@@ -12,6 +12,11 @@ Every prompt edit to Maya is logged here. Maya is Hindi-only (KKB spinoff). Entr
 
 ---
 
+## 2026-07-08 — Hard-gate Experience Capture for new_seeker="no"
+- **Feedback/bug:** Even with `new_seeker="no"` confirmed passed, the agent skipped the profile-permission/`get_profile` step and went straight to Experience Capture (the "yes" path) right after the greeting. Prior reinforcement told the model what to DO on the "no" path but never forbade the competing action (Experience Capture), so Experience Capture kept winning.
+- **Change:** Added a hard gate at the top of Experience Capture — when `new_seeker="no"`, it may NOT run as the first post-greeting action; it can run in the "no" path only after `get_profile` has been called and returned nothing/sparse. This leaves profile-permission → `get_profile` as the only valid first action for "no". Surgical, one section.
+- **Files:** `Maya/Maya Hindi.md`
+
 ## 2026-07-08 — Sync to production prompt + fix apply-time tool path
 - **Feedback/bug:** From live transcripts: (1) the new_seeker fork wasn't honored end-to-end — a new seeker's apply called `get_profile` (which returns nothing for a brand-new number) instead of `create_profile`, so `apply_job` fired with no valid `profile_id` and failed; (2) the apply bridge line ("अप्लाई कर देती हूँ") was spoken 3–4 times per apply, plus a forbidden "प्रोफाइल देख रही हूँ" waiting line. Root cause: Step 4 led with "use the `profile_id` from `get_profile` response," steering the model to the wrong tool at apply, which also caused the fumbling/repetition.
 - **Change:** First synced `Maya Hindi.md` in the repo to the current production prompt (it had diverged — production added Step 0, Pre-Apply Data Collection, turn-based Step 1, etc.). Then applied surgical fixes:
