@@ -12,6 +12,15 @@ Every prompt edit to Maya is logged here. Maya is Hindi-only (KKB spinoff). Entr
 
 ---
 
+## 2026-07-08 — Sync to production prompt + fix apply-time tool path
+- **Feedback/bug:** From live transcripts: (1) the new_seeker fork wasn't honored end-to-end — a new seeker's apply called `get_profile` (which returns nothing for a brand-new number) instead of `create_profile`, so `apply_job` fired with no valid `profile_id` and failed; (2) the apply bridge line ("अप्लाई कर देती हूँ") was spoken 3–4 times per apply, plus a forbidden "प्रोफाइल देख रही हूँ" waiting line. Root cause: Step 4 led with "use the `profile_id` from `get_profile` response," steering the model to the wrong tool at apply, which also caused the fumbling/repetition.
+- **Change:** First synced `Maya Hindi.md` in the repo to the current production prompt (it had diverged — production added Step 0, Pre-Apply Data Collection, turn-based Step 1, etc.). Then applied surgical fixes:
+  - **Step 4 (Application):** rewritten to branch on new_seeker — "yes" → `create_profile` then `apply_job` (never `get_profile`); "no" → reuse the `profile_id` from the post-intro `get_profile` (no re-fetch, no create). Added an explicit "never call get_profile at apply time" rule and a "one bridge line → silent tool call(s) → one result" sequence.
+  - **get_profile rules:** added a hard rule that get_profile never runs at apply/consent time.
+  - **apply_job bridge rules:** say the bridge once per application (never 2–3×); forbid the "प्रोफाइल देख रही हूँ" / profile-fetch / waiting narration; single result message.
+- **Files:** `Maya/Maya Hindi.md`
+- **Not done (flagged):** Did not reorder to create the profile *before* job presentation (your ideal "create → show jobs → update → apply" flow) — kept create-at-apply to stay surgical and not break the flow. No `update_profile` step added. Can do the fuller reorder separately if you want it.
+
 ## 2026-07-05 — Fix profile-handling bugs surfaced in testing
 - **Feedback/bug:** On live calls: (1) `new_seeker`="yes" applied to a job without ever calling `create_profile` (no profile_id); (2) `new_seeker`="no" (returning caller) did not call `get_profile` at the start and jumped to recommendations; (3) age/gender were never asked. KKB Hindi did not show these. Root cause: Maya's pre-apply profile logic is textually near-identical to KKB, but Maya's heavier prompt (Caller Identity gate, college confirmation, HR line, Experience Capture, MML) causes the model to drop the profile steps; plus a latent contradiction in the "no" branch (header "caller already has a profile" vs body "MANDATORY IF PROFILE DOES NOT EXIST"). Age/gender are only optional `create_profile` payload fields — never explicitly asked.
 - **Change (Maya Hindi only):**
