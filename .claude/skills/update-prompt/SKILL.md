@@ -43,7 +43,13 @@ AGNOSTIC / SPECIFIC / MIXED tags, and the Hindi→Kannada localization conventio
    Marketing Masters League, feminine-voice rule — see `CLAUDE.md`). Never overwrite those.
 7. **Changelog.** Append an entry to `<Agent>/CHANGELOG.md` (date, feedback/bug, change,
    files touched). If Maya was also updated, add an entry to `Maya/CHANGELOG.md` too.
-8. **Report.** Summarize what changed in each file, the classification used, and a
+8. **Feedback loop (bug fixes only).** If this change fixed a bug, teach `/prompt-analyser` to
+   catch it next time: add or sharpen an entry in
+   `../prompt-analyser/reference/bug-patterns.md` (symptom → root cause → detection heuristic →
+   fix direction → source agent + date), and update
+   `../prompt-analyser/reference/section-checklists.md` if the bug implies a section that must
+   always exist. See `CLAUDE.md` → "Bug-fix feedback loop". Skip for pure feature additions.
+9. **Report.** Summarize what changed in each file, the classification used, and a
    structural-parity note (confirm Hindi/Kannada section skeletons still align). For MIXED
    changes, show the Hindi line and its Kannada adaptation side by side.
 

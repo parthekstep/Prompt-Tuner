@@ -121,6 +121,22 @@ Every prompt edit appends an entry to the agent's `CHANGELOG.md`
 - **Ported from:** <source agent> (only for cross-agent ports)
 ```
 
+## Bug-fix feedback loop (pre-empt the next occurrence)
+
+Fixing a **bug** in a prompt is not done until the analyser is taught to catch it. Whenever a
+bug is fixed (via `/update-prompt`, `/port-feature`, `/update-memory`, or `/update-output`),
+you must also update **`/prompt-analyser`** so the same failure class is flagged pre-emptively
+in future audits:
+
+- Add or sharpen an entry in `.claude/skills/prompt-analyser/reference/bug-patterns.md` —
+  symptom → root cause → **detection heuristic** → fix direction → source agent + date.
+- If the bug implies a section that must always exist for that use case, update
+  `.claude/skills/prompt-analyser/reference/section-checklists.md`.
+
+The `CHANGELOG.md` entry records *what* changed; the analyser update ensures the scenario is
+*detected before it ships again*. This applies to bug fixes only — not to pure feature
+additions or ports of already-working behaviour.
+
 ## How to make a change
 
 | Task | Skill |
@@ -130,6 +146,8 @@ Every prompt edit appends an entry to the agent's `CHANGELOG.md`
 | Create or edit an agent's output prompt | `/update-output` |
 | Audit whether the language variants have drifted | `/sync-check` |
 | Carry a feature from one agent to another (e.g. KKB → DKB / Maya) | `/port-feature` |
+| Audit a prompt for latent gaps / bug-prone patterns before running it | `/prompt-analyser` |
 
 `/update-prompt` auto-runs `/sync-check` first, so a new change always lands on an
-aligned base.
+aligned base. `/prompt-analyser` is a read-only pre-flight review (flags, does not fix);
+route its confirmed findings to `/update-prompt`.
