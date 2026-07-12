@@ -19,7 +19,7 @@ override it. Always check *why the rule would fail*, not just whether it exists.
 - **Root cause:** the prompt says what to DO but never forbids the rival action that fires instead. Positive reinforcement alone loses to a strong competing default.
 - **Detection:** for each "must / mandatory / always" step, ask "what else could the model do at this moment, and is that explicitly forbidden here?" If there's no **negative gate** ("X may NOT run / begin until Y has happened"), flag it. **Strongest signal:** a branch whose paths point to a *separate top-level section* (its own `##` heading) rather than to an inline action — the model treats that prominent section as the default next thing. Compare to a sibling agent whose equivalent branch works and check whether it keeps the action inline.
 - **Fix direction:** add a hard negative gate at the top of the competing action. **But a negative gate can still lose if the competing action is a prominent standalone section** — the reliable fix is to **delete that section and fold its action inline into the branch paths, so there is nothing to jump to** (mirror the sibling agent where the branch already works).
-- **Seen in:** Maya 2026-07-08 (Experience Capture ran before `get_profile` until it was forbidden as the first post-greeting action); Maya 2026-07-13 (the `new_seeker="no"` branch *still* bypassed `get_profile` despite that HARD GATE, because the standalone `## Experience Capture` section was the salient next action — fixed only by deleting the section and inlining gathering into the branch, mirroring KKB, which has no such section).
+- **Seen in:** Maya 2026-07-08 (Experience Capture ran before `get_profile` until it was forbidden as the first post-greeting action); Maya 2026-07-13 (the `new_seeker="no"` branch kept bypassing `get_profile` through Step-0 removal, standalone-section deletion, AND hard gates — **none of these was the real fix**; the actual root cause was a variable-interpolation ordering bug, see **G1**. Removing the competing section is still good hygiene, but it was not what fixed this — a reminder not to declare victory on a plausible structural change without confirming it on a live call).
 
 ### A2 — Skip-forward pressure with no backpressure
 - **Symptom:** phases/steps that require active work get treated as optional; agent races to the end.
@@ -187,3 +187,14 @@ Drift between an agent's Hindi and Kannada files (AGNOSTIC logic landing in one 
 is its own audit — **don't reimplement it here.** This skill reviews one file. For parity, run
 `/sync-check`. Flag only: "this change looks language-agnostic and should be sync-checked
 against the twin."
+
+---
+
+## G. Templating & variable interpolation
+
+### G1 — Variable placeholder precedes its label in a binding phrase (garbles after interpolation)
+- **Symptom:** a branch/decision that depends on a control variable behaves as if the value were missing or wrong, even though the variable is passed correctly. Structural fixes, hard gates, and case-normalization all fail to help — because the value never actually binds.
+- **Root cause:** the prompt binds the variable with the **placeholder first**, e.g. `Consider ${new_seeker} as new_seeker.` At runtime `${new_seeker}` is interpolated to its value, so the model literally reads **"Consider no as new_seeker"** — the value is presented *as if it were the label*, so "new_seeker = no" is never established. The model is left with no clean value and falls through to a default / natural-conversation path.
+- **Detection:** scan for any binding/assignment phrase where a `${VAR}` placeholder appears **before** its human-readable label — `Consider/treat/use/read ${X} as X`, `${X} as x`, etc. Mentally interpolate it: does it still read as "x = <value>"? If it reads backwards ("<value> as x"), flag it — **critical** for any variable that drives a branch (new_seeker, flags, modes), lower for glossary lines that have a description to disambiguate.
+- **Fix direction:** put the **label first, placeholder last** — `Consider new_seeker as ${new_seeker}` → interpolates to "Consider new_seeker as no" (binds cleanly). General forms: `<var_name> is ${VAR}` / `<var_name> = ${VAR}`.
+- **Seen in:** Maya 2026-07-13 (`Consider ${new_seeker} as new_seeker` interpolated to "Consider no as new_seeker"; the `new_seeker="no"` branch never fired until the order was flipped to `Consider new_seeker as ${new_seeker}`. This — not the section deletion or gates — was the actual fix). **Latent in KKB** (`Consider ${new_seeker} as new_seeker` at Hindi/Kannada lines ~64 and ~197) — same backwards binding, not yet flipped.

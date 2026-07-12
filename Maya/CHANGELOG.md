@@ -12,6 +12,12 @@ Every prompt edit to Maya is logged here. Maya is Hindi-only (KKB spinoff). Entr
 
 ---
 
+## 2026-07-13 — Real fix for the new_seeker branch: variable-interpolation order
+- **Feedback/bug:** Even after the branch restructure below, `new_seeker="no"` (confirmed lowercase in input args) STILL ran the new-user path — asked about experience instead of fetching the profile, then called `create_profile`. The actual root cause (found by Parth): the binding line read `Consider ${new_seeker} as new_seeker`, which interpolates at runtime to **"Consider no as new_seeker"** — the value is placed where the label should be, so `new_seeker = no` never binds and the branch has no value to switch on. This is why case-normalization, Step-0 removal, section deletion, and hard gates all failed — none touched the garbled binding.
+- **Change:** flipped the order to `Consider new_seeker as ${new_seeker}` (→ "Consider new_seeker as no"), which binds the value cleanly. (Parth fixed this in production; synced into the repo here.) Catalogued as prompt-analyser **G1** (variable placeholder before its label garbles after interpolation).
+- **Files:** `Maya/Maya Hindi.md`; `.claude/skills/prompt-analyser/reference/bug-patterns.md` (added G1; corrected the A1 2026-07-13 note).
+- **Flag:** KKB has the same backwards binding (`Consider ${new_seeker} as new_seeker`, Hindi + Kannada, lines ~64 and ~197) — latent, not yet flipped.
+
 ## 2026-07-13 — Batch fix: branch structure, apply hallucination, phone +91, job order, age/gender, intro
 - **Feedback/bug:** Live transcripts (both `new_seeker="No"` and `"Yes"`) behaved identically — greeting → Experience Capture → `create_profile` → spoken "अप्लाई हो गया" with **no `apply_job` call**. Plus: apply bridge repeated 2–3×; jobs announced ("interested?") before being listed and without details; age/gender re-asked when already known; over-formal intro ("अवसरों"); and `get_profile` empty for ~14/80 (phone passed without `+91`). User confirmed lowercase `"no"` still failed → case was NOT the cause; pointed to KKB where the same branch works.
 - **Root cause:** Maya diverged from KKB's clean single-branch structure by adding a redundant `Step 0` and a **standalone `## Experience Capture` section** that the model jumped to after the greeting — hijacking the `new_seeker` branch for both values. (KKB has neither; its `"yes"` path gathers inline.)

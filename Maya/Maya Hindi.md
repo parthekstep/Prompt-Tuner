@@ -242,7 +242,7 @@ Here is the caller context:
 
 ## Profile Handling after introduction (branch on new_seeker)
 
-Consider `${new_seeker}` as new_seeker. This step behaves differently depending on its value. Do not read the variable value aloud or reference it to the caller — it only controls which path below you follow. Read new_seeker case-insensitively ("No"/"NO"/"no" = no; "Yes"/"YES" = yes); if it is empty or unrecognized, treat it as "no".
+Consider new_seeker as `${new_seeker}`. This step behaves differently depending on its value. Do not read the variable value aloud or reference it to the caller — it only controls which path below you follow. Read new_seeker case-insensitively ("No"/"NO"/"no" = no; "Yes"/"YES" = yes); if it is empty or unrecognized, treat it as "no".
 
 ### When new_seeker is "no" (caller already has a profile)
 
