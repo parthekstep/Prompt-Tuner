@@ -12,6 +12,19 @@ Every prompt edit to Maya is logged here. Maya is Hindi-only (KKB spinoff). Entr
 
 ---
 
+## 2026-07-13 — Batch fix: branch structure, apply hallucination, phone +91, job order, age/gender, intro
+- **Feedback/bug:** Live transcripts (both `new_seeker="No"` and `"Yes"`) behaved identically — greeting → Experience Capture → `create_profile` → spoken "अप्लाई हो गया" with **no `apply_job` call**. Plus: apply bridge repeated 2–3×; jobs announced ("interested?") before being listed and without details; age/gender re-asked when already known; over-formal intro ("अवसरों"); and `get_profile` empty for ~14/80 (phone passed without `+91`). User confirmed lowercase `"no"` still failed → case was NOT the cause; pointed to KKB where the same branch works.
+- **Root cause:** Maya diverged from KKB's clean single-branch structure by adding a redundant `Step 0` and a **standalone `## Experience Capture` section** that the model jumped to after the greeting — hijacking the `new_seeker` branch for both values. (KKB has neither; its `"yes"` path gathers inline.)
+- **Change (Maya Hindi):**
+  - **Branch (master):** deleted `Step 0`; deleted the standalone `Experience Capture` section; folded role/experience gathering **inline** into the Profile-Handling `"yes"`/`"no"` paths, mirroring KKB. Added a case-insensitive + empty-defaults-to-"no" clause. Updated dangling references (get_profile rules, create_profile).
+  - **Apply hallucination:** success line may be spoken ONLY after `apply_job` actually returned success; `apply_job` must fire every time (Apply Success Handling + apply_job rules + Step 4).
+  - **Phone:** `get_profile`/`create_profile` now prepend `+91` (both write and lookup), with a phone-format rule; updated the create_profile example to `+91…`.
+  - **Age/gender:** Pre-Apply now uses the fetched profile — asks only genuinely missing fields (no re-ask for `new_seeker="no"`).
+  - **Job order:** Step 1 is now a lead-in + area question (no premature interest question); Step 2 lists with details, then asks interest. Updated Example 1 to match.
+  - **Intro:** "अवसरों" → "जॉब्स" (greeting + Example 1).
+- **Files:** `Maya/Maya Hindi.md`; `.claude/skills/prompt-analyser/reference/bug-patterns.md` (sharpened A1, C3; added A5, A6, C5).
+- **Guidance followed:** mirrored KKB Placeholder Hindi (the working reference). Maya divergences (college identity, HR line, benefits, feminine voice, MML) preserved.
+
 ## 2026-07-08 — Hard-gate Experience Capture for new_seeker="no"
 - **Feedback/bug:** Even with `new_seeker="no"` confirmed passed, the agent skipped the profile-permission/`get_profile` step and went straight to Experience Capture (the "yes" path) right after the greeting. Prior reinforcement told the model what to DO on the "no" path but never forbade the competing action (Experience Capture), so Experience Capture kept winning.
 - **Change:** Added a hard gate at the top of Experience Capture — when `new_seeker="no"`, it may NOT run as the first post-greeting action; it can run in the "no" path only after `get_profile` has been called and returned nothing/sparse. This leaves profile-permission → `get_profile` as the only valid first action for "no". Surgical, one section.

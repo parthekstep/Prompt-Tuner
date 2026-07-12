@@ -17,9 +17,9 @@ override it. Always check *why the rule would fail*, not just whether it exists.
 ### A1 — Mandatory step skipped because the competing action isn't forbidden
 - **Symptom:** a step the prompt calls "mandatory" is intermittently skipped; the agent jumps to a later phase.
 - **Root cause:** the prompt says what to DO but never forbids the rival action that fires instead. Positive reinforcement alone loses to a strong competing default.
-- **Detection:** for each "must / mandatory / always" step, ask "what else could the model do at this moment, and is that explicitly forbidden here?" If there's no **negative gate** ("X may NOT run / begin until Y has happened"), flag it.
-- **Fix direction:** add a hard negative gate at the top of the competing action, not just emphasis on the desired one.
-- **Seen in:** Maya 2026-07-08 (Experience Capture ran before `get_profile` on the `new_seeker="no"` path until Experience Capture was explicitly forbidden as the first post-greeting action).
+- **Detection:** for each "must / mandatory / always" step, ask "what else could the model do at this moment, and is that explicitly forbidden here?" If there's no **negative gate** ("X may NOT run / begin until Y has happened"), flag it. **Strongest signal:** a branch whose paths point to a *separate top-level section* (its own `##` heading) rather than to an inline action — the model treats that prominent section as the default next thing. Compare to a sibling agent whose equivalent branch works and check whether it keeps the action inline.
+- **Fix direction:** add a hard negative gate at the top of the competing action. **But a negative gate can still lose if the competing action is a prominent standalone section** — the reliable fix is to **delete that section and fold its action inline into the branch paths, so there is nothing to jump to** (mirror the sibling agent where the branch already works).
+- **Seen in:** Maya 2026-07-08 (Experience Capture ran before `get_profile` until it was forbidden as the first post-greeting action); Maya 2026-07-13 (the `new_seeker="no"` branch *still* bypassed `get_profile` despite that HARD GATE, because the standalone `## Experience Capture` section was the salient next action — fixed only by deleting the section and inlining gathering into the branch, mirroring KKB, which has no such section).
 
 ### A2 — Skip-forward pressure with no backpressure
 - **Symptom:** phases/steps that require active work get treated as optional; agent races to the end.
@@ -41,6 +41,20 @@ override it. Always check *why the rule would fail*, not just whether it exists.
 - **Detection:** read each branch header against its body; flag any header/body or intra-section contradiction. Also flag the same rule stated with different thresholds in different places.
 - **Fix direction:** reconcile to one statement.
 - **Seen in:** Maya 2026-07-05 (contradictory `new_seeker="no"` branch).
+
+### A5 — Re-collecting data already available
+- **Symptom:** the agent asks for a field (age, gender, location…) it already has from the fetched profile / prior context, making the call feel like a form.
+- **Root cause:** the data-collection step is unconditional ("always ask age and gender") and never checks the fetched profile / known context first.
+- **Detection:** for each "always ask / must collect" field, check whether the prompt first says "skip if already present in the profile/context." An unconditional MANDATORY/HARD-BLOCK ask, with a profile fetch upstream, = flag.
+- **Fix direction:** gate each ask on "not already known — asked in this call OR present in the fetched profile"; ask only the genuinely missing fields.
+- **Seen in:** Maya 2026-07-13 (age/gender re-asked for returning `new_seeker="no"` seekers whose profile already had them).
+
+### A6 — Confirmation/interest asked before the content it refers to
+- **Symptom:** the agent asks "are you interested in these?" *before* actually presenting the options, then presents them, then asks again — a confusing double-ask; the first ask has nothing concrete behind it.
+- **Root cause:** an ordering rule mandates a confirmation turn *before* the listing turn (ask-before-show), often with "do NOT list yet" guards.
+- **Detection:** look for a confirm/interest question that is required before the content (jobs/options/details) is shown. Flag any "confirm interest → then list" ordering, and any "do NOT list yet" gate that pushes the ask ahead of the content.
+- **Fix direction:** present the content (with the details the user needs to judge), then ask for interest/selection. A brief lead-in is fine; a standalone interest question before the content is not.
+- **Seen in:** Maya 2026-07-13 (Turn 1A asked "इस तरह का काम देख रहे हैं?" before Step 2 listed the jobs).
 
 ---
 
@@ -80,10 +94,10 @@ override it. Always check *why the rule would fail*, not just whether it exists.
 
 ### C3 — Payload field/data bug
 - **Symptom:** tool call returns wrong/empty results or targets the wrong record.
-- **Root cause:** swapped or mislabeled fields (e.g. `searchlng ← lat`, `searchlat ← lng`), malformed variable names (`${phone(number}`), a wrong field name in prose vs payload (`work_experience_years` vs `workExperienceYears`), or a **hardcoded ID overriding dynamic results**.
-- **Detection:** for each payload, trace every value to its source. Check coordinate order (GeoJSON = `[lng, lat]`), check field names match the schema exactly, scan for stray/unbalanced brackets in `${...}`, and flag any hardcoded id that contradicts a dynamic search in the same flow.
-- **Fix direction:** correct the mapping; reconcile hardcoded vs dynamic.
-- **Seen in:** DKB 2026-06-29 (`${phone(number}` → `${phoneNumber}`, `workExperienceYears`); Purple Dots review (lat/lng swap; hardcoded provider `item_id`).
+- **Root cause:** swapped or mislabeled fields (e.g. `searchlng ← lat`, `searchlat ← lng`), malformed variable names (`${phone(number}`), a wrong field name in prose vs payload (`work_experience_years` vs `workExperienceYears`), a **value-format mismatch** (e.g. a phone passed as a bare 10-digit string when the store expects a `+91`/country-code-prefixed value → empty lookup), or a **hardcoded ID overriding dynamic results**.
+- **Detection:** for each payload, trace every value to its source. Check coordinate order (GeoJSON = `[lng, lat]`), check field names match the schema exactly, scan for stray/unbalanced brackets in `${...}`, confirm identifier **formats** match what the target store expects (phone with/without `+91`) **and that a write (create) and its later read (fetch/lookup) use the same format**, and flag any hardcoded id that contradicts a dynamic search in the same flow.
+- **Fix direction:** correct the mapping/format; make create and lookup use the identical key format; reconcile hardcoded vs dynamic.
+- **Seen in:** DKB 2026-06-29 (`${phone(number}` → `${phoneNumber}`, `workExperienceYears`); Maya 2026-07-13 (`get_profile`/`create_profile` passed the bare number → ~14/80 empty fetches; fixed to `+91`-prefixed on both); Purple Dots review (lat/lng swap; hardcoded provider `item_id`).
 
 ### C4 — Fixed-param / enum integrity
 - **Symptom:** downstream system rejects the payload or mis-routes.
@@ -91,6 +105,13 @@ override it. Always check *why the rule would fail*, not just whether it exists.
 - **Detection:** verify every "always use this exact value" param is present and unchanged. For every enum field, confirm the prompt constrains it to the exact allowed strings **in English/Latin** and forbids the conversational-language version.
 - **Fix direction:** restate the fixed value and the strict enum list at the payload.
 - **Seen in:** DKB (fixed params `ONESTAGENT`, `app_instance`); Purple Dots (`disability_type`/`looking_for`/`documents_available` enum + English-only rule).
+
+### C5 — Outcome narrated without the tool actually running/succeeding (hallucinated success)
+- **Symptom:** the agent says the action succeeded ("अप्लाई हो गया") but the tool was never called, or was called and errored.
+- **Root cause:** the success message is a canned line with no rule binding it to an actual successful tool result; the model emits it from memory — often right after a *preceding* tool (e.g. `create_profile`) while skipping the real terminal action (`apply_job`).
+- **Detection:** for every "success" spoken line, check for an explicit rule "speak this ONLY after <tool> was actually called AND returned success; otherwise use the failure line." Also confirm the terminal tool is stated as always-called (not optional). Missing either = flag.
+- **Fix direction:** gate the success line on a real successful result; state the terminal tool must actually run every time; on error / no-call, use the failure path.
+- **Seen in:** Maya 2026-07-13 (`apply_job` never fired but "अप्लाई हो गया" was spoken after `create_profile`).
 
 ---
 
