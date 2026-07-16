@@ -18,6 +18,11 @@ AGNOSTIC / SPECIFIC / MIXED tags, and the Hindi→Kannada localization conventio
 
 ## Procedure (update)
 
+0. **Snapshot first (rollback safety).** Before editing, checkpoint the target agent:
+   `scripts/prompt-version.sh save <agent> pre-<short-change-slug> "<one-line why>"`. This
+   captures the current stable files so any edit is instantly reversible via
+   `scripts/prompt-version.sh restore <agent> <label>` (see the `/prompt-version` skill).
+   Never skip this — it is the safety net for the surgical-edit rule.
 1. **Sync first.** Run the `/sync-check` procedure for the target agent (read its
    `SKILL.md`). If the Hindi/Kannada pair has drifted, reconcile it before applying the new
    change, so the change lands on an aligned base. (Skip for Maya — Hindi only.)

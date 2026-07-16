@@ -65,27 +65,20 @@ If a value is not present, use "NA" for strings, [] for arrays, or 0 for counts.
     job during the deep-dive?
     Values: "Yes" / "No".
 
-16. mml_offered — Did the agent offer the Marketing Masters League registration
-    (typically in the no-match fallback path)?
-    Values: "Yes" / "No".
-
-17. mml_registered — Did the student opt to register for the Marketing Masters League?
-    Values: "Yes" / "No" / "NA" (not offered).
-
-18. drop_reason — If the student dropped off or disengaged from the call before
+16. drop_reason — If the student dropped off or disengaged from the call before
     natural completion, what was the behavioral reason?
     This captures SEEKER behavior, not technical failures.
     Examples: "Said not looking", "Asked to call later", "Language barrier",
     "Hung up mid-call", "Not a student of this college", "Already employed".
     NA if the call completed normally.
 
-19. final_summary — A 2-3 sentence factual summary of the call in English.
+17. final_summary — A 2-3 sentence factual summary of the call in English.
     Cover: (1) whether the student was interested in jobs, (2) what role/location/
     salary they discussed, (3) whether they applied or tried to apply, (4) whether
-    HR contact was shared or MML was offered/registered.
+    HR contact was shared.
     No opinions, no speculation.
 
-20. EXAMPLE OUTPUT — Below is an example of how all the above fields should be
+18. EXAMPLE OUTPUT — Below is an example of how all the above fields should be
     aggregated and returned for a single call. Use this exact structure:
 
 {
@@ -132,8 +125,6 @@ If a value is not present, use "NA" for strings, [] for arrays, or 0 for counts.
   "jobs_failed_to_apply": [],
   "hr_contact_shared": "Yes",
   "benefits_mentioned": "Yes",
-  "mml_offered": "No",
-  "mml_registered": "NA",
   "drop_reason": "NA",
   "final_summary": "Student confirmed she studies at the named college and was actively looking for work. She discussed two roles and successfully applied to a Sales Executive position in Lucknow. The company's HR contact number was shared after the application."
 }

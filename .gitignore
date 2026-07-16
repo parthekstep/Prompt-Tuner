@@ -1,2 +1,6 @@
 .DS_Store
 *.log
+
+# Prompt version snapshots — local rollback safety net (see scripts/prompt-version.sh).
+# Ignore the snapshot bodies but keep the per-agent HISTORY.md logs + README tracked.
+versions/*/*/

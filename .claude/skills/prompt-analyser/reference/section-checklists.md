@@ -45,7 +45,8 @@ Add, and treat as critical:
 ### Archetype: Job-matching / recommendation bot (KKB, Maya)
 Add, and treat as critical:
 - **`new_seeker` (or equivalent) branch** — new vs returning caller drives fetch-vs-create; no re-fetch at action time.
-- **Recommendation presentation flow** — steps for 1/2/3+ options; company/role/location/salary spoken format.
+- **Reading the fetched profile** — a "reading the response" section: field map, most-recent-record rule when the response is an array, and "present ⇒ known ⇒ never re-ask"; the profile is actually *used* (address by first name, confirm role) not fetched-and-ignored (C6); the record's `id` is bound as the reusable `profile_id` and the create path is forbidden when a profile was found (C7).
+- **Recommendation presentation flow** — steps for 1/2/3+ options; company/role/location/salary spoken format; results **ranked by the caller's known signals** (role → location → salary), not raw array order, with an orient/overview turn when the target role is unknown (C8).
 - **Primary action (apply) + success/failure handling** — bridge line spoken **once** (B1); silent tool call; single result.
 - **Post-action info gathering / profile update** (if the agent completes profile after the action).
 - **Introduction priority rule** — opening line chosen from prior-call memory state.
@@ -69,6 +70,7 @@ Tick each; flag misses. (Each ties to a pattern in `bug-patterns.md`.)
 - [ ] Skip logic (SKIP-AHEAD/ORDER-FLEX/"move silently") is balanced by a never-skippable list (A2).
 - [ ] No two sections capture overlapping content without a sharp distinction + independent gate (A3).
 - [ ] No header/body or intra-branch contradiction (A4).
+- [ ] Adjacent askable steps have an explicit wait / separate-turn boundary; no two questions fused into one turn (A7).
 
 **Repetition**
 - [ ] Every consent/bridge/confirmation line is bounded to **"ask/say once"** (B1).
@@ -91,6 +93,7 @@ Tick each; flag misses. (Each ties to a pattern in `bug-patterns.md`.)
 
 **Examples, consent, guards, memory**
 - [ ] Examples model the mandatory path; greetings match the canonical one; no garbled text; names localized (E1).
+- [ ] When a control variable (e.g. `new_seeker`) selects the opening/path, every example is labelled with its value and no example's opening can bleed onto the other branch; re-test the other branch after adding an example (E1).
 - [ ] Each distinct consent gate asked once, with a clean decline hard-stop; distinct consents kept distinct (E2).
 - [ ] Memory-injection block present verbatim iff memory enabled (else flag Verify) (E3).
 - [ ] Guard sections all present: forbidden topics, dignity/safety, eligibility/age, relevance + functional sanity, scope boundaries (E4).

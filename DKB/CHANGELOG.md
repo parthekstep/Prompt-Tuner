@@ -12,6 +12,16 @@ Every prompt edit to DKB is logged here. Entry format:
 
 ---
 
+## 2026-07-15 — New agent: DKB Inbound (employer-inbound, Hindi + Kannada)
+- **Feedback/bug:** Need an inbound variant of DKB — an MSME owner **calls in** to post or verify a job (rather than DKB calling out about an expiring posting). Built new, not an edit to the outbound files.
+- **Change:**
+  - **Intro reframed to inbound:** replaced the outbound turn-based screening ("are you the owner / your posting expires today / do you have 2 minutes / connect me to the owner") with an inbound welcome + AI-and-recording disclosure (said once, Turn 1) + a single discovery question ("क्या आप नई जॉब पोस्ट करना चाहते हैं, या किसी मौजूदा जॉब के बारे में बात करनी है?"). Kept a "who are you" handler and a non-employer/wrong-number close.
+  - **Input variables:** removed all outbound job inputs (`${company_name}`, `${job_role}`, `${num_vacancies}`, `${job_id}`, `${city}`, `${salary}`, `${location}`, `${qualification}`, `${work_experience}`, `${work_experience_years}`). Kept caller-ID inputs `${contact_phone}` / `${country_code}` and the verbatim `### Contact context / {${contact_memory}}` memory-injection block.
+  - **Phase Entry Rule → Inbound Routing Rule:** returning-vs-new fork is decided by the silently-read `${contact_memory}` (returning-owner opening + recalled roles) plus the owner's discovery answer — DKB has **no read/lookup tool**, so no tool fetch is used and none was invented. New-job capture (Phase 3) is the primary, fully tool-backed flow. Phase 1/2 (freshness/completeness) are kept but hard-gated on a `${job_id}` being available on the call (there is no `${job_id}` input inbound and `${contact_memory}.roles_posted` has no id); if none is available the agent must not fabricate one or call update_job_status/update_job_details — it re-captures via Phase 3.
+  - **Preserved byte-identical:** all four tools and payloads (`get_talent_insights`, `update_job_status`, `update_job_details`, `create_job`), fixed params (`sourceService: "ONESTAGENT"`, `eventType: "UPDATE_JOB"`/`"JOB"`, `app_instance: "up-postjob"`), enum values, field names, Market Truth Delivery, Language/Script, TTS, Speech-Recognition, Prohibited, Consent, Error/Uncertainty, Silence, Emotional, Graceful Exit, Dignity. `phoneNumber` value is the inbound caller-ID `${contact_phone}` in `+91` form (consistent with the KKB inbound precedent and the C3 phone-format fix).
+  - **Hindi is source of truth; Kannada mirrored** — agnostic logic/payloads verbatim, spoken lines reused from `DKB Kannada.md` for shared sections and adapted for the inbound intro/routing; region example values kept per convention (Hindi Ghaziabad/UP, Kannada Dharwad/Karnataka). Section headings verified identical across the two files.
+- **Files:** `DKB/DKB Inbound Hindi.md` (new), `DKB/DKB Inbound Kannada.md` (new)
+
 ## 2026-06-29 — Full reconciliation: DKB Hindi brought up to Kannada
 - **Feedback/bug:** A sync-check found DKB Kannada was a newer, stricter version than DKB Hindi (behavioral drift, not cosmetic). Kannada is the source of truth here. Bring Hindi up to parity (agnostic logic only; all Hindi spoken lines preserved).
 - **Change (behavioral / bug fixes ported Kannada → Hindi):**

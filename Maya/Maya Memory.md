@@ -71,8 +71,6 @@ IMPORTANT:
 - `jobs_applied` — array of strings with timestamps embedded
 - `applications_this_session` — count of successful applies in the latest call
 - `hr_contact_shared` — `Yes` / `No` — whether an HR contact number was shared this journey
-- `mml_offered` — `Yes` / `No` — whether the Marketing Masters League was offered
-- `mml_registered` — `Yes` / `No` / `Unknown` — whether the student opted to register
 - `drop_off_reason` — string if applicable from prior session
 
 ---
@@ -104,7 +102,7 @@ IMPORTANT:
 - 4-5 lines max.
 - Written in English.
 - Builds up cumulatively: consume `last_conversation_summary` and add new details.
-- Focus on job-search journey progression: what role, what stage, what was presented, what was applied to, HR contact shared, MML outcome.
+- Focus on job-search journey progression: what role, what stage, what was presented, what was applied to, HR contact shared.
 - Do NOT include: literal call drops, "no further conversation", greeting-only sessions.
 
 # Output JSON schema (must follow exactly)
@@ -151,8 +149,6 @@ IMPORTANT:
   "jobs_applied": [],
   "applications_this_session": "",
   "hr_contact_shared": "",
-  "mml_offered": "",
-  "mml_registered": "",
   "drop_off_reason": "",
 
   "recent_changes": [
