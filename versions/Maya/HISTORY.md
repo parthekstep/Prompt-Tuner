@@ -9,3 +9,4 @@
 - **2026-07-16_185154** — `post-bugfix-batch3` — fork router + role=Any (out+in) _(4 files)_
 - **2026-07-18_193027** — `pre-slash-fix` — before enhancing slash TTS rule (bug 65) _(4 files)_
 - **2026-07-19_165001** — `pre-mpl` — before adding MPL Competition secondary offer (Maya in+out) _(4 files)_
+- **2026-07-19_165849** — `pre-profile-wording` — before Profile Wording Rules section _(4 files)_

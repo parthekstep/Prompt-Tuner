@@ -12,6 +12,12 @@ Every prompt edit to Maya is logged here. Maya is Hindi-only (KKB spinoff). Entr
 
 ---
 
+## 2026-07-19 — Profile Wording Rules: never speak "profile" aloud (say "जानकारी")
+- **Feedback/bug:** Same class as KKB — the internal word "profile"/"प्रोफाइल" leaked into caller-facing lines (permission-ask, "प्रोफ़ाइल मिल गई" acknowledgement, example dialogues).
+- **Change:** Added the "Profile Wording Rules (CRITICAL)" section to Maya Hindi + Maya Inbound and reconciled every spoken/example line to "जानकारी" wording (feminine forms preserved). On empty fetch, never announce the miss; tool-call silence reinforced; internal tool names/rules unchanged.
+- **Files:** Maya Hindi.md, Maya Inbound.md
+- **Ported from:** KKB (same bug class)
+
 ## 2026-07-19 — Add MPL Competition secondary offer (Maya in + out)
 - **Feedback/bug:** Feature request — Maya should invite candidates to register for the Ghaziabad Marketer Premiere League (MPL July 2026): a free competition with a free verified certificate. Must be a *secondary* offer that never affects job-application conversion (the primary goal).
 - **Change:** Added a self-contained "MPL Competition (Secondary Offer)" section to Maya Hindi (out) + Maya Inbound — offered ONCE, only after the primary job flow (post-apply / No-Match Fallback / just before Graceful Exit), never before or during job present/apply. Hook = free verified certificate + Ghaziabad Top-100; What/Why/How/Who shared only on request; on "yes" the bot states the follow-up-call timing (within 48 hrs, 6–8 pm) and reminds once at call end; the "not-a-job-guarantee" caveat only if asked. Added trigger refs in the No-Match Fallback + Graceful Exit. Added `mpl_registration` (Yes/No/Not offered) to Maya Output.

@@ -9,3 +9,4 @@
 - **2026-07-16_163850** — `post-bugfix-batch2` — 5-bug fixes + family-wide create-first hardening _(6 files)_
 - **2026-07-16_185154** — `post-bugfix-batch3` — fork over-fire router + role=Any placeholder (all 4 files) _(6 files)_
 - **2026-07-18_194225** — `pre-slash-fix` — add slash TTS rule to KKB inbound (bug 73) _(6 files)_
+- **2026-07-19_165849** — `pre-profile-wording` — before Profile Wording Rules section _(6 files)_

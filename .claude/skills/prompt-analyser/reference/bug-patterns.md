@@ -206,6 +206,13 @@ override it. Always check *why the rule would fail*, not just whether it exists.
 - **Fix direction:** wrap the fetch in a DECISIVE ROUTER mirroring the proven outbound router — first action, real tool call, no conversation before it returns, never skip. Language-agnostic (verbatim across H/K).
 - **Seen in:** KKB Placeholder Inbound + Maya Inbound live calls, 2026-07-14/17 (Consolidated Feedback rows 71/78; related: outbound profile-not-found path must still route to the Case-B pool overview, and the new-caller path must gate name+experience before create_profile — rows 74/80, 67/72).
 
+### D8 — Internal technical term ("profile") spoken to the caller
+- **Symptom:** the agent says an internal system word out loud — "profile"/"प्रोफाइल"/"ಪ್ರೊಫೈಲ್" — in the permission-ask, the found/not-found acknowledgement, or an example dialogue (e.g. "क्या मैं आपकी प्रोफाइल fetch कर सकती हूँ?", "प्रोफ़ाइल मिल गई"). Callers don't understand the term and it erodes trust.
+- **Root cause:** the prompt's OWN spoken lines/examples use the internal term, and there is no rule mapping it to a caller-friendly word.
+- **Detection:** grep the prompt's spoken lines + `> **Agent:**` examples for internal system nouns ("profile", tool names, "payload", "database", "fetch", "id"). Any such word in a line the caller hears = flag. Then confirm a "never speak <term> aloud; say <friendly word> instead" rule exists.
+- **Fix direction:** add a wording-rules section that bans the term aloud and gives the friendly replacement ("जानकारी" / "ಮಾಹಿತಿ" for profile), reconcile every spoken/example line, and on an empty fetch never announce the miss. Keep internal tool names + rule text unchanged.
+- **Seen in:** KKB + Maya get_profile prompts, 2026-07-19 (Profile Wording Rules).
+
 ---
 
 ## E. Examples, consent & standing rules
