@@ -73,6 +73,7 @@ AGNOSTIC / SPECIFIC / MIXED tags, and the Hindi→Kannada localization conventio
 
 - **Surgical edits only.** Make the smallest change that accomplishes the task; preserve every other line, spoken phrase, variable, tool name, and payload exactly. Prefer additive changes; never reformat or delete unrelated content. The resulting diff should contain only the intended change. See `CLAUDE.md` → "Surgical edits only".
 - Hindi is always the source of truth; never let Kannada lead.
+- **Instructions/rules are written in English; only the agent's spoken lines are in Hindi/Kannada.** When you add or change a rule, write the prose in English and quote any spoken line (e.g. *Offer line (say once): "एक और मौका…"*). Never write instruction/rule prose in Hindi/Kannada. A section whose rules are in Hindi/Kannada is a bug — rewrite the prose to English and keep only the spoken lines translated. This is why the Hindi and Kannada files share the SAME English instructions and differ only in quoted spoken text.
 - Never localize a `${variable}` name, a tool name, or a fixed payload param.
 - Never translate-copy an AGNOSTIC change — it must be byte-identical logic.
 - Never adapt a SPECIFIC change by pasting Hindi text into the Kannada file.

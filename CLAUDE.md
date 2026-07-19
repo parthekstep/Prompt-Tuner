@@ -58,6 +58,17 @@ classified before it is mirrored.**
   conventions. Kannada uses "Kanglish", Kannada-script numerals spelled as words, and
   local place names (Bengaluru/Mysuru/Dharwad rather than Pune/Ghaziabad).
 
+**Instructions are ALWAYS in English — only spoken content is in the target language.**
+Every instruction, rule, heading, condition, and explanatory note in a prompt is written in
+**English**, regardless of which language file it lives in. The ONLY parts written in
+Hindi/Kannada are the actual words the agent **speaks**: quoted spoken lines, example
+dialogues, and TTS number-word spellings. Never write rule or instruction prose in
+Hindi/Kannada. When you add a spoken line, wrap it in an English instruction and quote the
+line, e.g. *Offer line (say once): "एक और मौका…"*. This is exactly why a Hindi file and its
+Kannada twin share the **same English instructions** and differ only in the quoted spoken
+text. A section whose rules are written in Hindi/Kannada is a bug — rewrite the prose to
+English and keep only the spoken lines translated.
+
 The full section-by-section taxonomy with agnostic/specific tags lives in
 `.claude/skills/update-prompt/reference/prompt-anatomy.md`.
 
@@ -81,7 +92,7 @@ be overwritten by a KKB sync:
 - optional `hr_contact` and `benefits` recommendation fields
 - the **Experience Capture** section
 - HR-number sharing post-apply
-- the **Marketing Masters League** fallback offer
+- the **MPL Competition** secondary offer (Ghaziabad Marketer Premiere League; offered only after the job flow, never interrupting it — see Maya's "MPL Competition" section)
 - the explicit **feminine-voice** rule (Hindi feminine verb forms only)
 
 When a KKB change touches shared core logic, **flag it and ask** the user whether to
@@ -147,7 +158,34 @@ additions or ports of already-working behaviour.
 | Audit whether the language variants have drifted | `/sync-check` |
 | Carry a feature from one agent to another (e.g. KKB → DKB / Maya) | `/port-feature` |
 | Audit a prompt for latent gaps / bug-prone patterns before running it | `/prompt-analyser` |
+| Reconcile a repo prompt against the LIVE prompt on Raya (who's ahead) | `/raya-reconcile` |
+| Run the feedback loop end-to-end: sheet → transcript → fix → deploy → sheet | `/bug-fix` |
 
 `/update-prompt` auto-runs `/sync-check` first, so a new change always lands on an
 aligned base. `/prompt-analyser` is a read-only pre-flight review (flags, does not fix);
-route its confirmed findings to `/update-prompt`.
+route its confirmed findings to `/update-prompt`. **Always route prompt edits through
+`/update-prompt`** (or `/port-feature` for cross-agent) — it enforces the sync rule, the
+English-instructions rule, the changelog entry, and the analyser update; don't hand-edit a
+prompt file directly.
+
+## Deploying to live agents (Raya) + the feedback loop
+
+The prompts run on **Raya Voice AI** (LitWiz Labs). Config + tooling live in `raya/` and `scripts/`:
+
+- **Deploy** a prompt to its live agent: `scripts/raya_deploy.py` via the Raya **API PATCH**
+  (`PATCH /api/agent/{id}` with `{"instructions": <file>}`), verified against the PATCH
+  response — Raya's GET returns empty instructions, so never trust a GET for the live content.
+  Each agent's uuid is in `raya/agents.json`; deploys are recorded in `raya/deploy-history.md`.
+  Secrets (base URL + token) live in git-ignored `raya/.env`.
+- **Reconcile** live vs repo before editing with `/raya-reconcile` (browser sha-boolean, since
+  the API can't read instructions back). If Raya is ahead, pull live into the repo first.
+- **Feedback loop** (`/bug-fix`): read the Consolidated Feedback Tracker (Google Sheet) via
+  `scripts/gsheets.py` (service-account Sheets R/W), pick OPEN issues, temporal-check them
+  against the changelog, ground each in the real Raya call transcript
+  (`GET /api/call?agent_id=…` → `GET /api/call/{uuid}`), fix only genuine prompt gaps
+  (via `/update-prompt`), deploy, and write the status back to the sheet. Cross-agent
+  propagation of an agnostic fix is gated by an email approval.
+
+Note: `raya/`, `scripts/gsheets.py`, and `scripts/raya_deploy.py` are the self-contained
+deploy/feedback layer — nothing here changes prompt *content*; content edits still go through
+`/update-prompt`.

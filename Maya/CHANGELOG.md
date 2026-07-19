@@ -12,6 +12,11 @@ Every prompt edit to Maya is logged here. Maya is Hindi-only (KKB spinoff). Entr
 
 ---
 
+## 2026-07-19 — MPL section: instructions rewritten to English (spoken lines stay Hindi)
+- **Feedback/bug:** The MPL Competition section's instructions/rules were written in Hindi — violating the rule that all instruction prose is English and only spoken content is localized.
+- **Change:** Rewrote the MPL section in Maya Hindi + Maya Inbound so every rule/heading/note is English; only the three quoted spoken lines (offer, registration confirmation, end reminder) stay in Hindi, and the What/Why/How/Who facts are English (the agent conveys them in Hindi). The "instructions in English" rule is now codified in CLAUDE.md + `/update-prompt` + `/port-feature` + prompt-anatomy.
+- **Files:** Maya Hindi.md, Maya Inbound.md
+
 ## 2026-07-19 — Profile Wording Rules: never speak "profile" aloud (say "जानकारी")
 - **Feedback/bug:** Same class as KKB — the internal word "profile"/"प्रोफाइल" leaked into caller-facing lines (permission-ask, "प्रोफ़ाइल मिल गई" acknowledgement, example dialogues).
 - **Change:** Added the "Profile Wording Rules (CRITICAL)" section to Maya Hindi + Maya Inbound and reconciled every spoken/example line to "जानकारी" wording (feminine forms preserved). On empty fetch, never announce the miss; tool-call silence reinforced; internal tool names/rules unchanged.

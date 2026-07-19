@@ -37,6 +37,8 @@ via the path map in the repo root `CLAUDE.md`.
 
 ## Notes
 
+- **English instructions rule:** the ported feature's instructions/rules are written in English; only the target agent's spoken lines are localized. Do not carry over Hindi/Kannada rule prose — re-express the rules in English and quote the (re-domained) spoken lines in the target language.
+
 - **Surgical edits only.** Insert the re-domained feature with the smallest possible footprint; preserve every other line in the target file exactly. Prefer additive changes; never reformat or delete unrelated content. See `CLAUDE.md` → "Surgical edits only".
 - Port to one target at a time; repeat for multiple targets so each re-domaining is deliberate.
 - Porting INTO Maya is a deliberate, user-requested act — it is not the same as the KKB→Maya

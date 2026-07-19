@@ -84,6 +84,8 @@ Section headings differ slightly per agent; match by intent, not exact string.
 
 ## Localization conventions (Hindi → Kannada)
 
+**Instructions stay English; only spoken content is localized.** Every rule, heading, condition, and note is written in English in *every* language file. The Hindi and Kannada files carry the SAME English instructions and differ only in the quoted spoken lines, example dialogues, and TTS number-word spellings. Never translate rule/instruction prose into Hindi or Kannada — only the words the agent actually speaks are localized.
+
 When adapting a SPECIFIC change to Kannada:
 - **Script:** Kannada script only; no Roman Kannada. English-origin words in Kannada script (ಜಾಬ್, ಮಾರ್ಕೆಟ್).
 - **Register:** "Kanglish" — Kannada mixed naturally with commonly-used English words.
