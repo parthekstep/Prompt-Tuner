@@ -5,3 +5,7 @@
 - **2026-07-15_192815** — `pre-bugfixes` — before +91 fix + example refresh _(5 files)_
 - **2026-07-15_194506** — `pre-phone-fix` — snapshot of clean worktree HEAD (c16dfbf) before C3 phone +91 fix; sourced from worktree zen-ritchie-b10636 (main working tree was dirty) _(4 files)_
 - **2026-07-16_101104** — `pre-inbound-refresh` — before inbound refresh + Kannada twin _(5 files)_
+- **2026-07-16_162711** — `pre-bugfix-batch2` — fix new_seeker=yes create_profile + inbound +91/country_code _(6 files)_
+- **2026-07-16_163850** — `post-bugfix-batch2` — 5-bug fixes + family-wide create-first hardening _(6 files)_
+- **2026-07-16_185154** — `post-bugfix-batch3` — fork over-fire router + role=Any placeholder (all 4 files) _(6 files)_
+- **2026-07-18_194225** — `pre-slash-fix` — add slash TTS rule to KKB inbound (bug 73) _(6 files)_

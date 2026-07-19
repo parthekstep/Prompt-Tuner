@@ -12,6 +12,16 @@ Every prompt edit to DKB is logged here. Entry format:
 
 ---
 
+## 2026-07-16 — DKB Inbound: drop `${country_code}` input assumption; always `+91`
+- **Feedback/bug:** An inbound call has **no input variables**, so `${country_code}` is never passed — but the DKB inbound Input Variables section declared it as a caller-ID input "used for tool calls where required." This is a false-input assumption (C3-adjacent): if the model tried to build a phone value from a non-existent `${country_code}`, the `phoneNumber` lookup would be malformed/empty.
+- **Change:**
+  - Rewrote the `${country_code}` declaration to state it is **NOT a passed input** on an inbound call, must never be referenced in any tool payload, and that the country code is **always assumed `+91`** — the `phoneNumber` field is built from the caller's number with a literal `+91` prefix (pointing to `${contact_phone}`).
+  - Strengthened the `${contact_phone}` declaration to require the `+91` prefix always (never the bare 10-digit number) and added the **don't-double-prefix guard** ("if `${contact_phone}` already includes a country code, do not double-prefix; the value must carry exactly one `+91`"), mirroring the KKB inbound precedent (`KKB Placeholder Inbound.md`).
+  - **Audited all four tool payloads** (`create_job`, `update_job_status`, `update_job_details`, `get_talent_insights`): none references `${country_code}`; every `phoneNumber` already uses `${contact_phone}` "(in +91 form)" and the example payloads use literal `+919108790249`. No payload change was needed — only the input-variable declaration was wrong.
+  - **Untouched (verified byte-identical):** all fixed params (`sourceService: "ONESTAGENT"`, `eventType: "UPDATE_JOB"`/`"JOB"`, `app_instance: "up-postjob"`), enum values, field names, the `### Contact context` memory block, and every spoken line.
+  - Change is language-agnostic (payload/logic); applied to Hindi (source of truth) and mirrored **verbatim** to Kannada. The two edited declaration lines are byte-identical across H/K.
+- **Files:** `DKB/DKB Inbound Hindi.md`, `DKB/DKB Inbound Kannada.md`
+
 ## 2026-07-15 — New agent: DKB Inbound (employer-inbound, Hindi + Kannada)
 - **Feedback/bug:** Need an inbound variant of DKB — an MSME owner **calls in** to post or verify a job (rather than DKB calling out about an expiring posting). Built new, not an edit to the outbound files.
 - **Change:**
