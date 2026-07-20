@@ -79,12 +79,17 @@ If a value is not present, use "NA" for strings, [] for arrays, or 0 for counts.
     No opinions, no speculation.
 
 18. mpl_registration — Did the student register for the MPL Competition (Ghaziabad
-    Marketer Premiere League), offered as a secondary option near the end of the call?
+    Marketer Premiere League)?
     "Yes" if the student agreed to participate / accepted the follow-up competition call.
     "No" if the offer was made and the student declined.
     "Not offered" if the MPL Competition was never brought up in this call.
 
-19. EXAMPLE OUTPUT — Below is an example of how all the above fields should be
+19. mpl_presented — Was the MPL Competition offered/presented to the student at all
+    in this call — the combined "any other jobs, or shall I tell you about MPL?" line,
+    or any other MPL mention?
+    Values: "Yes" if MPL was brought up, "No" if it was never mentioned.
+
+20. EXAMPLE OUTPUT — Below is an example of how all the above fields should be
     aggregated and returned for a single call. Use this exact structure:
 
 {
@@ -132,6 +137,7 @@ If a value is not present, use "NA" for strings, [] for arrays, or 0 for counts.
   "hr_contact_shared": "Yes",
   "benefits_mentioned": "Yes",
   "mpl_registration": "Not offered",
+  "mpl_presented": "No",
   "drop_reason": "NA",
   "final_summary": "Student confirmed she studies at the named college and was actively looking for work. She discussed two roles and successfully applied to a Sales Executive position in Lucknow. The company's HR contact number was shared after the application."
 }
