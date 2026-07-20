@@ -12,6 +12,11 @@ Every prompt edit to KKB is logged here. Entry format:
 
 ---
 
+## 2026-07-20 — Propagate age/gender profile re-check to all KKB seeker gates
+- **Feedback/bug:** The "skip age/gender if the fetched profile already has them" rule was unreliable across all seeker bots (same weak instruction proven failing live on Maya Inbound) — the bot re-asked age/gender for a returning caller whose profile carried them.
+- **Change:** Added an explicit profile RE-CHECK at the age/gender HARD BLOCK (the apply gate) in KKB out H+K and in H+K — before asking, re-read `metadata.whatIHave.age` / `metadata.gender`; a returning caller normally has both, so ask only genuinely-missing fields. (Analyser class D9.)
+- **Files:** KKB Placeholder Hindi.md, KKB Placeholder Kannada.md, KKB Placeholder Inbound.md, KKB Placeholder Inbound Kannada.md
+
 ## 2026-07-19 — Profile Wording Rules: never speak "profile" aloud (say "जानकारी" / "ಮಾಹಿತಿ")
 - **Feedback/bug:** The internal technical word "profile"/"प्रोफाइल"/"ಪ್ರೊಫೈಲ್" was leaking into caller-facing lines — the permission-ask ("…क्या मैं आपकी प्रोफाइल fetch कर सकती हूँ?"), the acknowledgement ("प्रोफ़ाइल मिल गई"), and several example dialogues. Callers don't understand it and it erodes trust.
 - **Change:** Added a "Profile Wording Rules (CRITICAL — never speak 'profile' aloud)" section to all four KKB get_profile prompts, and reconciled every spoken/example line to warm non-technical wording — permission ask "मैं आपके लिए सही जॉब्स ढूंढने में मदद करना चाहती हूँ। क्या आपकी कुछ बेसिक जानकारी देख सकती हूँ?", acknowledgement "आपकी जानकारी मिल गई", post-apply bridge "…आपकी जानकारी पूरी रखने के लिए…". Kannada adapted (ಮಾಹಿತಿ, ನಿಮ್ಮ ಮಾಹಿತಿ ಸಿಕ್ತು). On empty fetch, never announce the miss; tool-call silence reinforced. Internal tool names + forbidden-list rules unchanged.
