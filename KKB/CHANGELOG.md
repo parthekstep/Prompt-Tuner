@@ -12,6 +12,11 @@ Every prompt edit to KKB is logged here. Entry format:
 
 ---
 
+## 2026-07-20 — Age/gender lock persists across every apply (round 2, all KKB seeker gates)
+- **Feedback/bug:** The round-1 profile re-check held on the first apply but was proven (on Maya Inbound) to fail on a SECOND apply in the same call — the skip was a per-gate re-derivation, not a persisted fact. Same weakness in all KKB seeker files.
+- **Change:** Locked the profile's known fields (esp. age/gender) the moment `get_profile` returns — the lock does NOT reset between applications — and strengthened the HARD BLOCK so the KNOWN status persists across every apply in the call. (Analyser class D9 strengthened.)
+- **Files:** KKB Placeholder Hindi.md, KKB Placeholder Kannada.md, KKB Placeholder Inbound.md, KKB Placeholder Inbound Kannada.md
+
 ## 2026-07-20 — Propagate age/gender profile re-check to all KKB seeker gates
 - **Feedback/bug:** The "skip age/gender if the fetched profile already has them" rule was unreliable across all seeker bots (same weak instruction proven failing live on Maya Inbound) — the bot re-asked age/gender for a returning caller whose profile carried them.
 - **Change:** Added an explicit profile RE-CHECK at the age/gender HARD BLOCK (the apply gate) in KKB out H+K and in H+K — before asking, re-read `metadata.whatIHave.age` / `metadata.gender`; a returning caller normally has both, so ask only genuinely-missing fields. (Analyser class D9.)

@@ -12,6 +12,11 @@ Every prompt edit to Maya is logged here. Maya is Hindi-only (KKB spinoff). Entr
 
 ---
 
+## 2026-07-20 — Maya (in+out) round 2: age/gender lock across repeat applies + MPL proactive push
+- **Feedback/bug:** Live re-test of Maya Inbound after round-1 fixes. (1) Age/gender were correctly skipped on the FIRST apply but re-asked on a SECOND apply in the same call — the profile re-check wasn't persisted, so the gate re-derived from scratch and missed. (2) MPL was still not pushed proactively: the bot sat in the apply-failure "retry or another job?" loop and only offered MPL when the caller explicitly asked ("koi competition?"), never on its own.
+- **Change:** (1) Locked the profile's known fields (esp. age/gender) the moment `get_profile` returns and stated the lock does NOT reset between applications; strengthened the HARD BLOCK so the KNOWN status persists across every apply in the call. (2) Rewrote MPL "When to offer" as a PROACTIVE push covering apply success OR failure + caller-declines-more-jobs, explicitly "don't wait to be asked"; added a pointer from Apply-Failure Handling into the MPL push before Graceful Exit. (Analyser D9 + D10 strengthened.)
+- **Files:** Maya Inbound.md, Maya Hindi.md
+
 ## 2026-07-20 — Propagate age/gender re-check + MPL mandatory-before-goodbye to Maya outbound
 - **Feedback/bug:** The age/gender re-ask bug (D9) and the MPL-not-offered bug (D10), both fixed in Maya Inbound, apply equally to Maya outbound (same instructions + same MPL feature).
 - **Change:** Added the age/gender profile re-check at Maya Hindi's Step 3.5 HARD BLOCK, and made the MPL offer a MANDATORY pre-goodbye step (declining a job ≠ ending the call).

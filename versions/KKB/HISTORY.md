@@ -10,3 +10,8 @@
 - **2026-07-16_185154** — `post-bugfix-batch3` — fork over-fire router + role=Any placeholder (all 4 files) _(6 files)_
 - **2026-07-18_194225** — `pre-slash-fix` — add slash TTS rule to KKB inbound (bug 73) _(6 files)_
 - **2026-07-19_165849** — `pre-profile-wording` — before Profile Wording Rules section _(6 files)_
+- **2026-07-20_092807** — `pre-agegender-lock-r2` — age/gender lock persists across every apply in a call _(6 files)_
+- **2026-07-20_093507** — `pre-deploy-kkb-hi-out-2026-07-20_093507` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi.md _(6 files)_
+- **2026-07-20_093508** — `pre-deploy-kkb-kn-out-2026-07-20_093508` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(6 files)_
+- **2026-07-20_093508** — `pre-deploy-kkb-hi-in-2026-07-20_093508` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(6 files)_
+- **2026-07-20_093509** — `pre-deploy-kkb-kn-in-2026-07-20_093509` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(6 files)_

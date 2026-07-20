@@ -11,3 +11,6 @@
 - **2026-07-19_165001** — `pre-mpl` — before adding MPL Competition secondary offer (Maya in+out) _(4 files)_
 - **2026-07-19_165849** — `pre-profile-wording` — before Profile Wording Rules section _(4 files)_
 - **2026-07-20_085144** — `pre-inbound-agegender-mpl` — fix Maya inbound: skip age/gender if on profile + reliably offer MPL _(4 files)_
+- **2026-07-20_092807** — `pre-mpl-push-agefix-r2` — strengthen MPL proactive push + age/gender lock across applies _(4 files)_
+- **2026-07-20_093509** — `pre-deploy-maya-hi-out-2026-07-20_093509` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_
+- **2026-07-20_093510** — `pre-deploy-maya-hi-in-2026-07-20_093510` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(4 files)_
