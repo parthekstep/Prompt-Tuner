@@ -12,6 +12,12 @@ Every prompt edit to Maya is logged here. Maya is Hindi-only (KKB spinoff). Entr
 
 ---
 
+## 2026-07-20 — Maya (in+out): MPL offer collapsed into the goodbye turn (call cut before registration)
+- **Feedback/bug:** Live Maya Inbound test (call 2bb8b332, 9:43 IST). MPL was finally offered proactively after the caller gave up (progress), but the agent said the offer line AND "Goodbye" in the SAME turn — the call ended before the caller could answer, so no details and no registration (`call_output.mpl_registration` = None; `drop_reason` apply_failed). The round-2 wording ("offer it before the goodbye line") let the model bundle offer + goodbye.
+- **Change:** Made the MPL offer its OWN turn that ends on its question and WAITS; forbade the goodbye line / "Goodbye" in the same turn as the offer; the Graceful Exit goodbye is now reachable only after the full MPL exchange (decline, or details → registration → reminder) has been handled in later turns. (Analyser D10 refined.)
+- **Files:** Maya Inbound.md, Maya Hindi.md
+- **Grounding note:** This test number's profile carries NO age/gender (verified in the call's `get_profile` result), so asking once on apply #1 is correct and the persistence fix (no re-ask on #2/#3) is working — that behaviour is NOT a bug.
+
 ## 2026-07-20 — Maya (in+out) round 2b: proxy carve-out, new-caller multi-apply, MPL 'in a hurry'
 - **Feedback/bug:** Adversarial review of the round-2 fixes flagged three residual issues. (1) The age/gender lock was absolute, so a proxy caller switching to a different candidate mid-call would put the first person's age/gender on the second. (2) A brand-new caller applying to a 2nd job in one call would re-run `create_profile` (duplicate profile) + re-ask name/experience. (3) The Graceful Exit MPL backstop's skip-list omitted "clearly in a hurry" (present in the MPL section), so a hurried caller could be pushed MPL at goodbye.
 - **Change:** (1) Scoped the lock to the SAME candidate — a proxy switching to a different person re-establishes age/gender. (2) Added a once-per-call `create_profile` guard — after the first mint, a later apply reuses the returned `profile_id` via `apply_job` only, no duplicate create, no re-ask. (3) Added "is clearly in a hurry" to the Graceful Exit skip-list. (Analyser D9 refined, D11 added, D10 refined.)

@@ -17,3 +17,6 @@
 - **2026-07-20_094438** — `pre-followups-r2b` — in-a-hurry MPL skip + proxy carve-out + new-caller multi-apply _(4 files)_
 - **2026-07-20_094825** — `pre-deploy-maya-hi-out-2026-07-20_094825` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_
 - **2026-07-20_094825** — `pre-deploy-maya-hi-in-2026-07-20_094825` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(4 files)_
+- **2026-07-20_095842** — `pre-mpl-turn-collapse-fix` — MPL offer must be its own waiting turn; Goodbye never same turn as offer _(4 files)_
+- **2026-07-20_100057** — `pre-deploy-maya-hi-in-2026-07-20_100057` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(4 files)_
+- **2026-07-20_100058** — `pre-deploy-maya-hi-out-2026-07-20_100058` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_
