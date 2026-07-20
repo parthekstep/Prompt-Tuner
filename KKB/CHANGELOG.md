@@ -17,6 +17,11 @@ Every prompt edit to KKB is logged here. Entry format:
 - **Change:** (1) Scoped the lock to the SAME candidate — a proxy switching to a different person re-establishes age/gender. (2) Added a once-per-call `create_profile` guard — after the first mint, a later apply reuses the returned `profile_id` via `apply_job` only. (Analyser D9 refined, D11 added.)
 - **Files:** KKB Placeholder Hindi.md, KKB Placeholder Kannada.md, KKB Placeholder Inbound.md, KKB Placeholder Inbound Kannada.md
 
+## 2026-07-20 — Age/gender re-ask root cause: extract at read time across all profile records
+- **Feedback/bug:** The raw `get_profile` dump for the test number showed the profile DOES carry age (`whatIHave.age`) and gender (`metadata.gender`), yet the bot still asked on the first apply — inconsistently (skipped one call, asked the next). Root cause: the number has many duplicate profile records with the fields scattered (the most-recent may be a placeholder while age/gender sit on another record), and the bot re-parsed the nested JSON at the apply gate — unreliable. The earlier "lock" declared the fields known but never forced extraction at read time.
+- **Change:** At profile-read time, extract age and gender from the `get_profile` result across ALL returned records (a field is KNOWN if any record carries it) and commit them as known for the whole call — do not re-derive at the apply gate. Added to "Reading the get_profile response" in all KKB seeker files. (Analyser D9 sharpened.)
+- **Files:** KKB Placeholder Hindi.md, KKB Placeholder Kannada.md, KKB Placeholder Inbound.md, KKB Placeholder Inbound Kannada.md
+
 ## 2026-07-20 — Age/gender lock persists across every apply (round 2, all KKB seeker gates)
 - **Feedback/bug:** The round-1 profile re-check held on the first apply but was proven (on Maya Inbound) to fail on a SECOND apply in the same call — the skip was a per-gate re-derivation, not a persisted fact. Same weakness in all KKB seeker files.
 - **Change:** Locked the profile's known fields (esp. age/gender) the moment `get_profile` returns — the lock does NOT reset between applications — and strengthened the HARD BLOCK so the KNOWN status persists across every apply in the call. (Analyser class D9 strengthened.)

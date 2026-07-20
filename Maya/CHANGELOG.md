@@ -12,6 +12,11 @@ Every prompt edit to Maya is logged here. Maya is Hindi-only (KKB spinoff). Entr
 
 ---
 
+## 2026-07-20 — Maya (in+out): age/gender extract at read time (real root cause of the re-ask)
+- **Feedback/bug:** The raw `get_profile` dump for the test number showed age+gender ARE on the profile, so the apply-#1 re-ask was still the bug — not correct behaviour as I had wrongly concluded from the call JSON (which does not contain the `get_profile` result). Duplicate records scatter the fields and the bot re-parsed nested JSON at the apply gate.
+- **Change:** Extract age/gender at profile-read time across ALL returned records and commit as KNOWN for the whole call. Added to "Reading the get_profile response" in Maya Inbound + Maya Hindi. (Analyser D9 sharpened.)
+- **Files:** Maya Inbound.md, Maya Hindi.md
+
 ## 2026-07-20 — Maya (in+out): MPL timing — offer as an interjection right after the first apply
 - **Feedback/bug:** Requested change. MPL was surfaced too late (only once the caller had fully given up). Offer it right after the FIRST application attempt concludes, as an interjection before the caller moves to the next job; also pitch it if the caller says they're not looking for a job.
 - **Change:** Rewrote MPL "When to offer" — primary trigger = right after the first apply concludes (success OR failure), once, as an interjection; alternative = caller not looking / No-Match. Adjusted the "never interrupt" rule to allow the post-first-apply interjection (still never mid-apply). Added interjection hooks in Apply Success and Apply Failure handling (failure holds the retry/another-job question until after the MPL exchange). Still at most once per call; the turn-collapse fix and the Graceful Exit backstop are retained. `mpl_registration` stays output-only (no CRM).

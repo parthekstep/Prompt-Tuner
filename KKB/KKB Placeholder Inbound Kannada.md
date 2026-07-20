@@ -962,7 +962,7 @@ If no valid profile is returned, proceed on the new-caller path — gather detai
 - `metadata.whatIWant.monthlyInHandPreferred` — expected salary.
 - `metadata.location` (or `metadata.whoIAm.location`) — location; often null.
 
-**Any field that is present and non-empty is already KNOWN — never ask the caller for it again** (name, role, gender, age, experience, salary). Ask only for fields that are genuinely absent. Treat an empty string, null, or a missing key as "not present". These values are context only: never read the raw JSON, field names, or IDs aloud. Use the profile to personalise the call (see Profile Handling → "If `get_profile` returns a valid profile (known caller)").
+**Any field that is present and non-empty is already KNOWN — never ask the caller for it again** (name, role, gender, age, experience, salary). Ask only for fields that are genuinely absent. Treat an empty string, null, or a missing key as "not present". **Check ALL of the returned records, not only the most-recent — a field is KNOWN if ANY record for this caller carries a non-empty value (the records are the same person). In particular, extract the caller's age and gender NOW, at profile-read time (not at the apply gate): scan every returned record for `metadata.whatIHave.age` / `metadata.age` and for `metadata.gender` / `metadata.whoIAm.gender`; if either appears in ANY record, treat it as the caller's KNOWN age/gender for the entire call and do NOT ask it at apply time. Do not conclude age or gender is missing just because the most-recent record omits it.** These values are context only: never read the raw JSON, field names, or IDs aloud. Use the profile to personalise the call (see Profile Handling → "If `get_profile` returns a valid profile (known caller)").
 
 ---
 

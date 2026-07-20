@@ -23,3 +23,6 @@
 - **2026-07-20_101023** — `pre-mpl-timing-first-apply` — offer MPL as interjection after first apply concludes + when not looking for a job _(4 files)_
 - **2026-07-20_101149** — `pre-deploy-maya-hi-in-2026-07-20_101149` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(4 files)_
 - **2026-07-20_101150** — `pre-deploy-maya-hi-out-2026-07-20_101150` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_
+- **2026-07-20_102334** — `pre-agegender-readtime-extract` — extract age/gender at read time across all records _(4 files)_
+- **2026-07-20_102605** — `pre-deploy-maya-hi-out-2026-07-20_102605` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_
+- **2026-07-20_102606** — `pre-deploy-maya-hi-in-2026-07-20_102606` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(4 files)_

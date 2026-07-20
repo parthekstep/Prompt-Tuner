@@ -20,3 +20,8 @@
 - **2026-07-20_094823** — `pre-deploy-kkb-kn-out-2026-07-20_094823` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(6 files)_
 - **2026-07-20_094823** — `pre-deploy-kkb-hi-in-2026-07-20_094823` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(6 files)_
 - **2026-07-20_094824** — `pre-deploy-kkb-kn-in-2026-07-20_094824` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(6 files)_
+- **2026-07-20_102334** — `pre-agegender-readtime-extract` — extract age/gender at read time across all records _(6 files)_
+- **2026-07-20_102601** — `pre-deploy-kkb-hi-out-2026-07-20_102601` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi.md _(6 files)_
+- **2026-07-20_102602** — `pre-deploy-kkb-kn-out-2026-07-20_102602` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(6 files)_
+- **2026-07-20_102602** — `pre-deploy-kkb-hi-in-2026-07-20_102602` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(6 files)_
+- **2026-07-20_102604** — `pre-deploy-kkb-kn-in-2026-07-20_102604` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(6 files)_
