@@ -213,6 +213,20 @@ override it. Always check *why the rule would fail*, not just whether it exists.
 - **Fix direction:** add a wording-rules section that bans the term aloud and gives the friendly replacement ("जानकारी" / "ಮಾಹಿತಿ" for profile), reconcile every spoken/example line, and on an empty fetch never announce the miss. Keep internal tool names + rule text unchanged.
 - **Seen in:** KKB + Maya get_profile prompts, 2026-07-19 (Profile Wording Rules).
 
+### D9 — Skip-if-known field re-asked at the apply gate despite being on the fetched profile
+- **Symptom:** the bot re-asks a field (age, gender, name, experience) at apply time even though the `get_profile` result earlier in the call already carries it — the "don't re-ask what the profile has" rule is stated but not honored at the decision gate.
+- **Root cause:** the skip rule lives in a general section, but the apply-time HARD BLOCK / Step 3.5 lists the field as a thing-to-ask with a spoken line, so the model defaults to asking; nothing forces a profile re-check right at the gate.
+- **Detection:** at every pre-apply "must be KNOWN" gate, confirm there is an explicit instruction to RE-CHECK the fetched profile's exact fields (e.g. `metadata.whatIHave.age` / `metadata.gender`) and skip the ask when present. A gate that only says "ask X" without "first re-check the profile for X" = flag.
+- **Fix direction:** at the decision gate, add an explicit profile re-check naming the exact fields; note a returning caller (profile found) normally has them; ask only genuinely-missing fields.
+- **Seen in:** Maya Inbound, 2026-07-20 (age/gender re-asked for a named returning caller).
+
+### D10 — Mandatory end-of-call step skipped because the closing script is jumped to directly
+- **Symptom:** a required end-of-call step (e.g. the MPL Competition offer, a survey, a callback promise) never happens — the bot goes straight to the goodbye line, skipping the trigger that sits just before it.
+- **Root cause:** the trigger is soft prose ("before ending, if not yet done, offer X") placed next to a self-contained goodbye script the model jumps to; and a job/apply decline is mis-read as "the caller ended the call."
+- **Detection:** for any mandatory pre-goodbye step, confirm it's framed as a MANDATORY step that must run BEFORE the goodbye line (not a soft "if"), and that "declining a job/apply" is explicitly distinguished from "ending the call / do-not-call".
+- **Fix direction:** make the step mandatory-before-goodbye; only an explicit end / do-not-call / hang-up suppresses it; a decline does not.
+- **Seen in:** Maya Inbound, 2026-07-20 (MPL never offered before goodbye).
+
 ---
 
 ## E. Examples, consent & standing rules

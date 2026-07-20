@@ -12,6 +12,11 @@ Every prompt edit to Maya is logged here. Maya is Hindi-only (KKB spinoff). Entr
 
 ---
 
+## 2026-07-20 — Maya Inbound: skip age/gender when on profile + reliably offer MPL before goodbye
+- **Feedback/bug:** Two live Inbound-Maya bugs (20-Jul transcripts). (1) `get_profile` returned a profile (caller greeted by name), yet the bot re-asked age and gender at apply time — the "skip if on profile" rule wasn't honored at the decision gate. (2) The MPL Competition was never offered — the bot jumped straight to the goodbye line, skipping the Graceful-Exit MPL trigger (and treated a job/apply decline as "ending the call").
+- **Change:** (1) Added an explicit profile re-check at the Step 3.5 HARD BLOCK — before asking age/gender, re-read the `get_profile` result (`metadata.whatIHave.age` / `metadata.gender`); a returning caller normally has both, so ask only genuinely-missing fields. (2) Made the MPL offer a MANDATORY pre-goodbye step and clarified that declining a job/apply is not ending the call — only an explicit end / do-not-call / hang-up skips MPL.
+- **Files:** Maya Inbound.md
+
 ## 2026-07-19 — MPL section: instructions rewritten to English (spoken lines stay Hindi)
 - **Feedback/bug:** The MPL Competition section's instructions/rules were written in Hindi — violating the rule that all instruction prose is English and only spoken content is localized.
 - **Change:** Rewrote the MPL section in Maya Hindi + Maya Inbound so every rule/heading/note is English; only the three quoted spoken lines (offer, registration confirmation, end reminder) stay in Hindi, and the What/Why/How/Who facts are English (the agent conveys them in Hindi). The "instructions in English" rule is now codified in CLAUDE.md + `/update-prompt` + `/port-feature` + prompt-anatomy.
