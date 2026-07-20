@@ -12,6 +12,11 @@ Every prompt edit to Maya is logged here. Maya is Hindi-only (KKB spinoff). Entr
 
 ---
 
+## 2026-07-20 — Maya (in+out): MPL timing — offer as an interjection right after the first apply
+- **Feedback/bug:** Requested change. MPL was surfaced too late (only once the caller had fully given up). Offer it right after the FIRST application attempt concludes, as an interjection before the caller moves to the next job; also pitch it if the caller says they're not looking for a job.
+- **Change:** Rewrote MPL "When to offer" — primary trigger = right after the first apply concludes (success OR failure), once, as an interjection; alternative = caller not looking / No-Match. Adjusted the "never interrupt" rule to allow the post-first-apply interjection (still never mid-apply). Added interjection hooks in Apply Success and Apply Failure handling (failure holds the retry/another-job question until after the MPL exchange). Still at most once per call; the turn-collapse fix and the Graceful Exit backstop are retained. `mpl_registration` stays output-only (no CRM).
+- **Files:** Maya Inbound.md, Maya Hindi.md
+
 ## 2026-07-20 — Maya (in+out): MPL offer collapsed into the goodbye turn (call cut before registration)
 - **Feedback/bug:** Live Maya Inbound test (call 2bb8b332, 9:43 IST). MPL was finally offered proactively after the caller gave up (progress), but the agent said the offer line AND "Goodbye" in the SAME turn — the call ended before the caller could answer, so no details and no registration (`call_output.mpl_registration` = None; `drop_reason` apply_failed). The round-2 wording ("offer it before the goodbye line") let the model bundle offer + goodbye.
 - **Change:** Made the MPL offer its OWN turn that ends on its question and WAITS; forbade the goodbye line / "Goodbye" in the same turn as the offer; the Graceful Exit goodbye is now reachable only after the full MPL exchange (decline, or details → registration → reminder) has been handled in later turns. (Analyser D10 refined.)
