@@ -29,3 +29,6 @@
 - **2026-07-20_102918** — `pre-role-family` — role synonym+family grouping (21-23) _(4 files)_
 - **2026-07-20_103543** — `pre-deploy-maya-hi-out-2026-07-20_103543` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_
 - **2026-07-20_103543** — `pre-deploy-maya-hi-in-2026-07-20_103543` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(4 files)_
+- **2026-07-20_104733** — `pre-mpl-tooltied` — tie MPL to first apply_job return; mandatory as apply_job _(4 files)_
+- **2026-07-20_104831** — `pre-deploy-maya-hi-in-2026-07-20_104830` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(4 files)_
+- **2026-07-20_104831** — `pre-deploy-maya-hi-out-2026-07-20_104831` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_

@@ -625,6 +625,8 @@ Only after the user gives clear consent, and only after age and gender are known
 
 Run the application as ONE clean sequence in a single turn: say the bridge line ONCE → make the tool call(s) silently (returning caller whose profile was fetched: `apply_job` alone; brand-new caller: `create_profile` then `apply_job`, back to back) → then speak the result once. Never repeat the bridge line. Never narrate a profile-fetch or profile-creation step. `apply_job` is always the final call and must actually run — never speak a success message unless `apply_job` returned success.
 
+**MPL after the first apply (mandatory — tool-tied; treat it as non-negotiable as `apply_job` itself).** The FIRST time `apply_job` returns in this call — whether it returned success OR failure — is a fixed MPL trigger. After you speak the ONE-line apply result, your VERY NEXT turn MUST be the MPL Competition offer (see the MPL Competition section): say its offer line as its own turn, end on its question, then WAIT. Offer MPL here BEFORE you propose any retry, any other job, or any wrap-up. A call in which `apply_job` has run but MPL was never offered is INCOMPLETE. Offer it exactly once per call; once offered, mark it done and never repeat it. (If the caller never reaches an apply at all — declines every job / isn't looking — offer MPL at that point instead.)
+
 Never apply without explicit consent.
 
 ---
