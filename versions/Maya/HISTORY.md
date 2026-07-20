@@ -26,3 +26,6 @@
 - **2026-07-20_102334** — `pre-agegender-readtime-extract` — extract age/gender at read time across all records _(4 files)_
 - **2026-07-20_102605** — `pre-deploy-maya-hi-out-2026-07-20_102605` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_
 - **2026-07-20_102606** — `pre-deploy-maya-hi-in-2026-07-20_102606` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(4 files)_
+- **2026-07-20_102918** — `pre-role-family` — role synonym+family grouping (21-23) _(4 files)_
+- **2026-07-20_103543** — `pre-deploy-maya-hi-out-2026-07-20_103543` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_
+- **2026-07-20_103543** — `pre-deploy-maya-hi-in-2026-07-20_103543` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(4 files)_

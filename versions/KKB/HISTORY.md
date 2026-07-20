@@ -25,3 +25,8 @@
 - **2026-07-20_102602** — `pre-deploy-kkb-kn-out-2026-07-20_102602` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(6 files)_
 - **2026-07-20_102602** — `pre-deploy-kkb-hi-in-2026-07-20_102602` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(6 files)_
 - **2026-07-20_102604** — `pre-deploy-kkb-kn-in-2026-07-20_102604` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(6 files)_
+- **2026-07-20_102918** — `pre-role-geo-fixes` — role synonym+family + city anchor (35/21-23/37) _(6 files)_
+- **2026-07-20_103539** — `pre-deploy-kkb-hi-out-2026-07-20_103539` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi.md _(6 files)_
+- **2026-07-20_103540** — `pre-deploy-kkb-kn-out-2026-07-20_103540` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(6 files)_
+- **2026-07-20_103541** — `pre-deploy-kkb-hi-in-2026-07-20_103541` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(6 files)_
+- **2026-07-20_103542** — `pre-deploy-kkb-kn-in-2026-07-20_103542` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(6 files)_

@@ -60,7 +60,14 @@ If a value is not present, use "NA" for strings, [] for arrays, or 0 for counts.
     salary they discussed, (3) whether they applied or tried to apply. 
     No opinions, no speculation.
 
-14. EXAMPLE OUTPUT — Below is an example of how all the above fields should be 
+14. ready_for_interview — Did the seeker indicate they could attend an interview 
+    if an employer shortlists them (a single question asked once before applying)? 
+    Values: "Yes" if they said they can attend (including a phone interview), 
+    "No" if they said they cannot, "Conditional" if it depends (only by phone, 
+    only if nearby, only at certain times), "NA" if the question was not asked 
+    (e.g. no application was attempted) or the seeker gave no clear answer.
+
+15. EXAMPLE OUTPUT — Below is an example of how all the above fields should be 
     aggregated and returned for a single call. Use this exact structure:
 
 {
@@ -127,6 +134,7 @@ If a value is not present, use "NA" for strings, [] for arrays, or 0 for counts.
       "failure_reason": "HTTP 404 — profile not found"
     }
   ],
+  "ready_for_interview": "Yes",
   "drop_reason": "NA",
   "final_summary": "Seeker was actively looking for work and engaged in a detailed conversation about three roles. Successfully applied to Electrician and Machine Operator positions but the third application (Solar Energy Consultant) failed due to a profile not found error."
 }
@@ -142,6 +150,8 @@ Rules:
   a single job either succeeded or failed to apply, never both.
 - drop_reason captures seeker behavior only, not technical apply failures. If apply 
   failed but the seeker stayed engaged, drop_reason = "NA".
+- ready_for_interview is "NA" when the interview-readiness question was never asked 
+  or the seeker did not give a clear Yes/No/Conditional answer.
 - Do not hallucinate company names, salaries, or contact details — only extract what 
   is actually present in the transcript or input recommendations.
 - For final_summary, always write in English regardless of the conversation language.

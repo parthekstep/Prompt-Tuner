@@ -12,6 +12,11 @@ Every prompt edit to Maya is logged here. Maya is Hindi-only (KKB spinoff). Entr
 
 ---
 
+## 2026-07-20 — Maya (in+out): role synonym + customer-facing family grouping
+- **Feedback/bug:** Sheet rows 21/23 — customer-service/sales/crew/retail roles treated as separate buckets, so the bot could say "no customer service jobs" while crew/sales roles existed, and categorised the same job differently across calls. User explicitly requested Maya.
+- **Change:** Added the role synonym + customer-facing-family matching rule (Maya Hindi Default Presentation Rule; Maya Inbound ranking rule). Cashier kept distinct. (Analyser D12.)
+- **Files:** Maya Hindi.md, Maya Inbound.md
+
 ## 2026-07-20 — Maya (in+out): age/gender extract at read time (real root cause of the re-ask)
 - **Feedback/bug:** The raw `get_profile` dump for the test number showed age+gender ARE on the profile, so the apply-#1 re-ask was still the bug — not correct behaviour as I had wrongly concluded from the call JSON (which does not contain the `get_profile` result). Duplicate records scatter the fields and the bot re-parsed nested JSON at the apply gate.
 - **Change:** Extract age/gender at profile-read time across ALL returned records and commit as KNOWN for the whole call. Added to "Reading the get_profile response" in Maya Inbound + Maya Hindi. (Analyser D9 sharpened.)

@@ -12,6 +12,11 @@ Every prompt edit to DKB is logged here. Entry format:
 
 ---
 
+## 2026-07-20 — DKB (H+K): Yes/No Gate Capture — register the owner's answer before advancing
+- **Feedback/bug:** Sheet row 26 — employers said yes/no clearly but the bot didn't register it and advanced anyway (wrong branch / skipped consent), causing frustrated drop-offs (calls 2465759, 3663530, 3664822).
+- **Change:** Added a "Yes/No Gate Capture (Mandatory — Register Before Advancing)" section listing the five yes/no gates (identity, availability, job-freshness, new-vacancy, post-consent) and requiring the bot to capture + briefly confirm a clear yes/no before branching or firing a tool, with a single re-ask when no clear response is captured (an explicit "unsure" is itself a captured answer). (Analyser D14.)
+- **Files:** DKB Hindi.md, DKB Kannada.md
+
 ## 2026-07-16 — DKB Inbound: drop `${country_code}` input assumption; always `+91`
 - **Feedback/bug:** An inbound call has **no input variables**, so `${country_code}` is never passed — but the DKB inbound Input Variables section declared it as a caller-ID input "used for tool calls where required." This is a false-input assumption (C3-adjacent): if the model tried to build a phone value from a non-existent `${country_code}`, the `phoneNumber` lookup would be malformed/empty.
 - **Change:**

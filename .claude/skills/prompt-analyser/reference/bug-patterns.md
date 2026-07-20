@@ -234,6 +234,27 @@ override it. Always check *why the rule would fail*, not just whether it exists.
 - **Fix direction:** add a once-per-call `create_profile` guard: after the first mint, treat the returned `profile_id` (and the gathered name/experience/age/gender) as KNOWN for the rest of the call; a 2nd/3rd apply calls `apply_job` only. Parallels D9's persistence clause on the returning-caller path.
 - **Seen in:** all 6 seeker files, 2026-07-20 (found by adversarial verify of the D9/age-gender fix; the new-caller twin of the same repeat-apply weakness).
 
+### D12 — Role-name variant / job-family not matched → false "no jobs" + inconsistent categorisation
+- **Symptom:** the seeker names a role variant (customer service) and the bot ranks the matching pool job (Customer Support Executive) as unrelated, or tells the caller a role isn't available, while a same-role/family job sits un-offered in the pool; the same job is categorised differently across calls (customer service one call, sales another).
+- **Root cause:** no role-synonym/job-family mapping — ranking relies on an undefined "closely related"; overlapping customer-facing categories (customer-service/support, sales/marketing/tele/field/promoter, crew/team-member/retail/store) are treated as separate matchable buckets.
+- **Detection:** in any seeker matching/ranking or synonym section, verify (a) role-name variants map to the same role, and (b) customer-service/sales/crew/retail/promoter are declared ONE matchable customer-facing family (cashier excluded). Grep the outbound Default Presentation Rule for "family"/"synonym" — absence = flag.
+- **Fix direction:** add a role synonym + job-family matching rule before ranking / before any "no jobs" statement; propose family members together; keep cashier distinct.
+- **Seen in:** KKB inbound had per-role synonyms but no cross-family grouping; KKB outbound + Maya had neither. Fixed 2026-07-20 across all 6 seeker files.
+
+### D13 — Out-of-city jobs surfaced in the first batch to a caller who stated their own city
+- **Symptom:** a caller who named their city (e.g. Ghaziabad) is shown Noida/Meerut jobs in the FIRST batch, unprompted → immediate drop.
+- **Root cause:** ranking places location BELOW role with no first-batch city anchor, so a role-matched out-of-city job outranks a same-city job.
+- **Detection:** a Default Presentation Rule whose priority list has role above location and NO "stated city anchors the first batch" clause = flag.
+- **Fix direction:** add a city-anchor rule — the stated city anchors the first batch; surface other/nearby cities only after local options, on request, or when local yields too few. Preference, NOT a hard filter (never exclude other cities outright).
+- **Seen in:** KKB seeker (out + in), 2026-07-20.
+
+### D14 — Yes/No gate advanced without capturing the owner's clear response (DKB)
+- **Symptom:** the employer says yes or no clearly but the bot doesn't register it and advances anyway — takes the wrong branch or skips consent; the owner drops off frustrated.
+- **Root cause:** no rule mandating capture + brief confirm of a clear yes/no at each decision gate before branching / firing a tool.
+- **Detection:** for each identity / availability / freshness / new-vacancy / post-consent gate, verify a rule requires a clear yes/no be registered before the branch or tool call, and a single re-ask on an unclear/silent reply (an explicit "unsure" is itself a captured answer, handled per that gate's rule).
+- **Fix direction:** add a "Yes/No Gate Capture" section listing the gates and requiring register-before-advance + one re-ask on no-clear-response.
+- **Seen in:** DKB (calls 2465759, 3663530, 3664822), 2026-07-20.
+
 ---
 
 ## E. Examples, consent & standing rules
