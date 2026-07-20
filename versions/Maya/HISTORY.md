@@ -35,3 +35,5 @@
 - **2026-07-20_113001** — `pre-mpl-folded-memory` — fold MPL into post-apply job question + cross-call memory + presented/registered capture _(4 files)_
 - **2026-07-20_113458** — `pre-deploy-maya-hi-in-2026-07-20_113458` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(4 files)_
 - **2026-07-20_113459** — `pre-deploy-maya-hi-out-2026-07-20_113459` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_
+- **2026-07-20_123639** — `pre-deploy-maya-hi-in-2026-07-20_123639` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(4 files)_
+- **2026-07-20_123819** — `pre-deploy-maya-hi-out-2026-07-20_123819` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_

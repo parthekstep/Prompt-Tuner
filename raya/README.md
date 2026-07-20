@@ -7,6 +7,18 @@ over Raya's REST API — always against a verified-correct agent/URL.
 Prefer the **`/deploy-prompt`** skill for day-to-day use; it wraps the tool with
 the sync-check gate, snapshots, diffs, confirmation, and read-back verification.
 
+## ⚠️ CAUTION — do NOT edit/reload/save the Raya console for these agents
+
+Raya's **read path is broken/flaky**: the public `GET /api/agent/{id}` and the
+console's on-load fetch often return **empty** instructions, so the console editor
+falls back to its default **`"You are a helpful assistant"`** placeholder.
+
+- **Reloading or opening an agent in the console, then Save (or an auto-save), OVERWRITES the live prompt with that placeholder — wiping it.** This happened once: maya-hi-in was clobbered to `"You are a helpful assistant"` on 2026-07-20 after a console reload, and was restored with `scripts/raya_deploy.py deploy maya-hi-in --yes`.
+- **Never open, reload, or Save the Raya console for these agents while the read is broken.** Treat the console as display-only-and-unreliable.
+- **Deploy ONLY via the API PATCH** (`scripts/raya_deploy.py` / `/deploy-prompt`). PATCH *writes* reliably and self-verifies via the PATCH **response echo**; when GET happens to return content, the tool's `diff: none — remote already matches local` is a bonus positive confirmation.
+- **Recover a wiped agent:** `python3 scripts/raya_deploy.py deploy <target> --yes` re-asserts the repo prompt. `deploy --all` (or per-target) re-asserts everything.
+- **Output prompt** deploys via the `output_instructions` field (also PATCH-able — same tool pattern). **Memory prompt** has *no* API field — it is a manual platform step, and the console is equally unreliable for it, so avoid touching it there too.
+
 ## Files
 
 | File | Tracked? | What |
