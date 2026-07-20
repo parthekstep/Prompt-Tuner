@@ -30,3 +30,8 @@
 - **2026-07-20_103540** — `pre-deploy-kkb-kn-out-2026-07-20_103540` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(6 files)_
 - **2026-07-20_103541** — `pre-deploy-kkb-hi-in-2026-07-20_103541` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(6 files)_
 - **2026-07-20_103542** — `pre-deploy-kkb-kn-in-2026-07-20_103542` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(6 files)_
+- **2026-07-20_134345** — `pre-rich-apply-failure` — richer Apply Failure Handling: own the failure, HR/alt-job/callback paths, hard bans _(6 files)_
+- **2026-07-20_134756** — `pre-deploy-kkb-hi-out-2026-07-20_134756` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi.md _(6 files)_
+- **2026-07-20_134758** — `pre-deploy-kkb-kn-out-2026-07-20_134758` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(6 files)_
+- **2026-07-20_134800** — `pre-deploy-kkb-hi-in-2026-07-20_134800` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(6 files)_
+- **2026-07-20_134802** — `pre-deploy-kkb-kn-in-2026-07-20_134802` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(6 files)_

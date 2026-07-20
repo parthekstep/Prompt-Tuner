@@ -255,6 +255,13 @@ override it. Always check *why the rule would fail*, not just whether it exists.
 - **Fix direction:** add a "Yes/No Gate Capture" section listing the gates and requiring register-before-advance + one re-ask on no-clear-response.
 - **Seen in:** DKB (calls 2465759, 3663530, 3664822), 2026-07-20.
 
+### D15 — Apply failure dead-ends the seeker (no recovery, or burden shifted to them)
+- **Symptom:** on an `apply_job` error the bot only says "couldn't apply, try again / see another" and often ends the call — or says "call us back later" / blames the seeker's phone or network. A seeker who chose to apply leaves with nothing.
+- **Root cause:** Apply Failure Handling is a single line with no recovery path and no ownership of the (our-side, technical) failure.
+- **Detection:** the Apply Failure Handling section must (a) own the failure as technical/our-side and note the interest, (b) offer exactly ONE recovery path — share `hr_contact` if the job has it, else offer ONE alternate job (not a batch of three, never the same failed job), else promise a callback with NO committed time, (c) hard-ban over-apology, blaming the seeker, "call later", and looping to a third apply, and (d) log the failure system-side without narrating it. A bare "apply failed, retry?" line = flag.
+- **Fix direction:** replace with the multi-path recovery block (HR-contact / one alternate job / callback + hard bans + logging note). On seeker bots that have MPL (Maya), fold the one MPL offer into the alternate-job path on the first apply.
+- **Seen in:** all seeker bots (KKB out/in H+K, Maya out+in), 2026-07-20. Ties to the recurring backend `apply_failed`.
+
 ---
 
 ## E. Examples, consent & standing rules

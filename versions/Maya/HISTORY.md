@@ -37,3 +37,6 @@
 - **2026-07-20_113459** — `pre-deploy-maya-hi-out-2026-07-20_113459` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_
 - **2026-07-20_123639** — `pre-deploy-maya-hi-in-2026-07-20_123639` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(4 files)_
 - **2026-07-20_123819** — `pre-deploy-maya-hi-out-2026-07-20_123819` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_
+- **2026-07-20_134345** — `pre-rich-apply-failure` — richer Apply Failure Handling + MPL fold in alt-job path _(4 files)_
+- **2026-07-20_134803** — `pre-deploy-maya-hi-out-2026-07-20_134803` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_
+- **2026-07-20_134804** — `pre-deploy-maya-hi-in-2026-07-20_134804` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(4 files)_
