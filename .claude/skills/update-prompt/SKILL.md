@@ -18,6 +18,14 @@ AGNOSTIC / SPECIFIC / MIXED tags, and the Hindi→Kannada localization conventio
 
 ## Procedure (update)
 
+**Reconcile against live FIRST — before step 0.** The live Raya agent can be AHEAD of the repo (the
+team edits it directly — e.g. the real job inventory / `job_id`s). Run `scripts/raya_deploy.py diff
+<agent-target>` (or `/raya-reconcile` if GET is flaky/empty). If **Raya is ahead**, adopt the live prompt
+into the repo with `scripts/raya_deploy.py pull <agent-target>` and commit that reconciliation BEFORE
+editing — never edit a repo file that is behind live (you would clobber live-only content, e.g. overwrite
+a real job inventory with placeholders). `deploy` also refuses any prompt still carrying placeholder
+`job_id`s / a `[PLACEHOLDER]` flag. See `raya/README.md → Reconcile-before-fix`.
+
 0. **Snapshot first (rollback safety).** Before editing, checkpoint the target agent:
    `scripts/prompt-version.sh save <agent> pre-<short-change-slug> "<one-line why>"`. This
    captures the current stable files so any edit is instantly reversible via

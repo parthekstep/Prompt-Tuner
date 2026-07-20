@@ -524,6 +524,19 @@ def deploy_one(row, endpoints, env, base, headers, token, args):
         die("target '%s' has no raya_agent_id for env '%s' — fill agents.json." % (row["id"], env_name))
 
     local = read_local(row)
+
+    # 1a. Placeholder guardrail — NEVER push sample/placeholder job data to a live agent.
+    #     The real job inventory may be maintained ON the live agent (the team edits it there),
+    #     so a repo file still carrying placeholder job_ids means WE are behind — reconcile first.
+    _ph_ids = [v for v in re.findall(r'"job_id"\s*:\s*"([^"]*)"', local) if "00000000" in v]
+    _ph_flag = "PLACEHOLDER SAMPLE DATA" in local
+    if _ph_ids or _ph_flag:
+        die("REFUSING to deploy %s — local prompt still carries %d placeholder job_id(s)%s.\n"
+            "The REAL job inventory was likely updated on the live agent (it is AHEAD). Reconcile "
+            "the real inventory into %s first (pull the live prompt), then deploy.\n"
+            "See raya/README.md -> 'Reconcile-before-fix'."
+            % (row["id"], len(_ph_ids), " + a [PLACEHOLDER SAMPLE DATA] flag" if _ph_flag else "", row["file"]))
+
     max_bytes = endpoints.get("request", {}).get("max_prompt_bytes")
     llen, lsha = fingerprint(local)
     if max_bytes and llen > max_bytes:
@@ -667,6 +680,63 @@ def cmd_reconcile(args, endpoints, env):
     print("\n".join(diff))
 
 
+def cmd_pull(args, endpoints, env):
+    """Consume the LIVE prompt into the repo file — reconcile when Raya is AHEAD (e.g. the real job
+    inventory / job_ids were updated directly on the console, independent of us).
+
+    GET is flaky, so this is defensive: require TWO agreeing reads; reject the empty / 'helpful
+    assistant' default and implausibly-small reads; snapshot the repo file first (reversible).
+    After pulling, review `git diff`, commit the reconciliation, THEN apply any fix on top."""
+    base = base_url_or_die(env)
+    headers, token = auth_header(endpoints, env)
+    targets = load_targets()
+    rows = resolve_selector(targets, args.target)
+    if len(rows) != 1:
+        die("pull takes exactly one target; '%s' matched %d (%s)"
+            % (args.target, len(rows), ", ".join(r["id"] for r in rows)))
+    row = rows[0]
+    _, _, live1, name1 = fetch_remote(base, endpoints, env, headers, token, row)
+    _, _, live2, _ = fetch_remote(base, endpoints, env, headers, token, row)
+    if not live1 or not live2:
+        die("GET returned no prompt for %s — cannot pull (read path still broken)." % row["id"])
+    if normalize(live1) != normalize(live2):
+        die("GET is UNSTABLE for %s — two reads differ (%d vs %d bytes). Refusing to pull a flaky read; "
+            "retry, or use the browser /raya-reconcile path."
+            % (row["id"], fingerprint(live1)[0], fingerprint(live2)[0]))
+    live = normalize(live1)
+    if live in ("", "You are a helpful assistant"):
+        die("GET returned the empty/default placeholder for %s — refusing to pull (would wipe the prompt)." % row["id"])
+    repo = read_local(row)
+    rlen, rsha = fingerprint(repo)
+    llen, lsha = fingerprint(live)
+    if llen < max(2000, rlen // 2):
+        die("live prompt for %s is implausibly small (%d bytes vs repo %d) — refusing to pull." % (row["id"], llen, rlen))
+    print("target:    %s  (raya: %s)" % (row["id"], name1 or "?"))
+    print("live:      %d bytes  sha256:%s  (stable across 2 GETs)" % (llen, lsha))
+    print("repo:      %d bytes  sha256:%s   %s" % (rlen, rsha, row["file"]))
+    if normalize(repo) == live:
+        print("\nIN SYNC — live already matches the repo. Nothing to pull.")
+        return
+    ph_live = [v for v in re.findall(r'"job_id"\s*:\s*"([^"]*)"', live) if "00000000" in v]
+    if ph_live:
+        print("WARNING: the LIVE prompt ALSO carries %d placeholder job_id(s) — the live agent is not the real "
+              "inventory either. Pulling will not fix apply; get the real inventory from the team." % len(ph_live))
+    if getattr(args, "dry_run", False):
+        import difflib
+        diff = list(difflib.unified_diff(repo.splitlines(), live.splitlines(),
+                    fromfile="repo:%s" % row["file"], tofile="live:%s" % row["id"], lineterm=""))
+        sys.stdout.write("\n".join(diff[:400]))
+        if len(diff) > 400:
+            print("\n... (%d more diff lines)" % (len(diff) - 400))
+        print("\nDRY RUN: not written. Re-run without --dry-run to adopt the live prompt into %s." % row["file"])
+        return
+    label = snapshot_local(row)
+    print("snapshot:  %s (rollback: scripts/prompt-version.sh restore %s %s)" % (label, row["agent"], label))
+    with open(os.path.join(REPO_ROOT, row["file"]), "w", encoding="utf-8") as fh:
+        fh.write(live + "\n")
+    print("PULLED live -> %s (%d bytes). Review `git diff`, commit the reconciliation, THEN apply fixes on top." % (row["file"], llen))
+
+
 # ----------------------------------------------------------------------------- cli
 
 def build_parser():
@@ -701,6 +771,10 @@ def build_parser():
     p_recon = sub.add_parser("reconcile", help="diff a downloaded live prompt vs the repo file (who is ahead?)")
     p_recon.add_argument("target", help="target id / file / agent[:lang][:dir]")
     p_recon.add_argument("--live", help="path to the downloaded live prompt (default: newest ~/Downloads/raya-live-<target>*.md)")
+
+    p_pull = sub.add_parser("pull", help="consume the LIVE prompt into the repo file (reconcile when Raya is ahead)")
+    p_pull.add_argument("target", help="target id / file / agent[:lang][:dir]")
+    p_pull.add_argument("--dry-run", action="store_true", help="show the diff; do not write the repo file")
     return parser
 
 
@@ -720,6 +794,7 @@ def main(argv):
         "status": cmd_status,
         "deploy": cmd_deploy,
         "reconcile": cmd_reconcile,
+        "pull": cmd_pull,
     }
     handlers[args.cmd](args, endpoints, env)
 

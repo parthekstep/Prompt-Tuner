@@ -177,8 +177,13 @@ The prompts run on **Raya Voice AI** (LitWiz Labs). Config + tooling live in `ra
   response — Raya's GET returns empty instructions, so never trust a GET for the live content.
   Each agent's uuid is in `raya/agents.json`; deploys are recorded in `raya/deploy-history.md`.
   Secrets (base URL + token) live in git-ignored `raya/.env`.
-- **Reconcile** live vs repo before editing with `/raya-reconcile` (browser sha-boolean, since
-  the API can't read instructions back). If Raya is ahead, pull live into the repo first.
+- **Reconcile BEFORE every edit** (mandatory — the live agent can be AHEAD; the team maintains the
+  real job inventory / `job_id`s directly on the console). `scripts/raya_deploy.py diff <target>` shows
+  who's ahead (GET now reads most conversation prompts; if flaky/empty, use `/raya-reconcile`'s browser
+  sha-boolean). If Raya is ahead, adopt live into the repo with `scripts/raya_deploy.py pull <target>`
+  (two agreeing GETs, snapshots first) and commit it BEFORE editing — never edit a repo file behind live,
+  or you clobber live-only content (e.g. overwrite a real inventory with placeholders → `apply_failed`).
+  `deploy` refuses any prompt still carrying placeholder `job_id`s / a `[PLACEHOLDER SAMPLE DATA]` flag.
 - **Feedback loop** (`/bug-fix`): read the Consolidated Feedback Tracker (Google Sheet) via
   `scripts/gsheets.py` (service-account Sheets R/W), pick OPEN issues, temporal-check them
   against the changelog, ground each in the real Raya call transcript

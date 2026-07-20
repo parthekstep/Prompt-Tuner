@@ -19,6 +19,17 @@ falls back to its default **`"You are a helpful assistant"`** placeholder.
 - **Recover a wiped agent:** `python3 scripts/raya_deploy.py deploy <target> --yes` re-asserts the repo prompt. `deploy --all` (or per-target) re-asserts everything.
 - **Output prompt** deploys via the `output_instructions` field (also PATCH-able — same tool pattern). **Memory prompt** has *no* API field — it is a manual platform step, and the console is equally unreliable for it, so avoid touching it there too.
 
+## Reconcile-before-fix (the live agent can be AHEAD of the repo)
+
+The team edits some things directly on the live console — most importantly the **real job inventory / `job_id`s** for the inbound agents (KKB/Maya Inbound), which is not a dependency on us. That makes the LIVE agent ahead of the repo. If you edit + deploy the repo blindly, you overwrite that live-only content — this is exactly how the real Maya Inbound inventory got replaced with placeholder `job_id`s, so every `apply_job` failed.
+
+**Before ANY prompt change, reconcile first:**
+1. `python3 scripts/raya_deploy.py diff <target>` — who is ahead? (GET now reads most conversation prompts; if it's flaky/empty, use `/raya-reconcile` via the browser.)
+2. If **Raya is ahead**, adopt the live prompt into the repo: `python3 scripts/raya_deploy.py pull <target>` — it requires TWO agreeing GETs, rejects the empty / `"You are a helpful assistant"` default and implausibly-small reads, snapshots the repo file first, then writes live → repo. Review `git diff`, commit the reconciliation.
+3. Only THEN apply your fix on top of the reconciled base, and deploy.
+
+**Guardrail:** `deploy` **refuses** to push any prompt still carrying placeholder `job_id`s (`…000000000NNN`) or a `[PLACEHOLDER SAMPLE DATA]` flag — so a stale/sample inventory can never overwrite the real one. If you hit that refusal, `pull` the real inventory first.
+
 ## Files
 
 | File | Tracked? | What |

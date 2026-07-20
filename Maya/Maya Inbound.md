@@ -94,163 +94,243 @@ benefits      — (optional) non-monetary perks such as PF, insurance, incentive
 
 # Job Inventory (Internal — Hardcoded)
 
-> **[FLAG — PLACEHOLDER SAMPLE DATA]** The list below is **sample data** for wiring and testing only. **Replace it with the real, current UP-graduate listings before this agent goes live.** Do not present any job not listed here. Same presentation rules, field rules, and hallucination guard apply as in the outbound version.
+> **[LIVE JOB INVENTORY — reconciled from the Raya console 2026-07-20]** The list below is the **real, current** UP-graduate inventory with real `job_id`s (pulled from the live agent, which the team maintains directly). Do not present any job not listed here. Keep the `job_id`s exact — they are passed to `apply_job`. Same presentation rules, field rules, and hallucination guard apply as in the outbound version. When the team updates jobs on the live console, re-reconcile with `scripts/raya_deploy.py pull maya-hi-in` before editing.
 
 ```json
 [
   {
-    "job_id": "a1f0c2d1-1001-4a11-9c01-000000000001",
-    "role": "Data Entry Operator",
-    "company": "Aarav Tech Services",
-    "qualification": "बारहवीं पास और बेसिक कंप्यूटर",
-    "salary": "14000-17000",
-    "vacancy": "5",
-    "location": "Sector 62, Noida",
-    "hr_contact": "",
-    "benefits": ""
+    "job_id": "c7927f97-8e61-4a01-a617-3779f2e17cdb",
+    "role": "Tele Marketing Female",
+    "company": "GLOBAL CHEMICALS",
+    "qualification": "Graduation",
+    "salary": "20000-25000",
+    "vacancy": 3,
+    "location": "Udyog Kunj Industrial Area, Ghaziabad"
   },
   {
-    "job_id": "a1f0c2d1-1002-4a11-9c01-000000000002",
-    "role": "Data Entry Operator",
-    "company": "Zenith BPO Solutions",
-    "qualification": "कोई भी ग्रेजुएट",
-    "salary": "15000-18000",
-    "vacancy": "8",
-    "location": "Sector 63, Noida",
-    "hr_contact": "",
-    "benefits": "पी एफ, ई एस आई"
+    "job_id": "359e9156-bf23-4655-9fad-1cc764bb59ba",
+    "role": "Supervisor",
+    "company": "MAHARAJA ENGINEERING WORKS",
+    "qualification": "Engineering or BBA",
+    "salary": "20000",
+    "vacancy": 2,
+    "location": "Harsa Industrial Area, Ghaziabad"
   },
   {
-    "job_id": "a1f0c2d1-1003-4a11-9c01-000000000003",
+    "job_id": "d082a471-c8ba-4822-8f05-3f5114bf110d",
+    "role": "Marketing",
+    "company": "SARA ENTERPRISES",
+    "qualification": "1-2 years experience (Private trading preferred)",
+    "salary": "20000-25000",
+    "vacancy": 2,
+    "location": "Mukand Nagri, Ghaziabad"
+  },
+  {
+    "job_id": "777e5dc5-5835-4e5f-93f3-6c032bfd0458",
+    "role": "Commercial Manager",
+    "company": "GREY FASHION PRIVATE LIMITED",
+    "qualification": "12th pass",
+    "salary": "20000-25000",
+    "vacancy": 2,
+    "location": "Rajeev Nagar, Bhopura, Ghaziabad"
+  },
+  {
+    "job_id": "ce9fbbcb-d52b-418c-b708-86887116c3f3",
+    "role": "Tele Salesperson",
+    "company": "QUESS CORP LTD.",
+    "qualification": "12th",
+    "salary": "20000",
+    "vacancy": 100,
+    "location": "Ghaziabad, Uttar Pradesh"
+  },
+  {
+    "job_id": "a8155bee-0996-438e-92a5-58ac2848eee6",
+    "role": "Field Salesperson",
+    "company": "Shree Krishna Industrie",
+    "qualification": "12th Pass",
+    "salary": "15000 to 20000",
+    "vacancy": 2,
+    "location": "Tronica City, Ghaziabad"
+  },
+  {
+    "job_id": "9a8687b5-3c93-40e0-9fb6-19256050c978",
+    "role": "Account Assistant",
+    "company": "A.D. INDUSTRIES",
+    "qualification": "2 years experience in accounts and computer proficiency",
+    "salary": "15000-17000",
+    "vacancy": 1,
+    "location": "Muradnagar, Ghaziabad"
+  },
+  {
+    "job_id": "518644ae-0676-4560-827c-85ad4009df6f",
+    "role": "Cashier & Packer",
+    "company": "QUESS CORP LTD.",
+    "qualification": "12th",
+    "salary": "13000 - 18000",
+    "vacancy": 100,
+    "location": "Wave City, Ghaziabad"
+  },
+  {
+    "job_id": "2f803696-403f-4386-963a-8a36d819b497",
+    "role": "Sales Representative",
+    "company": "Westside",
+    "qualification": "12th",
+    "salary": "12000 - 16000",
+    "vacancy": 10,
+    "location": "Shipra Mall, Indirapuram, Ghaziabad"
+  },
+  {
+    "job_id": "e6fafabf-9cd4-4a04-9984-a6bda71d5c87",
+    "role": "In Store Promoter",
+    "company": "QUESS CORP LTD.",
+    "qualification": "12th",
+    "salary": "13000",
+    "vacancy": 100,
+    "location": "Ghaziabad, Uttar Pradesh"
+  },
+  {
+    "job_id": "5bac06a9-1b2a-40d8-8256-fb1fb3d5df36",
+    "role": "Team member",
+    "company": "BURGER KING",
+    "qualification": "12th",
+    "salary": "13000 - 15000",
+    "vacancy": 10,
+    "location": "Opulent Mall, Nehru Nagar, Ghaziabad"
+  },
+  {
+    "job_id": "d0864e33-edc8-42ba-8a0a-eb4353ff0806",
+    "role": "Crew Member - McDonald's",
+    "company": "McDonald's",
+    "qualification": "12th",
+    "salary": "13000 - 15000",
+    "vacancy": 15,
+    "location": "Padmana Naidu Marg, Indirapuram, Ghaziabad"
+  },
+  {
+    "job_id": "b256308a-f1f5-4b50-8ce2-87ecf20d2ef7",
+    "role": "Crew Member - McDonald's",
+    "company": "McDonald's",
+    "qualification": "12th",
+    "salary": "13000 - 15000",
+    "vacancy": 10,
+    "location": "Opulent Mall, Nehru Nagar, Ghaziabad"
+  },
+  {
+    "job_id": "af81c643-d750-4a72-9370-cd16f9bd336a",
+    "role": "Crew Member - McDonald's",
+    "company": "McDonald's",
+    "qualification": "12th",
+    "salary": "13000 - 15000",
+    "vacancy": 10,
+    "location": "Raj Nagar Extension, Ghaziabad"
+  },
+  {
+    "job_id": "699304e1-b44a-45fe-9917-445f010aa598",
+    "role": "Crew Member - McDonald's",
+    "company": "McDonald's",
+    "qualification": "12th",
+    "salary": "13000 - 15000",
+    "vacancy": 9,
+    "location": "Shipra Mall, Indirapuram, Ghaziabad"
+  },
+  {
+    "job_id": "c9857e06-7c84-45e2-9a90-9295c71118b6",
+    "role": "Crew Member - McDonald's",
+    "company": "McDonald's",
+    "qualification": "12th",
+    "salary": "13000 - 15000",
+    "vacancy": 10,
+    "location": "Padmana Naidu Marg, Indirapuram, Ghaziabad"
+  },
+  {
+    "job_id": "6ba92afd-c299-4006-a26c-edce9089f1bb",
+    "role": "Fashion assistant",
+    "company": "Pantaloons",
+    "qualification": "12th",
+    "salary": "12000 - 14000",
+    "vacancy": 10,
+    "location": "Crossings Republik, Ghaziabad"
+  },
+  {
+    "job_id": "ea9efcfb-5977-428e-845e-e0218624100e",
+    "role": "Store Keeper",
+    "company": "MUKUT LAL PRADEEP KUMAR",
+    "qualification": "10th class, English knowing",
+    "salary": "12000",
+    "vacancy": 2,
+    "location": "Kirana Mandi, Ghaziabad"
+  },
+  {
+    "job_id": "d303ceb5-615f-4504-b98d-9c138265a99e",
+    "role": "Cashier",
+    "company": "CIEL- HR",
+    "qualification": "12th",
+    "salary": "14000 - 17000",
+    "vacancy": 15,
+    "location": "Knowledge Park II, Greater Noida"
+  },
+  {
+    "job_id": "eab4805a-7d5f-4bf2-b1a9-1fd34521550d",
     "role": "Customer Support Executive",
-    "company": "Brightline BPO",
-    "qualification": "बारहवीं पास",
-    "salary": "16000-20000",
-    "vacancy": "20",
-    "location": "Sector 16, Noida",
-    "hr_contact": "",
-    "benefits": ""
+    "company": "CY FUTURE",
+    "qualification": "12th",
+    "salary": "15000 - 18000",
+    "vacancy": 200,
+    "location": "Noida SEZ, Phase-2, Noida"
   },
   {
-    "job_id": "a1f0c2d1-1004-4a11-9c01-000000000004",
+    "job_id": "d5541f24-6efb-4034-80ce-e2b450a904a6",
     "role": "Customer Support Executive",
-    "company": "Nova Financial Services",
-    "qualification": "ग्रेजुएट",
-    "salary": "15000-19000",
-    "vacancy": "15",
-    "location": "Vaishali, Ghaziabad",
-    "hr_contact": "9876543210",
-    "benefits": "पी एफ, इंश्योरेंस"
+    "company": "CY FUTURE",
+    "qualification": "12th",
+    "salary": "15000 - 17000",
+    "vacancy": 200,
+    "location": "Sector 81, Noida"
   },
   {
-    "job_id": "a1f0c2d1-1005-4a11-9c01-000000000005",
-    "role": "Telecaller",
-    "company": "Nova Financial Services",
-    "qualification": "बारहवीं पास",
-    "salary": "12000-15000",
-    "vacancy": "25",
-    "location": "Indirapuram, Ghaziabad",
-    "hr_contact": "",
-    "benefits": ""
+    "job_id": "ce71969f-e364-4da1-a025-8ba1db33940e",
+    "role": "Team member",
+    "company": "BURGER KING",
+    "qualification": "12th",
+    "salary": "13000 - 15000",
+    "vacancy": 10,
+    "location": "Raj Nagar Extension, Noida"
   },
   {
-    "job_id": "a1f0c2d1-1006-4a11-9c01-000000000006",
-    "role": "Telecaller",
-    "company": "Shakti Insurance",
-    "qualification": "कोई भी",
-    "salary": "13000-16000",
-    "vacancy": "30",
-    "location": "Raj Nagar Extension, Ghaziabad",
-    "hr_contact": "",
-    "benefits": ""
+    "job_id": "ed12aa84-6c8a-48a7-b69e-ff95c15a5b1b",
+    "role": "Customer Service Executive",
+    "company": "Weavings Manpower Solution Pvt Ltd",
+    "qualification": "12th",
+    "salary": "12000 - 14000",
+    "vacancy": 50,
+    "location": "Noida, Uttar Pradesh"
   },
   {
-    "job_id": "a1f0c2d1-1007-4a11-9c01-000000000007",
-    "role": "Back Office Executive",
-    "company": "Meridian Solutions",
-    "qualification": "ग्रेजुएट",
-    "salary": "14000-18000",
-    "vacancy": "10",
-    "location": "Sector 2, Noida",
-    "hr_contact": "",
-    "benefits": ""
-  },
-  {
-    "job_id": "a1f0c2d1-1008-4a11-9c01-000000000008",
-    "role": "Back Office Assistant",
-    "company": "Orbit Enterprises",
-    "qualification": "बारहवीं पास",
-    "salary": "13000-16000",
-    "vacancy": "12",
-    "location": "Knowledge Park II, Greater Noida",
-    "hr_contact": "",
-    "benefits": ""
-  },
-  {
-    "job_id": "a1f0c2d1-1009-4a11-9c01-000000000009",
-    "role": "Sales Executive",
-    "company": "Pinnacle Retail",
-    "qualification": "ग्रेजुएट",
-    "salary": "15000-25000",
-    "vacancy": "20",
-    "location": "Gomti Nagar, Lucknow",
-    "hr_contact": "9812345678",
-    "benefits": "इंसेंटिव, ट्रैवल अलाउंस"
-  },
-  {
-    "job_id": "a1f0c2d1-1010-4a11-9c01-000000000010",
-    "role": "Field Sales Executive",
+    "job_id": "408bcaa2-20ba-49cc-bad5-cf95db6ebc71",
+    "role": "Sales Representative",
     "company": "Pukhraj Health Care",
-    "qualification": "कोई भी ग्रेजुएट",
-    "salary": "14000-22000",
-    "vacancy": "40",
-    "location": "Hazratganj, Lucknow",
-    "hr_contact": "",
-    "benefits": "इंसेंटिव"
+    "qualification": "12th",
+    "salary": "12500 - 25000",
+    "vacancy": 50,
+    "location": "Meerut, Uttar Pradesh"
   },
   {
-    "job_id": "a1f0c2d1-1011-4a11-9c01-000000000011",
-    "role": "Digital Marketing Executive",
-    "company": "WebGrowth Media",
-    "qualification": "ग्रेजुएट और बेसिक कंप्यूटर",
-    "salary": "18000-24000",
-    "vacancy": "6",
-    "location": "Sector 63, Noida",
-    "hr_contact": "",
-    "benefits": ""
+    "job_id": "87f06564-3e13-4626-8e0a-df6ffa558bc0",
+    "role": "Packing (Logistics Warehouse)",
+    "company": "Adecco India Pvt. Ltd",
+    "qualification": "Minimum 10th pass; able to read and write",
+    "salary": "15000 - 17000",
+    "vacancy": 200,
+    "location": "Dadri, Uttar Pradesh"
   },
   {
-    "job_id": "a1f0c2d1-1012-4a11-9c01-000000000012",
-    "role": "Digital Marketing Trainee",
-    "company": "WebGrowth Media",
-    "qualification": "ग्रेजुएट",
-    "salary": "15000-18000",
-    "vacancy": "10",
-    "location": "Sector 63, Noida",
-    "hr_contact": "",
-    "benefits": "ट्रेनिंग के साथ"
-  },
-  {
-    "job_id": "a1f0c2d1-1013-4a11-9c01-000000000013",
-    "role": "Accounts Assistant",
-    "company": "Sharma and Associates",
-    "qualification": "बी कॉम",
-    "salary": "16000-20000",
-    "vacancy": "4",
-    "location": "Civil Lines, Kanpur",
-    "hr_contact": "",
-    "benefits": ""
-  },
-  {
-    "job_id": "a1f0c2d1-1014-4a11-9c01-000000000014",
-    "role": "BPO Voice Process",
-    "company": "CY Future",
-    "qualification": "बारहवीं पास",
-    "salary": "15000-18000",
-    "vacancy": "50",
-    "location": "Sector 81, Noida",
-    "hr_contact": "",
-    "benefits": "पी एफ, कैब सुविधा"
+    "job_id": "220a677a-4754-4275-8490-3d33b8204ba8",
+    "role": "Field Salesperson",
+    "company": "Rishabh Packaging Industries",
+    "qualification": "No minimum qualification required",
+    "salary": "Incentive based",
+    "vacancy": 1,
+    "location": "Konika City, Sadabad Durgavali"
   }
 ]
 ```
