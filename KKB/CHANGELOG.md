@@ -12,6 +12,11 @@ Every prompt edit to KKB is logged here. Entry format:
 
 ---
 
+## 2026-07-20 — KKB seeker gates round 2b: proxy carve-out + new-caller multi-apply
+- **Feedback/bug:** Adversarial review of the round-2 age/gender-lock fix flagged two residual issues across all KKB seeker files. (1) The lock was absolute, so a proxy caller switching to a different candidate mid-call would carry the first person's age/gender onto the second. (2) A brand-new caller applying to a 2nd job in one call would re-run `create_profile` (duplicate profile) + re-ask name/experience.
+- **Change:** (1) Scoped the lock to the SAME candidate — a proxy switching to a different person re-establishes age/gender. (2) Added a once-per-call `create_profile` guard — after the first mint, a later apply reuses the returned `profile_id` via `apply_job` only. (Analyser D9 refined, D11 added.)
+- **Files:** KKB Placeholder Hindi.md, KKB Placeholder Kannada.md, KKB Placeholder Inbound.md, KKB Placeholder Inbound Kannada.md
+
 ## 2026-07-20 — Age/gender lock persists across every apply (round 2, all KKB seeker gates)
 - **Feedback/bug:** The round-1 profile re-check held on the first apply but was proven (on Maya Inbound) to fail on a SECOND apply in the same call — the skip was a per-gate re-derivation, not a persisted fact. Same weakness in all KKB seeker files.
 - **Change:** Locked the profile's known fields (esp. age/gender) the moment `get_profile` returns — the lock does NOT reset between applications — and strengthened the HARD BLOCK so the KNOWN status persists across every apply in the call. (Analyser class D9 strengthened.)

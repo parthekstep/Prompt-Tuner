@@ -14,3 +14,6 @@
 - **2026-07-20_092807** — `pre-mpl-push-agefix-r2` — strengthen MPL proactive push + age/gender lock across applies _(4 files)_
 - **2026-07-20_093509** — `pre-deploy-maya-hi-out-2026-07-20_093509` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_
 - **2026-07-20_093510** — `pre-deploy-maya-hi-in-2026-07-20_093510` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(4 files)_
+- **2026-07-20_094438** — `pre-followups-r2b` — in-a-hurry MPL skip + proxy carve-out + new-caller multi-apply _(4 files)_
+- **2026-07-20_094825** — `pre-deploy-maya-hi-out-2026-07-20_094825` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_
+- **2026-07-20_094825** — `pre-deploy-maya-hi-in-2026-07-20_094825` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(4 files)_

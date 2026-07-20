@@ -12,6 +12,11 @@ Every prompt edit to Maya is logged here. Maya is Hindi-only (KKB spinoff). Entr
 
 ---
 
+## 2026-07-20 — Maya (in+out) round 2b: proxy carve-out, new-caller multi-apply, MPL 'in a hurry'
+- **Feedback/bug:** Adversarial review of the round-2 fixes flagged three residual issues. (1) The age/gender lock was absolute, so a proxy caller switching to a different candidate mid-call would put the first person's age/gender on the second. (2) A brand-new caller applying to a 2nd job in one call would re-run `create_profile` (duplicate profile) + re-ask name/experience. (3) The Graceful Exit MPL backstop's skip-list omitted "clearly in a hurry" (present in the MPL section), so a hurried caller could be pushed MPL at goodbye.
+- **Change:** (1) Scoped the lock to the SAME candidate — a proxy switching to a different person re-establishes age/gender. (2) Added a once-per-call `create_profile` guard — after the first mint, a later apply reuses the returned `profile_id` via `apply_job` only, no duplicate create, no re-ask. (3) Added "is clearly in a hurry" to the Graceful Exit skip-list. (Analyser D9 refined, D11 added, D10 refined.)
+- **Files:** Maya Inbound.md, Maya Hindi.md
+
 ## 2026-07-20 — Maya (in+out) round 2: age/gender lock across repeat applies + MPL proactive push
 - **Feedback/bug:** Live re-test of Maya Inbound after round-1 fixes. (1) Age/gender were correctly skipped on the FIRST apply but re-asked on a SECOND apply in the same call — the profile re-check wasn't persisted, so the gate re-derived from scratch and missed. (2) MPL was still not pushed proactively: the bot sat in the apply-failure "retry or another job?" loop and only offered MPL when the caller explicitly asked ("koi competition?"), never on its own.
 - **Change:** (1) Locked the profile's known fields (esp. age/gender) the moment `get_profile` returns and stated the lock does NOT reset between applications; strengthened the HARD BLOCK so the KNOWN status persists across every apply in the call. (2) Rewrote MPL "When to offer" as a PROACTIVE push covering apply success OR failure + caller-declines-more-jobs, explicitly "don't wait to be asked"; added a pointer from Apply-Failure Handling into the MPL push before Graceful Exit. (Analyser D9 + D10 strengthened.)

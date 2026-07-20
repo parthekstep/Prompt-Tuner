@@ -15,3 +15,8 @@
 - **2026-07-20_093508** — `pre-deploy-kkb-kn-out-2026-07-20_093508` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(6 files)_
 - **2026-07-20_093508** — `pre-deploy-kkb-hi-in-2026-07-20_093508` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(6 files)_
 - **2026-07-20_093509** — `pre-deploy-kkb-kn-in-2026-07-20_093509` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(6 files)_
+- **2026-07-20_094438** — `pre-followups-r2b` — proxy carve-out + new-caller multi-apply parity _(6 files)_
+- **2026-07-20_094822** — `pre-deploy-kkb-hi-out-2026-07-20_094822` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi.md _(6 files)_
+- **2026-07-20_094823** — `pre-deploy-kkb-kn-out-2026-07-20_094823` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(6 files)_
+- **2026-07-20_094823** — `pre-deploy-kkb-hi-in-2026-07-20_094823` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(6 files)_
+- **2026-07-20_094824** — `pre-deploy-kkb-kn-in-2026-07-20_094824` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(6 files)_
