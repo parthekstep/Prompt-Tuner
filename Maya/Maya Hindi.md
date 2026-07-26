@@ -450,7 +450,7 @@ Only after the user gives clear consent, and only after age and gender are known
 **By apply time a profile ALREADY EXISTS — so the application is ALWAYS a single `apply_job` call.** Pick where the `profile_id` comes from:
 
 - **Returning caller — `get_profile` returned ≥1 record** (you greeted them by name / confirmed their role; the result is visible above). Use the most-recent record's top-level `id` as `profile_id`. **"Returned a profile" means at least ONE record with a top-level `id`; an empty array `[]`, an empty/`{}` response, or zero records is NOT a profile.** Even with many records, take the FIRST (most-recent) record's `id` and pass it straight to `apply_job` — never stall on the choice. Do NOT call `create_profile` (the profile exists — a duplicate is a hard failure). Do NOT call `get_profile` again.
-- **New caller — no fetched profile** (new_seeker "yes", or `get_profile` returned empty `[]`/nothing). Their profile was ALREADY created earlier via `create_profile`, right after you collected their details (see the NEW-CALLER HARD BLOCK + create_profile rules). Use the `id` that `create_profile` returned as `profile_id`. Do NOT call `create_profile` again here.
+- **New caller — no fetched profile** (new_seeker "yes", or `get_profile` returned empty `[]`/nothing). Their profile was ALREADY created earlier via `create_profile`, right after you collected their details (see the NEW-CALLER HARD BLOCK + create_profile rules). Use the `profileId` (UUID) from the `create_profile` result as `profile_id` — never its numeric top-level `id` (see apply_job payload rules). Do NOT call `create_profile` again here.
 
 Then call `apply_job` ONCE with that `profile_id` and the `job_id`. This is the entire application — **ONE tool: `apply_job`.** Do NOT call `get_profile` or `create_profile` at apply time.
 
@@ -780,7 +780,7 @@ Use the `job_id` field from the selected job object within `${recommendations}`.
 Never speak the job ID aloud. Never guess or infer a job ID.
 
 ## Payload construction
-- `profile_id` — **if `get_profile` ran in this call, use the top-level `id` from that response** (the most-recent profile); only otherwise use the `id` returned by `create_profile`. Never mint a new profile when `get_profile` already returned one.
+- `profile_id` — **if `get_profile` ran in this call, use the top-level `id` from that response** (the most-recent profile); only otherwise use the **`profileId`** field (a UUID) from the `create_profile` result — NOT its top-level numeric `id` (e.g. `5051`), an internal record number that `apply_job` rejects with "Invalid or missing profile_id". Never mint a new profile when `get_profile` already returned one.
 - `job_id` — from the selected job object in `${recommendations}`
 
 Do not send empty or null fields.

@@ -75,3 +75,14 @@
 - **2026-07-27_011523** — `pre-deploy-kkb-kn-in-2026-07-27_011523` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(6 files)_
 - **2026-07-27_014638** — `pre-deploy-kkb-kn-in-2026-07-27_014638` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(6 files)_
 - **2026-07-27_014639** — `pre-deploy-kkb-kn-out-2026-07-27_014639` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(6 files)_
+- **2026-07-27_021022** — `pre-name-confirm-r39` — KKB outbound: name-greeting doubles as early identity confirmation (row 39) _(6 files)_
+- **2026-07-27_022343** — `pre-json-guard-port` — KKB: port Maya call-wide NEVER-SPEAK-JSON guard (row 70 payload read-out at create_profile) _(6 files)_
+- **2026-07-27_022432** — `pre-deploy-kkb-hi-out-2026-07-27_022432` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi.md _(6 files)_
+- **2026-07-27_022432** — `pre-deploy-kkb-kn-out-2026-07-27_022432` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(6 files)_
+- **2026-07-27_022433** — `pre-deploy-kkb-hi-in-2026-07-27_022433` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(6 files)_
+- **2026-07-27_022433** — `pre-deploy-kkb-kn-in-2026-07-27_022433` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(6 files)_
+- **2026-07-27_022839** — `pre-profileid-fix` — KKB: create_profile profile_id must be profileId UUID not numeric id (apply 404 root cause) _(6 files)_
+- **2026-07-27_023140** — `pre-deploy-kkb-hi-out-2026-07-27_023140` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi.md _(6 files)_
+- **2026-07-27_023140** — `pre-deploy-kkb-kn-out-2026-07-27_023140` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(6 files)_
+- **2026-07-27_023140** — `pre-deploy-kkb-hi-in-2026-07-27_023140` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(6 files)_
+- **2026-07-27_023141** — `pre-deploy-kkb-kn-in-2026-07-27_023141` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(6 files)_

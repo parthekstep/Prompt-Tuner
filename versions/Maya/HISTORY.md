@@ -66,3 +66,6 @@
 - **2026-07-27_013658** — `pre-deploy-maya-hi-out-2026-07-27_013658` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_
 - **2026-07-27_013658** — `pre-deploy-maya-hi-in-2026-07-27_013658` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(4 files)_
 - **2026-07-27_014639** — `pre-deploy-maya-hi-out-2026-07-27_014639` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_
+- **2026-07-27_022839** — `pre-profileid-fix` — Maya: create_profile profile_id must be profileId UUID not numeric id _(4 files)_
+- **2026-07-27_023139** — `pre-deploy-maya-hi-out-2026-07-27_023139` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_
+- **2026-07-27_023139** — `pre-deploy-maya-hi-in-2026-07-27_023139` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(4 files)_

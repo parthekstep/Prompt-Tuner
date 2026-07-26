@@ -1,24 +1,44 @@
 ---
 name: bug-fix
-description: End-to-end bug-fixing loop from the Consolidated Feedback Tracker (Google Sheet) to the live Raya agents. Reads the sheet, picks OPEN issues, temporal-checks them against the changelog, grounds each in the real call transcript, fixes the prompt where a gap exists, deploys the fix to the live agent, and writes the status back to the sheet. Propagates agent-agnostic fixes to sibling agents (gated by an email approval). Use when the user says "process the feedback sheet", "fix the reported bugs", "run the bug-fix loop", or points at the tracker.
+description: End-to-end bug-fixing loop from the Consolidated Feedback Tracker (Google Sheet) to the live Raya agents. Runs the fixed sequence — find issues → root-cause each against its real call transcript → fix only genuine prompt gaps → propagate to sibling bots where the same bug exists → verify nothing broke → repeat → summarize last. Marks the sheet "Fixed for UAT" on deploy. Use when the user says "process the feedback sheet", "fix the reported bugs", "run the bug-fix loop", or points at the tracker.
 ---
 
-# Bug-fix loop (sheet → transcript → fix → deploy → sheet)
+# Bug-fix loop (sheet → transcript → root-cause → fix → propagate → verify → sheet → summary)
 
-The closed loop, proven 2026-07-18. Ties together: `scripts/gsheets.py` (sheet R/W),
-the Raya call + agent APIs, `/raya-reconcile`, `/update-prompt`, `scripts/raya_deploy.py`,
-and the temporal check. **Fix only OPEN issues. Ground every change in a real transcript.
-Deploys are gated and verified.**
+Ties together `scripts/gsheets.py` (sheet R/W), the Raya call + agent APIs, `/raya-reconcile`,
+`/update-prompt`, `/port-feature`, `scripts/raya_deploy.py`, and the regression check.
+
+## THE SEQUENCE (do these in order — do not skip, do not reorder, summary is ALWAYS last)
+
+1. **Find** — pull every OPEN issue for the target owner from the sheet.
+2. **Root-cause with the real call** — for EACH issue, pull the actual Raya transcript and find what truly happened. **No fix without a transcript** (see rule below).
+3. **Classify** — prompt-fixable | backend | runtime/tool-adherence | no-repro | verbiage | ops. Only *prompt-fixable* gets a prompt edit (see the classification table).
+4. **Fix** the genuine prompt gaps (via `/update-prompt`), surgically.
+5. **Propagate** — check the sibling bots; if the SAME bug/gap is present there, port the fix (via `/port-feature`). Don't assume — verify presence.
+6. **Verify nothing broke** — regression-check the edits (contradictions with existing rules, flow intact, Hindi↔Kannada parity). Reconcile anything the new rule contradicts, then deploy.
+7. **Deploy** to the live agents (API PATCH), read-back-verified + in-sync.
+8. **Write the sheet status** — `Fixed for UAT` for deployed fixes (see status discipline).
+9. **Repeat** for every issue.
+10. **Summarize LAST** — only after all issues are worked, write the MD summary (what fixed / how / why prior attempts failed / what's pending). Never write the summary before the work is done.
+
+## The two non-negotiable rules (the ones the user keeps repeating)
+
+- **NO FIX WITHOUT A TRANSCRIPT.** Never edit a prompt off a sheet report, a hunch, or a static/analyser finding alone. Pull the actual call, read the offending turns, confirm the bug is real and understand its root cause FIRST. A "plausible" static gap that no transcript reproduces is **not** a fix — it's an ungrounded change (see r70 2026-07-27: a static "gap" that 40 calls never reproduced). If you can't reproduce it in a recent call, do NOT fix — ask the reporter for the specific call uuid + timestamp.
+- **"Fixed for UAT" ≠ confirmed.** Deploying lands the fix; it does not prove it works. Mark the sheet `Fixed for UAT` (= deployed, ready for the user's acceptance test) — but do NOT claim it's *confirmed* until a **post-deploy** call transcript shows the corrected behavior. If there are no post-deploy calls yet, say so.
 
 ## Credentials / prerequisites
 - `raya/.env` — `RAYA_BASE_URL`, `RAYA_API_TOKEN` (git-ignored).
-- Google service-account key for the sheet — `scripts/gsheets.py` finds it (`$GOOGLE_SA_KEY` → `secrets/gsheets-sa.json` → `~/Downloads/service-account.json`). SA `kkb-sheets-writer@operation-rozgar.iam.gserviceaccount.com` must have edit access.
-- The tracker id: `1cqT9EVk_vap16wJ3fQM7txLklf-kbMDHdYWsiHImbHU`, tab `Doc 1 Issues`.
+- Google service-account key — `scripts/gsheets.py` finds it (`$GOOGLE_SA_KEY` → `secrets/gsheets-sa.json` → `~/Downloads/service-account.json`). SA `kkb-sheets-writer@operation-rozgar.iam.gserviceaccount.com` has edit access.
+  - **If `~/Downloads/service-account.json` is blocked** (macOS TCC — the app process loses folder access on restart), the same key lives base64-encoded in `kaam-ki-baat/.env.local` as `GOOGLE_SERVICE_ACCOUNT_JSON_BASE64`. Decode it into `secrets/gsheets-sa.json` (git-ignored) — pipe base64→file, never print the private key. Or ask the user to copy the key into `secrets/gsheets-sa.json`.
+- Tracker id: `1cqT9EVk_vap16wJ3fQM7txLklf-kbMDHdYWsiHImbHU`, tab **`All Issues`** (NOT "Doc 1 Issues" — that tab is gone).
 
-## Sheet → agent mapping (campaign label → repo file → Raya agent)
-The sheet's "Bot name" uses campaign labels; map them (uuids live in `raya/agents.json`):
+## Sheet columns (`All Issues`)
+`A DATE · B STATUS · C Bot · D Title · E Type · F Issue description · G Owner · H Priority · I ETA · J Call IDs · K Additional comments · L "Fixed, Date/call id"`.
+Status vocab in use: `Open · Accepted to Fix · Fixed for UAT · Flagged - Backend Issue · Rejected / Not an Issue · Closed`.
+Note: column J "Call IDs" are the team's own ids and do **not** map to the Raya API — identify calls by **agent uuid + date** instead.
 
-| Sheet "Bot name" | repo file | target id |
+## Sheet "Bot" label → repo file → Raya target (uuids in `raya/agents.json`)
+| Sheet "Bot" | repo file | target id |
 |---|---|---|
 | KKB (Ghaziabad) | KKB/KKB Placeholder Hindi.md | kkb-hi-out |
 | KKB Kannada | KKB/KKB Placeholder Kannada.md | kkb-kn-out |
@@ -28,54 +48,52 @@ The sheet's "Bot name" uses campaign labels; map them (uuids live in `raya/agent
 | **KKB HE Inbound** | Maya/Maya Inbound.md | maya-hi-in |
 | DKB (Ghaziabad) | DKB/DKB Hindi.md / DKB Kannada.md | dkb-hi-out / dkb-kn-out |
 
-## Sheet columns (Doc 1 Issues)
-`A DATE · B Title · C Type · D Issue description · E Bot name · F Owner · G Priority · H Status · I ETA · J Call IDs · K Additional comments`. Status vocab: `1. Submitted / 2. Accepted to Fix / 3. Rejected, not an issue / 4. Fixed for UAT / 5. Pending / 6. Passed to Field / 7. Closed`.
+## Root-cause classification (step 3) — only ONE class gets a prompt edit
+| Class | Signal | Action |
+|---|---|---|
+| **prompt-fixable** | transcript shows a genuine prompt gap (missing guard, wrong wording, missing step) | fix via `/update-prompt`, propagate, deploy, → `Fixed for UAT` |
+| **backend** | tool returns HTTP 4xx/5xx with a valid-looking payload; placeholder job inventory (`job_id "1"/"2"` → "Job not found") | do NOT edit the prompt → `Flagged - Backend Issue` + escalate |
+| **runtime / tool-adherence** | the model ignores an instruction the prompt already states clearly (e.g. `get_profile` not firing despite HARD BLOCKs) | do NOT pile on more prose — that regresses (see below). Escalate for platform **tool-forcing** → `Flagged - Backend Issue` |
+| **no-repro** | not reproduced in recent calls | do NOT fix; keep `Open` + comment asking for the reproducing call uuid |
+| **verbiage** | pure wording/tone request, not a bug | reassign (Aryan) — out of our scope; note it |
+| **ops** | telephony / spam / account (e.g. Truecaller verification) | not a prompt; leave for Ops |
 
-## Procedure
+**Do NOT try to prose-fix a runtime tool-adherence failure.** If the prompt already mandates the behavior and the model ignores it, adding more/stronger prose is the single highest-regression-risk move — it has already backfired here: the 2026-07 attempt to force `get_profile` by reframing it as "silent/invisible" made the model *stop calling it* (regression, reverted; see bug-patterns D25). The durable fix is platform-side (Raya tool-forcing / static first-message). Escalate; don't experiment on the live flow.
 
-### 1. Pull + filter
-`scripts/gsheets.py --sheet-id <id> get "'Doc 1 Issues'!A1:K200" --out <scratch>/issues.csv`.
-Keep rows where Owner contains the target person AND Status is OPEN (Submitted / Accepted / Pending / WIP / Open). Skip `Fixed`, `Confirmed working`, `Closed`, `Rejected`. Order by DATE then Priority (P1 first).
+## Step details
 
-### 2. Temporal check (before any change)
-For each open issue: get the call datetime (the DATE column, or the transcript's `created_at`).
-Then check `<agent>/CHANGELOG.md` — **did we ship a fix for this specific issue AFTER that date?**
-If yes and the sheet still says open → **assume fixed; set Status = "4. Fixed for UAT" with a note; make NO prompt change.** Only proceed to fix issues with no post-dating fix.
-
-### 3. Ground in the transcript (mandatory)
-Never change a prompt without seeing the call. The sheet's numeric call IDs do NOT map to the API (open gap) — identify the call by **agent + date** instead:
+**Step 2 — ground in the transcript.** Identify the call by agent + date:
 ```
-GET {BASE}/api/call?agent_id=<uuid>&limit=20     -> {calls:[{uuid, caller_no, created_at, call_duration, outcome}]}
-GET {BASE}/api/call/<call_uuid>                   -> {call_transcript:[{role,content}], call_output:{drop_reason,...}, outcome}
+GET {BASE}/api/call?agent_id=<uuid>&limit=20   -> {calls:[{uuid, caller_no, to_number, created_at, call_duration, outcome}]}
+GET {BASE}/api/call/<call_uuid>                -> {call_transcript:[…], call_output:{drop_reason,…}, agent_args}
 ```
-(headers `X-API-Key`, `User-Agent: Mozilla/5.0`.) Save transcripts to files; grep for the symptom — quote the offending turns. `call_output.drop_reason` (e.g. `apply_failed`) is a strong signal. For an unknown-size batch, use a Workflow to fan out one diagnosis agent per bug + an **adversarial verify** agent per diagnosis (see the 2026-07-18 run). Decide per issue: real prompt bug / backend / data / not-reproduced.
+(headers `X-API-Key`, `User-Agent: Mozilla/5.0`. Pagination: `&offset=N` (max `limit`≈100). No server-side phone filter — match `caller_no` for **inbound** callers / `to_number` for **outbound** callers, client-side.)
 
-### 4. Reconcile (who's ahead) before editing
-The live prompt can hold console-only edits — most importantly the real job inventory / `job_id`s the team maintains on the console. Reconcile the target FIRST: `scripts/raya_deploy.py diff <target>` (GET now reads most conversation prompts; if flaky/empty, fall back to `/raya-reconcile`'s browser sha-boolean). If **Raya is ahead**, adopt live into the repo with `scripts/raya_deploy.py pull <target>` (requires two agreeing GETs; snapshots the repo file first) and commit it BEFORE editing; if repo is ahead / in sync, proceed. Note: `deploy` refuses any prompt still carrying placeholder `job_id`s / a `[PLACEHOLDER SAMPLE DATA]` flag — `pull` the real inventory first.
+**Read the transcript PROPERLY — the tool-call arguments are how you catch payload bugs.** Each `call_transcript` turn has `role`, `content`, `tool_calls`, `tool_call_id`:
+- An **assistant turn that makes a tool call** has `content: null` and a `tool_calls` array: `[{id, type:"function", function:{name, arguments}}]`. `function.arguments` is a JSON string = **the EXACT payload the model sent** (e.g. `apply_job {"job_id":"…","profile_id":"5051"}`). **This is where wrong field values live** — a dumper that prints only `content` shows *nothing* here and you will miss the bug.
+- A **tool turn** (`role:"tool"`) holds the **result/error** in `content`, with a `tool_call_id` linking back. Errors carry `response_body_excerpt` (e.g. `{"error":"Invalid or missing profile_id"}`).
+- To diagnose a tool failure: read the assistant turn's `tool_calls.function.arguments` (what was sent) **and** the next tool turn's `content` (what came back), and compare field-by-field.
 
-### 5. Fix (only real prompt gaps)
-Use `/update-prompt`: surgical, additive; Hindi is source of truth, mirror agnostic content **verbatim** to Kannada and **adapt** language-specific examples; preserve tool payloads / variable names / section structure; keep Maya's divergences (flag-and-ask). Snapshot first (`scripts/prompt-version.sh save`). Append a `CHANGELOG.md` entry and, per the bug-fix loop, add/sharpen a `prompt-analyser/reference/bug-patterns.md` class.
+**Known payload gotcha (caused a large share of apply 404s):** `create_profile` returns BOTH a numeric top-level `id` (internal record number, e.g. `5051`) AND a `profileId` (a UUID). `apply_job`'s `profile_id` MUST be the **`profileId` UUID** — the numeric `id` is rejected with "Invalid or missing profile_id" (404). (`get_profile`'s top-level `id` already IS the UUID, so the returning-caller path is fine.)
 
-### 6. Deploy (gated, verified)
-Deploy via the **API PATCH** — it works and self-verifies even though GET is broken:
-```
-PATCH {BASE}/api/agent/<uuid>   body {"instructions": <file content>}   -> 200, response echoes "instructions"
-```
-Verify: `normalize(response.instructions) == normalize(file)`. Name-guard first (GET returns `name` correctly). Record to `raya/deploy-history.md`. `scripts/raya_deploy.py deploy <target>` does this with a snapshot + confirm + response-verify; batch stops on first failure. **Human gate:** confirm the target list before pushing to production agents.
+Use `scripts/raya_call.py <agent_uuid> [limit] [offset]` — it prints `tool_calls.function.{name,arguments}` + linked results (and caller_no/to_number/agent_args). Don't hand-roll a `content`-only reader. **If the API ever omits a field you need, say so explicitly** and don't guess. For a batch, fan out with a Workflow (one grounding agent per issue + an adversarial verify), but every verdict must quote the actual `tool_calls`/result.
 
-### 7. Write status back
-`scripts/gsheets.py update` (or the Sheets `values:batchUpdate` for many rows at once). Set Status = `4. Fixed for UAT` for deployed fixes; `3. Rejected` / a "Not reproduced" note for non-bugs; `Flagged — backend` / `Flagged — data` for out-of-prompt causes. Put the evidence + what changed in column K.
+**Step 4 — reconcile before editing.** `scripts/raya_deploy.py diff <target>`. If Raya is ahead (console-only edits, real inventory), `pull` it into the repo and commit BEFORE editing. Then fix via `/update-prompt`: surgical, additive, Hindi source-of-truth mirrored verbatim (agnostic) / adapted (spoken) to Kannada, Maya divergences preserved. Snapshot first (`prompt-version.sh save`), append `CHANGELOG.md`, and add/sharpen a `bug-patterns.md` class.
 
-## Cross-agent propagation (email-gated)
-When a fix is **not agent-specific** (a spoken-output rule, a routing gate, a guard — e.g. the slash rule, the inbound fork gate), it should land on every sibling agent that shares the logic. Before doing that:
-1. Identify the sibling agents/files (agnostic logic → all languages + in/out).
-2. **Send an approval email** describing the fix + the list of agents it would propagate to (Gmail MCP: `create_draft` / send). 
-3. **Read the reply** (`search_threads` / `get_message`); proceed only on approval, honoring any scoping the reply gives. If declined, apply only to the originally-reported agent.
-4. Then fix + deploy the approved siblings and update their sheet rows.
+**Step 5 — propagate.** After fixing, check the sibling bots (KKB ↔ Maya; both directions; in/out) for the SAME structural gap. If present, port via `/port-feature` (re-domain to the sibling's variables/tools/spoken lines). This is standard — not email-gated — when it's the identical bug. (An email approval is only needed for broad *agent-agnostic* propagation the user hasn't already scoped.)
+
+**Step 6 — verify nothing broke.** After the edits (before deploy), regression-check: does any new rule CONTRADICT an existing line (e.g. a new canonical-spelling rule vs the file's own sample-dialogue spellings — see the 2026-07-27 Kannada virama / Maya MPL catches)? Did an insertion split a section or break the greeting→fork→apply→failure flow? Is Hindi↔Kannada scaffolding still parallel? Reconcile every contradiction, then re-verify. A Workflow with one regression agent per changed file works well.
+
+**Step 7 — deploy.** API PATCH, name-guarded, read-back-verified, recorded to `raya/deploy-history.md`. `scripts/raya_deploy.py deploy <target>` does this. Never edit the live agent in the Raya console (it clobbers console-only content). Confirm all changed targets are `in sync` afterward.
+
+**Step 8 — sheet status discipline (always flip the status, not just a comment):**
+- deployed prompt fix → **`Fixed for UAT`** (+ comment: root cause + call uuid + what changed + deploy date; note "awaiting post-deploy call to confirm").
+- backend / runtime → **`Flagged - Backend Issue`** (+ what's needed from LitWiz/console).
+- no-repro → keep **`Open`** (+ "not reproduced in N calls; need the specific call uuid").
+- verbiage → note + reassign. ops → leave.
+Never leave a deployed fix marked `Open`.
 
 ## Safety
-- Fix only OPEN issues; never re-fix something the temporal check shows already-shipped.
-- Every prompt change is snapshotted + surgical; Hindi↔Kannada parity preserved.
-- Deploys are name-guarded, response-verified, recorded, and human-confirmed for production.
+- Fix only OPEN issues; temporal-check against `CHANGELOG.md` first (already shipped after the report date → set `Fixed for UAT`, make no change).
+- Every prompt change is snapshotted + surgical; parity preserved; deploys name-guarded + response-verified + recorded.
 - Rollback: `scripts/prompt-version.sh restore <agent> <pre-fix-label>` → re-PATCH.
-- Long-term this shrinks to the *new delta* rows each cycle plus self-triggered test calls (Stage 2).

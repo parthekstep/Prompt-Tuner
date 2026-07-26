@@ -12,6 +12,12 @@ Every prompt edit to Maya is logged here. Maya is Hindi-only (KKB spinoff). Entr
 
 ---
 
+## 2026-07-27 — Maya: apply_job profile_id must be the `profileId` UUID, not the numeric `id` (shared 6-file fix)
+- **Feedback/bug:** Grounded in Maya call 46d9f776 (read via the tool-call ARGS): create_profile returned `{'id': 5051, 'profileId': '2b51fd94-…'}`, then apply_job was sent `profile_id:"5051"` (the numeric top-level id) → backend 404 `{"error":"Invalid or missing profile_id"}` (the "apply failing" P1s, rows 15/42/65, previously mis-filed as pure backend).
+- **Change:** On the create_profile path, the apply_job `profile_id` is now specified as the `profileId` UUID field — NEVER the numeric top-level `id`. (get_profile's top-level `id` already IS the UUID, so the returning-caller path was unchanged.) Applied to Maya Hindi.md + Maya Inbound.md as part of the 6-file KKB+Maya fix (see KKB/CHANGELOG.md 2026-07-27).
+- **Files:** Maya/Maya Hindi.md, Maya/Maya Inbound.md. Deployed, verified in-sync. Awaiting post-deploy call.
+- **Ported from:** shared KKB+Maya apply-path fix.
+
 ## 2026-07-27 — Maya: port KKB apply-loop guards + MPL canonical exemption
 - **Change:** Ported the two Apply Failure Handling guards (no bridge re-speak on failure; no re-fire of same failed job_id) from KKB into Maya Hindi.md + Maya Inbound.md (Maya is Hindi-only). Also added an exemption to the Canonical Location Spellings section in Maya Hindi.md so the fixed MPL competition name "घाज़ियाबाद मार्केटर प्रीमियर लीग" (spelled with घ) is not normalized to the ग canonical — resolves a contradiction the canonical rule introduced. Deployed maya-hi-out + maya-hi-in, verified in-sync. Not yet live-confirmed (no post-deploy calls).
 

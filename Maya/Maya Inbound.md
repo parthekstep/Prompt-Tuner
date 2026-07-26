@@ -1002,7 +1002,7 @@ Use the `job_id` field from the selected job object within the Job Inventory.
 Never speak the job ID aloud. Never guess or infer a job ID.
 
 ## Payload construction
-- `profile_id` — **if `get_profile` returned a profile in this call, use the top-level `id` from that response** (the most-recent profile); only otherwise use the `id` returned by `create_profile`. Never mint a new profile when `get_profile` already returned one.
+- `profile_id` — **if `get_profile` returned a profile in this call, use the top-level `id` from that response** (the most-recent profile); only otherwise use the **`profileId`** field (a UUID) from the `create_profile` result — NOT its top-level numeric `id` (e.g. `5051`), an internal record number that `apply_job` rejects with "Invalid or missing profile_id". Never mint a new profile when `get_profile` already returned one.
 - `job_id` — from the selected job object in the Job Inventory
 
 Do not send empty or null fields.

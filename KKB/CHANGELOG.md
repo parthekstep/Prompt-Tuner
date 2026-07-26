@@ -12,6 +12,15 @@ Every prompt edit to KKB is logged here. Entry format:
 
 ---
 
+## 2026-07-27 — KKB + Maya: apply_job used numeric `id` instead of `profileId` UUID → 404 "Invalid or missing profile_id" (apply-fail root cause, rows 15/42/65)
+- **Feedback/bug:** Grounded in Maya call 46d9f776 by reading the tool-call ARGS (not just results): create_profile returned `{'id': 5051, 'profileId': '2b51fd94-…'}`, then apply_job was sent `profile_id:"5051"` (the numeric top-level id) → backend 404 `{"error":"Invalid or missing profile_id"}`. This is a large share of the "apply failing" P1s (rows 15/42/65), previously mis-filed as pure backend.
+- **Change:** In the apply_job payload rules (and the new-caller apply clause), specify that on the create_profile path the `profile_id` is the `profileId` UUID field — NEVER the numeric top-level `id`. (get_profile's top-level `id` already IS the UUID, so the returning-caller path was correct and unchanged.)
+- **Files:** KKB Placeholder Hindi/Kannada.md + Inbound Hindi/Kannada.md, Maya Hindi.md + Maya Inbound.md (6 apply-path files; English rule identical across languages). Deployed all 6, verified in-sync. Awaiting post-deploy call.
+
+## 2026-07-27 — KKB: port Maya's call-wide "Never Speak Tool Payloads Aloud" guard (row 70)
+- **Feedback/bug:** Row 70 (payload spoken during profile creation) — confirmed occurred in Maya on 07-21. Maya already had a call-wide "NEVER SPEAK JSON ALOUD" hard guard; KKB had only the apply-turn one, leaving the create_profile-return moment exposed.
+- **Change:** Added a call-wide "# Never Speak Tool Payloads Aloud (Critical — No Exceptions)" section to all 4 KKB files (before the Hallucination Guard) — no JSON/payload/field-names/id/profileId/job_id/metadata/raw tool result spoken at ANY point. Deployed, in-sync.
+
 ## 2026-07-27 — KKB inbound: apply-loop fix (row 68) — stop bridge re-speak on failure + no re-fire of same failed job
 - **Feedback/bug:** Sheet row 68 (P1). Live call 4663a367 (2026-07-26): on a failed apply the bot re-spoke the apply bridge/hold ("...अप्लाई कर देती हूँ" / "एक बार apply कर देती हूँ") at the head of the failure message with no new tool call, and re-fired apply_job on the SAME already-failed job_id across repeat user requests.
 - **Change:** Two additive guards in Apply Failure Handling: (1) failure message must begin DIRECTLY with the base failure line — never re-speak the bridge/hold on the failure turn; (2) a job that has already FAILED apply_job in this call is DONE — never re-fire apply_job for that same job_id, go straight to interest-noted/HR/alternate-job path.
