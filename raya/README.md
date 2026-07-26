@@ -17,7 +17,7 @@ falls back to its default **`"You are a helpful assistant"`** placeholder.
 - **Never open, reload, or Save the Raya console for these agents while the read is broken.** Treat the console as display-only-and-unreliable.
 - **Deploy ONLY via the API PATCH** (`scripts/raya_deploy.py` / `/deploy-prompt`). PATCH *writes* reliably and self-verifies via the PATCH **response echo**; when GET happens to return content, the tool's `diff: none — remote already matches local` is a bonus positive confirmation.
 - **Recover a wiped agent:** `python3 scripts/raya_deploy.py deploy <target> --yes` re-asserts the repo prompt. `deploy --all` (or per-target) re-asserts everything.
-- **Output prompt** deploys via the `output_instructions` field (also PATCH-able — same tool pattern). **Memory prompt** has *no* API field — it is a manual platform step, and the console is equally unreliable for it, so avoid touching it there too.
+- **Output prompt** deploys via the `output_instructions` field (also PATCH-able — same tool pattern). **Memory prompt** now deploys the same way too — via the `memory_instructions` field plus a `memory_enabled` boolean (same PATCH pattern), wired as the `memory` profile; pushing the memory prompt with the tool also sets `memory_enabled: true` (turning the feature ON). GET returns both fields cleanly.
 
 ## Reconcile-before-fix (the live agent can be AHEAD of the repo)
 
@@ -80,5 +80,5 @@ confirmation (type the target id) unless `--yes` is passed after a human has app
 - **Get agent** — endpoint + method; **does a GET return the current live prompt?** (needed for verify/backup/diff); where the object sits in the response (`get_item_path`); which field (or dotted path) holds the prompt (`prompt_field`).
 - **Update** — endpoint + method (PUT/PATCH); **replace vs patch** (`update_mode`); required fields on update; UTF-8/Devanagari+Kannada safety; max prompt size (largest file ≈ 84 KB → set `request.max_prompt_bytes`).
 - **Topology** — are inbound/outbound and Hindi/Kannada **separate agent objects/IDs**? How are phone numbers bound to agents?
-- **Post-call prompts** — where do **Memory/Output** prompts live (separate fields/objects, or not in Raya)? Until confirmed, those 6 targets stay `deploy:false`.
+- **Post-call prompts** — where do **Memory/Output** prompts live (separate fields/objects, or not in Raya)? **Memory is now confirmed** — it lives on the SAME agent object as the conversation prompt, deployed via `memory_instructions` + `memory_enabled` (the `memory` profile), so the two Maya memory targets are now `deploy:true`. Output (`output_instructions`) and the remaining memory targets (KKB/DKB) stay `deploy:false` until their uuids are confirmed.
 - **Ops** — rate limits; idempotency-key support; does Raya keep its own prompt version history?

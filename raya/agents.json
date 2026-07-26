@@ -1,24 +1,312 @@
 {
   "_note": "Explicit file -> Raya agent-ID manifest. This mapping is the SOURCE OF TRUTH for deploys and MUST be filled by hand from `scripts/raya_deploy.py list` -- never inferred from filenames (e.g. 'KKB Placeholder Inbound.md' is HINDI; 'Maya Inbound.md' has no language token). 'raya_agent_id' is keyed by environment so staging and prod IDs never collide; the tool picks the one matching RAYA_ENV in raya/.env. A target whose id for the active env is empty, or with deploy=false, is skipped. 'expected_name_contains' is a wrong-target guard: deploy aborts if the live agent's name lacks ALL these tokens. Tighten it (e.g. add 'Inbound' or 'Kannada') once you see the real agent names from `list`.",
   "targets": [
-    { "id": "kkb-hi-out", "file": "KKB/KKB Placeholder Hindi.md",          "agent": "KKB",  "language": "hi", "direction": "outbound", "kind": "conversation", "profile": "conversation", "expected_name_contains": ["KKB"],  "raya_name": "KKB Placeholder",                    "raya_agent_id": { "prod": "da612923-1927-45d7-9ad0-b1c7cbb15294", "staging": "" }, "deploy": true },
-    { "id": "kkb-kn-out", "file": "KKB/KKB Placeholder Kannada.md",         "agent": "KKB",  "language": "kn", "direction": "outbound", "kind": "conversation", "profile": "conversation", "expected_name_contains": ["KKB"],  "raya_name": "KKB Placeholder- Kannada",           "raya_agent_id": { "prod": "87ab9108-5d66-4a13-a20a-575eaa9aae36", "staging": "" }, "deploy": true },
-    { "id": "kkb-hi-in",  "file": "KKB/KKB Placeholder Inbound.md",         "agent": "KKB",  "language": "hi", "direction": "inbound",  "kind": "conversation", "profile": "conversation", "expected_name_contains": ["KKB"],  "raya_name": "KKB Inbound Placeholder",            "raya_agent_id": { "prod": "b6222233-8a8d-49a6-9950-d07e9d159757", "staging": "" }, "deploy": true },
-    { "id": "kkb-kn-in",  "file": "KKB/KKB Placeholder Inbound Kannada.md", "agent": "KKB",  "language": "kn", "direction": "inbound",  "kind": "conversation", "profile": "conversation", "expected_name_contains": ["KKB"],  "raya_name": "KKB Inbound Placeholder- Kannada",   "raya_agent_id": { "prod": "4ac90bf1-a740-4b1c-92b0-45bda099e53f", "staging": "" }, "deploy": true },
-
-    { "id": "dkb-hi-out", "file": "DKB/DKB Hindi.md",                       "agent": "DKB",  "language": "hi", "direction": "outbound", "kind": "conversation", "profile": "conversation", "expected_name_contains": ["DKB", "Dhande", "Dhandhe"], "raya_name": "DKB Hindi- New",   "raya_agent_id": { "prod": "57814ac8-5d79-41f5-bab7-bcfe2d9aac4f", "staging": "" }, "deploy": true },
-    { "id": "dkb-kn-out", "file": "DKB/DKB Kannada.md",                     "agent": "DKB",  "language": "kn", "direction": "outbound", "kind": "conversation", "profile": "conversation", "expected_name_contains": ["DKB", "Dhande", "Dhandhe"], "raya_name": "DKB Kannada- New", "raya_agent_id": { "prod": "d1a1614f-fa7e-41c1-8963-e7f3af213a13", "staging": "" }, "deploy": true },
-    { "id": "dkb-hi-in",  "file": "DKB/DKB Inbound Hindi.md",               "agent": "DKB",  "language": "hi", "direction": "inbound",  "kind": "conversation", "profile": "conversation", "expected_name_contains": ["DKB", "Dhande", "Dhandhe"], "raya_name": "",   "raya_agent_id": { "prod": "", "staging": "" }, "deploy": true },
-    { "id": "dkb-kn-in",  "file": "DKB/DKB Inbound Kannada.md",             "agent": "DKB",  "language": "kn", "direction": "inbound",  "kind": "conversation", "profile": "conversation", "expected_name_contains": ["DKB", "Dhande", "Dhandhe"], "raya_name": "",   "raya_agent_id": { "prod": "", "staging": "" }, "deploy": true },
-
-    { "id": "maya-hi-out","file": "Maya/Maya Hindi.md",                     "agent": "Maya", "language": "hi", "direction": "outbound", "kind": "conversation", "profile": "conversation", "expected_name_contains": ["Maya"], "raya_name": "Maya KKB College Hindi",             "raya_agent_id": { "prod": "47fdffe6-0cb0-4fcf-8762-135ddadfb194", "staging": "" }, "deploy": true },
-    { "id": "maya-hi-in", "file": "Maya/Maya Inbound.md",                   "agent": "Maya", "language": "hi", "direction": "inbound",  "kind": "conversation", "profile": "conversation", "expected_name_contains": ["Maya"], "raya_name": "Inbound Maya KKB College Hindi",     "raya_agent_id": { "prod": "df99f501-e636-4f3d-80dc-e06e82240082", "staging": "" }, "deploy": true },
-
-    { "id": "kkb-memory", "file": "KKB/KKB Memory.md",                      "agent": "KKB",  "language": "xx", "direction": "postcall", "kind": "memory", "profile": "memory", "expected_name_contains": ["KKB"],  "raya_agent_id": { "prod": "", "staging": "" }, "deploy": false },
-    { "id": "kkb-output", "file": "KKB/KKB Output.md",                      "agent": "KKB",  "language": "xx", "direction": "postcall", "kind": "output", "profile": "output", "expected_name_contains": ["KKB"],  "raya_agent_id": { "prod": "", "staging": "" }, "deploy": false },
-    { "id": "dkb-memory", "file": "DKB/DKB Memory.md",                      "agent": "DKB",  "language": "xx", "direction": "postcall", "kind": "memory", "profile": "memory", "expected_name_contains": ["DKB"],  "raya_agent_id": { "prod": "", "staging": "" }, "deploy": false },
-    { "id": "dkb-output", "file": "DKB/DKB Output.md",                      "agent": "DKB",  "language": "xx", "direction": "postcall", "kind": "output", "profile": "output", "expected_name_contains": ["DKB"],  "raya_agent_id": { "prod": "", "staging": "" }, "deploy": false },
-    { "id": "maya-memory","file": "Maya/Maya Memory.md",                    "agent": "Maya", "language": "xx", "direction": "postcall", "kind": "memory", "profile": "memory", "expected_name_contains": ["Maya"], "raya_agent_id": { "prod": "", "staging": "" }, "deploy": false },
-    { "id": "maya-output","file": "Maya/Maya Output.md",                    "agent": "Maya", "language": "xx", "direction": "postcall", "kind": "output", "profile": "output", "expected_name_contains": ["Maya"], "raya_agent_id": { "prod": "", "staging": "" }, "deploy": false }
+    {
+      "id": "kkb-hi-out",
+      "file": "KKB/KKB Placeholder Hindi.md",
+      "agent": "KKB",
+      "language": "hi",
+      "direction": "outbound",
+      "kind": "conversation",
+      "profile": "conversation",
+      "expected_name_contains": [
+        "KKB"
+      ],
+      "raya_name": "KKB Placeholder",
+      "raya_agent_id": {
+        "prod": "da612923-1927-45d7-9ad0-b1c7cbb15294",
+        "staging": ""
+      },
+      "deploy": true
+    },
+    {
+      "id": "kkb-kn-out",
+      "file": "KKB/KKB Placeholder Kannada.md",
+      "agent": "KKB",
+      "language": "kn",
+      "direction": "outbound",
+      "kind": "conversation",
+      "profile": "conversation",
+      "expected_name_contains": [
+        "KKB"
+      ],
+      "raya_name": "KKB Placeholder- Kannada",
+      "raya_agent_id": {
+        "prod": "87ab9108-5d66-4a13-a20a-575eaa9aae36",
+        "staging": ""
+      },
+      "deploy": true
+    },
+    {
+      "id": "kkb-hi-in",
+      "file": "KKB/KKB Placeholder Inbound.md",
+      "agent": "KKB",
+      "language": "hi",
+      "direction": "inbound",
+      "kind": "conversation",
+      "profile": "conversation",
+      "expected_name_contains": [
+        "KKB"
+      ],
+      "raya_name": "KKB Inbound Placeholder",
+      "raya_agent_id": {
+        "prod": "b6222233-8a8d-49a6-9950-d07e9d159757",
+        "staging": ""
+      },
+      "deploy": true
+    },
+    {
+      "id": "kkb-kn-in",
+      "file": "KKB/KKB Placeholder Inbound Kannada.md",
+      "agent": "KKB",
+      "language": "kn",
+      "direction": "inbound",
+      "kind": "conversation",
+      "profile": "conversation",
+      "expected_name_contains": [
+        "KKB"
+      ],
+      "raya_name": "KKB Inbound Placeholder- Kannada",
+      "raya_agent_id": {
+        "prod": "4ac90bf1-a740-4b1c-92b0-45bda099e53f",
+        "staging": ""
+      },
+      "deploy": true
+    },
+    {
+      "id": "dkb-hi-out",
+      "file": "DKB/DKB Hindi.md",
+      "agent": "DKB",
+      "language": "hi",
+      "direction": "outbound",
+      "kind": "conversation",
+      "profile": "conversation",
+      "expected_name_contains": [
+        "DKB",
+        "Dhande",
+        "Dhandhe"
+      ],
+      "raya_name": "DKB Hindi- New",
+      "raya_agent_id": {
+        "prod": "57814ac8-5d79-41f5-bab7-bcfe2d9aac4f",
+        "staging": ""
+      },
+      "deploy": true
+    },
+    {
+      "id": "dkb-kn-out",
+      "file": "DKB/DKB Kannada.md",
+      "agent": "DKB",
+      "language": "kn",
+      "direction": "outbound",
+      "kind": "conversation",
+      "profile": "conversation",
+      "expected_name_contains": [
+        "DKB",
+        "Dhande",
+        "Dhandhe"
+      ],
+      "raya_name": "DKB Kannada- New",
+      "raya_agent_id": {
+        "prod": "d1a1614f-fa7e-41c1-8963-e7f3af213a13",
+        "staging": ""
+      },
+      "deploy": true
+    },
+    {
+      "id": "dkb-hi-in",
+      "file": "DKB/DKB Inbound Hindi.md",
+      "agent": "DKB",
+      "language": "hi",
+      "direction": "inbound",
+      "kind": "conversation",
+      "profile": "conversation",
+      "expected_name_contains": [
+        "DKB",
+        "Dhande",
+        "Dhandhe"
+      ],
+      "raya_name": "",
+      "raya_agent_id": {
+        "prod": "",
+        "staging": ""
+      },
+      "deploy": true
+    },
+    {
+      "id": "dkb-kn-in",
+      "file": "DKB/DKB Inbound Kannada.md",
+      "agent": "DKB",
+      "language": "kn",
+      "direction": "inbound",
+      "kind": "conversation",
+      "profile": "conversation",
+      "expected_name_contains": [
+        "DKB",
+        "Dhande",
+        "Dhandhe"
+      ],
+      "raya_name": "",
+      "raya_agent_id": {
+        "prod": "",
+        "staging": ""
+      },
+      "deploy": true
+    },
+    {
+      "id": "maya-hi-out",
+      "file": "Maya/Maya Hindi.md",
+      "agent": "Maya",
+      "language": "hi",
+      "direction": "outbound",
+      "kind": "conversation",
+      "profile": "conversation",
+      "expected_name_contains": [
+        "Maya"
+      ],
+      "raya_name": "Maya KKB College Hindi",
+      "raya_agent_id": {
+        "prod": "47fdffe6-0cb0-4fcf-8762-135ddadfb194",
+        "staging": ""
+      },
+      "deploy": true
+    },
+    {
+      "id": "maya-hi-in",
+      "file": "Maya/Maya Inbound.md",
+      "agent": "Maya",
+      "language": "hi",
+      "direction": "inbound",
+      "kind": "conversation",
+      "profile": "conversation",
+      "expected_name_contains": [
+        "Maya"
+      ],
+      "raya_name": "Inbound Maya KKB College Hindi",
+      "raya_agent_id": {
+        "prod": "df99f501-e636-4f3d-80dc-e06e82240082",
+        "staging": ""
+      },
+      "deploy": true
+    },
+    {
+      "id": "kkb-memory",
+      "file": "KKB/KKB Memory.md",
+      "agent": "KKB",
+      "language": "xx",
+      "direction": "postcall",
+      "kind": "memory",
+      "profile": "memory",
+      "expected_name_contains": [
+        "KKB"
+      ],
+      "raya_agent_id": {
+        "prod": "",
+        "staging": ""
+      },
+      "deploy": false
+    },
+    {
+      "id": "kkb-output",
+      "file": "KKB/KKB Output.md",
+      "agent": "KKB",
+      "language": "xx",
+      "direction": "postcall",
+      "kind": "output",
+      "profile": "output",
+      "expected_name_contains": [
+        "KKB"
+      ],
+      "raya_agent_id": {
+        "prod": "",
+        "staging": ""
+      },
+      "deploy": false
+    },
+    {
+      "id": "dkb-memory",
+      "file": "DKB/DKB Memory.md",
+      "agent": "DKB",
+      "language": "xx",
+      "direction": "postcall",
+      "kind": "memory",
+      "profile": "memory",
+      "expected_name_contains": [
+        "DKB"
+      ],
+      "raya_agent_id": {
+        "prod": "",
+        "staging": ""
+      },
+      "deploy": false
+    },
+    {
+      "id": "dkb-output",
+      "file": "DKB/DKB Output.md",
+      "agent": "DKB",
+      "language": "xx",
+      "direction": "postcall",
+      "kind": "output",
+      "profile": "output",
+      "expected_name_contains": [
+        "DKB"
+      ],
+      "raya_agent_id": {
+        "prod": "",
+        "staging": ""
+      },
+      "deploy": false
+    },
+    {
+      "id": "maya-out-memory",
+      "file": "Maya/Maya Memory.md",
+      "agent": "Maya",
+      "language": "hi",
+      "direction": "outbound",
+      "kind": "memory",
+      "profile": "memory",
+      "expected_name_contains": [
+        "Maya"
+      ],
+      "raya_agent_id": {
+        "prod": "47fdffe6-0cb0-4fcf-8762-135ddadfb194",
+        "staging": ""
+      },
+      "deploy": true
+    },
+    {
+      "id": "maya-in-memory",
+      "file": "Maya/Maya Memory.md",
+      "agent": "Maya",
+      "language": "hi",
+      "direction": "inbound",
+      "kind": "memory",
+      "profile": "memory",
+      "expected_name_contains": [
+        "Maya"
+      ],
+      "raya_agent_id": {
+        "prod": "df99f501-e636-4f3d-80dc-e06e82240082",
+        "staging": ""
+      },
+      "deploy": true
+    },
+    {
+      "id": "maya-output",
+      "file": "Maya/Maya Output.md",
+      "agent": "Maya",
+      "language": "xx",
+      "direction": "postcall",
+      "kind": "output",
+      "profile": "output",
+      "expected_name_contains": [
+        "Maya"
+      ],
+      "raya_agent_id": {
+        "prod": "",
+        "staging": ""
+      },
+      "deploy": false
+    }
   ]
 }

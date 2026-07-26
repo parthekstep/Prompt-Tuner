@@ -35,3 +35,43 @@
 - **2026-07-20_134758** — `pre-deploy-kkb-kn-out-2026-07-20_134758` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(6 files)_
 - **2026-07-20_134800** — `pre-deploy-kkb-hi-in-2026-07-20_134800` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(6 files)_
 - **2026-07-20_134802** — `pre-deploy-kkb-kn-in-2026-07-20_134802` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(6 files)_
+- **2026-07-22_113932** — `pre-newseeker-value-surface` — forking broken on KKB (kn): new_seeker not steering; port Maya value-surface + default-to-fetch _(6 files)_
+- **2026-07-22_114033** — `pre-deploy-kkb-hi-out-2026-07-22_114033` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi.md _(6 files)_
+- **2026-07-22_114035** — `pre-deploy-kkb-kn-out-2026-07-22_114035` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(6 files)_
+- **2026-07-22_124351** — `pre-port-experience-bridge` — port Maya experience-gate + causal-bridge clause to KKB outbound (rows 24/58, 14/61) _(6 files)_
+- **2026-07-22_124742** — `pre-deploy-kkb-hi-out-2026-07-22_124742` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi.md _(6 files)_
+- **2026-07-22_124746** — `pre-deploy-kkb-kn-out-2026-07-22_124746` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(6 files)_
+- **2026-07-22_125801** — `pre-port-integrity-inbound` — port Maya APPLY-TURN INTEGRITY to KKB inbound Hi+Kn (row45 spoken payload) _(6 files)_
+- **2026-07-22_125804** — `pre-deploy-kkb-hi-in-2026-07-22_125804` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(6 files)_
+- **2026-07-22_125807** — `pre-deploy-kkb-kn-in-2026-07-22_125807` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(6 files)_
+- **2026-07-22_134705** — `pre-applyturn-integrity-outbound` — KKB Kannada hallucinated apply (said applied, no apply_job tool); port APPLY-TURN INTEGRITY to KKB outbound Hi+Kn _(6 files)_
+- **2026-07-22_134709** — `pre-deploy-kkb-hi-out-2026-07-22_134709` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi.md _(6 files)_
+- **2026-07-22_134715** — `pre-deploy-kkb-kn-out-2026-07-22_134715` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(6 files)_
+- **2026-07-22_163858** — `pre-inbound-permission-residue` — KKB inbound: residual outbound permission-ask line contradicts silent-fetch router; neutralize _(6 files)_
+- **2026-07-22_164005** — `pre-deploy-kkb-hi-in-2026-07-22_164005` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(6 files)_
+- **2026-07-22_164011** — `pre-deploy-kkb-kn-in-2026-07-22_164011` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(6 files)_
+- **2026-07-22_171812** — `pre-inbound-fetch-narration-ban` — KKB inbound: bot narrating 'profile की जानकारी देख लेती हूँ' before get_profile; tighten silence+profile ban _(6 files)_
+- **2026-07-22_171859** — `pre-deploy-kkb-hi-in-2026-07-22_171859` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(6 files)_
+- **2026-07-22_171917** — `pre-deploy-kkb-kn-in-2026-07-22_171917` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(6 files)_
+- **2026-07-22_172359** — `pre-deploy-kkb-hi-in-2026-07-22_172359` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(6 files)_
+- **2026-07-22_172446** — `pre-deploy-kkb-kn-in-2026-07-22_172446` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(6 files)_
+- **2026-07-22_172748** — `pre-deploy-kkb-hi-in-2026-07-22_172748` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(6 files)_
+- **2026-07-22_172853** — `pre-deploy-kkb-kn-in-2026-07-22_172853` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(6 files)_
+- **2026-07-22_201521** — `pre-kkbin-remap-08001508` — remap kkb-hi-in to live agent 08001508 + splice its real inventory into fixed prompt _(6 files)_
+- **2026-07-22_201555** — `pre-deploy-kkb-hi-in-2026-07-22_201555` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(6 files)_
+- **2026-07-22_221958** — `pre-fetch-narration-structural` — KKB inbound: model still prepends fetch-narration (new synonym) before greeting; move from phrase-ban to category ban _(6 files)_
+- **2026-07-22_223142** — `pre-deploy-kkb-hi-in-2026-07-22_223142` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(6 files)_
+- **2026-07-22_223215** — `pre-deploy-kkb-kn-in-2026-07-22_223215` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(6 files)_
+- **2026-07-23_114554** — `pre-restore-2026-07-23_114554` — auto-saved before restoring 'pre-fetch-narration-structural' _(6 files)_
+- **2026-07-23_114607** — `pre-deploy-kkb-hi-in-2026-07-23_114607` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(6 files)_
+- **2026-07-23_114736** — `pre-deploy-kkb-kn-in-2026-07-23_114736` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(6 files)_
+- **2026-07-24_150012** — `pre-canonical-locations` — KKB: add Canonical Location Spellings section (rows 69/71) + queued json-readout guard _(6 files)_
+- **2026-07-27_005640** — `pre-deploy-kkb-kn-in-2026-07-27_005640` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(6 files)_
+- **2026-07-27_005641** — `pre-deploy-kkb-hi-out-2026-07-27_005641` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi.md _(6 files)_
+- **2026-07-27_005642** — `pre-deploy-kkb-kn-out-2026-07-27_005642` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(6 files)_
+- **2026-07-27_005642** — `pre-deploy-kkb-hi-in-2026-07-27_005642` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(6 files)_
+- **2026-07-27_011303** — `pre-apply-repeat-fix` — KKB inbound: stop bridge/hold re-speak on failure turn + no re-fire of same failed job_id (row 68, call 4663a367) _(6 files)_
+- **2026-07-27_011523** — `pre-deploy-kkb-hi-in-2026-07-27_011523` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(6 files)_
+- **2026-07-27_011523** — `pre-deploy-kkb-kn-in-2026-07-27_011523` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(6 files)_
+- **2026-07-27_014638** — `pre-deploy-kkb-kn-in-2026-07-27_014638` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(6 files)_
+- **2026-07-27_014639** — `pre-deploy-kkb-kn-out-2026-07-27_014639` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(6 files)_

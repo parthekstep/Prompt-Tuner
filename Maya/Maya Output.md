@@ -89,7 +89,13 @@ If a value is not present, use "NA" for strings, [] for arrays, or 0 for counts.
     or any other MPL mention?
     Values: "Yes" if MPL was brought up, "No" if it was never mentioned.
 
-20. EXAMPLE OUTPUT — Below is an example of how all the above fields should be
+20. not_interested_in_jobs — Did the student explicitly say they are NOT looking for a
+    job / not interested in jobs during this call (an unambiguous decline, not mere
+    hesitation or "maybe")?
+    Values: "Yes" only on a clear, explicit decline of job-seeking; "No" otherwise
+    (including when the student engaged, was unsure, or the topic never came up).
+
+21. EXAMPLE OUTPUT — Below is an example of how all the above fields should be
     aggregated and returned for a single call. Use this exact structure:
 
 {
@@ -138,6 +144,7 @@ If a value is not present, use "NA" for strings, [] for arrays, or 0 for counts.
   "benefits_mentioned": "Yes",
   "mpl_registration": "Not offered",
   "mpl_presented": "No",
+  "not_interested_in_jobs": "No",
   "drop_reason": "NA",
   "final_summary": "Student confirmed she studies at the named college and was actively looking for work. She discussed two roles and successfully applied to a Sales Executive position in Lucknow. The company's HR contact number was shared after the application."
 }

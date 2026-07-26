@@ -41,3 +41,28 @@
 - **2026-07-20_134803** — `pre-deploy-maya-hi-out-2026-07-20_134803` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_
 - **2026-07-20_134804** — `pre-deploy-maya-hi-in-2026-07-20_134804` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(4 files)_
 - **2026-07-20_175541** — `pre-deploy-maya-hi-in-2026-07-20_175541` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(4 files)_
+- **2026-07-20_181216** — `pre-apply-newcaller-fix` — campaign fire: empty get_profile -> apply_job w/o create_profile (404) + create_profile double +91 (400) _(4 files)_
+- **2026-07-20_181405** — `pre-deploy-maya-hi-out-2026-07-20_181405` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_
+- **2026-07-20_182900** — `pre-newseeker-mpl-fix` — campaign blocker: new_seeker=yes still fetches profile; MPL not offered on failure/no-apply _(4 files)_
+- **2026-07-20_183000** — `pre-deploy-maya-hi-out-2026-07-20_183000` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_
+- **2026-07-20_184008** — `pre-applyturn-newcaller-hardblock` — hallucinated apply (spoke JSON + fake success, no apply_job) + new-caller age/gender/loc/exp not collected _(4 files)_
+- **2026-07-20_184954** — `pre-deploy-maya-hi-out-2026-07-20_184954` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_
+- **2026-07-20_185640** — `pre-newseeker-value-surface` — new_seeker never steered branch across 14 calls; surface interpolated value at decision + default-to-fetch _(4 files)_
+- **2026-07-20_185739** — `pre-deploy-maya-hi-out-2026-07-20_185739` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_
+- **2026-07-20_190822** — `pre-createprofile-5field-gate` — new caller: create_profile fired with empty gender; experience/age never asked; enforce 5-field collection before mint _(4 files)_
+- **2026-07-20_190839** — `pre-deploy-maya-hi-out-2026-07-20_190839` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_
+- **2026-07-20_191215** — `pre-mpl-goodbye-hardgate` — MPL still skipped on failure/decline exit; gate goodbye behind MPL + inline line at failure exit _(4 files)_
+- **2026-07-20_191253** — `pre-deploy-maya-hi-out-2026-07-20_191253` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_
+- **2026-07-20_191606** — `pre-mpl-crosscall-presented` — cross-call MPL skip should key on presented (asked), not only registered _(4 files)_
+- **2026-07-20_191738** — `pre-deploy-maya-hi-out-2026-07-20_191738` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_
+- **2026-07-20_192418** — `pre-deploy-maya-out-memory-2026-07-20_192418` — auto snapshot before Raya deploy of Maya/Maya Memory.md _(4 files)_
+- **2026-07-20_192446** — `pre-deploy-maya-in-memory-2026-07-20_192446` — auto snapshot before Raya deploy of Maya/Maya Memory.md _(4 files)_
+- **2026-07-22_130035** — `pre-notinterested-exit` — row26: explicit not-looking-for-job -> graceful exit + not_interested_in_jobs output var _(4 files)_
+- **2026-07-22_130038** — `pre-deploy-maya-hi-out-2026-07-22_130038` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_
+- **2026-07-24_150630** — `pre-canonical-locations` — Maya: add Canonical Location Spellings (propagate from KKB) _(4 files)_
+- **2026-07-27_005643** — `pre-deploy-maya-hi-out-2026-07-27_005643` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_
+- **2026-07-27_005644** — `pre-deploy-maya-hi-in-2026-07-27_005644` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(4 files)_
+- **2026-07-27_013608** — `pre-apply-repeat-port` — Maya: port r68 apply-failure guards (no bridge re-speak on failure + no re-fire of same failed job_id) from KKB _(4 files)_
+- **2026-07-27_013658** — `pre-deploy-maya-hi-out-2026-07-27_013658` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_
+- **2026-07-27_013658** — `pre-deploy-maya-hi-in-2026-07-27_013658` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(4 files)_
+- **2026-07-27_014639** — `pre-deploy-maya-hi-out-2026-07-27_014639` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_

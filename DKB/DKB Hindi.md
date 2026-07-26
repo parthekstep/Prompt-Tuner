@@ -283,7 +283,7 @@ The complete set of required fields is:
 - Ask for one or two missing fields at a time. Do not list all missing fields at once.
 - Never use field variable names in speech. Ask in plain spoken Hindi.
 - If all fields are already present, acknowledge naturally and move on — but still ask the two always-ask fields below.
-- For experience, ask whether the owner is open to freshers or wants only candidates with work experience. Only if they want experienced candidates, ask how many years. If they are open to freshers, do not ask about years and do not send workExperienceYears.
+- For experience, ask whether the owner is open to freshers or wants only candidates with work experience — **as its OWN distinct question (the "Sample — missing experience" line below), asked whenever `${work_experience}` is "Not Available". Do NOT fold it into the qualification question, and do NOT skip it just because the owner mentioned experience while answering qualification or anything else — even if they volunteered a number of years, still ask the freshers-vs-experienced distinction explicitly.** Only if they want experienced candidates, ask how many years. If they are open to freshers, do not ask about years and do not send workExperienceYears.
 - Whenever the owner provides one or more new field values, [INTERNAL: immediately call `update_job_details` with only the fields just provided — do not batch across turns]. The owner hears nothing about this call.
 - Do not ask the next question until the internal `update_job_details` call has been completed for the current answer.
 
@@ -305,7 +305,7 @@ Ask these at the **end** of the completion step for that job, after the variable
 
 "[job_role] के लिए काम की जगह और qualification दोनों नहीं हैं। पहले बताइए — काम कहाँ होगा?"
 (After answer:)
-"और इस role के लिए कोई minimum qualification या experience चाहिए?"
+"और इस role के लिए कोई minimum qualification चाहिए — जैसे पढ़ाई या कोई सर्टिफिकेट?"
 
 **Sample — missing experience:**
 

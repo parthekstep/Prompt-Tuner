@@ -23,6 +23,6 @@
       "get_item_path": ""
     },
     "output": { "inherits": "conversation", "prompt_field": "output_instructions" },
-    "memory": { "inherits": "conversation", "prompt_field": "MEMORY_PROMPT_FIELD_UNMAPPED" }
+    "memory": { "inherits": "conversation", "prompt_field": "memory_instructions", "extra_body": { "memory_enabled": true } }
   }
 }

@@ -12,6 +12,11 @@ Every prompt edit to DKB is logged here. Entry format:
 
 ---
 
+## 2026-07-22 — DKB (Hi+Kn): "open to freshers?" question was being skipped — decouple from qualification + make it a distinct ask
+- **Feedback/bug:** Sheet row 66. Grounded in live call 1be4fc6c: the freshers-vs-experienced question never fired. Root cause: the completion step asked a COMBINED question ("इस role के लिए कोई minimum qualification या experience चाहिए?"), the owner answered with experience ("two years"), the agent captured it and moved on — so the distinct "क्या आप freshers को रखने के लिए तैयार हैं, या सिर्फ़ experience वाले candidates चाहिए?" ask (which the prompt DID contain) was short-circuited. (The prompt having the question was not enough — it was structurally unreachable when the owner volunteered experience.)
+- **Change:** (1) Decoupled the qualification question from experience — it now asks qualification only ("कोई minimum qualification चाहिए — जैसे पढ़ाई या कोई सर्टिफिकेट?"), no longer absorbing the experience answer. (2) Strengthened the experience rule: ask the freshers-vs-experienced question as its OWN distinct question whenever ${work_experience} is "Not Available"; do NOT fold it into the qualification question, and do NOT skip it just because the owner mentioned experience while answering something else. Hindi source-of-truth, mirrored to Kannada (English rule identical; only the quoted qualification line adapted). Deployed dkb-hi-out + dkb-kn-out (echo-verified).
+- **Files:** DKB/DKB Hindi.md, DKB/DKB Kannada.md
+
 ## 2026-07-20 — DKB (H+K): Yes/No Gate Capture — register the owner's answer before advancing
 - **Feedback/bug:** Sheet row 26 — employers said yes/no clearly but the bot didn't register it and advanced anyway (wrong branch / skipped consent), causing frustrated drop-offs (calls 2465759, 3663530, 3664822).
 - **Change:** Added a "Yes/No Gate Capture (Mandatory — Register Before Advancing)" section listing the five yes/no gates (identity, availability, job-freshness, new-vacancy, post-consent) and requiring the bot to capture + briefly confirm a clear yes/no before branching or firing a tool, with a single re-ask when no clear response is captured (an explicit "unsure" is itself a captured answer). (Analyser D14.)

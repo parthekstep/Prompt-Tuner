@@ -513,6 +513,33 @@ def append_history(env_name, row, agent_id, sha, label, result):
         fh.write(line)
 
 
+def warn_if_stale_agent(base, headers, token, agent_id, timeout):
+    """Freshness guard: warn (do not block) if the target agent has no recent calls — a strong
+    sign it is a dead placeholder while live traffic is on a DIFFERENT agent id. Learned the hard
+    way on 2026-07-22: KKB inbound fixes were deployed to a placeholder (last call 07-14) while the
+    live number was bound to another agent."""
+    try:
+        status, parsed, _ = api("GET", "%s/api/call?agent_id=%s&limit=1" % (base, agent_id),
+                                 headers, token, None, timeout, 1)
+        calls = (parsed.get("calls") or parsed.get("data") or []) if isinstance(parsed, dict) else []
+        if not calls:
+            print("   ⚠️  FRESHNESS: this agent has NO calls on record — is it the LIVE agent? "
+                  "Live traffic may be on a different agent id (run `list` and compare).")
+            return
+        ts = (calls[0].get("created_at") or "")[:10]
+        try:
+            days = (datetime.utcnow() - datetime.strptime(ts, "%Y-%m-%d")).days
+        except Exception:
+            print("   freshness:  last call %s" % ts); return
+        if days >= 10:
+            print("   ⚠️  FRESHNESS: last call was %s (%d days ago) — verify this is the LIVE agent, "
+                  "not a dead placeholder (live traffic may be on a different agent id)." % (ts, days))
+        else:
+            print("   freshness:  OK — last call %s (%d days ago)" % (ts, days))
+    except Exception as exc:
+        print("   freshness:  (check skipped: %s)" % exc)
+
+
 def deploy_one(row, endpoints, env, base, headers, token, args):
     import difflib
     env_name = env.get("RAYA_ENV", "staging")
@@ -559,12 +586,22 @@ def deploy_one(row, endpoints, env, base, headers, token, args):
             "(fix raya/agents.json or expected_name_contains)."
             % (live_name, row.get("expected_name_contains")))
     print("   name guard: OK (contains one of %s)" % row.get("expected_name_contains"))
+    warn_if_stale_agent(base, headers, token, agent_id, endpoints.get("request", {}).get("timeout_s", 30))
 
     # 3. dry-run diff. In sync -> nothing to push, no snapshot needed.
-    if normalize(remote_prompt) == normalize(local):
+    #    "In sync" requires BOTH the prompt content AND any extra_body fields (e.g. memory_enabled)
+    #    to match remote — otherwise a toggle like memory_enabled=true would never get pushed when
+    #    the prompt text already matches (which is exactly the memory-enable case).
+    _extra = prof.get("extra_body", {})
+    _extra_in_sync = all(isinstance(agent_obj, dict) and agent_obj.get(k) == v for k, v in _extra.items())
+    if normalize(remote_prompt) == normalize(local) and _extra_in_sync:
         print("   diff:       none — remote already matches local. Skipping PUT (idempotent no-op).")
         append_history(env_name, row, agent_id, lsha, "-", "skip-in-sync")
         return
+    if normalize(remote_prompt) == normalize(local) and not _extra_in_sync:
+        print("   diff:       prompt text matches; extra fields differ -> pushing to set them: %s"
+              % ", ".join("%s: %r->%r" % (k, (agent_obj.get(k) if isinstance(agent_obj, dict) else None), v)
+                          for k, v in _extra.items() if not (isinstance(agent_obj, dict) and agent_obj.get(k) == v)))
     diff = list(difflib.unified_diff(
         (remote_prompt or "").splitlines(keepends=True),
         local.splitlines(keepends=True),
@@ -600,6 +637,10 @@ def deploy_one(row, endpoints, env, base, headers, token, args):
     else:
         body = copy.deepcopy(agent_obj)
         dotted_set(body, prof["prompt_field"], local)
+    # extra_body: profile-level fixed fields sent alongside the prompt (e.g. memory profile
+    # sends {"memory_enabled": true} so pushing the memory prompt also turns the feature ON).
+    for _k, _v in prof.get("extra_body", {}).items():
+        body.setdefault(_k, _v)
     timeout = endpoints.get("request", {}).get("timeout_s", 30)
     status, parsed, raw = api(prof["update"]["method"], update_url, headers, token, body, timeout, 0)
     if status >= 300:
@@ -617,6 +658,11 @@ def deploy_one(row, endpoints, env, base, headers, token, args):
             "Rollback local: scripts/prompt-version.sh restore %s %s\n"
             "STOPPING the batch." % (row["id"], row["agent"], label))
     print("   read-back:  OK — update response echoes local (%d bytes, sha %s)." % (llen, lsha))
+    # soft-confirm extra_body fields (e.g. memory_enabled) from the response, if it echoes them.
+    for _k, _v in prof.get("extra_body", {}).items():
+        if isinstance(parsed, dict) and _k in parsed:
+            ok = "OK" if parsed.get(_k) == _v else "MISMATCH (got %r)" % parsed.get(_k)
+            print("   extra:      %s=%r %s" % (_k, _v, ok))
     append_history(env_name, row, agent_id, lsha, label, "deployed")
     print("   DEPLOYED %s -> %s" % (row["id"], agent_id))
 
