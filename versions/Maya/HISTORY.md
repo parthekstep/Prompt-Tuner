@@ -69,3 +69,6 @@
 - **2026-07-27_022839** — `pre-profileid-fix` — Maya: create_profile profile_id must be profileId UUID not numeric id _(4 files)_
 - **2026-07-27_023139** — `pre-deploy-maya-hi-out-2026-07-27_023139` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_
 - **2026-07-27_023139** — `pre-deploy-maya-hi-in-2026-07-27_023139` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(4 files)_
+- **2026-07-27_135729** — `pre-inbound-twoturn-and-jobid` — Maya inbound two-turn greet-then-fetch + job_id verbatim rule _(4 files)_
+- **2026-07-27_140044** — `pre-deploy-maya-hi-in-2026-07-27_140044` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(4 files)_
+- **2026-07-27_140047** — `pre-deploy-maya-hi-out-2026-07-27_140047` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_

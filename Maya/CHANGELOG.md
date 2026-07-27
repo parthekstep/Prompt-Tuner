@@ -12,6 +12,13 @@ Every prompt edit to Maya is logged here. Maya is Hindi-only (KKB spinoff). Entr
 
 ---
 
+## 2026-07-27 — Maya inbound: smooth greet-then-fetch (two-turn) + job_id-verbatim rule
+- **Feedback/bug (two-turn):** Parth: "update for maya inbound also" — port KKB inbound's greet-first-then-fetch fix. Grounded: Maya inbound DOES fire `get_profile` (on turn 2) but prepends a fetch-narration BEFORE the greeting ("मैं आपके लिए जानकारी देख रही हूँ। नमस्ते…" — calls `cb19fc17`/`41ca7460`/`ff03c92d`/`234e50a8`/`7a5cb1e2`), which reads backwards/weird. Root: line said "Deliver the greeting naturally **alongside** the silent call" (bundling) + "the very first thing you do is emit get_profile" primed the pre-greeting narration.
+- **Change:** restructured the fetch into the explicit two-turn DECISIVE ROUTER (Turn 1 greeting only, clean; Turn 2 a mandatory tool-only `get_profile` before any discovery/jobs), mirroring KKB inbound; removed the "alongside the silent call" bundling; added the observed narration string to the forbidden list (both turns); harmonized the get_profile Tool Call Rules "first action" line to "the turn immediately after the greeting." Deliberately NOT the D25 silent/invisible reframe — the fetch stays loud + mandatory (Maya already fires it; this only un-bundles + cleans the greeting so it's smoother).
+- **Feedback/bug (job_id):** same job_id-hyphen-stripping class found on KKB inbound (call `8ddcaa5a`; see `KKB/CHANGELOG.md`). Applied the identical job_id-verbatim rule to Maya inbound + Maya Hindi (outbound) `apply_job` payload rules (propagation; pure-additive).
+- **Files:** `Maya/Maya Inbound.md` (two-turn + job_id), `Maya/Maya Hindi.md` (job_id). Deployed maya-hi-in (sha 3fda09a9) + maya-hi-out (sha d82f163c), read-back verified. Awaiting post-deploy call.
+- **Analyser:** D29 "Seen in" extended to Maya inbound 2026-07-27; D30 added (see `KKB/CHANGELOG.md`).
+
 ## 2026-07-27 — Maya: apply_job profile_id must be the `profileId` UUID, not the numeric `id` (shared 6-file fix)
 - **Feedback/bug:** Grounded in Maya call 46d9f776 (read via the tool-call ARGS): create_profile returned `{'id': 5051, 'profileId': '2b51fd94-…'}`, then apply_job was sent `profile_id:"5051"` (the numeric top-level id) → backend 404 `{"error":"Invalid or missing profile_id"}` (the "apply failing" P1s, rows 15/42/65, previously mis-filed as pure backend).
 - **Change:** On the create_profile path, the apply_job `profile_id` is now specified as the `profileId` UUID field — NEVER the numeric top-level `id`. (get_profile's top-level `id` already IS the UUID, so the returning-caller path was unchanged.) Applied to Maya Hindi.md + Maya Inbound.md as part of the 6-file KKB+Maya fix (see KKB/CHANGELOG.md 2026-07-27).

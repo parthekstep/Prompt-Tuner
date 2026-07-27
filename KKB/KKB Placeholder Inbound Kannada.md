@@ -1072,13 +1072,13 @@ Use `apply_job` only after:
 - a valid `profile_id` exists (from get_profile or create_profile)
 
 ## job_id Rules
-Use the `job_id` field from the selected job object within the Job Inventory.
+Use the `job_id` field from the selected job object within the Job Inventory. **Pass it EXACTLY as it appears there — a full hyphenated UUID in 8-4-4-4-12 form (e.g. `eab4805a-7d5f-4bf2-b1a9-1fd34521550d`). Copy every character INCLUDING all four hyphens; never strip, drop, add, or reformat any character. A `job_id` sent with the hyphens removed (a bare 32-character run) is rejected by the backend with "Job not found" (404).**
 
 Never speak the job ID aloud. Never guess or infer a job ID.
 
 ## Payload construction
 - `profile_id` — **if `get_profile` returned a profile at the start of this call, use the top-level `id` from that response** (the most-recent profile); only otherwise use the **`profileId`** field (a UUID) from the `create_profile` result — NOT its top-level numeric `id` (e.g. `5051`), an internal record number that `apply_job` rejects with "Invalid or missing profile_id". Never mint a new profile when `get_profile` already returned one.
-- `job_id` — from the selected job object in the Job Inventory
+- `job_id` — from the selected job object in the Job Inventory; the full hyphenated UUID, copied verbatim (all four hyphens intact — never a stripped 32-char run)
 
 Do not send empty or null fields.
 
