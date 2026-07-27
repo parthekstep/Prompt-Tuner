@@ -74,6 +74,25 @@
       "deploy": true
     },
     {
+      "id": "kkb-kn-signals",
+      "file": "KKB/KKB Placeholder Kannada Signals.md",
+      "agent": "KKB",
+      "language": "kn",
+      "direction": "outbound",
+      "kind": "conversation",
+      "profile": "conversation",
+      "expected_name_contains": [
+        "KKB",
+        "Signals"
+      ],
+      "raya_name": "KKB Placeholder- Kannada Signals API",
+      "raya_agent_id": {
+        "prod": "33037201-78ce-405d-b509-a3b6934e20f1",
+        "staging": ""
+      },
+      "deploy": true
+    },
+    {
       "id": "dkb-hi-out",
       "file": "DKB/DKB Hindi.md",
       "agent": "DKB",
