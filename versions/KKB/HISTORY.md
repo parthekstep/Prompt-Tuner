@@ -86,3 +86,6 @@
 - **2026-07-27_023140** — `pre-deploy-kkb-kn-out-2026-07-27_023140` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(6 files)_
 - **2026-07-27_023140** — `pre-deploy-kkb-hi-in-2026-07-27_023140` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(6 files)_
 - **2026-07-27_023141** — `pre-deploy-kkb-kn-in-2026-07-27_023141` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(6 files)_
+- **2026-07-27_121204** — `pre-inbound-greet-then-fetch` — restructure inbound get_profile: greet turn1, fetch turn2 (fix 0/8 not-firing) _(6 files)_
+- **2026-07-27_121640** — `pre-deploy-kkb-hi-in-2026-07-27_121640` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(6 files)_
+- **2026-07-27_121641** — `pre-deploy-kkb-kn-in-2026-07-27_121641` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(6 files)_
