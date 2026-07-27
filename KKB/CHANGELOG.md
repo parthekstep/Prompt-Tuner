@@ -12,6 +12,14 @@ Every prompt edit to KKB is logged here. Entry format:
 
 ---
 
+## 2026-07-27 — KKB (base, Hi+Kn): new-caller apply — `apply_job` batched with `create_profile` → empty `profile_id` (apply fails)
+- **Feedback/bug:** Parth: on the base KKB Kannada, a new-caller apply failed — the bot correctly called `create_profile`, but `apply_job` went out with no `profile_id`. Grounded in `kkb-kn-out` call `40c8e3db` (`new_seeker=Yes`): tools = `[create_profile, apply_job]`; `apply_job` args `{"job_id":"4d52479b…","profile_id":""}` — **empty** `profile_id`. (Returning-caller path `61d713a6` works: `get_profile` → `apply_job` with a real id.)
+- **Root cause:** the apply-sequence prose told the model to run `create_profile` + `apply_job` "back to back" in "ONE clean sequence in a single turn" / "for the whole sequence" (Hindi lines 387, 889). So the model emitted BOTH tool calls in one batch, and `apply_job` was built BEFORE `create_profile`'s result (the `profileId`) existed → `profile_id=""`. The id only exists after `create_profile` responds.
+- **Change (AGNOSTIC — English rule verbatim Hi↔Kn):** rewrote both lines so the new-caller apply is TWO steps: `create_profile` FIRST → WAIT for its result → then, as the NEXT action, read the `profile_id` from that result and call `apply_job` with it. Explicit: never emit `create_profile` + `apply_job` in the same turn/batch; never send `apply_job` with an empty `profile_id`. Returning-caller path (single `apply_job`) unchanged.
+- **Files:** `KKB/KKB Placeholder Hindi.md` + `KKB Placeholder Kannada.md`. Deployed kkb-hi-out (`614e7c61`) + kkb-kn-out (`2944cf61`). Awaiting a post-deploy new-caller call to confirm.
+- **Analyser:** added **D31** (new-caller create→apply batched in one turn → `apply_job` empty `profile_id`).
+- **Flag:** Maya (out+in) and the Signals clone carry the same "single turn / back to back / whole sequence" apply language → same latent bug (Maya gate + Signals parked — port on approval).
+
 ## 2026-07-27 — NEW: "KKB Kannada Signals API" clone — swap 3 tools (ONEST → Signals) + prompt response-mapping
 - **What:** Integrated the cloned agent **"KKB Placeholder- Kannada Signals API"** (`33037201-78ce-405d-b509-a3b6934e20f1`) with the EkStep **blue_dot Dev** Signals APIs (`https://signals.bluedotseconomy.org`), replacing its 3 ONEST/dhiway tools. The bot's spoken behavior/flow is unchanged; only the 3 tool endpoints + the response-reading prompt sections changed.
 - **Tool configs** (live in the Raya agent's `tools.llm_tools[]`; PATCHed via the API — proven to round-trip byte-identical incl. per-field descriptions/types, without wiping `instructions`):

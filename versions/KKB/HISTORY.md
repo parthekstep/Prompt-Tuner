@@ -97,3 +97,6 @@
 - **2026-07-27_150049** — `pre-deploy-kkb-kn-signals-2026-07-27_150049` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada Signals.md _(7 files)_
 - **2026-07-27_150201** — `pre-deploy-kkb-kn-signals-2026-07-27_150201` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada Signals.md _(7 files)_
 - **2026-07-27_154358** — `pre-deploy-kkb-kn-signals-2026-07-27_154358` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada Signals.md _(7 files)_
+- **2026-07-27_160526** — `pre-apply-chain-sequencing` — new caller: apply_job separate step after create_profile returns (fix empty profile_id) _(7 files)_
+- **2026-07-27_160645** — `pre-deploy-kkb-hi-out-2026-07-27_160645` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi.md _(7 files)_
+- **2026-07-27_160645** — `pre-deploy-kkb-kn-out-2026-07-27_160645` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(7 files)_
