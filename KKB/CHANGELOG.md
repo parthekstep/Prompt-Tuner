@@ -12,6 +12,11 @@ Every prompt edit to KKB is logged here. Entry format:
 
 ---
 
+## 2026-07-30 — KKB outbound (Hi+Kn): phone-malform fix — exactly-one-`+91` (ported from Maya) [overnight run]
+- **Feedback/bug:** overnight retest (kkb-kn-out `fa530906` + `bz8fjqumk`) — `create_profile` sent a MALFORMED phone `+9197946350285` → HTTP 400 "Invalid Indian phone number format" → seeker not created, apply blocked. Root cause: kkb-out's phone rule (lines 776/817) only said "don't double-prefix" (weak), so the model mangled a `+91`-prefixed `${contact_phone}`. Maya's stronger rule (use as-is if already `+91`, only prepend to a bare 10-digit, never double/mangle) composes cleanly — Maya's phone was clean in the same harness (`baf836fe`).
+- **Change:** ported Maya's exactly-one-`+91` rule to BOTH `get_profile` and `create_profile` phone rules in kkb-hi-out + kkb-kn-out.
+- **Files:** `KKB/KKB Placeholder Hindi.md` + `KKB/KKB Placeholder Kannada.md` (DEPLOYED kkb-hi-out `da612923` + kkb-kn-out `87ab9108`). **Verify:** end-to-end retest `bgdfxtzxn` in progress (target: clean phone → create success → apply success on real up-getjob job_ids → neutral D34 hold).
+
 ## 2026-07-30 — KKB outbound (Hi+Kn): neutral `hold_message` (D34) [overnight run]
 - **Feedback/bug:** overnight harness test (call `fa530906`, kkb-kn-out) — `get_profile`/`create_profile` `hold_message="ನಿಮ್ಮ ಮಾಹಿತಿ ಪರಿಶೀಲಿಸುತ್ತಿದ್ದೇನೆ"` spoken; "ನಿಮ್ಮ ಮಾಹಿತಿ ಸಿಕ್ತು" said even on an EMPTY fetch → the silent fetch is narrated (D34 ACTIVE). Tool-silence rule was prose-only, never named the `hold_message` param.
 - **Change:** added a neutral-hold rule ("एक मिनट" / "ಒಂದು ನಿಮಿಷ" for `get_profile`/`create_profile`/`update_profile`). Ported from the Signals/inbound D34 fix.
