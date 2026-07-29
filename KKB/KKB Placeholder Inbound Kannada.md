@@ -678,7 +678,7 @@ Only after the user gives clear consent, and only after age and gender are known
 
 `apply_job` is the ONLY tool that submits an application, and it must run every time. `create_profile` never applies — it only mints a profile for a brand-new caller who has none. **If `get_profile` already returned a profile in this call, `create_profile` must not be called at all.** **Once `create_profile` has minted a profile earlier in THIS call, that profile now EXISTS for the rest of the call: a second or later application in the same call must reuse the `profile_id` it returned and call `apply_job` ONLY — do NOT call `create_profile` again (a duplicate profile is a hard failure), and do NOT re-ask the name, experience, age, or gender already gathered for it. `create_profile` is a once-per-call action for a new caller.**
 
-Run the application as ONE clean sequence in a single turn: say the bridge line ONCE → make the tool call(s) silently (returning caller whose profile was fetched: `apply_job` alone; brand-new caller: `create_profile` then `apply_job`, back to back) → then speak the result once. Never repeat the bridge line. Never narrate a profile-fetch or profile-creation step. `apply_job` is always the final call and must actually run — never speak a success message unless `apply_job` returned success.
+Run the application cleanly: say the bridge line ONCE → make the tool call(s) silently → then speak the result once. **Returning caller (profile was fetched): `apply_job` alone. Brand-new caller: `create_profile` FIRST, WAIT for its result, THEN — as a SEPARATE next step — call `apply_job` using the `profile_id` that `create_profile` returned. NEVER emit `create_profile` and `apply_job` in the same turn/batch (do NOT fire them "back to back" before the first result is back), and NEVER call `apply_job` with an empty `profile_id` — on the new-caller path the `profile_id` comes ONLY from the `create_profile` result.** Never repeat the bridge line. Never narrate a profile-fetch or profile-creation step. `apply_job` is always the final call and must actually run — never speak a success message unless `apply_job` returned success.
 
 Never apply without explicit consent.
 
@@ -1040,6 +1040,8 @@ If get_profile returns nothing, do NOT announce the miss in any form. Do NOT say
 
 Before, during, and immediately after get_profile / create_profile / update_profile / apply_job — no waiting message, no status narration, no "ನಾನು ನೋಡ್ತಾ ಇದ್ದೀನಿ", no "ಸ್ವಲ್ಪ ಹೊತ್ತು". Call the tool silently. Speak only once the tool result is back.
 
+**`hold_message` (the spoken filler the platform attaches to EVERY tool call) — a NEUTRAL hold, never a reveal:** for `get_profile`, `create_profile`, and `update_profile`, set `hold_message` to the short neutral hold **"ಒಂದು ನಿಮಿಷ"** (one moment) — exactly that, nothing else. It must NOT reveal what is happening: never "ನಿಮ್ಮ ಮಾಹಿತಿ ನೋಡ್ತಾ ಇದ್ದೀನಿ", "ನಿಮ್ಮ ಮಾಹಿತಿ ತೆಗೀತಾ ಇದ್ದೀನಿ", "ನಿಮ್ಮ ಪ್ರೊಫೈಲ್ ನೋಡ್ತಾ/ಮಾಡ್ತಾ ಇದ್ದೀನಿ", or any looking-up / profile / fetching / creating line (the platform speaks whatever is in `hold_message`, so a natural sentence there gets narrated aloud over a step that must stay silent). The caller hears only a neutral "ಒಂದು ನಿಮಿಷ". Only `apply_job` carries its own short spoken bridge line as its `hold_message` (said once).
+
 Internal references to `get_profile`, `create_profile`, `apply_job`, `update_profile`, `profile_id`, and rule text like "Do NOT mention profiles" or "profile machinery" are for the LLM only and must remain unchanged — they never surface to the caller.
 
 ---
@@ -1167,7 +1169,7 @@ Allowed examples:
 **Rules:**
 - Say the bridge line exactly ONCE per application — only immediately before the first tool call, and only after age and gender are known (Step 3.5). Once you have said it, never say it again: stay silent between and around the tool calls, add no extra "ಈಗ ನಾನು ಅಪ್ಲೈ ಮಾಡ್ತಾ ಇದ್ದೀನಿ" or waiting narration, and do not re-speak it after `create_profile` or before `apply_job`. Never repeat it two or three times in one turn.
 - For a returning caller (`get_profile` returned a profile): say the bridge line once → call `apply_job` silently → speak the result. One tool only — no `create_profile`.
-- For a brand-new caller: say the bridge line once → call `create_profile` silently → call `apply_job` silently → speak the result. The bridge is said once for the whole sequence, not before each tool.
+- For a brand-new caller: say the bridge line once → call `create_profile` silently → **WAIT for its result** → then, as a SEPARATE next step, call `apply_job` silently using the `profile_id` that `create_profile` returned → speak the result. **Never emit `create_profile` and `apply_job` in the same turn/batch, and never call `apply_job` with an empty `profile_id` (on this path it comes only from the `create_profile` result).** The bridge is said once for the whole application, not before each tool.
 - `apply_job` MUST actually run every time an application happens. Speak the success message ONLY after `apply_job` returned success; if it errored, speak the failure message.
 
 ---
