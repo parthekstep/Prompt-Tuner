@@ -132,7 +132,7 @@ Log every call (uuid, scenario, pass/fail per checklist, issues) to scratchpad/T
 - 2026-07-30 ~01:00 IST — **Fix A STARTED.** kkb-hi-in D31 two-step (create→WAIT→apply, no batching) **DEPLOYED** (b6222233; rollback snapshot pre-deploy-kkb-hi-in-2026-07-30_003534) — VERIFY-PENDING (inbound, needs a real new-caller call). kkb-kn-in: **reconcile-first required** — live holds a newer real inventory (Burger King/CIEL HR job_ids) the repo lacks; the Kn D31 edit was REVERTED (do NOT deploy the stale repo Kn copy). Changelog updated. Still TODO: add kkb-hi-in/kn-in to analyser D31 "Seen in". Personas hi-employer + hi-student staged.
 
 ## NEXT ACTION (grounded 2026-07-30 ~00:50 from raya/overnight/PRIORITY_BUGS.md)
-**Fix A status: kkb-hi-in DEPLOYED (verify-pending). kkb-kn-in STILL TODO → `pull kkb-kn-in` (adopts live real inventory) → re-apply the D31 two-step edit (same as Hi; see CHANGELOG 2026-07-30) → deploy → commit.** Then continue B, C below.
+**Fix A+B status: kkb-hi-in DEPLOYED both — D31 (two-step create→WAIT→apply) + D34 (neutral `hold_message`) — verify-pending (inbound). kkb-kn-in STILL TODO → `pull kkb-kn-in` (adopts live real inventory Burger King/CIEL HR) → re-apply BOTH the D31 two-step edit AND the D34 hold_message edit (see CHANGELOG 2026-07-30 ×2) → deploy → commit.** Then: Fix C (dkb-kn D34/D5 — HARNESS-VERIFIABLE, do full repro→fix→verify with a KN employer persona + sync DKB Hi); Maya D31 batching (analyser flag says Maya out+in still carries "single turn/back to back" — fix + Maya out is harness-testable); then latent→open-items; then Phase 4 report/skills/Excel.
 
 Merge+ground verdict: MOST static findings are **LATENT** (bots work in real calls) → do NOT edit; log to open-items. Grounded **ACTIVE** fixes, in order:
 

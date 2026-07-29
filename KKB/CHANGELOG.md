@@ -12,6 +12,11 @@ Every prompt edit to KKB is logged here. Entry format:
 
 ---
 
+## 2026-07-30 — KKB inbound: neutral `hold_message` (D34 — stop narrating the silent fetch) [overnight run]
+- **Feedback/bug:** kkb-hi-in `get_profile` `hold_message` = "आपकी जानकारी निकल रही है" — the platform speaks `hold_message` aloud, so the fetch the prompt insists is silent gets announced (D34, ACTIVE). The tool-silence rule was prose-only and never named the `hold_message` param.
+- **Change:** added a rule setting `hold_message` to the neutral "एक मिनट" for `get_profile`/`create_profile`/`update_profile` (only `apply_job` keeps a spoken bridge). Ported from the Signals D34 fix.
+- **Files:** `KKB/KKB Placeholder Inbound.md` — **DEPLOYED kkb-hi-in** (snapshot `pre-deploy-kkb-hi-in-2026-07-30_003943`). Kn twin (`kkb-kn-in`) gets the same edit during the inventory reconcile. Verify-pending (inbound).
+
 ## 2026-07-30 — KKB inbound: new-caller apply-404 fix (D31 create→WAIT→apply, no batching) [overnight run]
 - **Feedback/bug:** overnight test-harness static analysis + real transcripts (calls `5449910e`, `34f1f587`) — new INBOUND callers' `apply_job` fired with a fabricated/empty `profile_id` and NO `create_profile` → HTTP 404 "Invalid or missing profile_id"; apply broken for every new inbound caller. Root cause: the apply-sequence said "single turn / back to back / whole sequence", batching `create_profile`+`apply_job` so apply args were built before `create_profile` returned. (Control call `1fde1677` did create→apply correctly → success.)
 - **Change:** rewrote the new-caller apply sequence to two steps crossing a tool-result boundary — `create_profile` FIRST → WAIT for its result → then as a SEPARATE step call `apply_job` with the returned `profile_id`; forbade same-turn create+apply and empty `profile_id`. Ported from the kkb-kn-out D31 fix (2026-07-27). Lines ~605 + ~1095.
