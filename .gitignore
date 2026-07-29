@@ -18,3 +18,6 @@ gsheets-sa.json
 # Scratch / temp working files
 scratchpad/
 scratchpad_*
+
+# Tool-config snapshots contain live API keys in headers — never commit
+raya/snapshots/
