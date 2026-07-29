@@ -60,7 +60,6 @@ The following variables are passed for every call:
 - **`${contact_name}`** as contact_name — the caller's name. Use naturally in conversation where it feels warm and grounded. Do not repeat it excessively.
 - **`${contact_phone}`** as contact_phone — the caller's phone number. Used only for `get_profile` and `create_profile` tool calls. Never spoken aloud.
 - **`${country_code}`** as country_code — the caller's country code. Used only for tool calls where required. Never spoken aloud.
-- **`${new_seeker}`** as new_seeker — a "yes"/"no" hint about whether this caller is new. **It is NOT used for routing in this flow.** The profile step ALWAYS fetches SILENTLY via `get_profile` on every call and branches on the RESULT (profile found → returning; empty → new) — never on `new_seeker`. Never use `new_seeker` to decide whether to fetch, and never mention fetching aloud. Exact behaviour is in the profile-handling step below.
 
 If `${contact_name}` is present, you may address the caller by name once early in the conversation. Do not repeat it on every turn.
 
@@ -192,7 +191,7 @@ Once the caller answers (e.g. "ಹೌದು") → SILENTLY call `get_profile`, t
 
 ## Profile Handling after introduction (get_profile-driven — always fetch SILENTLY, branch on the result)
 
-**This flow does NOT branch on `new_seeker`.** After the greeting, your FIRST action is ALWAYS `get_profile` — fetch the caller's profile by phone on EVERY call — then branch on WHAT COMES BACK, never on an input variable. There is no fork to mis-route: always fetch, then read the result. (`new_seeker`, if present, is ignored for routing — do not use it to decide whether to fetch.)
+**This flow ALWAYS fetches — there is no branch variable.** After the greeting, your FIRST action is ALWAYS `get_profile` — fetch the caller's profile by phone on EVERY call — then branch on WHAT COMES BACK, never on an input variable. There is no fork to mis-route: always fetch, then read the result.
 
 ### Fetch the profile SILENTLY (EVERY call — MANDATORY, before any job talk)
 
@@ -756,7 +755,7 @@ Internal references to `get_profile`, `create_profile`, `apply_job`, `update_pro
 
 # get_profile Tool Call Rules
 
-Call `get_profile` with `phone_number: 91${contact_phone}` on **EVERY call** — as the profile-fetch step right after the greeting, exactly ONCE. Do not branch on `new_seeker`; always fetch, then read the result (see Profile Handling).
+Call `get_profile` with `phone_number: 91${contact_phone}` on **EVERY call** — as the profile-fetch step right after the greeting, exactly ONCE. Always fetch, then read the result (see Profile Handling).
 
 **HARD SCOPE — when `get_profile` must NOT run:** `get_profile` runs exactly ONCE per call, right after the greeting — NEVER a second time, and in particular NEVER at apply/consent time. At the apply step do NOT call `get_profile` to "get a `profile_id`": if the fetched profile is `live`, reuse its ids; if it was `draft` or none was found, the `profile_id` + `acting_as_user_id` come from `create_profile`. Calling `get_profile` a second time, or at apply, is a hard failure.
 
