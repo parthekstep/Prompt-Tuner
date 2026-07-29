@@ -19,6 +19,7 @@ Columns: bot | scenario | call_uuid | result | key observations. "FIXED" = bug f
 ## KKB Kannada outbound (up-getjob) — `87ab9108`
 | scenario | call | result | notes |
 |---|---|---|---|
+| D34 re-verify (post-fix) | (bz8fjqumk) | ✅ D34 hold VERIFIED | `get_profile` hold_message now neutral "ಒಂದು ನಿಮಿಷ" (was "ನಿಮ್ಮ ಮಾಹಿತಿ ಪರಿಶೀಲಿಸುತ್ತಿದ್ದೇನೆ"). RESIDUAL: bot still SPEAKS "ನಿಮ್ಮ ಮಾಹಿತಿ ಸಿಕ್ತು" as content (runtime narration, prose ban exists → open-items, not prose-fixable). Phone still "+9197946350285" (open-item #2). |
 | cooperative + memory-substitution probe | fa530906 | 🐛 findings | (1) **D32 memory-substitution LATENT** — bot opened neutrally, did NOT resume the `contact_memory` "Fitter\|Hubballi" journey; get_profile fired. (2) **D34 ACTIVE** — get_profile/create_profile `hold_message="ನಿಮ್ಮ ಮಾಹಿತಿ ಪರಿಶೀಲಿಸುತ್ತಿದ್ದೇನೆ"` spoken; also "ನಿಮ್ಮ ಮಾಹಿತಿ ಸಿಕ್ತು" said on an EMPTY fetch (`[]`). → PORT neutral-hold fix to KKB outbound pair. (3) **Phone malform** — create_profile `phone:"+9197946350285"` → HTTP 400 "Invalid Indian phone number"; DICEY (may be harness-DID artifact since contact_phone bound to tester DID) → open-items + ready exactly-one-+91 fix. (4) Age read-back worked (ASR "28"→"8" caught + corrected). |
 
 ## DKB (Hi `57814ac8` + Kn `d1a1614f`) — up-postjob, outbound
