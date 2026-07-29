@@ -12,6 +12,12 @@ Every prompt edit to KKB is logged here. Entry format:
 
 ---
 
+## 2026-07-29 — KKB Signals bots (Kn + Hi): role-confirm wording (current occupation, not "looking for")
+- **Feedback (Parth, call `51c6f63e` — which confirmed all round-3 fixes working: gender skipped when present, correct question count, single ack, one-field update, English values):** the intro role-confirm said "आप अभी [role] का काम देख रहे हैं — क्या आप इसी तरह की जॉब्स देख रहे हैं?" ("you are currently looking for [role] work…"). But the profile `role` is the caller's CURRENT occupation, not what they're seeking. Should be "you ARE a [role] — are you still looking for a [role] job?".
+- **Change (both prompts, Profile Handling step 2):** reworded the role-confirm to treat `role` as the caller's current trade — Hi "मैं देख रही हूँ कि आप अभी [role] हैं — क्या आप अभी भी [role] की जॉब देख रहे हैं?"; Kn "ನಾನು ನೋಡ್ತಿದ್ದೀನಿ, ನೀವು ಈಗ [role] ಆಗಿದೀರಿ — ನಿಮಗೆ ಇನ್ನೂ [role] ಥರದ ಜಾಬ್ ಬೇಕಾ?" + an English note that `role` = current occupation, never phrase as "looking for [role]".
+- **Files:** both Signals prompts (deployed).
+- **Minor open (not yet fixed):** on `51c6f63e` the end-confirm read name/age/role/area but omitted gender though it was on the profile — the confirm rule already lists gender; watch for recurrence.
+
 ## 2026-07-29 — KKB Signals bots (Kn + Hi): Phase-2 decide-missing-first + correct count, drop working/studying, gender-skip, one-field updates, single ack
 - **Feedback (Parth, call `ce59a84c`):** gender asked though the profile had it; "नोट कर रही हूँ" said twice; the location `update_profile` re-sent gender; Phase-2 dribbled ("दो बातें… एक और बात"); "working/studying" answer went nowhere. Suggested: decide the missing fields ONCE at `get_profile` and ask only those with a correct count.
 - **Change (both prompts):** Phase-2 now **decides the question list up-front from the fetched profile** and asks only the MISSING additional fields — **gender ONLY if `item_state.gender` is absent** (skipped entirely if present), granular location always — then announces the **exact count once** and asks one per turn (no "one more"). **Removed the "working / studying" question** (no Signals profile field for it — asking discarded the answer). `update_profile` persist rule tightened to **ONE field per call** (don't re-send gender on the location update). **Double-ack fix:** update `hold_message` is now a NEUTRAL filler ("एक सेकंड" / "ಒಂದು ಕ್ಷಣ"), and the single "noted it down" ack is spoken once in the turn — never in both. Example 1 hold annotations updated to match.
