@@ -83,9 +83,15 @@ GET /api/v1/admin/participant?phone_number=91XXXXXXXXXX
   }
   ```
 - **Empty** (new caller): `items: []` (and/or `user_id: null`).
-- **What the prompt reads:** `profile_id = items[0].item_id`; `acting_as_user_id =`
-  top-level `user_id`; readiness `= items[0].lifecycle_status`; known fields from
-  `items[0].item_state.*`.
+- **`items` can hold MULTIPLE profiles** (up to 5 per user) in no guaranteed order — a
+  stale `draft` and a `live` one can both be present, draft possibly first. **Do NOT read
+  `items[0]` blindly.** Select by lifecycle (see §C.4).
+- **What the prompt reads:** `profile_id =` the **live item's** `item_id` (the first item
+  with `lifecycle_status: "live"`, not necessarily `items[0]`); `acting_as_user_id =`
+  top-level `user_id`; readiness `=` "does any item have `lifecycle_status: "live"`?";
+  known fields from the selected item's `item_state.*`. **Warning:** participant-level
+  `user_consent` can be all-`true` while a specific item is still `draft` — readiness is
+  the ITEM's `lifecycle_status`, never `user_consent`.
 
 ### A.2 `create_profile` — save / go live (POST)
 
@@ -269,15 +275,26 @@ turn. After the caller answers, silently fetch, then greet by name if found. Thi
 also stops the "unnatural start" where the bot blurts a name/stall before any
 conversation.
 
-### C.4 Lifecycle readiness gate — live vs draft
+### C.4 Lifecycle readiness gate — select the LIVE item, not `items[0]`
 
-**Pattern:** before applying, branch on `items[0].lifecycle_status`:
-- **READY (`live`)** → the profile is consented + complete → call `apply_job`
-  **alone** (fetched `item_id` as `profile_id` + top-level `user_id` as
-  `acting_as_user_id` + `job_id`). No create, no consent, no age/gender re-ask.
-- **NOT READY (empty result, or `draft`)** → the caller needs a live profile first:
-  collect only genuinely-missing fields → take consent → `create_profile` → **then,
-  as a separate step**, `apply_job`.
+**Symptom it fixes:** a returning caller with more than one profile — `get_profile`
+returned `[{draft}, {live}]` — and the bot applied to `items[0]` (the draft) →
+`422 PROFILE_NOT_LIVE`, even though a live profile was right there at `items[1]`.
+
+**Pattern:** don't branch on `items[0]`; **scan all `items` and select by lifecycle:**
+- **READY** → **any** item has `lifecycle_status: "live"` → use that live item's
+  `item_id` as `profile_id` + top-level `user_id` as `acting_as_user_id` → `apply_job`
+  **alone**. No create, no consent, no age/gender re-ask. **Ignore any stale `draft` in
+  the same response — never apply to a draft while a live item exists.**
+- **NOT READY** → **no** item is live (all `draft`, or `items` empty) → collect only
+  genuinely-missing fields → consent → `create_profile` (mints a live profile) →
+  **then, as a separate step**, `apply_job` on the new item.
+
+Point every downstream rule (HARD GUARD, apply preconditions, age/gender reuse) at the
+*selected* item, not `items[0]`. (`items[0]` stays correct for the `create_profile`
+*response*, which returns a single new item.) Note: `create_profile` without an
+`item_id` mints a NEW profile each time rather than flipping an existing draft, so users
+accumulate items — which is exactly why selecting the live one matters.
 
 ### C.5 Consent gate — HARD BLOCK, and "draft ≠ consented"
 
