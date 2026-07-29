@@ -189,3 +189,5 @@ Format:
 2026-07-29 21:12:22 · prod · kkb-kn-signals · 33037201-78ce-405d-b509-a3b6934e20f1 · KKB/KKB Placeholder Kannada Signals.md · sha256:a155cb82 · snapshot:pre-deploy-kkb-kn-signals-2026-07-29_211221 · deployed
 2026-07-29 21:19:37 · prod · kkb-kn-signals · 33037201-78ce-405d-b509-a3b6934e20f1 · KKB/KKB Placeholder Kannada Signals.md · sha256:9296eb64 · snapshot:pre-deploy-kkb-kn-signals-2026-07-29_211937 · deployed
 2026-07-29 21:19:38 · prod · kkb-hi-signals · 115b38a5-42ef-4082-be69-84a871bb226a · KKB/KKB Placeholder Hindi Signals.md · sha256:d7a7600f · snapshot:pre-deploy-kkb-hi-signals-2026-07-29_211937 · deployed
+2026-07-29 21:45:52 · prod · kkb-kn-signals · 33037201-78ce-405d-b509-a3b6934e20f1 · KKB/KKB Placeholder Kannada Signals.md · sha256:c93c8df3 · snapshot:pre-deploy-kkb-kn-signals-2026-07-29_214552 · deployed
+2026-07-29 21:45:52 · prod · kkb-hi-signals · 115b38a5-42ef-4082-be69-84a871bb226a · KKB/KKB Placeholder Hindi Signals.md · sha256:efd79e0c · snapshot:pre-deploy-kkb-hi-signals-2026-07-29_214552 · deployed
