@@ -160,6 +160,8 @@ additions or ports of already-working behaviour.
 | Audit a prompt for latent gaps / bug-prone patterns before running it | `/prompt-analyser` |
 | Reconcile a repo prompt against the LIVE prompt on Raya (who's ahead) | `/raya-reconcile` |
 | Run the feedback loop end-to-end: sheet → transcript → fix → deploy → sheet | `/bug-fix` |
+| Test a live agent by having a persona "tester" agent CALL it, then grade the call against generic + bot-specific checklists (find bugs ourselves; verify a fix end-to-end) | `/voice-test` |
+| Onboard a new user/customer bringing a voice bot (or point at an existing repo bot) | `/onboard` |
 
 `/update-prompt` auto-runs `/sync-check` first, so a new change always lands on an
 aligned base. `/prompt-analyser` is a read-only pre-flight review (flags, does not fix);
