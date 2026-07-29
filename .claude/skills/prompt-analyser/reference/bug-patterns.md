@@ -155,6 +155,14 @@ override it. Always check *why the rule would fail*, not just whether it exists.
 - **Fix direction:** define the sentinel set per field; treat sentinel = absent/unknown; never speak the sentinel aloud; route on "unknown" (e.g. role unknown → pool overview / Case B, not a role-confirm).
 - **Seen in:** KKB + Maya 2026-07-16 (profile `role="Any"` spoken and role-confirmed; fixed to treat "Any"/"Not Available"/empty/null/garbled as NOT a usable role → UNKNOWN → skip role-confirm → Step 1 Case B pool overview, surfacing the job-type summary upfront).
 
+### C10 — Tool 4xx with a well-formed id = backend/endpoint issue, NOT prose (and endpoint differences across twins may be BY DESIGN)
+- **Symptom:** a tool consistently fails on one bot with a client error even though the prompt did everything right — e.g. `apply_job` returns **HTTP 404 "Invalid or missing profile_id"** on every call, even after a clean `create_profile` returned a **valid UUID** `profileId` that the bot correctly passed. Prose is correct; adding more prose does nothing.
+- **Root cause:** the failure is in the **backend / live tool config**, not the prompt. Either the endpoint is down/deprecated, or there is a cross-host mismatch (e.g. profile created on one interface host but applied against a different regional BAP host whose DB doesn't hold that id).
+- **Detection:** when grounding a tool failure in a transcript, read the `__RAYA_TOOL_DEBUG__` block: a `4xx`/`404` with a concrete `url=` **and a well-formed id** (a real UUID from a successful create) is an **endpoint/backend** problem, not a payload/prose problem.
+- **⚠️ Do NOT assume endpoint differences between language twins are "drift."** Language variants may use **region-specific backends by design** — e.g. **KKB Kannada = Karnataka endpoints** (`jobs.onest.seeker.dhiway.net`, `onest-lite-bap.dhiway.net`) while **KKB Hindi = UP endpoints** (`job-up.seeker.dhiway.net`, `up-onest-lite-bap.dhiway.net`). A host that differs from the twin is **not evidence of a bug**. Never PATCH a bot's `api_details` to "match its twin" without the **owner confirming** the endpoint is actually wrong — doing so can point a regional bot at the wrong region's data.
+- **Fix direction:** **flag for the backend/platform owner** (`Flagged - Backend Issue`); do NOT prose-fix and do NOT blind-align endpoints. Reinforces **D25** (backend/runtime failures are not prose-fixable).
+- **Seen in:** KKB 2026-07-30 (`kkb-kn-out` `apply_job` → 404 "Invalid or missing profile_id" on the Karnataka BAP endpoint despite a valid `profileId` from a successful create; grounded in calls `7e5e1173`/`ab930586`. Initially mis-read as endpoint "drift" vs the Hindi twin and PATCH-aligned to the UP hosts — **reverted on owner correction: "Karnataka doesn't use those endpoints."** Correct handling: leave the Karnataka endpoints as-is and flag the apply 404 as a backend issue.)
+
 ---
 
 ## D. Language, script & voice
