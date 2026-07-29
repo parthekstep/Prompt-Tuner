@@ -93,6 +93,25 @@
       "deploy": true
     },
     {
+      "id": "kkb-hi-signals",
+      "file": "KKB/KKB Placeholder Hindi Signals.md",
+      "agent": "KKB",
+      "language": "hi",
+      "direction": "outbound",
+      "kind": "conversation",
+      "profile": "conversation",
+      "expected_name_contains": [
+        "KKB",
+        "Signals"
+      ],
+      "raya_name": "KKB Placeholder- Hindi Signals API",
+      "raya_agent_id": {
+        "prod": "115b38a5-42ef-4082-be69-84a871bb226a",
+        "staging": ""
+      },
+      "deploy": true
+    },
+    {
       "id": "dkb-hi-out",
       "file": "DKB/DKB Hindi.md",
       "agent": "DKB",
