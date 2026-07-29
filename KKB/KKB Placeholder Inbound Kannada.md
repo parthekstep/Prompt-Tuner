@@ -88,191 +88,268 @@ This is the complete list of jobs available for this inbound agent. Do not prese
 ```json
 [
   {
-    "job_id": "5bac06a9-1b2a-40d8-8256-fb1fb3d5df36",
-    "role": "Team Member",
-    "company": "Burger King",
-    "qualification": "ಯಾವುದಾದರೂ",
-    "salary": "13000-15000",
-    "vacancy": "10",
-    "location": "Ghaziabad",
-    "hr_contact": "",
-    "benefits": ""
-  },
-  {
-    "job_id": "ce71969f-e364-4da1-a025-8ba1db33940e",
-    "role": "Team Member",
-    "company": "Burger King",
-    "qualification": "ಹತ್ತನೇ ಕ್ಲಾಸ್ ಪಾಸ್",
-    "salary": "13000-15000",
-    "vacancy": "10",
-    "location": "Noida",
-    "hr_contact": "",
-    "benefits": ""
-  },
-  {
-    "job_id": "d303ceb5-615f-4504-b98d-9c138265a99e",
-    "role": "Cashier",
-    "company": "CIEL HR",
-    "qualification": "ಹನ್ನೆರಡನೇ ಕ್ಲಾಸ್ ಪಾಸ್",
-    "salary": "14000-17000",
-    "vacancy": "15",
-    "location": "Knowledge Park II, Greater Noida",
-    "hr_contact": "",
-    "benefits": ""
-  },
-  {
-    "job_id": "d5541f24-6efb-4034-80ce-e2b450a904a6",
-    "role": "Customer Support Executive",
-    "company": "CY Future",
-    "qualification": "ಹನ್ನೆರಡನೇ ಕ್ಲಾಸ್ ಪಾಸ್",
-    "salary": "15000-17000",
-    "vacancy": "200",
-    "location": "Sector 81, Noida",
-    "hr_contact": "",
-    "benefits": ""
-  },
-  {
-    "job_id": "eab4805a-7d5f-4bf2-b1a9-1fd34521550d",
-    "role": "Customer Support Executive",
-    "company": "CY Future",
-    "qualification": "ಹತ್ತನೇ ಕ್ಲಾಸ್ ಪಾಸ್",
-    "salary": "15000-18000",
-    "vacancy": "200",
-    "location": "Noida Special Economic Zone, Phase 2, Noida",
-    "hr_contact": "",
-    "benefits": ""
-  },
-  {
-    "job_id": "d0864e33-edc8-42ba-8a0a-eb4353ff0806",
-    "role": "Crew Member",
-    "company": "McDonald's",
-    "qualification": "ಹನ್ನೆರಡನೇ ಕ್ಲಾಸ್ ಪಾಸ್",
-    "salary": "13000-15000",
-    "vacancy": "15",
-    "location": "PVR Indirapuram, Ghaziabad",
-    "hr_contact": "",
-    "benefits": ""
-  },
-  {
-    "job_id": "b256308a-f1f5-4b50-8ce2-87ecf20d2ef7",
-    "role": "Crew Member",
-    "company": "McDonald's",
-    "qualification": "ಹನ್ನೆರಡನೇ ಕ್ಲಾಸ್ ಪಾಸ್",
-    "salary": "13000-15000",
-    "vacancy": "10",
-    "location": "Nehru Nagar, Ghaziabad",
-    "hr_contact": "",
-    "benefits": ""
-  },
-  {
-    "job_id": "af81c643-d750-4a72-9370-cd16f9bd336a",
-    "role": "Crew Member",
-    "company": "McDonald's",
-    "qualification": "ಹನ್ನೆರಡನೇ ಕ್ಲಾಸ್ ಪಾಸ್",
-    "salary": "13000-15000",
-    "vacancy": "10",
-    "location": "Raj Nagar Extension, Ghaziabad",
-    "hr_contact": "",
-    "benefits": ""
-  },
-  {
-    "job_id": "699304e1-b44a-45fe-9917-445f010aa598",
-    "role": "Crew Member",
-    "company": "McDonald's",
-    "qualification": "ಹನ್ನೆರಡನೇ ಕ್ಲಾಸ್ ಪಾಸ್",
-    "salary": "13000-15000",
-    "vacancy": "9",
-    "location": "PVR Indirapuram, Ghaziabad",
-    "hr_contact": "",
-    "benefits": ""
-  },
-  {
-    "job_id": "c9857e06-7c84-45e2-9a90-9295c71118b6",
-    "role": "Crew Member",
-    "company": "McDonald's",
-    "qualification": "ಹನ್ನೆರಡನೇ ಕ್ಲಾಸ್ ಪಾಸ್",
-    "salary": "13000-15000",
-    "vacancy": "10",
-    "location": "Padmana Naidu Marg, Indirapuram, Ghaziabad",
-    "hr_contact": "",
-    "benefits": ""
-  },
-  {
-    "job_id": "6ba92afd-c299-4006-a26c-edce9089f1bb",
-    "role": "Fashion Assistant",
-    "company": "Pantaloons",
-    "qualification": "ಹನ್ನೆರಡನೇ ಕ್ಲಾಸ್ ಪಾಸ್",
-    "salary": "12000-14000",
-    "vacancy": "10",
-    "location": "Crossings Republik, Ghaziabad",
-    "hr_contact": "",
-    "benefits": ""
-  },
-  {
-    "job_id": "408bcaa2-20ba-49cc-bad5-cf95db6ebc71",
-    "role": "Sales & Marketing Executive",
-    "company": "Pukhraj Health Care",
-    "qualification": "ಯಾವುದಾದರೂ",
-    "salary": "12500-25000",
-    "vacancy": "50",
-    "location": "Meerut, Uttar Pradesh",
-    "hr_contact": "",
-    "benefits": ""
-  },
-  {
-    "job_id": "ce9fbbcb-d52b-418c-b708-86887116c3f3",
-    "role": "Tele Salesperson",
-    "company": "Ques Corp",
-    "qualification": "ಯಾವುದಾದರೂ",
-    "salary": "20000",
-    "vacancy": "100",
-    "location": "Ghaziabad, Uttar Pradesh",
-    "hr_contact": "",
-    "benefits": ""
-  },
-  {
-    "job_id": "518644ae-0676-4560-827c-85ad4009df6f",
-    "role": "Cashier & Packer",
-    "company": "Quess Corp",
-    "qualification": "ಹನ್ನೆರಡನೇ ಕ್ಲಾಸ್ ಪಾಸ್",
-    "salary": "13000-18000",
-    "vacancy": "100",
-    "location": "Aditya World City, Wave City, Ghaziabad",
-    "hr_contact": "",
-    "benefits": ""
-  },
-  {
-    "job_id": "e6fafabf-9cd4-4a04-9984-a6bda71d5c87",
-    "role": "In Store Promoter",
-    "company": "Quess Corporation",
-    "qualification": "ಯಾವುದಾದರೂ",
-    "salary": "13000",
-    "vacancy": "100",
-    "location": "Ghaziabad, Uttar Pradesh",
-    "hr_contact": "",
-    "benefits": ""
-  },
-  {
-    "job_id": "ed12aa84-6c8a-48a7-b69e-ff95c15a5b1b",
+    "job_id": "19e3da1f-fdaf-4b3c-a415-22e73248fae6",
     "role": "Customer Service Executive",
-    "company": "Weavings Manpower Solutions",
-    "qualification": "ಯಾವುದಾದರೂ",
-    "salary": "12000-14000",
-    "vacancy": "50",
-    "location": "Sector Alpha II, Greater Noida",
-    "hr_contact": "",
-    "benefits": ""
+    "company": "Dafson's Healthcare Solutions Private Limited",
+    "salary": "15000-20000",
+    "vacancy": 25,
+    "location": "Navanagar, Hubballi, Karnataka 580025, India"
   },
   {
-    "job_id": "2f803696-403f-4386-963a-8a36d819b497",
-    "role": "Sales Representative",
-    "company": "Westside",
-    "qualification": "ಹನ್ನೆರಡನೇ ಕ್ಲಾಸ್ ಪಾಸ್",
-    "salary": "12000-16000",
-    "vacancy": "10",
-    "location": "Indirapuram, Ghaziabad",
-    "hr_contact": "",
-    "benefits": ""
+    "job_id": "9b42e02f-00e9-41e3-859c-0d638053c003",
+    "role": "Mechanic",
+    "company": "Channamma Automotive",
+    "salary": "12000-18000",
+    "vacancy": 3,
+    "location": "Rayapur, Hubballi, Karnataka, India"
+  },
+  {
+    "job_id": "f77c59f5-925f-4b37-a1f8-6b1625cff4b9",
+    "role": "Assembly Trainee",
+    "company": "Viridescent Energy Transformation Private Limited",
+    "salary": "13000-15000",
+    "vacancy": 1,
+    "location": "Dharwad, Karnataka, India"
+  },
+  {
+    "job_id": "bc2ac8de-8d95-4d3f-9aff-98dc8c918163",
+    "role": "Electrician and electronic",
+    "company": "Viridescent Energy Transformation",
+    "salary": "10000-15000",
+    "vacancy": 2,
+    "location": "Belur Industrial Area, 580011"
+  },
+  {
+    "job_id": "9bd83720-14e2-45a4-aa92-3903abfa8f04",
+    "role": "Welder",
+    "company": "Naveen Agro and Engineering Works",
+    "salary": "12000",
+    "vacancy": 4,
+    "location": "Dharwad, Karnataka, India"
+  },
+  {
+    "job_id": "e137e6d0-f7de-4753-8139-5e2f6c7b9e34",
+    "role": "Welder and surface coating",
+    "company": "Kalmesh Industries",
+    "salary": "9000-12000",
+    "vacancy": 1,
+    "location": "N15, C-215, Gokul Road, Industrial Estate, Hubballi, Karnataka 580030, India"
+  },
+  {
+    "job_id": "0ee78b68-baaf-4046-a15d-ef58987910c9",
+    "role": "CNC Operator",
+    "company": "Autologic Engineering",
+    "salary": "10000-18000",
+    "vacancy": 3,
+    "location": "92CX+VCG, Hubballi, Karnataka 580025, India"
+  },
+  {
+    "job_id": "378aee0e-38ee-48f8-963d-06a3fc62d69b",
+    "role": "Electrician",
+    "company": "Techno App",
+    "salary": "18000",
+    "vacancy": 1,
+    "location": "580025, 93H2+GX, Gamanagatti Rd, Tarihal Industrial Area, Hubballi, Karnataka 580025, India"
+  },
+  {
+    "job_id": "d8bd2588-0d2f-4bea-ac2f-5c02fc9b3506",
+    "role": "Fitter",
+    "company": "ESSAE Gears and Transmissions",
+    "salary": "16800",
+    "vacancy": 8,
+    "location": "580025, 93H2+GX, Gamanagatti Rd, Tarihal Industrial Area, Hubballi, Karnataka 580025, India"
+  },
+  {
+    "job_id": "fb160251-bd34-455f-a204-9afbc22be91d",
+    "role": "Machine Operator",
+    "company": "ASTR Defence Private Limited",
+    "salary": "15000",
+    "vacancy": 5,
+    "location": "Hubli, Hubballi Urban Taluku, Dharwad, Karnataka, 580020, India"
+  },
+  {
+    "job_id": "b3e5d0e1-f179-4dd2-810e-418ee4bb45a5",
+    "role": "Electrician",
+    "company": "W B agro product pvt ltd",
+    "salary": "12000-15000",
+    "vacancy": 20,
+    "location": "Plot No.:110 & 111, P, Rayapur, 580009"
+  },
+  {
+    "job_id": "a99a6a0f-1fe8-4ff9-a5af-29f5372b7b94",
+    "role": "Machine Operator",
+    "company": "Halfcoat",
+    "salary": "15000",
+    "vacancy": 1,
+    "location": "Hubballi, Karnataka, India"
+  },
+  {
+    "job_id": "7a60e9c1-cb83-4aa1-9774-114fc84d3d55",
+    "role": "Machine Operator",
+    "company": "Shreedhar Engineering Works",
+    "salary": "15000",
+    "vacancy": 1,
+    "location": "Belur Industrial Area, Karnataka 580011, India"
+  },
+  {
+    "job_id": "6b795112-d1c1-464a-99de-f9034e13a8c6",
+    "role": "Machine Operator",
+    "company": "Procaps",
+    "salary": "15000",
+    "vacancy": 2,
+    "location": "Industrial Estate, Hubballi, Karnataka, India"
+  },
+  {
+    "job_id": "0a505368-3067-4b3d-bf2c-3eb9202bb47b",
+    "role": "Fitter",
+    "company": "Kalpur Ke Industries",
+    "salary": "15000",
+    "vacancy": 2,
+    "location": "Industrial Estate Gokul Rd, Industrial Estate, Hubballi, Karnataka 580030, India"
+  },
+  {
+    "job_id": "19a69d13-b7c0-457e-b6d0-cc7b8b68559b",
+    "role": "Machine Operator",
+    "company": "Durga Enterprise",
+    "salary": "15000",
+    "vacancy": 2,
+    "location": "Gamanagatti, Hubballi, Karnataka 580025, India"
+  },
+  {
+    "job_id": "745d740d-7d67-4a9a-b2e5-106e6eaedc45",
+    "role": "Machine Operator",
+    "company": "Dawa Ki Engineering",
+    "salary": "15000",
+    "vacancy": 8,
+    "location": "927X+MR8, Tarihal Industrial Area, Hubballi, Karnataka 580026, India"
+  },
+  {
+    "job_id": "4b33cd4d-15e1-4159-9d64-251b607e0eff",
+    "role": "Machine Operator",
+    "company": "Skytech Dyz and Mos Private Limited",
+    "salary": "14500",
+    "vacancy": 1,
+    "location": "Karnataka 580020, India"
+  },
+  {
+    "job_id": "ba76a2eb-d481-41cc-ac87-930f2e413e13",
+    "role": "Machine Operator",
+    "company": "Skytech Dyz and Mos Private Limited",
+    "salary": "14500",
+    "vacancy": 9,
+    "location": "Karnataka 580020, India"
+  },
+  {
+    "job_id": "cdad8e6c-5601-46ab-9452-9ac4baa4d293",
+    "role": "Machine Operator",
+    "company": "Vishweshwar Aiyer Heat Treatment and Engineering Cluster",
+    "salary": "14000",
+    "vacancy": 1,
+    "location": "Gokul Rd, Industrial Estate, Hubballi, Karnataka, India"
+  },
+  {
+    "job_id": "6423cbc9-4b65-4d9c-b894-c0db05c43500",
+    "role": "Fitter",
+    "company": "Omega Fabrication and Electrical",
+    "salary": "14000",
+    "vacancy": 10,
+    "location": "Hubli, Hubballi Urban Taluku, Dharwad, Karnataka, 580020, India"
+  },
+  {
+    "job_id": "801dd2cf-5e5d-4a82-b7bd-fb42a66b547b",
+    "role": "Electrician",
+    "company": "Dattatraya Engineering Works",
+    "salary": "12000-13000",
+    "vacancy": 2,
+    "location": "Industrial Estate, 580030"
+  },
+  {
+    "job_id": "4d52479b-1bc9-42f2-a11f-de40af755546",
+    "role": "Electrician",
+    "company": "Bella Rath Park",
+    "salary": "11000-13000",
+    "vacancy": 1,
+    "location": "Mummigatti Tanda Rd, Belur Industrial Area, Mummigatti, Karnataka 580011, India"
+  },
+  {
+    "job_id": "bdd50e01-ead9-4ec9-be66-dd869d278846",
+    "role": "Electrician",
+    "company": "Aakash Precision Components Private Limited",
+    "salary": "12000",
+    "vacancy": 5,
+    "location": "Tarihal Industrial Area, Hubballi, Karnataka 580026, India"
+  },
+  {
+    "job_id": "ba723cba-e993-4e28-9c44-233f1c16d67d",
+    "role": "Electrician",
+    "company": "Kabira Mobility",
+    "salary": "10000-12000",
+    "vacancy": 7,
+    "location": "Belur Industrial Area, Karnataka 580011, India"
+  },
+  {
+    "job_id": "71c850e5-94bb-4699-93bc-455f778f9c2c",
+    "role": "Fitter",
+    "company": "Guru Engineering",
+    "salary": "12000",
+    "vacancy": 1,
+    "location": "C-449, Gokul Road, Industrial Estate, Hubballi, Karnataka 580030, India"
+  },
+  {
+    "job_id": "fa0aafc4-eb45-453c-a697-58055b28484a",
+    "role": "Machine Operator",
+    "company": "Done Engineering",
+    "salary": "10010",
+    "vacancy": 2,
+    "location": "Hubballi, Karnataka, India"
+  },
+  {
+    "job_id": "e0643ae0-4dad-4735-823a-19b6c0609708",
+    "role": "Machine Operator",
+    "company": "Jm Technocrafts",
+    "salary": "10000",
+    "vacancy": 2,
+    "location": "Gokul Rd, Industrial Estate, Hubballi, Karnataka, India"
+  },
+  {
+    "job_id": "86533b1f-3bde-4d2c-88f0-223f138b7535",
+    "role": "Machine Operator",
+    "company": "पवन industry",
+    "salary": "10000",
+    "vacancy": 10,
+    "location": "Dharwad, Karnataka, India"
+  },
+  {
+    "job_id": "84e33444-eda7-48ae-b712-aa65fb45f4e7",
+    "role": "Machine Operator",
+    "company": "Manoh Engineering Work",
+    "salary": "10000",
+    "vacancy": 2,
+    "location": "Gokul Rd, Industrial Estate, Hubballi, Karnataka, India"
+  },
+  {
+    "job_id": "0a05ab5a-5cdd-4ea7-a8eb-f83d945e90ec",
+    "role": "Machine Operator",
+    "company": "Ahor Yatra",
+    "salary": "10000",
+    "vacancy": 3,
+    "location": "Belur Industrial Area, Karnataka 580011, India"
+  },
+  {
+    "job_id": "a0d082f6-68d2-49fc-a236-7b98e98e1e28",
+    "role": "Fitter",
+    "company": "J Nagar Machine Tools Private Limited",
+    "salary": "9000",
+    "vacancy": 10,
+    "location": "580009"
+  },
+  {
+    "job_id": "a6e4ff5e-7a7a-4d23-9767-47fc8898d85f",
+    "role": "Machine Operator",
+    "company": "Shri Bhavani Pharmacy",
+    "salary": "8000",
+    "vacancy": 5,
+    "location": "Hubballi, Karnataka, India"
   }
 ]
 ```
