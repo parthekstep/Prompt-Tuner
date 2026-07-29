@@ -28,6 +28,11 @@ Columns: bot | scenario | call_uuid | result | key observations. "FIXED" = bug f
 | static + historical (cf3fc048) | — | 🐛→✅ D5 FIXED+VERIFIED; D34 deployed | **D5** outbound close invited callback → reframed to "our team will reach out": **VERIFIED** on DKB Kn verify `90959fdc` (bot closed "ನಮ್ಮ ಟೀಮ್ ನಿಮ್ಮ ಜೊತೆ ಮತ್ತೆ ಮಾತಾಡುತ್ತೆ. Goodbye", not "phone ಮಾಡಿ"). **D34** empty-hold deployed both langs (…024108/…024109) — VERIFY-PENDING (the `90959fdc` call hit the 4-min cap before reaching create_job; get_talent_insights hold still narrated — arguably OK since its result is spoken). Phone-format (bare 10-digit Kn) → open-items. |
 | employer new-vacancy (verify D5/D34) | 90959fdc | ⚠️ partial | D5 ✅. **NEW: unbounded read-back loop** — bot asked "vacancies ಎರಡು, ಸರಿನಾ?" ~8× on a 2-vs-22 ASR/persona confusion, never capping → wasted the call, hit max duration (generic checklist §4 re-prompt bound). Partly a persona artifact (tester garbled "2"→"22"); the bot's failure to cap the loop is a real weakness → open-items. |
 
+## Maya outbound (up-getjob, campus, Hindi) — `47fdffe6`
+| scenario | call | result | notes |
+|---|---|---|---|
+| student cooperative (D34 + feature check) | baf836fe | 🐛→✅ D34 fixed + ✅ features | **D34 ACTIVE** — create_profile hold "आपकी जानकारी तैयार कर देती हूँ" narrated → PORTED neutral-hold fix (DEPLOYED maya-hi-out `47fdffe6` + maya-hi-in `df99f501`). **All Maya features WORKING:** campus identity ("माया, एलआर कॉलेज की ओर से"), feminine voice, student gate, and **MPL Competition offer fired** (first live observation). create_profile phone clean single +91 (so the malform is kkb-kn-out-specific). Harness artifacts (not Maya bugs): apply 404 (Signals job_ids passed to an up-getjob bot), max-duration hit. |
+
 ## Harness / platform findings (apply to all bots)
 - **Concurrency SUPPORTED** — 3 parallel calls to the tester DID overlapped in time, all bridged (c0455a9b/08c48abe/5d4dc390). BUT one tester = one persona at a time (callee gets `agent_args={}`), so parallel = SAME scenario only. Different scenarios in parallel need multiple tester DIDs (unavailable) → **testing is sequential** (Approach B).
 - **Bridging is intermittently flaky** — some dials fail instantly (Failure/Unanswered, dur=0); retry + ~45s cooldown recovers. Rapid bursts degrade it.

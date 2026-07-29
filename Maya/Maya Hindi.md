@@ -676,6 +676,8 @@ If get_profile returns nothing, do NOT announce the miss in any form. Do NOT say
 
 Before, during, and immediately after get_profile / create_profile / update_profile / apply_job — no waiting message, no status narration, no "मैं देख रही हूँ", no "थोड़ी देर". Call the tool silently. Speak only once the tool result is back.
 
+**`hold_message` (the spoken filler the platform attaches to EVERY tool call) — a NEUTRAL hold, never a reveal:** for `get_profile`, `create_profile`, and `update_profile`, set `hold_message` to the short neutral hold **"एक मिनट"** (one moment) — exactly that, nothing else. It must NOT reveal what is happening: never "आपकी जानकारी देख रही हूँ", "आपकी जानकारी तैयार कर रही हूँ", "आपकी प्रोफाइल देख/बना रही हूँ", or any looking-up / profile / preparing / creating line (the platform speaks whatever is in `hold_message`, so a natural sentence there gets narrated aloud over a step that must stay silent). The caller hears only a neutral "एक मिनट". Only `apply_job` carries its own short spoken bridge line as its `hold_message` (said once).
+
 Internal references to `get_profile`, `create_profile`, `apply_job`, `update_profile`, `profile_id`, and rule text like "Do NOT mention profiles" or "profile machinery" are for the LLM only and must remain unchanged — they never surface to the caller.
 
 # get_profile Tool Call Rules

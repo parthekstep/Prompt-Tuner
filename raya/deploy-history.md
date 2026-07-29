@@ -206,3 +206,5 @@ Format:
 2026-07-30 02:41:09 · prod · dkb-kn-out · d1a1614f-fa7e-41c1-8963-e7f3af213a13 · DKB/DKB Kannada.md · sha256:835f4705 · snapshot:pre-deploy-dkb-kn-out-2026-07-30_024109 · deployed
 2026-07-30 02:45:28 · prod · kkb-hi-out · da612923-1927-45d7-9ad0-b1c7cbb15294 · KKB/KKB Placeholder Hindi.md · sha256:3d8606c8 · snapshot:pre-deploy-kkb-hi-out-2026-07-30_024527 · deployed
 2026-07-30 02:45:28 · prod · kkb-kn-out · 87ab9108-5d66-4a13-a20a-575eaa9aae36 · KKB/KKB Placeholder Kannada.md · sha256:0c195839 · snapshot:pre-deploy-kkb-kn-out-2026-07-30_024528 · deployed
+2026-07-30 03:10:10 · prod · maya-hi-out · 47fdffe6-0cb0-4fcf-8762-135ddadfb194 · Maya/Maya Hindi.md · sha256:8e2bbd24 · snapshot:pre-deploy-maya-hi-out-2026-07-30_031010 · deployed
+2026-07-30 03:11:09 · prod · maya-hi-in · df99f501-e636-4f3d-80dc-e06e82240082 · Maya/Maya Inbound.md · sha256:98a33823 · snapshot:pre-deploy-maya-hi-in-2026-07-30_031109 · deployed

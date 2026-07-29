@@ -12,6 +12,12 @@ Every prompt edit to Maya is logged here. Maya is Hindi-only (KKB spinoff). Entr
 
 ---
 
+## 2026-07-30 — Maya (out+in): neutral `hold_message` (D34) [overnight run]
+- **Feedback/bug:** overnight harness test (Maya-out call `baf836fe`) — `create_profile` `hold_message="ठीक है। आपकी तरफ़ से अप्लाई करने से पहले मैं आपकी जानकारी तैयार कर देती हूँ।"` — the platform speaks `hold_message`, so the silent create is narrated (D34 ACTIVE). Same exposure on Maya inbound.
+- **Change:** added a neutral-hold rule ("एक मिनट" for `get_profile`/`create_profile`/`update_profile`; only `apply_job` keeps a spoken bridge). Ported from the KKB/DKB D34 fix; feminine-consistent reveal bans.
+- **Files:** `Maya/Maya Hindi.md` (DEPLOYED maya-hi-out `47fdffe6`, snapshot `pre-deploy-maya-hi-out-2026-07-30_031010`) + `Maya/Maya Inbound.md` (DEPLOYED maya-hi-in `df99f501`, snapshot `…031109`). Maya inbound verify-pending (inbound).
+- **Also confirmed working on `baf836fe`** (no fix needed): campus identity ("माया, एलआर कॉलेज की ओर से"), feminine voice, student-status gate, and the **MPL Competition secondary offer fired** after the job flow (first live observation of MPL). Maya create_profile phone was clean single `+91` (the phone-malform is kkb-kn-out-specific, not Maya).
+
 ## 2026-07-27 — Maya inbound: smooth greet-then-fetch (two-turn) + job_id-verbatim rule
 - **Feedback/bug (two-turn):** Parth: "update for maya inbound also" — port KKB inbound's greet-first-then-fetch fix. Grounded: Maya inbound DOES fire `get_profile` (on turn 2) but prepends a fetch-narration BEFORE the greeting ("मैं आपके लिए जानकारी देख रही हूँ। नमस्ते…" — calls `cb19fc17`/`41ca7460`/`ff03c92d`/`234e50a8`/`7a5cb1e2`), which reads backwards/weird. Root: line said "Deliver the greeting naturally **alongside** the silent call" (bundling) + "the very first thing you do is emit get_profile" primed the pre-greeting narration.
 - **Change:** restructured the fetch into the explicit two-turn DECISIVE ROUTER (Turn 1 greeting only, clean; Turn 2 a mandatory tool-only `get_profile` before any discovery/jobs), mirroring KKB inbound; removed the "alongside the silent call" bundling; added the observed narration string to the forbidden list (both turns); harmonized the get_profile Tool Call Rules "first action" line to "the turn immediately after the greeting." Deliberately NOT the D25 silent/invisible reframe — the fetch stays loud + mandatory (Maya already fires it; this only un-bundles + cleans the greeting so it's smoother).
