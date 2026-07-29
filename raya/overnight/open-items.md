@@ -34,5 +34,6 @@ As of ~02:50 IST 2026-07-30 (overnight run). These are things I deliberately did
 ## 8. D31 fix has a runtime tool-adherence residue (watch on verify)
 - The KKB-inbound apply-404 was partly the model *hallucinating* a profile_id / skipping create_profile. The deployed fix removes the batching language (should hold), but if a post-fix real inbound call STILL shows a fabricated/empty `profile_id`, prose won't be enough → needs a **platform/tool-schema backstop** (e.g. Raya capturing the create_profile response into a variable the apply step must use). Flagging so we escalate to LitWiz rather than piling on prose.
 
-## 9. Maya D31 batching (in progress / may be an open item)
-- Analyser flags Maya (out+in) still carries the "single turn / back to back" create→apply language (same class as the KKB-inbound bug). Maya outbound is harness-testable. If I fixed + verified it tonight it'll be in the changelog; if not, it's a queued item — same two-step fix as KKB inbound, Hindi-only.
+## 9. Maya — D31 NOT present (false alarm); real exposure is D34
+- **Corrected:** Maya does NOT carry the D31 create→apply batching. `Maya/Maya Hindi.md` line 457 uses a different design — `create_profile` runs EARLIER in the flow, so apply is `apply_job` alone (no same-turn create+apply). The analyser's D31-flag-on-Maya was a stale heuristic; **no Maya D31 fix needed.**
+- **Real Maya exposure: D34** (hold_message narration — Maya is get_profile-driven). Needs a Maya-out live test (student persona) to confirm before fixing; if active, the same neutral-hold port applies (Hindi-only). Queued for a Maya-out test.
