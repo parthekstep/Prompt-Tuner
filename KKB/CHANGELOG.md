@@ -12,6 +12,16 @@ Every prompt edit to KKB is logged here. Entry format:
 
 ---
 
+## 2026-07-29 — KKB Signals bots (Kn + Hi): role-update offer on role-mismatch + 1:1 profile:user principle
+- **Feedback (Parth, via agent-to-agent test harness, call `a0c24a1d`):** (1) when a returning caller with a live profile wants a DIFFERENT role than their stored one, the bot switched jobs + applied but never offered to update the stored role (profile stayed `role=Data Entry Operator` though the caller now wanted remote work). (2) profile:user should be treated as 1:1 — if more than one profile item exists, use only the active/live one.
+- **Change (both Signals prompts, Profile Handling step 2 + Reading-the-response):** (1) added a **Role-update offer** to the "wants something different" branch — the bot names the stored role and offers once to update it: Hi "मैं देख रही हूँ कि अभी आपका role [old] है — क्या मैं इसे [new] कर दूँ?"; Kn "ನಾನು ನೋಡ್ತಿದ್ದೀನಿ, ಈಗ ನಿಮ್ಮ role [old] ಇದೆ — ಇದನ್ನ [new] ಗೆ ಬದಲಾಯಿಸ್ಲಾ?" → on yes `update_profile(role=new)`, on no leave it; proceed either way (live profile only; new/draft path sets role via `create_profile`). (2) added a clean "profile:user is 1:1 — use only the live profile, ignore the rest" principle atop the get_profile response-reading section (reinforces the D37 live-selection rule).
+- **Files:** both Signals prompts (deployed to prod). Feature addition — no analyser entry (not a bug class).
+
+## 2026-07-29 — KKB Signals bots (Kn + Hi): `location` required for `create_profile` (new-seeker apply PROFILE_NOT_LIVE)
+- **Feedback/bug:** agent-to-agent harness test (call `fb1283cb`) — a NEW seeker completed the flow but `create_profile` ran WITHOUT `location` → profile created `draft` → `apply_job` failed `422 PROFILE_NOT_LIVE`. Curl-confirmed: create without `location` → `draft`; with `location` → `live` (gender irrelevant).
+- **Change:** added `location` to the `create_profile` tool's `required` params on both Signals agents (a **tool-schema** fix via Raya PATCH, not a prompt-prose change — the Phase-1 prose gate already required location; this was a runtime tool-adherence miss, cf. analyser D25/D40). Also appended the "why" to the `location` param description. Instructions untouched.
+- **Files:** Raya tool config (PATCH) on `kkb-hi-signals` + `kkb-kn-signals`; analyser `bug-patterns.md` (new D40).
+
 ## 2026-07-29 — KKB Signals bots (Kn + Hi): role-confirm wording (current occupation, not "looking for")
 - **Feedback (Parth, call `51c6f63e` — which confirmed all round-3 fixes working: gender skipped when present, correct question count, single ack, one-field update, English values):** the intro role-confirm said "आप अभी [role] का काम देख रहे हैं — क्या आप इसी तरह की जॉब्स देख रहे हैं?" ("you are currently looking for [role] work…"). But the profile `role` is the caller's CURRENT occupation, not what they're seeking. Should be "you ARE a [role] — are you still looking for a [role] job?".
 - **Change (both prompts, Profile Handling step 2):** reworded the role-confirm to treat `role` as the caller's current trade — Hi "मैं देख रही हूँ कि आप अभी [role] हैं — क्या आप अभी भी [role] की जॉब देख रहे हैं?"; Kn "ನಾನು ನೋಡ್ತಿದ್ದೀನಿ, ನೀವು ಈಗ [role] ಆಗಿದೀರಿ — ನಿಮಗೆ ಇನ್ನೂ [role] ಥರದ ಜಾಬ್ ಬೇಕಾ?" + an English note that `role` = current occupation, never phrase as "looking for [role]".
