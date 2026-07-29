@@ -9,3 +9,5 @@
 - **2026-07-22_132940** — `pre-freshers-distinct` — row66: freshers question skipped because qualification question absorbs experience; decouple + make distinct _(6 files)_
 - **2026-07-22_133021** — `pre-deploy-dkb-hi-out-2026-07-22_133021` — auto snapshot before Raya deploy of DKB/DKB Hindi.md _(6 files)_
 - **2026-07-22_133021** — `pre-deploy-dkb-kn-out-2026-07-22_133021` — auto snapshot before Raya deploy of DKB/DKB Kannada.md _(6 files)_
+- **2026-07-30_024108** — `pre-deploy-dkb-hi-out-2026-07-30_024108` — auto snapshot before Raya deploy of DKB/DKB Hindi.md _(6 files)_
+- **2026-07-30_024109** — `pre-deploy-dkb-kn-out-2026-07-30_024109` — auto snapshot before Raya deploy of DKB/DKB Kannada.md _(6 files)_

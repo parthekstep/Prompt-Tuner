@@ -12,6 +12,11 @@ Every prompt edit to KKB is logged here. Entry format:
 
 ---
 
+## 2026-07-30 — KKB outbound (Hi+Kn): neutral `hold_message` (D34) [overnight run]
+- **Feedback/bug:** overnight harness test (call `fa530906`, kkb-kn-out) — `get_profile`/`create_profile` `hold_message="ನಿಮ್ಮ ಮಾಹಿತಿ ಪರಿಶೀಲಿಸುತ್ತಿದ್ದೇನೆ"` spoken; "ನಿಮ್ಮ ಮಾಹಿತಿ ಸಿಕ್ತು" said even on an EMPTY fetch → the silent fetch is narrated (D34 ACTIVE). Tool-silence rule was prose-only, never named the `hold_message` param.
+- **Change:** added a neutral-hold rule ("एक मिनट" / "ಒಂದು ನಿಮಿಷ" for `get_profile`/`create_profile`/`update_profile`). Ported from the Signals/inbound D34 fix.
+- **Files:** `KKB/KKB Placeholder Hindi.md` (DEPLOYED kkb-hi-out, snapshot `…024527`) + `KKB/KKB Placeholder Kannada.md` (DEPLOYED kkb-kn-out, snapshot `…024528`). Verify: kkb-kn-out re-test pending.
+
 ## 2026-07-30 — KKB inbound: neutral `hold_message` (D34 — stop narrating the silent fetch) [overnight run]
 - **Feedback/bug:** kkb-hi-in `get_profile` `hold_message` = "आपकी जानकारी निकल रही है" — the platform speaks `hold_message` aloud, so the fetch the prompt insists is silent gets announced (D34, ACTIVE). The tool-silence rule was prose-only and never named the `hold_message` param.
 - **Change:** added a rule setting `hold_message` to the neutral "एक मिनट" for `get_profile`/`create_profile`/`update_profile` (only `apply_job` keeps a spoken bridge). Ported from the Signals D34 fix.
