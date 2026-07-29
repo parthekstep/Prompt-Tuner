@@ -129,11 +129,21 @@ Log every call (uuid, scenario, pass/fail per checklist, issues) to scratchpad/T
 
 - 2026-07-30 ~00:45 IST — **RESTART RESILIENCE SET (user warned of imminent usage limit, resets ~03:40 IST).** Canonical state moved to REPO `raya/overnight/` (this file — update HERE going forward, not scratchpad). Mechanisms: (1) durable scheduled task `resume-overnight-run` (~/.claude/scheduled-tasks/, disk-durable, recurring, resumes from raya/overnight/RESUME.md, self-deletes when done); (2) memory `overnight-autonomous-run` + MEMORY.md pointer (auto-loaded → resume); (3) repo anchor committed+pushed (2bada7b). Retired the in-memory cron (superseded). Merge+ground subagent (aa81e181) still running → PRIORITY_BUGS.md.
 
-## NEXT ACTION
-1. When bivpyhtqa (KN Signals) lands → grade vs kkb.md + generic.md; append TEST_LOG; note parity vs Hindi.
-2. When wf_4fd4ce5d (static analysis) lands → read scratchpad/analysis/*.md; build scratchpad/PRIORITY_BUGS.md (HIGH first; mark which have a proven sibling fix to PORT; which need a repro call).
-3. Drive Phase-2 sequential testing across the matrix (KKB Hi/Kn out [up-getjob], DKB Hi/Kn [employer persona + DKB args], Maya Hi [student persona + college_name], + inbound probe). Pull known-good agent_args per bot from its recent calls (raya_call.py). Create personas as needed (kn done for seeker; need employer + student personas).
-4. Phase 3: fix HIGH-priority confirmed bugs (port proven fixes; snapshot→deploy→re-test→revert-on-fail; changelog+analyser; cap 2 cycles/bot; dicey→open-items).
-5. Phase 4: Excel report (xlsx skill) + open-items.md + ideas.md; update existing skills (bug-fix/prompt-analyser/etc. with harness + Signals learnings); commit+push; morning summary.
-6. BONUS (only if 1–5 done + time): 5 combined ${call_direction} bots (new agents, don't touch live) → test+compare → report readiness. FURTHER BONUS: port combined to Signals.
-Between voice calls, do the NON-call deliverables (report scaffolding, skill updates) so the slow call pipeline is never the bottleneck.
+## NEXT ACTION (grounded 2026-07-30 ~00:50 from raya/overnight/PRIORITY_BUGS.md)
+Merge+ground verdict: MOST static findings are **LATENT** (bots work in real calls) → do NOT edit; log to open-items. Grounded **ACTIVE** fixes, in order:
+
+**A. kkb-hi-in — new-caller apply 404 (D31/D16) [ACTIVE: calls 5449910e, 34f1f587].** New inbound caller: apply_job fired with a FABRICATED profile_id ("up-getjob"/placeholder UUID) and NO create_profile → HTTP 404. (Control 1fde1677 did create→apply → success.) FIX = port kkb-kn-out's D31 two-step (create → WAIT → apply, separate turns) + D16 create-first into kkb-hi-in, sync twin kkb-kn-in. **DECIDE FIRST by reading kkb-hi-in's apply section:** if it ALREADY has the two-step rule → this is runtime tool-adherence (model hallucinated the id) → do NOT pile prose (D25) → OPEN-ITEMS + recommend a tool-schema/platform backstop. If it LACKS the rule → port it (legit additive fix). INBOUND ⇒ cannot harness-verify (tester can't dial the bot) → deploy + mark "verify pending (needs a real inbound call from the user)". Snapshot first.
+
+**B. kkb-hi-in — get_profile hold_message narrates the fetch (D34) [ACTIVE].** hold = "आपकी जानकारी निकल रही है" (spoken). FIX = port the neutral hold ("एक मिनट") from the Signals bots. Safe additive prose swap. Sync twin kkb-kn-in. Inbound ⇒ verify-pending.
+
+**C. dkb-kn — spoken hold on silent create_job (D34) + callback-invite close on outbound (D5) + phoneNumber undeclared [ACTIVE: cf3fc048].** OUTBOUND ⇒ HARNESS-VERIFIABLE (employer persona ready; make a Kannada employer persona). FIX prose (neutral hold; drop callback-invite close for outbound). Sync DKB Hi. Full repro→fix→verify loop. (phoneNumber undeclared returned success → data-quality note, not a break.)
+
+**VERIFY-ONLY (no edit):** kkb-kn-signals D40 location-required — already verified (KN Signals test passed + `location` in create_profile.required).
+
+**CHEAP PROSE HYGIENE (LATENT, optional, snapshot first, both langs):** remove stale "10-digit" phone bullet in kkb-hi/kn-signals (D39 leftover); align maya phone-prefix line. Low-risk hygiene only.
+
+**OPEN-ITEMS (LATENT — do NOT touch live prompts without a live probe):** kkb-hi-out & maya-hi +91 double-prefix; kkb-hi-in & kkb-kn-out memory-substitution. Log with evidence + the port-ready fix so the user can decide.
+
+Then **Phase 4:** Excel report (xlsx) + open-items.md + ideas.md; update existing skills (bug-fix/prompt-analyser with harness + Signals + D40 learnings); commit/push; morning summary. **BONUS only if all done:** 5 combined ${call_direction} bots (NEW agents, don't touch live) → test+compare → report readiness; then port to Signals.
+
+Between voice calls, advance the NON-call deliverables (report, skill updates, open-items) so the slow sequential call pipeline is never the sole bottleneck.
