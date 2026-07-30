@@ -24,3 +24,11 @@ raya/snapshots/
 
 # tester persona backups (transient)
 raya/personas/_backups/
+
+# Bot Control Center — local runtime artifacts (job logs may echo transcripts/secrets)
+control-center/runs/
+control-center/control.db
+control-center/backend/.venv/
+control-center/frontend/node_modules/
+control-center/frontend/dist/
+control-center/**/__pycache__/
