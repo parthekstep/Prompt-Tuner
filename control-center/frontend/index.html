@@ -90,6 +90,28 @@
   .muted{color:var(--faint);font-size:12px}
   .loading{color:var(--faint);padding:40px;text-align:center;font-family:var(--mono)}
   .banner{margin:14px 22px 0;padding:9px 13px;border:1px dashed var(--line2);border-radius:8px;color:var(--dim);font-size:11.5px}
+  .ebadge{font-size:10px;font-family:var(--mono);padding:3px 9px;border-radius:20px;border:1px solid var(--line2);letter-spacing:.6px}
+  .ebadge.sim{color:var(--amber);border-color:#3a3420} .ebadge.real{color:var(--green);border-color:#173a2c}
+
+  /* job console */
+  .rail{display:flex;gap:0;margin:6px 0 18px;flex-wrap:wrap}
+  .rstep{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--faint);font-family:var(--mono)}
+  .rstep .b{width:22px;height:22px;border-radius:50%;border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;font-size:10px;background:var(--panel)}
+  .rstep.done .b{background:var(--green);color:#04120c;border-color:var(--green);box-shadow:0 0 10px rgba(58,210,159,.5)}
+  .rstep.done{color:var(--txt)}
+  .rstep.active .b{border-color:var(--blue);color:var(--blue);animation:pulse 1.3s infinite}
+  .rstep.active{color:#fff}
+  .rline{width:26px;height:1px;background:var(--line2);margin:0 3px}
+  .log{background:#060a0f;border:1px solid var(--line);border-radius:9px;padding:12px;font-family:var(--mono);font-size:11.5px;line-height:1.7;max-height:300px;overflow-y:auto}
+  .log .l-tool{color:var(--blue)} .log .l-text{color:var(--dim)} .log .l-res{color:var(--green)} .log .l-err{color:var(--red)}
+  .gate{margin-top:16px;padding:14px;border:1px solid var(--amber);border-radius:10px;background:rgba(245,196,81,.05)}
+  .gate h4{margin:0 0 6px;color:var(--amber);font-size:12px;letter-spacing:.5px}
+  .gate .flags{display:flex;gap:6px;margin:8px 0;flex-wrap:wrap}
+  .gate .flag{font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:6px;border:1px solid #3a3420;color:var(--amber)}
+  .gbtns{display:flex;gap:8px;margin-top:10px}
+  .btn.go{border-color:var(--green);color:var(--green)} .btn.go:hover{background:rgba(58,210,159,.12)}
+  .btn.no{border-color:var(--red);color:var(--red)} .btn.no:hover{background:rgba(255,107,107,.1)}
+  .verdict{font-family:var(--mono);font-size:11.5px;color:var(--dim);margin:4px 0 0}
 </style>
 </head>
 <body>
@@ -97,6 +119,7 @@
   <div class="brand">
     <span class="dot"></span>
     <div><h1>Bot Control Center</h1><small>Prompt Tuner · voice-agent fleet ops</small></div>
+    <span class="ebadge sim" id="ebadge" title="">engine…</span>
   </div>
   <div class="stat-strip" id="stats"></div>
   <button class="btn" onclick="refresh()">↻ Refresh</button>
@@ -141,6 +164,12 @@ async function load(){
   renderStats(); g("c-fleet").textContent=BOTS.length;
   g("c-issues").textContent=ISSUES.filter(i=>lane(i.status)!=="Closed / Rejected").length;
   g("c-tests").textContent=STATS.test_runs||0;
+  fetch(API+"/api/engine").then(r=>r.json()).then(e=>{ENGINE=e;
+    const b=g("ebadge"); b.className="ebadge "+e.mode; b.textContent="engine: "+e.mode.toUpperCase(); b.title=e.note;
+    g("engine-banner").innerHTML = e.mode==="real"
+      ? `Fix / Test engine: <b style="color:var(--green)">LIVE</b> — ${esc(e.claude_version||"claude")} on your login. Fix buttons run real /bug-fix jobs.`
+      : `Fix / Test engine: <b style="color:var(--amber)">SIMULATION</b> — no host <span class="mono">claude</span> CLI found; jobs replay a realistic stream so the full pipeline works. Install <span class="mono">claude</span> (npm i -g @anthropic-ai/claude-code; claude login) to go live.`;
+  }).catch(()=>{});
   render();
 }
 function refresh(){ fetch(API+"/api/ingest/refresh?mode=--all",{method:"POST"}).catch(()=>{}); load(); }
@@ -233,10 +262,72 @@ function renderTests(){
   });
 }
 
-function fixIssue(id){
+// ---------------- Job Console ----------------
+const RAIL=["Find","Root-cause","Classify","Fix","Verify","Deploy","Sheet","Done"];
+let WS=null, JOB={op:null,stages:new Set(),active:null,pendingOp:null};
+
+async function fixIssue(id){
   const i=ISSUES.find(x=>x.issue_id===id);
-  alert("Fix engine (Claude-Code job runner) is the next phase.\n\nThis will spawn a headless `claude -p` running /bug-fix for:\n\n"+(i?i.title:id)+"\n\nStreaming stages: Find → Root-cause → Classify → Fix → Verify → Deploy → Sheet, with a risk-gate that pauses for your approval before any live deploy.");
+  const r=await fetch(API+"/api/jobs",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({kind:"bugfix",mode:"autonomous",issue_id:id})}).then(r=>r.json()).catch(e=>({error:e}));
+  if(r.error||!r.job_id){ alert("could not start job: "+JSON.stringify(r)); return; }
+  openConsole(r.operation_id, r.job_id, i?i.title:id);
 }
+
+function openConsole(op, jobId, title){
+  JOB={op, stages:new Set(), active:null, pendingOp:null, jobId};
+  g("scrim").classList.add("open"); g("drawer").classList.add("open");
+  g("drawer").innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:start">
+      <div><h2>Fix job</h2><div class="muted" style="max-width:400px">${esc(title||op)}</div>
+        <div class="verdict mono">${esc(op)} · engine ${ENGINE?ENGINE.mode:"?"}</div></div>
+      <button class="btn" onclick="closeConsole()">✕</button></div>
+    <div class="sec"><h4>Pipeline</h4><div class="rail" id="rail"></div></div>
+    <div class="sec"><h4>Live stream</h4><div class="log" id="log"></div></div>
+    <div id="gate"></div>`;
+  renderRail();
+  if(WS){try{WS.close()}catch(e){}}
+  // stream the whole operation (diagnose + auto/approved deploy jobs) via the global feed, filtered by op id
+  const wsBase=(API||location.origin).replace(/^http/,"ws");
+  WS=new WebSocket(wsBase+"/ws/jobs/*");
+  WS.onmessage=(m)=>{ const e=JSON.parse(m.data); if(!e.job_id||!e.job_id.startsWith(op))return; onJobEvent(e); };
+}
+
+function onJobEvent(e){
+  const log=g("log");
+  if(e.kind==="stage"){ JOB.active=e.stage; JOB.stages.add(e.stage); renderRail(); }
+  else if(e.kind==="text"){ add(log,`<span class="l-text">${esc(e.text)}</span>`); }
+  else if(e.kind==="tool"){ add(log,`<span class="l-tool">▸ ${esc(e.signature||e.tool)}</span>`); }
+  else if(e.kind==="tool_result"){ add(log,`<span class="${e.is_error?'l-err':'l-res'}">  ↳ ${esc(e.text||'')}</span>`); }
+  else if(e.kind==="result"){ add(log,`<span class="l-res">✓ ${esc(e.summary||'done')}</span>`); }
+  else if(e.kind==="verdict"){ /* decision shown via state */ }
+  else if(e.kind==="state"){
+    if(e.state==="awaiting-approval"){ JOB.pendingOp=JOB.op; renderGate(e); }
+    else if(e.state==="done"){ JOB.stages.add("Done"); JOB.active=null; renderRail(); add(log,`<span class="l-res">■ job ${esc(e.job_id.split("-").pop())} done</span>`); loadSoon(); }
+    else if(e.state==="running"){ add(log,`<span class="l-text">— ${esc(e.job_id.split("-").pop())} running (${esc(e.engine||e.trigger||"")})</span>`); }
+    else if(e.state==="cancelled"){ add(log,`<span class="l-err">✕ rejected — roll back via snapshot</span>`); }
+  }
+}
+function add(el,html){ el.insertAdjacentHTML("beforeend",`<div>${html}</div>`); el.scrollTop=el.scrollHeight; }
+function renderRail(){
+  const done=JOB.stages;
+  g("rail").innerHTML=RAIL.map((s,idx)=>{
+    const cls=done.has(s)?"done":(s===JOB.active?"active":"");
+    return `<div class="rstep ${cls}"><span class="b">${done.has(s)?"✓":idx+1}</span>${s}</div>`+
+      (idx<RAIL.length-1?'<span class="rline"></span>':"");
+  }).join("");
+}
+function renderGate(e){
+  g("gate").innerHTML=`<div class="gate"><h4>⏸ Flagged — awaiting your approval</h4>
+    <div class="verdict">${esc(e.reason||"")}</div>
+    <div class="flags">${(e.flags||[]).map(f=>`<span class="flag">${esc(f)}</span>`).join("")}</div>
+    <div class="gbtns"><button class="btn go" onclick="approve()">Approve &amp; deploy ▸</button>
+      <button class="btn no" onclick="rejectJob()">Reject</button></div></div>`;
+}
+async function approve(){ g("gate").innerHTML='<div class="muted">deploying…</div>'; await fetch(API+"/api/operations/"+JOB.pendingOp+"/approve",{method:"POST"}); }
+async function rejectJob(){ await fetch(API+"/api/operations/"+JOB.pendingOp+"/reject",{method:"POST"}); g("gate").innerHTML='<div class="muted">rejected.</div>'; }
+function closeConsole(){ if(WS){try{WS.close()}catch(e){}} g("scrim").classList.remove("open"); g("drawer").classList.remove("open"); }
+let _soon; function loadSoon(){ clearTimeout(_soon); _soon=setTimeout(load,1200); }
 
 async function openBot(id){
   g("scrim").classList.add("open"); g("drawer").classList.add("open");
@@ -260,7 +351,7 @@ async function openBot(id){
     <div class="sec"><h4>Recent versions</h4>${rows(b.versions,v=>`<div class="row"><span class="a">${esc((v.ts||"").slice(0,16))}</span><span>${esc(v.label)}</span></div>`)}</div>
     <div class="sec"><h4>Test runs</h4>${rows(b.test_runs,t=>`<div class="row"><span class="a">${esc(t.result)}</span><span>${esc((t.notes||"").slice(0,90))}</span></div>`)}</div>`;
 }
-function closeDrawer(){ g("scrim").classList.remove("open"); g("drawer").classList.remove("open"); }
+function closeDrawer(){ if(WS){try{WS.close()}catch(e){}} g("scrim").classList.remove("open"); g("drawer").classList.remove("open"); }
 load();
 </script>
 </body>
