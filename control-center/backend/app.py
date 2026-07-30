@@ -7,9 +7,10 @@ import subprocess
 import threading
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 import queries
-from config import BACKEND_DIR, PY
+from config import BACKEND_DIR, CC_DIR, PY
 from db import init_db
 
 app = FastAPI(title="Bot Control Center", version="0.1")
@@ -99,3 +100,9 @@ def ingest_refresh(mode: str = Query("--all")):
         _ingest_state["running"] = True
     threading.Thread(target=_do_ingest, args=(mode,), daemon=True).start()
     return {"queued": True, "mode": mode}
+
+
+# Serve the cockpit (mounted last so /api/* routes win). Same-origin -> no CORS needed.
+_frontend = CC_DIR / "frontend"
+if _frontend.exists():
+    app.mount("/", StaticFiles(directory=str(_frontend), html=True), name="cockpit")
