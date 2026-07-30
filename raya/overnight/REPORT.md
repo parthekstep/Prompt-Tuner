@@ -194,3 +194,18 @@ Goal: one prompt per bot that serves BOTH inbound and outbound, branching on the
 **Further bonus (Signals port):** not started — depends on a settled v1 pattern.
 
 **Recommendation:** do NOT stand up 5 experimental agents on v0 (their inbound is knowingly broken and can't be harness-verified, and the Raya console has no delete). Complete v1 (direction-aware shared flow) first, review, then create + outbound-smoke-test. v0 scaffolds + this spec are the head start.
+
+### G.6 — Combined bots: v1 built + 5 agents created, but a PLATFORM BLOCKER found (call_direction not injected)
+After the v0 finding (G.5), I ran a direction-aware **v1** pass (workflow: 5 builders + 5 adversarial reviewers) that made the shared flow honor `${call_direction}` — job source resolves to the hardcoded inventory on inbound (not empty `${recommendations}`), and the `get_profile` permission-ask is gated (outbound asks, inbound fetches silently). Verdicts: **dkb-kn + maya-hi PASS; kkb-hi/dkb-hi/kkb-kn FIX_NEEDED** (residual inbound spoken-nuance). I then fixed kkb-kn's two real structural gaps (ungated inbound fetch + the stale Kannada inventory prose → rewritten to Karnataka; 0 UP leftovers) and **created all 5 as experimental Raya agents** (`deploy=false`, NOT migrated):
+
+| Combined bot | agent uuid | source cloned |
+|---|---|---|
+| kkb-hi-combined | `3f521174` | kkb-hi-out |
+| kkb-kn-combined | `f38da775` | kkb-kn-out |
+| maya-hi-combined | `904f333f` | maya-hi-out |
+| dkb-hi-combined | `fabda71d` | dkb-hi-out |
+| dkb-kn-combined | `847a85e2` | dkb-kn-out |
+
+**THE BLOCKER (open-items #12).** The outbound smoke test on kkb-hi-combined (`b2e9e1e9`) exposed a platform issue that invalidates the approach as-tested: I triggered it OUTBOUND with real `${recommendations}` (Burger King/Pantaloons), but the bot opened with a **welcome** greeting and presented **hardcoded-inventory** jobs (CY Future Noida, Weavings Greater Noida) — i.e. it ran the **inbound** branch. The call's `agent_args` = `[contact_memory, contact_name, contact_phone, country_code, recommendations]` — **`call_direction` is absent (None)**, and it's ALSO absent from real standalone `kkb-hi-out` calls. So `${call_direction}` is **not injected on `POST /api/call`-triggered calls**; with it empty the branch is ambiguous and the model defaults to inbound (inventory + welcome).
+
+**Conclusion:** the combined `${call_direction}` bots are BUILT (v1) and CREATED, but **cannot be validated or trusted until LitWiz/Raya confirm when/how `call_direction` is actually set** (likely only on real DID telephony, or in the prompt template rather than `agent_args`, or needs per-agent enabling). The 5 experimental agents exist for the user to test on REAL inbound/outbound DID calls where the flag may be populated. **Recommendation: keep the separate inbound/outbound bots (today's production design) — they don't depend on a runtime direction flag — until `call_direction` injection is confirmed.** Further bonus (Signals port) is not started (gated on a validated pattern).

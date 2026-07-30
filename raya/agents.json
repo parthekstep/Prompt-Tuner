@@ -345,6 +345,111 @@
         "staging": ""
       },
       "deploy": false
+    },
+    {
+      "id": "kkb-hi-combined",
+      "file": "raya/combined/kkb-hi-combined.md",
+      "agent": "KKB",
+      "language": "hi",
+      "direction": "combined",
+      "kind": "conversation",
+      "profile": "conversation",
+      "raya_name": "KKB Combined [call_direction] - Hindi (EXPERIMENTAL)",
+      "raya_agent_id": {
+        "prod": "3f521174-574d-43ca-a9be-081849373c18",
+        "staging": ""
+      },
+      "deploy": false,
+      "experimental": true,
+      "expected_name_contains": [
+        "KKB",
+        "Combined"
+      ],
+      "_note": "EXPERIMENTAL combined ${call_direction} bot (v1). deploy=false; NOT migrated. Outbound branch = standalone outbound bot byte-for-byte; inbound branch direction-aware v1 with documented residual gaps (see REPORT G.5)."
+    },
+    {
+      "id": "kkb-kn-combined",
+      "file": "raya/combined/kkb-kn-combined.md",
+      "agent": "KKB",
+      "language": "kn",
+      "direction": "combined",
+      "kind": "conversation",
+      "profile": "conversation",
+      "raya_name": "KKB Combined [call_direction] - Kannada (EXPERIMENTAL)",
+      "raya_agent_id": {
+        "prod": "f38da775-c572-4a50-9340-fe1f42c43901",
+        "staging": ""
+      },
+      "deploy": false,
+      "experimental": true,
+      "expected_name_contains": [
+        "KKB",
+        "Combined"
+      ],
+      "_note": "EXPERIMENTAL combined ${call_direction} bot (v1). deploy=false; NOT migrated. Outbound branch = standalone outbound bot byte-for-byte; inbound branch direction-aware v1 with documented residual gaps (see REPORT G.5)."
+    },
+    {
+      "id": "maya-hi-combined",
+      "file": "raya/combined/maya-hi-combined.md",
+      "agent": "Maya",
+      "language": "hi",
+      "direction": "combined",
+      "kind": "conversation",
+      "profile": "conversation",
+      "raya_name": "Maya Combined [call_direction] - Hindi (EXPERIMENTAL)",
+      "raya_agent_id": {
+        "prod": "904f333f-1919-4523-a51d-b22ba382dd22",
+        "staging": ""
+      },
+      "deploy": false,
+      "experimental": true,
+      "expected_name_contains": [
+        "Maya",
+        "Combined"
+      ],
+      "_note": "EXPERIMENTAL combined ${call_direction} bot (v1). deploy=false; NOT migrated. Outbound branch = standalone outbound bot byte-for-byte; inbound branch direction-aware v1 with documented residual gaps (see REPORT G.5)."
+    },
+    {
+      "id": "dkb-hi-combined",
+      "file": "raya/combined/dkb-hi-combined.md",
+      "agent": "DKB",
+      "language": "hi",
+      "direction": "combined",
+      "kind": "conversation",
+      "profile": "conversation",
+      "raya_name": "DKB Combined [call_direction] - Hindi (EXPERIMENTAL)",
+      "raya_agent_id": {
+        "prod": "fabda71d-af75-4ddd-8cf1-fa35c827f753",
+        "staging": ""
+      },
+      "deploy": false,
+      "experimental": true,
+      "expected_name_contains": [
+        "DKB",
+        "Combined"
+      ],
+      "_note": "EXPERIMENTAL combined ${call_direction} bot (v1). deploy=false; NOT migrated. Outbound branch = standalone outbound bot byte-for-byte; inbound branch direction-aware v1 with documented residual gaps (see REPORT G.5)."
+    },
+    {
+      "id": "dkb-kn-combined",
+      "file": "raya/combined/dkb-kn-combined.md",
+      "agent": "DKB",
+      "language": "kn",
+      "direction": "combined",
+      "kind": "conversation",
+      "profile": "conversation",
+      "raya_name": "DKB Combined [call_direction] - Kannada (EXPERIMENTAL)",
+      "raya_agent_id": {
+        "prod": "847a85e2-c5c8-4727-9918-f1db9efad05d",
+        "staging": ""
+      },
+      "deploy": false,
+      "experimental": true,
+      "expected_name_contains": [
+        "DKB",
+        "Combined"
+      ],
+      "_note": "EXPERIMENTAL combined ${call_direction} bot (v1). deploy=false; NOT migrated. Outbound branch = standalone outbound bot byte-for-byte; inbound branch direction-aware v1 with documented residual gaps (see REPORT G.5)."
     }
   ]
 }
