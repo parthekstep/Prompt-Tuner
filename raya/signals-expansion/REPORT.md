@@ -13,7 +13,7 @@ Recycled the 5 abandoned combined-`${call_direction}` agents (no Raya delete rou
 | KKB Kannada Inbound Signals | `f38da775` | repurposed (ex kkb-kn-combined) | inbound seeker | ✅ **VOICE-VERIFIED** (8d958447) |
 | Maya Inbound Signals | `1c24feda` | NEW (clone df99f501) | inbound seeker | ✅ **VOICE-VERIFIED** (2e0c7014) |
 | DKB Hindi Signals | `fabda71d` | repurposed (ex dkb-hi-combined) | provider/employer | ✅ **VOICE-VERIFIED** (09a7b6c8) |
-| DKB Kannada Signals | `847a85e2` | repurposed (ex dkb-kn-combined) | provider/employer | ⚠ flow verified; create_job-adherence (see below) |
+| DKB Kannada Signals | `847a85e2` | repurposed (ex dkb-kn-combined) | provider/employer | ⚠ flow verified; **create_job runtime-adherence (D25) — FLAGGED** |
 
 Every bot: prompt built by re-domaining the proven `kkb-hi-signals` structure (9 stabilisation patterns + Signals tool contract) onto the target, preserving each bot's own divergences (Maya campus/feminine/MPL/Experience-Capture/hr_contact; inbound welcome + hardcoded inventory; DKB employer flow). Each reviewed (adversarial), repurposed (PATCH name+instructions+Signals tools), grounded, and tested.
 
