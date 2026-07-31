@@ -425,7 +425,7 @@
         "prod": "fabda71d-af75-4ddd-8cf1-fa35c827f753",
         "staging": ""
       },
-      "deploy": false,
+      "deploy": true,
       "experimental": true,
       "expected_name_contains": [
         "DKB",
@@ -447,7 +447,7 @@
         "prod": "847a85e2-c5c8-4727-9918-f1db9efad05d",
         "staging": ""
       },
-      "deploy": false,
+      "deploy": true,
       "experimental": true,
       "expected_name_contains": [
         "DKB",

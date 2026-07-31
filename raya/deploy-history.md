@@ -223,3 +223,5 @@ Format:
 2026-07-31 (repurpose) · prod · kkb-hi-in-signals · 3f521174 · KKB Inbound Signals (Hi) · repurposed ex-combined + Signals tools + real-jobs inventory
 2026-07-31 (repurpose) · prod · kkb-kn-in-signals · f38da775 · KKB Inbound Signals (Kn) · repurposed + kn Signals tools + real-jobs inventory
 2026-07-31 (create) · prod · maya-hi-in-signals · 1c24feda · Maya Inbound Signals · new agent (clone df99f501) + Signals tools + real-jobs inventory
+2026-07-31 (repurpose) · prod · dkb-hi-signals · fabda71d · DKB Hindi Signals · Signals create_job/update_job (provider job_posting) + get_talent_insights; create_job curl-grounded (item f6c3d7bb)
+2026-07-31 (repurpose) · prod · dkb-kn-signals · 847a85e2 · DKB Kannada Signals · same Signals provider tools
