@@ -25,7 +25,7 @@ Prereqs: (a) provider-side Signals API to SEED job_posting items (partial DKB di
 
 ## Phase 2 — DKB Signals discovery (separate)  [status: TODO]
 DKB = provider/employer side (create/verify job postings, not seeker profiles) → different endpoints, integration, workflow.
-- [ ] curl-map the provider Signals API (create job_posting_1.0 item; verify/update; talent insights equivalent)
+- [x] provider create_job schema mapped -> raya/signals-expansion/DKB-provider-discovery.md (title/role/natureOfJob/positions/jobProviderLocation/lastRoleHeld/hiringManager*; salary/qual DROPPED). TODO: talent-insights endpoint.
 - [ ] write DKB-Signals discovery doc (employer twin of the handover)
 - [ ] build DKB Hi/Kn Signals → curl-ground → deploy → test
 
