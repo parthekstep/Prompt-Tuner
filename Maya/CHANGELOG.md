@@ -10,6 +10,12 @@ Every prompt edit to Maya is logged here. Maya is Hindi-only (KKB spinoff). Entr
 - **Ported from:** <source agent> (only for cross-agent ports)
 ```
 
+## 2026-07-31 — Maya Inbound Signals (new bot, migrated to Signals DPG)
+
+- **Change:** created Maya/Maya Inbound Signals.md (inbound + 9 Signals patterns + Signals tools + Maya divergences); new agent 1c24feda (clone df99f501). Inventory swapped to real Signals jobs; removed a residual second inventory array that caused a wrong-job present + hallucinated apply.
+- **Test status:** VOICE-VERIFIED via inbound-via-outbound (call 2e0c7014): campus feminine welcome, Signals get_profile, real-inventory jobs, apply_job -> 201 SUCCESS, hr_contact, full MPL flow.
+
+
 ## 2026-07-31 — Maya Hindi Signals (new bot, migrated to Signals DPG)
 
 - **Feedback/bug:** migrate Maya onto the Signals backend (part of the Signals expansion), matching the KKB Signals bots' behavior while keeping every Maya divergence.

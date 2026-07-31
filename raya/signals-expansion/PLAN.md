@@ -83,3 +83,5 @@ FOLLOW-UP (cross-cutting): /update-output add consent_status + confirm ready_for
 
 ## Inbound-via-outbound test method VALIDATED (2026-07-31)
 Trigger the inbound bot to CALL the tester (POST /api/call agent_id=inbound-bot to_number=tester + agent_args{contact_phone}); it runs its inbound prompt; grade the transcript. WORKS on out_did 911204404274. The 918037006352 DID does NOT bridge outbound -> re-pointed f38da775 + 1c24feda to 911204404274.
+
+## ALL 4 seeker Signals bots VERIFIED (2026-07-31): maya-hi-signals(b2df2d35), kkb-hi-in-signals(1a8deec0), kkb-kn-in-signals(8d958447), maya-hi-in-signals(2e0c7014) — all apply_job 201 on real Signals jobs. DKB Hi/Kn repurposed; employer create_job test next.
