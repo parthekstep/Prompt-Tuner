@@ -10,6 +10,14 @@ Every prompt edit to KKB is logged here. Entry format:
 - **Ported from:** <source agent> (only for cross-agent ports)
 ```
 
+## 2026-07-31 — KKB Hindi + Kannada Inbound Signals (new bots, migrated to Signals DPG)
+
+- **Feedback/bug:** migrate the KKB inbound bots (Hi+Kn) onto Signals as part of the Signals expansion; match the KKB Signals seeker bots' behavior with the inbound flow.
+- **Change:** created `KKB/KKB Placeholder Inbound Signals.md` + `KKB/KKB Placeholder Inbound Kannada Signals.md` by re-domaining the kkb-signals structure onto the inbound base — 9 Signals patterns + Signals tool contract + inbound flow (welcome opener, hardcoded inventory, no government claim). Hardcoded inventory swapped to real Signals job_ids (b7513680/7dc7f10b/da32f92e/362b0ad9). Repurposed agents 3f521174 (Hi) + f38da775 (Kn, kn Signals tools). Hi build had dropped the interview-readiness Step 3.5 (ready_for_interview) — ported it back in + redeployed.
+- **Files:** KKB Placeholder Inbound Signals.md, KKB Placeholder Inbound Kannada Signals.md (new); agents 3f521174, f38da775 repurposed.
+- **Test status:** BOTH VOICE-VERIFIED end-to-end via the inbound-via-outbound harness (trigger inbound bot to call the tester). Hi call `1a8deec0`: inbound welcome, Signals get_profile, live-item select, real-inventory job (Data Entry/Kashi), apply_job -> 201 SUCCESS, Phase-2. Kn call `8d958447`: same, real-inventory job (Remote CSE/Rampur), apply_job -> 201 SUCCESS. Minor (Kn): post-apply update_profile doubled the 91 phone prefix (D39, cosmetic — apply already succeeded) — flag for a phone-format tighten.
+
+
 ## 2026-07-31 — KKB intro reword (drop government claim) + empty-recommendations callback fallback
 
 - **Feedback/bug:** (1) Parth: the KKB intro still claimed "मैं गवर्नमेंट की तरफ से कॉल कर रही हूँ" — the caller identity should be the city-administration employment initiative, no "government" claim on top; also move the recording disclosure to the END of the intro turn and stop after one question. (2) Proactive safeguard (Parth): when NO job data is passed (`${recommendations}` empty/missing), the bot must not hallucinate a job list — say a short callback line instead. (Root of reported apply-fail `51c29350` was a USER input error — jobs sent in `contact_memory` not `${recommendations}` — NOT a bot bug; this fallback is the chosen safeguard, not a fix of that call.)
