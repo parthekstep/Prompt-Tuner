@@ -20,7 +20,7 @@ Per bot (handover §D): build prompt (base + 9 patterns + Signals tools) → cre
 - [ ] Maya Hindi Signals   (base Maya/Maya Hindi.md; outbound; preserve Maya divergences: campus id, feminine voice, MPL, Experience Capture, hr_contact/benefits; languageSpoken ["Hindi"])
 - [ ] KKB Hindi Inbound Signals   (base KKB Placeholder Inbound.md; inbound; hardcoded inventory needs Signals job_ids)
 - [ ] KKB Kannada Inbound Signals (base KKB Placeholder Inbound Kannada.md; inbound twin; languageSpoken ["Kannada"])
-- ~~Maya Inbound Signals~~ — DROPPED (user 2026-07-31: 'don't create a Maya inbound bot').
+- [ ] Maya Inbound Signals (base Maya/Maya Inbound.md; inbound + Maya divergences; NEW agent cloned from maya-hi-in df99f501). RE-ADDED (user: 'we have a maya inbound- migrate that too').
 Prereqs: (a) provider-side Signals API to SEED job_posting items (partial DKB discovery); (b) inbound harness + in_dids for the 3 inbound bots.
 
 ## Phase 2 — DKB Signals discovery (separate)  [status: TODO]
@@ -52,5 +52,5 @@ DKB = provider/employer side (create/verify job postings, not seeker profiles) �
 - kkb-kn-combined f38da775 -> kkb-kn-in-signals (KKB Kannada Inbound Signals)
 - dkb-hi-combined fabda71d -> dkb-hi-signals (Phase 2)
 - dkb-kn-combined 847a85e2 -> dkb-kn-signals (Phase 2)
-- (Maya inbound DROPPED — no new agent needed; clean 5-for-5 repurpose)
+- NEW agent -> maya-hi-in-signals (Maya Inbound Signals, cloned from df99f501)
 Repurpose = PATCH instructions+tools+name on the reused uuid (voice/language already match).

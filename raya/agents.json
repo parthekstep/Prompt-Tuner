@@ -455,6 +455,28 @@
       ],
       "_note": "REPURPOSED from a combined ${call_direction} experiment into a Signals bot (2026-07-31). uuid reused; instructions+tools+name to be PATCHed to Signals. Phase per raya/signals-expansion/PLAN.md.",
       "signals": true
+    },
+    {
+      "id": "maya-hi-in-signals",
+      "raya_name": "Maya Inbound Signals",
+      "file": "Maya/Maya Inbound Signals.md",
+      "agent": "Maya",
+      "language": "hi",
+      "direction": "inbound",
+      "kind": "conversation",
+      "profile": "conversation",
+      "raya_agent_id": {
+        "prod": "",
+        "staging": ""
+      },
+      "deploy": false,
+      "signals": true,
+      "expected_name_contains": [
+        "Maya",
+        "Signals"
+      ],
+      "source_agent_for_clone": "df99f501-e636-4f3d-80dc-e06e82240082",
+      "_note": "NEW Signals agent (Maya Hindi INBOUND) — base Maya/Maya Inbound.md; create by cloning maya-hi-in (df99f501) config + Signals tools. Phase 1."
     }
   ]
 }
