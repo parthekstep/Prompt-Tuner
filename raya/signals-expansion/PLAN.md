@@ -72,3 +72,11 @@ NEXT (exact steps — resume here):
 Repurpose tool: scratchpad/repurpose_agent.py <target_uuid> <instructions_file> "<name>" [signals_src_uuid].
 Real Signals job_ids for grounding/tests: 362b0ad9-fa21-4261-be1f-9582c0cc03a9 (AC Tech), b7513680-6b2f-4223-bba5-893143c949b9 (Data Entry), 7dc7f10b-a42b-4132-ae58-4455f518a37f (Remote CSE) — all apply-verified.
 DEPENDENCY: in_dids for the 3 inbound Signals agents (3f521174, f38da775, + Maya inbound) to voice-test inbound.
+
+## Phase 1 progress (2026-07-31 PM)
+- [x] Maya Hindi Signals — 904f333f — VOICE-VERIFIED (b2df2d35)
+- [x] KKB Hindi Inbound Signals — 3f521174 — built+repurposed; interview-readiness gap FIXED + redeployed; inventory=real Signals jobs; TEST-PENDING (inbound-via-outbound)
+- [x] KKB Kannada Inbound Signals — f38da775 — built (review PASS)+repurposed; inventory=real Signals jobs; TEST-PENDING
+- [x] Maya Inbound Signals — 1c24feda (NEW agent, clone df99f501) — built (PASS)+repurposed+out_did; inventory=real Signals jobs; TEST running
+Inbound test method: trigger the inbound bot (has out_did) to CALL the tester via POST /api/call + agent_args{contact_phone}; grade the inbound flow.
+FOLLOW-UP (cross-cutting): /update-output add consent_status + confirm ready_for_interview in KKB/Maya Output prompts.
