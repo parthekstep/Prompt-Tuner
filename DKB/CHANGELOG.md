@@ -10,6 +10,15 @@ Every prompt edit to DKB is logged here. Entry format:
 - **Ported from:** <source agent> (only for cross-agent ports)
 ```
 
+## 2026-07-31 — DKB Hindi + Kannada Signals (new bots, migrated to Signals DPG — provider side)
+
+- **Feedback/bug:** migrate DKB (the employer/provider bot) onto Signals as the final Signals-expansion phase. DKB is provider-side (posts/verifies jobs), so it required a separate provider-API discovery (raya/signals-expansion/DKB-provider-discovery.md).
+- **Change:** created `DKB/DKB Hindi Signals.md` + `DKB/DKB Kannada Signals.md`. create_job now POSTs to Signals `/api/v1/admin/participant` (domain=provider, item_type=job_posting_1.0): company name -> top-level `name`, location -> `item_state.jobProviderLocation`, item_state = title/role/natureOfJob/positions/jobProviderLocation/hiringManager*; consent via compliance array. update_job = same endpoint by item_id. **SALARY/QUALIFICATION/STIPEND/EXPERIENCE have NO Signals slot — collected in conversation but NOT persisted (flagged in-prompt).** get_talent_insights NOT-YET-MAPPED on Signals -> kept conversational with an honest low-signal fallback (backend dependency for Srivatsa). Repurposed agents fabda71d (Hi) + 847a85e2 (Kn) with hand-built Signals create_job/update_job tools + get_talent_insights.
+- **Files:** DKB/DKB Hindi Signals.md, DKB/DKB Kannada Signals.md (new); agents fabda71d, 847a85e2 repurposed.
+- **Test status:** create_job CURL-GROUNDED (200, job item f6c3d7bb created with a fresh employer phone). DKB Hindi VOICE-VERIFIED (call `09a7b6c8`): employer greeting, Phase-1 verify -> Phase-3 capture, full field-collection, honest market-signal, create_job fires with correct Signals payload, D5 close. (Voice test used the seeker-registered tester phone so the response echoed the seeker participant — a test artifact; the fresh-phone curl-ground confirms clean job_posting creation.) DKB Kannada voice test running.
+- **Open (backend deps, flagged):** requirements-style schema completeness (a description field may exist), get_talent_insights endpoint unmapped, job open/closed status has no confirmed slot, ${job_id} for updates must be a Signals item_id. Confirm with Srivatsa.
+
+
 ---
 
 ## 2026-07-30 — DKB (Hi+Kn): D5 outbound callback-invite close + D34 hold_message narration [overnight run]
