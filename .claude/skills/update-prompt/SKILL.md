@@ -77,6 +77,15 @@ a real job inventory with placeholders). `deploy` also refuses any prompt still 
   entry there if it's a new agent). Then create both language files via the new-language-variant
   step above.
 
+## Test before done (MANDATORY — the change is not DONE until tested)
+
+A change is NOT done when the files are edited/deployed — only when it has been TESTED and confirmed working, with overall sanity intact. Never report a prompt/agent change as "done", "fixed", or "confirmed" until you have actually tested it. Where a bot cannot be harness-tested (inbound bots — the tester can only receive, not dial in; or telephony is down), do the best available verification (post-deploy transcript review + static sanity) and explicitly mark the residual VERIFY-PENDING — never claim done/confirmed on an untested change. Revert on any regression (see /prompt-version).
+
+After deploying a conversation-prompt change:
+1. **Voice-test the changed bot(s)** with `/voice-test`: exercise the exact scenario the change targets (for a bug, the pre-fix repro; for a wording/feature change, a call that hits the changed path) and confirm the NEW behavior appears in the live transcript — on BOTH language variants where the change is agnostic.
+2. **Sanity-check the whole flow** — the change did the intended thing AND broke nothing else (greet → fetch → present → apply → close still work; the sibling language matches).
+3. Only then is it DONE. Untestable → best-available verification + mark VERIFY-PENDING (never "done").
+
 ## Guardrails
 
 - **Surgical edits only.** Make the smallest change that accomplishes the task; preserve every other line, spoken phrase, variable, tool name, and payload exactly. Prefer additive changes; never reformat or delete unrelated content. The resulting diff should contain only the intended change. See `CLAUDE.md` → "Surgical edits only".

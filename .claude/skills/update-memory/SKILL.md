@@ -50,6 +50,12 @@ Use when an agent has no memory prompt (currently KKB and Maya).
 7. Append a `CHANGELOG.md` entry (note both the new memory prompt and any conversation files
    that received the injection block), and report.
 
+## Test before done (MANDATORY — the memory-prompt change is not DONE until tested)
+
+A change is NOT done when the files are edited/deployed — only when it has been TESTED and confirmed working, with overall sanity intact. Never report a prompt/agent change as "done", "fixed", or "confirmed" until you have actually tested it. Where a bot cannot be harness-tested (inbound bots — the tester can only receive, not dial in; or telephony is down), do the best available verification (post-deploy transcript review + static sanity) and explicitly mark the residual VERIFY-PENDING — never claim done/confirmed on an untested change. Revert on any regression (see /prompt-version).
+
+After changing a memory prompt: run a real (or representative sample) call transcript through the updated memory prompt and confirm the memory JSON updates correctly — the new/changed field appears with the right value, enums are respected, and no existing field is corrupted or dropped. Not done until verified against an actual transcript's output.
+
 ## Guardrails
 
 - **Surgical edits only.** Make the smallest change that accomplishes the task; preserve every other field, rule, and line exactly. Prefer additive changes; never reformat or delete unrelated content. See `CLAUDE.md` → "Surgical edits only".

@@ -170,6 +170,16 @@ route its confirmed findings to `/update-prompt`. **Always route prompt edits th
 English-instructions rule, the changelog entry, and the analyser update; don't hand-edit a
 prompt file directly.
 
+## Testing is mandatory — a change is not DONE until tested
+
+**Testing is not optional — a change is not DONE until tested.** A change is NOT done when the
+files are edited/deployed — only when it has been TESTED and confirmed working, with overall
+sanity intact. Never report a prompt/agent change as "done", "fixed", or "confirmed" until you
+have actually tested it. Where a bot cannot be harness-tested (inbound bots — the tester can only
+receive, not dial in; or telephony is down), do the best available verification (post-deploy
+transcript review + static sanity) and explicitly mark the residual **VERIFY-PENDING** — never
+claim done/confirmed on an untested change. Revert on any regression (see `/prompt-version`).
+
 ## Feedback-loop operating sequence (from the sheet — don't ask to be re-told)
 
 When processing reported bugs from the tracker, run this fixed order (full detail in `/bug-fix`):
@@ -180,7 +190,11 @@ Two non-negotiables:
 - **No fix without a transcript.** Never edit a prompt off a sheet report, a hunch, or a static/analyser finding alone — pull the actual call, confirm the bug, understand the root cause. If no recent call reproduces it, don't fix; ask for the reproducing call uuid.
 - **On deploy, flip the sheet status to `Fixed for UAT`** (= deployed, ready for the user's acceptance test) — never leave a deployed fix marked `Open`. Backend/runtime causes → `Flagged - Backend Issue`; no-repro → keep `Open` + request the call. `Fixed for UAT` ≠ *confirmed* — don't claim confirmed until a POST-deploy transcript shows the corrected behavior.
 
-Not every reported bug is a prompt bug. Backend (placeholder/bad job inventory, API 4xx/5xx) and **runtime tool-adherence** (the model ignoring an instruction the prompt already states clearly — e.g. `get_profile` not firing) are NOT prose-fixable; piling on more prose regresses (see analyser D25). Escalate those for a platform fix — don't experiment on the live flow.
+Not every reported bug is a prompt bug — **push back before fixing; sometimes there is no bug.** Root-cause every report against BOTH the real transcript AND the call's **input args** before touching a prompt. Distinct non-prompt causes to name and PUSH BACK on rather than "fix":
+- **User/data input error** — the args were sent wrong (job list in the wrong field, malformed/missing values, mis-mapped campaign `agent_args`). The prompt is fine; the inputs weren't. Say so; make no edit. *(2026-07-31: a "new profile, apply failed" on kkb-hi-signals was actually the jobs sent in `contact_memory` instead of `${recommendations}` — a user mistake, not a bot bug. Every working call carries jobs in `recommendations`.)*
+- **Backend** (placeholder/bad job inventory, API 4xx/5xx, region-specific endpoint behavior) and **runtime tool-adherence** (the model ignoring an instruction the prompt already states clearly — e.g. `get_profile` not firing) are NOT prose-fixable; piling on more prose regresses (see analyser D25). Escalate for a platform fix — don't experiment on the live flow.
+
+Only genuine prompt gaps get a prompt edit. When the inputs were wrong, say "the prompt is fine, the inputs were wrong" out loud instead of editing. (A proactive safeguard the user explicitly asks for — e.g. an empty-`${recommendations}` fallback line — is a chosen feature, not a blind fix, and is fine to add.)
 
 The tracker tab is **`All Issues`** (id `1cqT9EVk_vap16wJ3fQM7txLklf-kbMDHdYWsiHImbHU`). If the sheet key at `~/Downloads` is TCC-blocked, decode it from `kaam-ki-baat/.env.local` (`GOOGLE_SERVICE_ACCOUNT_JSON_BASE64`) into `secrets/gsheets-sa.json` (git-ignored).
 

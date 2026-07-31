@@ -39,6 +39,12 @@ Use when an agent has no output prompt (currently Maya).
 4. Keep the full extraction Rules block.
 5. Create the file at the path-map location, append a `CHANGELOG.md` entry, and report.
 
+## Test before done (MANDATORY — the output-prompt change is not DONE until tested)
+
+A change is NOT done when the files are edited/deployed — only when it has been TESTED and confirmed working, with overall sanity intact. Never report a prompt/agent change as "done", "fixed", or "confirmed" until you have actually tested it. Where a bot cannot be harness-tested (inbound bots — the tester can only receive, not dial in; or telephony is down), do the best available verification (post-deploy transcript review + static sanity) and explicitly mark the residual VERIFY-PENDING — never claim done/confirmed on an untested change. Revert on any regression (see /prompt-version).
+
+After changing an output prompt: run a real (or representative sample) call transcript through the updated output prompt and confirm the extracted variables come out correct — the new/changed variable is populated as intended, enums honored, and no existing field regresses. Not done until verified against an actual transcript's output.
+
 ## Guardrails
 
 - **Surgical edits only.** Make the smallest change that accomplishes the task; preserve every other field, rule, and line exactly. Prefer additive changes; never reformat or delete unrelated content. See `CLAUDE.md` → "Surgical edits only".

@@ -35,6 +35,12 @@ via the path map in the repo root `CLAUDE.md`.
 7. **Report.** Show what was ported, the variable/tool remapping table used, any flagged gaps,
    and the files touched per target.
 
+## Test before done (MANDATORY — the port is not DONE until tested)
+
+A change is NOT done when the files are edited/deployed — only when it has been TESTED and confirmed working, with overall sanity intact. Never report a prompt/agent change as "done", "fixed", or "confirmed" until you have actually tested it. Where a bot cannot be harness-tested (inbound bots — the tester can only receive, not dial in; or telephony is down), do the best available verification (post-deploy transcript review + static sanity) and explicitly mark the residual VERIFY-PENDING — never claim done/confirmed on an untested change. Revert on any regression (see `/prompt-version`).
+
+After porting + deploying: **voice-test the TARGET bot** (`/voice-test`) on a scenario that exercises the ported feature, confirm it behaves correctly in the target's own domain/persona, and sanity-check the target's existing flow still works (and its sibling language). Untestable → best-available verification + VERIFY-PENDING.
+
 ## Notes
 
 - **English instructions rule:** the ported feature's instructions/rules are written in English; only the target agent's spoken lines are localized. Do not carry over Hindi/Kannada rule prose — re-express the rules in English and quote the (re-domained) spoken lines in the target language.

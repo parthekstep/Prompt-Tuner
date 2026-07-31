@@ -84,7 +84,7 @@ Use `scripts/raya_call.py <agent_uuid> [limit] [offset]` — it prints `tool_cal
 
 **Step 6 — verify nothing broke.** After the edits (before deploy), regression-check: does any new rule CONTRADICT an existing line (e.g. a new canonical-spelling rule vs the file's own sample-dialogue spellings — see the 2026-07-27 Kannada virama / Maya MPL catches)? Did an insertion split a section or break the greeting→fork→apply→failure flow? Is Hindi↔Kannada scaffolding still parallel? Reconcile every contradiction, then re-verify. A Workflow with one regression agent per changed file works well.
 
-**Step 7 — deploy.** API PATCH, name-guarded, read-back-verified, recorded to `raya/deploy-history.md`. `scripts/raya_deploy.py deploy <target>` does this. Never edit the live agent in the Raya console (it clobbers console-only content). Confirm all changed targets are `in sync` afterward.
+**Step 7 — deploy.** API PATCH, name-guarded, read-back-verified, recorded to `raya/deploy-history.md`. `scripts/raya_deploy.py deploy <target>` does this. Never edit the live agent in the Raya console (it clobbers console-only content). Confirm all changed targets are `in sync` afterward. A deploy is NOT the finish line: the fix is not done until a **post-deploy** voice-test/transcript confirms the corrected behavior AND overall sanity holds (nothing else regressed) — `Fixed for UAT` means deployed + ready-to-test, never *confirmed*.
 
 **Step 8 — sheet status discipline (always flip the status, not just a comment):**
 - deployed prompt fix → **`Fixed for UAT`** (+ comment: root cause + call uuid + what changed + deploy date; note "awaiting post-deploy call to confirm").
