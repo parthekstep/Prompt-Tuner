@@ -10,6 +10,14 @@ Every prompt edit to Maya is logged here. Maya is Hindi-only (KKB spinoff). Entr
 - **Ported from:** <source agent> (only for cross-agent ports)
 ```
 
+## 2026-07-31 — Maya: empty-recommendations callback fallback
+
+- **Feedback/bug:** proactive safeguard (Parth) — when NO job data is passed (`${recommendations}` empty/missing), the bot must not hallucinate; say a short callback line and close. (Maya's intro was NOT changed — the government-claim reword was KKB-only.)
+- **Change:** added a "Missing-job-data fallback" at the recommendations pre-check / No-Match Fallback: empty/null/missing/unparseable `${recommendations}` -> say "अभी आपके लिए मुझे जॉब्स नहीं मिल रहीं — एक बार फिर से देखकर मैं आपको वापस कॉल करती हूँ।" (feminine form, per Maya's voice rule) and close; never invent a job or apply with an example/invented `job_id`. Non-empty No-Match message unchanged. All Maya divergences preserved.
+- **Files:** Maya/Maya Hindi.md
+- **Test status:** deployed + voice-tested (see session report).
+
+
 ---
 
 ## 2026-07-30 — Maya (out+in): neutral `hold_message` (D34) [overnight run]

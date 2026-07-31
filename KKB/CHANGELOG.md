@@ -10,6 +10,14 @@ Every prompt edit to KKB is logged here. Entry format:
 - **Ported from:** <source agent> (only for cross-agent ports)
 ```
 
+## 2026-07-31 — KKB intro reword (drop government claim) + empty-recommendations callback fallback
+
+- **Feedback/bug:** (1) Parth: the KKB intro still claimed "मैं गवर्नमेंट की तरफ से कॉल कर रही हूँ" — the caller identity should be the city-administration employment initiative, no "government" claim on top; also move the recording disclosure to the END of the intro turn and stop after one question. (2) Proactive safeguard (Parth): when NO job data is passed (`${recommendations}` empty/missing), the bot must not hallucinate a job list — say a short callback line instead. (Root of reported apply-fail `51c29350` was a USER input error — jobs sent in `contact_memory` not `${recommendations}` — NOT a bot bug; this fallback is the chosen safeguard, not a fix of that call.)
+- **Change:** (Intro — outbound Hi/Kn + Signals Hi/Kn) all greeting variants re-anchored to "शहर प्रशासन की 'काम की बात' पहल" / "ನಗರ ಆಡಳಿತದ 'ಕೆಲಸದ ಮಾತು' ಉಪಕ್ರಮ"; the "मैं गवर्नमेंट की तरफ से…" / "ನಾನು ಗವರ್ನಮೆಂಟ್ ಕಡೆಯಿಂದ…" clause removed; recording disclosure moved to the END after the question; added an English "Intro-turn rules" block (identity anchor / no government claim; disclosure at end; end the turn after the disclosure and wait — one question only). Sample-conversation opening greetings updated to match (0 government-claim occurrences file-wide). (Fallback — all recommendations bots) added a "Missing-job-data fallback" at the recommendations pre-check / No-Match Fallback: empty/null/missing/unparseable `${recommendations}` -> say "अभी आपके लिए मुझे जॉब्स नहीं मिल रहीं — एक बार फिर से देखकर मैं आपको वापस कॉल करती हूँ।" / "ಸಧ್ಯಕ್ಕೆ ನಿಮಗೆ ಜಾಬ್‌ಗಳು ಸಿಗ್ತಿಲ್ಲ — ಇನ್ನೊಮ್ಮೆ ನೋಡಿ ನಾನು ನಿಮಗೆ ವಾಪಸ್ ಕಾಲ್ ಮಾಡ್ತೀನಿ." and close; never invent a job or apply with an example/invented `job_id`. Non-empty No-Match message (jobs present but none fit) unchanged.
+- **Files:** KKB Placeholder Hindi.md, KKB Placeholder Kannada.md, KKB Placeholder Hindi Signals.md, KKB Placeholder Kannada Signals.md
+- **Test status:** deployed + voice-tested (see session report); sync Hi<->Kn verified.
+
+
 ---
 
 ## 2026-07-30 — KKB outbound (Hi+Kn): REMOVE `new_seeker` → fetch-driven Profile Handling [overnight run, per Parth]
