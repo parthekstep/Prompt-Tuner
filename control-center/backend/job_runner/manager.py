@@ -28,7 +28,9 @@ _DEPLOY = _EDIT + ["Bash(python3 scripts/raya_deploy.py deploy:*)",
                    "Bash(python3 scripts/raya_testrun.py:*)", "Bash(python3 scripts/raya_testcall.py:*)",
                    "Bash(python3 scripts/gsheets.py update:*)"]
 ALLOW = {"diagnose": _EDIT, "propose": _READ, "deploy": _DEPLOY, "voice-test": _DEPLOY}
-PERM_MODE = {"diagnose": "acceptEdits", "propose": "plan", "deploy": "acceptEdits", "voice-test": "acceptEdits"}
+# propose = default mode + read-only allowlist (edits/deploy simply not allowlisted -> can't mutate);
+# plan mode can over-restrict read-only Bash, so default is used for a reliable read-only diagnose.
+PERM_MODE = {"diagnose": "acceptEdits", "propose": "default", "deploy": "acceptEdits", "voice-test": "acceptEdits"}
 
 
 class Manager:
