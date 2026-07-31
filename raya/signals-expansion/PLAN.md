@@ -1,0 +1,47 @@
+# Signals expansion — migrate all remaining agents onto Signals DPGs
+
+Durable plan + progress tracker (survives context limits). Playbook: `docs/signals-migration-guide.md`.
+Reference bots (the pattern to replicate): **kkb-hi-signals** `115b38a5`, **kkb-kn-signals** `33037201`.
+Migration = (A) swap 3 tools to Signals endpoints + (B) apply the 9 structural patterns (§C) + consent_status output var.
+"Consistent results" bar = fetch→branch-on-result→consent→create-LIVE→apply-201 (current KKB Signals applies succeed: `12cc6a48`, `51b605a2`).
+
+## User decisions (2026-07-31)
+- **Job ids:** SEED throwaway Signals `job_posting_1.0` items via the provider API; use those ids to validate apply end-to-end.
+- **Inbound testing:** BUILD an inbound harness (tester agent gets an out_did / dials the inbound bot's in_did). NOTE: new inbound Signals agents will need in_dids assigned (DID provisioning — flag to user).
+- Combined ${call_direction} bots: ABANDON (no Raya delete route → deregister + flag for manual console deletion).
+
+## Phase 0 — Abandon combined bots  [status: IN PROGRESS]
+5 experimental agents to retire (deploy=false, keep uuids for manual console deletion):
+- kkb-hi-combined 3f521174 · kkb-kn-combined f38da775 · maya-hi-combined 904f333f · dkb-hi-combined fabda71d · dkb-kn-combined 847a85e2
+Actions: mark abandoned in agents.json; archive raya/combined/ prompts; note in report/open-items.
+
+## Phase 1 — Signals seeker bots  [status: TODO]
+Per bot (handover §D): build prompt (base + 9 patterns + Signals tools) → create Raya agent (POST /api/agent, Signals tools) → curl-ground create-live+apply-201 → deploy → test to parity → changelog.
+- [ ] Maya Hindi Signals   (base Maya/Maya Hindi.md; outbound; preserve Maya divergences: campus id, feminine voice, MPL, Experience Capture, hr_contact/benefits; languageSpoken ["Hindi"])
+- [ ] KKB Hindi Inbound Signals   (base KKB Placeholder Inbound.md; inbound; hardcoded inventory needs Signals job_ids)
+- [ ] KKB Kannada Inbound Signals (base KKB Placeholder Inbound Kannada.md; inbound twin; languageSpoken ["Kannada"])
+- [ ] Maya Inbound Signals   (base Maya/Maya Inbound.md; inbound + Maya divergences)
+Prereqs: (a) provider-side Signals API to SEED job_posting items (partial DKB discovery); (b) inbound harness + in_dids for the 3 inbound bots.
+
+## Phase 2 — DKB Signals discovery (separate)  [status: TODO]
+DKB = provider/employer side (create/verify job postings, not seeker profiles) → different endpoints, integration, workflow.
+- [ ] curl-map the provider Signals API (create job_posting_1.0 item; verify/update; talent insights equivalent)
+- [ ] write DKB-Signals discovery doc (employer twin of the handover)
+- [ ] build DKB Hi/Kn Signals → curl-ground → deploy → test
+
+## Dependencies / blockers
+- Signals job_id inventory (inbound hardcoded + Maya recommendations) — using seeded test ids for validation; production wiring separate (Srivatsa).
+- in_dids for the 3 new inbound Signals agents (DID provisioning) — needed to voice-test inbound.
+- Signals x-api-key (Srivatsa) lives only in tool headers / git-ignored — never commit.
+- requirements_snapshot: RESOLVED (applies succeed now).
+
+## Discovery log (2026-07-31)
+- Signals creds/endpoints pulled from live kkb-hi-signals into `raya/snapshots/_signals-tools-ref.json` (git-ignored; has x-api-key). Tools: get_profile GET /admin/participant · create_profile POST /admin/participant · apply_job POST /action/perform · update_profile POST /admin/participant.
+- Provider job-create endpoint CONFIRMED: POST /admin/participant with domain=provider, item_type=job_posting_1.0 (400 INVALID_ITEM_STATE on guessed fields — the job_posting_1.0 item_state schema needs full discovery = Phase 2 DKB work).
+- GET-by-item-id NOT exposed (tried 9 paths, all 404/400). Job fetch is phone-keyed (seeker) only.
+- Real apply-verified Signals job_ids available for Phase-1 apply testing (from the live feed): 362b0ad9-fa21-4261-be1f-9582c0cc03a9 (apply succeeded on call 12cc6a48). Use these for now; seed controlled test jobs in Phase 2.
+- DECISION: Phase 1 uses existing real Signals job_ids for apply validation; full provider job_posting schema + seeding -> Phase 2 (DKB), which is the provider side anyway.
+
+## Progress
+- [x] Phase 0 — combined bots abandoned (agents.json + raya/combined/ABANDONED.md)
+- [~] Phase 1 — foundational discovery done; building Maya Hindi Signals first (re-domain kkb-hi-signals -> Maya)

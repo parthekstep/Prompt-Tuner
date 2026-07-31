@@ -365,7 +365,8 @@
         "KKB",
         "Combined"
       ],
-      "_note": "EXPERIMENTAL combined ${call_direction} bot (v1). deploy=false; NOT migrated. Outbound branch = standalone outbound bot byte-for-byte; inbound branch direction-aware v1 with documented residual gaps (see REPORT G.5)."
+      "_note": "ABANDONED 2026-07-31 — combined ${call_direction} experiment retired (call_direction not injected on API calls; see open-items #12). NOT deleted (no Raya delete route) — flag uuid for manual console deletion. Superseded by the Signals expansion.",
+      "abandoned": true
     },
     {
       "id": "kkb-kn-combined",
@@ -386,7 +387,8 @@
         "KKB",
         "Combined"
       ],
-      "_note": "EXPERIMENTAL combined ${call_direction} bot (v1). deploy=false; NOT migrated. Outbound branch = standalone outbound bot byte-for-byte; inbound branch direction-aware v1 with documented residual gaps (see REPORT G.5)."
+      "_note": "ABANDONED 2026-07-31 — combined ${call_direction} experiment retired (call_direction not injected on API calls; see open-items #12). NOT deleted (no Raya delete route) — flag uuid for manual console deletion. Superseded by the Signals expansion.",
+      "abandoned": true
     },
     {
       "id": "maya-hi-combined",
@@ -407,7 +409,8 @@
         "Maya",
         "Combined"
       ],
-      "_note": "EXPERIMENTAL combined ${call_direction} bot (v1). deploy=false; NOT migrated. Outbound branch = standalone outbound bot byte-for-byte; inbound branch direction-aware v1 with documented residual gaps (see REPORT G.5)."
+      "_note": "ABANDONED 2026-07-31 — combined ${call_direction} experiment retired (call_direction not injected on API calls; see open-items #12). NOT deleted (no Raya delete route) — flag uuid for manual console deletion. Superseded by the Signals expansion.",
+      "abandoned": true
     },
     {
       "id": "dkb-hi-combined",
@@ -428,7 +431,8 @@
         "DKB",
         "Combined"
       ],
-      "_note": "EXPERIMENTAL combined ${call_direction} bot (v1). deploy=false; NOT migrated. Outbound branch = standalone outbound bot byte-for-byte; inbound branch direction-aware v1 with documented residual gaps (see REPORT G.5)."
+      "_note": "ABANDONED 2026-07-31 — combined ${call_direction} experiment retired (call_direction not injected on API calls; see open-items #12). NOT deleted (no Raya delete route) — flag uuid for manual console deletion. Superseded by the Signals expansion.",
+      "abandoned": true
     },
     {
       "id": "dkb-kn-combined",
@@ -449,7 +453,8 @@
         "DKB",
         "Combined"
       ],
-      "_note": "EXPERIMENTAL combined ${call_direction} bot (v1). deploy=false; NOT migrated. Outbound branch = standalone outbound bot byte-for-byte; inbound branch direction-aware v1 with documented residual gaps (see REPORT G.5)."
+      "_note": "ABANDONED 2026-07-31 — combined ${call_direction} experiment retired (call_direction not injected on API calls; see open-items #12). NOT deleted (no Raya delete route) — flag uuid for manual console deletion. Superseded by the Signals expansion.",
+      "abandoned": true
     }
   ]
 }
