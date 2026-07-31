@@ -403,7 +403,7 @@
         "prod": "904f333f-1919-4523-a51d-b22ba382dd22",
         "staging": ""
       },
-      "deploy": false,
+      "deploy": true,
       "experimental": true,
       "expected_name_contains": [
         "Maya",
