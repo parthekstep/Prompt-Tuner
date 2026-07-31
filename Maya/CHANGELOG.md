@@ -10,6 +10,18 @@ Every prompt edit to Maya is logged here. Maya is Hindi-only (KKB spinoff). Entr
 - **Ported from:** <source agent> (only for cross-agent ports)
 ```
 
+## 2026-08-01 — Maya Signals deep E2E pass: inbound inventory↔example consistency + parity + are-you-AI + outbound-close
+
+- **Feedback/bug:** (user) deep end-to-end test + fix. Static audit found the **Maya Inbound** inventory was swapped to 4 real Signals jobs but the roles-list, synonym/role-family table, Case-B overview, canonical-locations and all example dialogues still described the OLD Ghaziabad/Noida set (CY Future, Weavings, Westside, sales/telecaller/retail) → analyser E1 hallucination risk. Plus small outbound↔inbound parity gaps, malformed inventory markdown, and two quality gaps (no are-you-AI responder; one outbound-frame D5 leak).
+- **Change:**
+  - **CD2 (Maya Inbound):** rewrote roles-list, role-synonym + role-family blocks, Case-B pool overview, canonical-locations, and Examples 1/2/3/5 to reference ONLY the 4 real jobs (Data Entry/Kashi, Remote Customer Support/Rampur, EV Charging Tech/Yamuna, AC Tech/Krishna; Bengaluru/Remote), with a nearby-location rule (Remote role fits any city; offer Bengaluru as the alternative). Employer names transliterated to Devanagari (काशी इंफोटेक). Since none of the 4 jobs carries an `hr_contact`, did NOT fabricate one (Hallucination Guard) — removed "→ HR number" from Ex1's title; HR-share behaviour stays documented abstractly. MPL, feminine voice, campus identity, memory block untouched. Inventory job_ids untouched.
+  - **M17:** fixed the malformed `> **[` inventory-wrapper markdown → clean ```json fence; removed `[FLAG — REVIEW]` scaffolding.
+  - **M14/M15/M16 (Maya outbound parity):** ported the honorific-plural voice clarification + the "never skip the fetch if the caller front-loads role/city" clause into the outbound; noted `${country_code}` as declared-but-unused.
+  - **CD4 (both):** honest are-you-AI responder ("जी, मैं एक AI असिस्टेंट हूँ — आपकी मदद के लिए।", feminine).
+  - **CD3 (Maya outbound):** reworded the inbound-frame closing ("जब भी फिर से देखना हो, बात कीजिए।") → outbound frame ("ज़रूरत होने पर हमारी टीम आपसे फिर बात करेगी।"). Inbound closings left (inbound may invite callback).
+- **Files:** Maya/Maya Hindi Signals.md, Maya/Maya Inbound Signals.md. Agents 904f333f + 1c24feda re-deployed.
+- **Test status:** deployed; live-test matrix in progress (campus apply + MPL + are-you-AI + inbound inventory). Also fixed the stale `voice-test/reference/checklists/maya.md` §6 (it wrongly asserted `+91` on get_profile; Signals uses `91` no `+`). Revert snapshots: raya/signals-expansion/e2e/snapshots/Maya *.pre-e2e-fixes.md.
+
 ## 2026-07-31 — Maya Inbound Signals (new bot, migrated to Signals DPG)
 
 - **Change:** created Maya/Maya Inbound Signals.md (inbound + 9 Signals patterns + Signals tools + Maya divergences); new agent 1c24feda (clone df99f501). Inventory swapped to real Signals jobs; removed a residual second inventory array that caused a wrong-job present + hallucinated apply.

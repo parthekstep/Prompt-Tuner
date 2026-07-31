@@ -10,6 +10,18 @@ Every prompt edit to KKB is logged here. Entry format:
 - **Ported from:** <source agent> (only for cross-agent ports)
 ```
 
+## 2026-08-01 — KKB Signals deep E2E pass: inbound inventory↔example consistency + sync-drift + are-you-AI + outbound-close
+
+- **Feedback/bug:** (user) deep end-to-end test + fix of every Signals bug. Static audit (3 graders) + live tests surfaced: **(CD2, ship-blocker)** the inbound bots' hardcoded inventory was swapped to 4 real Signals jobs during the build, but the "What's available" line, role-synonym table, Case-B overview, canonical-locations and ALL example dialogues still described the OLD Ghaziabad/Noida retail-food set (McDonald's, Burger King, CY Future, Weavings, Cashier, Sales) — per analyser E1 the model copies examples over inventory → it would present jobs that don't exist (hallucination). Plus several Hi↔Kn sync drifts and two quality gaps (no are-you-AI responder; outbound-frame D5 leak in closings).
+- **Change:**
+  - **CD2 (inbound Hi+Kn):** rewrote "What's available", the role-synonym table, Case-B pool overview, canonical-location list, Role-family grouping, and all 5 example dialogues to reference ONLY the 4 real inventory jobs (Data Entry Operator/Kashi Infotech, Remote Customer Support/Rampur Technologies, EV Charging Technician/Yamuna Solar, AC Technician/Krishna Enterprises; Bengaluru/Remote). Inventory job_ids untouched. Each example's pedagogical point (silent fetch, live-item gate, decoupled create→apply, consent, no-match) preserved.
+  - **Sync/correctness (KKB outbound Hi+Kn):** Kn Pre-check empty-`${recommendations}` fallback block added (parity); Kn Core-belief prose → English; Kn `update_profile` enum-reminder sentence added; Example-2 stopped persisting a non-schema `totalYearsOfExperience` (→ `workExperience` enum); top No-Match scaffolding normalised.
+  - **Sync/correctness (KKB inbound Hi+Kn):** consent line "profile" word → "जानकारी/ಮಾಹಿತಿ" (Kn carve-out removed, D8); Hi Step-3 data-share clause added (parity); Kn `update_profile` hold → "ಒಂದು ಕ್ಷಣ"; Hi NOT-READY HARD BLOCK + update_profile example added (parity); Kn Core-belief → English; relevance-filter illustration unified; Kn intro fetch-mention removed.
+  - **CD4 (all 4 KKB files):** added an honest "are you a real person / AI?" responder (English rule + in-language line).
+  - **CD3 (KKB outbound Hi+Kn):** reworded 8 closings that invited the caller to "contact us" → outbound frame ("हमारी टीम आपसे फिर संपर्क करेगी" / Kn twin); do-not-call closings had the invite dropped (not substituted) to avoid contradicting the compliance promise.
+- **Files:** KKB/KKB Placeholder Hindi Signals.md, KKB/KKB Placeholder Kannada Signals.md, KKB/KKB Placeholder Inbound Signals.md, KKB/KKB Placeholder Inbound Kannada Signals.md. All 4 agents re-deployed (115b38a5, 33037201, 3f521174, f38da775).
+- **Test status:** deployed; live-test matrix in progress (outbound + inbound seeker apply + are-you-AI). Analyser E1 sharpened with the inventory-swap variant. Revert snapshots: raya/signals-expansion/e2e/snapshots/*.pre-e2e-fixes.md.
+
 ## 2026-07-31 — KKB Hindi + Kannada Inbound Signals (new bots, migrated to Signals DPG)
 
 - **Feedback/bug:** migrate the KKB inbound bots (Hi+Kn) onto Signals as part of the Signals expansion; match the KKB Signals seeker bots' behavior with the inbound flow.

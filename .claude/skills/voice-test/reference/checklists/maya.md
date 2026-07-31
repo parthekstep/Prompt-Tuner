@@ -55,8 +55,8 @@ Grade a tester-vs-Maya call from the transcript + `call_output`. Maya is the **H
   - *Why / how to detect:* Fail if any turn near the fetch says "जानकारी देख रही हूँ / देख लेती हूँ", "प्रोफाइल देख रही हूँ", "एक मिनट", or any lookup/wait line — including a clause prepended to the greeting (cf. B2, D25/D29). The greeting turn is greeting-only; the fetch is a separate silent step.
 - [ ] The word "profile" / "प्रोफाइल" is NEVER spoken; Maya says "जानकारी" instead.
   - *Why / how to detect:* Grep every bot turn for "profile"/"प्रोफाइल" (either script) — any occurrence = fail (cf. D8). Permission ask uses "बेसिक जानकारी"; acknowledgement is "आपकी जानकारी मिल गई…".
-- [ ] `get_profile` phone arg is `+91`-prefixed exactly once (never bare 10-digit, never `+91+91…`).
-  - *Why / how to detect:* Inspect the `get_profile` tool_call args — `phoneNumber` must be `+91XXXXXXXXXX` (cf. C3, D17). A bare number → empty fetch bug; a doubled prefix → 400.
+- [ ] `get_profile` phone arg matches the backend's required shape, sent exactly once (never bare 10-digit, never doubled).
+  - *Why / how to detect:* Inspect the `get_profile` tool_call args. **Signals** (current Maya Signals deployment): `phone_number` = `91XXXXXXXXXX` — 12-digit, digits-only, **no `+`**. Legacy **up-getjob** Maya: `phoneNumber` = `+91XXXXXXXXXX`. A bare 10-digit → empty fetch; a doubled prefix (`+9191…`/`919191…`) → wrong record / 400 (cf. C3, D17, D39).
 - [ ] A returned profile is actually used: Maya greets by first name and reflects the role — she does not fall back to a generic script.
   - *Why / how to detect:* After a non-empty `get_profile`, the next turn says "आपकी जानकारी मिल गई, [पहला नाम] जी।" and confirms the role (grounded pattern: prompt Example 4). Ignoring the returned data = fail (cf. C6).
 - [ ] Age/gender (and other present fields) from the profile are locked KNOWN for the whole call and never re-asked — including on a 2nd/3rd apply.
