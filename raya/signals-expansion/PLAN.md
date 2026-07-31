@@ -17,7 +17,7 @@ Actions: mark abandoned in agents.json; archive raya/combined/ prompts; note in 
 
 ## Phase 1 — Signals seeker bots  [status: TODO]
 Per bot (handover §D): build prompt (base + 9 patterns + Signals tools) → create Raya agent (POST /api/agent, Signals tools) → curl-ground create-live+apply-201 → deploy → test to parity → changelog.
-- [ ] Maya Hindi Signals   (base Maya/Maya Hindi.md; outbound; preserve Maya divergences: campus id, feminine voice, MPL, Experience Capture, hr_contact/benefits; languageSpoken ["Hindi"])
+- [x] Maya Hindi Signals — DONE + VOICE-VERIFIED (call b2df2d35: apply 201, MPL, feminine campus). Agent 904f333f repurposed.
 - [ ] KKB Hindi Inbound Signals   (base KKB Placeholder Inbound.md; inbound; hardcoded inventory needs Signals job_ids)
 - [ ] KKB Kannada Inbound Signals (base KKB Placeholder Inbound Kannada.md; inbound twin; languageSpoken ["Kannada"])
 - [ ] Maya Inbound Signals (base Maya/Maya Inbound.md; inbound + Maya divergences; NEW agent cloned from maya-hi-in df99f501). RE-ADDED (user: 'we have a maya inbound- migrate that too').

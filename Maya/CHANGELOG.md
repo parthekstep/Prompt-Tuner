@@ -10,6 +10,15 @@ Every prompt edit to Maya is logged here. Maya is Hindi-only (KKB spinoff). Entr
 - **Ported from:** <source agent> (only for cross-agent ports)
 ```
 
+## 2026-07-31 — Maya Hindi Signals (new bot, migrated to Signals DPG)
+
+- **Feedback/bug:** migrate Maya onto the Signals backend (part of the Signals expansion), matching the KKB Signals bots' behavior while keeping every Maya divergence.
+- **Change:** created `Maya/Maya Hindi Signals.md` (1261 lines) by re-domaining the proven kkb-hi-signals structure onto Maya — all 9 Signals stabilisation patterns (fetch-driven/no-fork, memory-is-not-a-fetch, smooth opener, lifecycle live-item gate, consent HARD BLOCK, silenced fetch, reuse item_state, ranking filter, never-batch create->apply) + Signals tool contract (get_profile phone 91+digits; create_profile compliance+age->live; apply_job source/target/acting_as_user_id) + consent_status/ready_for_interview vars; Maya divergences preserved (campus identity ${college_name}, feminine voice, MPL Competition, Experience Capture, hr_contact/benefits). Repurposed agent `904f333f` (ex maya-hi-combined): PATCHed name+instructions+4 Signals tools.
+- **Files:** Maya/Maya Hindi Signals.md (new); agent 904f333f repurposed.
+- **Test status:** VOICE-VERIFIED end-to-end (call `b2df2d35`): campus feminine greeting, silent Signals get_profile, live-item selection, role-update offer, consent, apply_job -> 201 SUCCESS (real job_id 7dc7f10b), ready_for_interview, post-apply update_profile, MPL offer. Parity with KKB Signals confirmed.
+- **Follow-up:** add consent_status + ready_for_interview to Maya Output (/update-output) before production wiring.
+
+
 ## 2026-07-31 — Maya: empty-recommendations callback fallback
 
 - **Feedback/bug:** proactive safeguard (Parth) — when NO job data is passed (`${recommendations}` empty/missing), the bot must not hallucinate; say a short callback line and close. (Maya's intro was NOT changed — the government-claim reword was KKB-only.)
