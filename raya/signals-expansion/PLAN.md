@@ -8,9 +8,9 @@ Migration = (A) swap 3 tools to Signals endpoints + (B) apply the 9 structural p
 ## User decisions (2026-07-31)
 - **Job ids:** SEED throwaway Signals `job_posting_1.0` items via the provider API; use those ids to validate apply end-to-end.
 - **Inbound testing:** BUILD an inbound harness (tester agent gets an out_did / dials the inbound bot's in_did). NOTE: new inbound Signals agents will need in_dids assigned (DID provisioning — flag to user).
-- Combined ${call_direction} bots: ABANDON (no Raya delete route → deregister + flag for manual console deletion).
+- Combined ${call_direction} bots: REPURPOSE their uuids as the new Signals bots (user 2026-07-31: 'instead of deleting them, repurpose them for the new bots'). 5 agents recycled + 1 new (Maya inbound).
 
-## Phase 0 — Abandon combined bots  [status: IN PROGRESS]
+## Phase 0 — Repurpose combined bots  [status: DONE]
 5 experimental agents to retire (deploy=false, keep uuids for manual console deletion):
 - kkb-hi-combined 3f521174 · kkb-kn-combined f38da775 · maya-hi-combined 904f333f · dkb-hi-combined fabda71d · dkb-kn-combined 847a85e2
 Actions: mark abandoned in agents.json; archive raya/combined/ prompts; note in report/open-items.
@@ -45,3 +45,12 @@ DKB = provider/employer side (create/verify job postings, not seeker profiles) �
 ## Progress
 - [x] Phase 0 — combined bots abandoned (agents.json + raya/combined/ABANDONED.md)
 - [~] Phase 1 — foundational discovery done; building Maya Hindi Signals first (re-domain kkb-hi-signals -> Maya)
+
+## Repurpose map (uuids reused)
+- maya-hi-combined 904f333f -> maya-hi-signals (Maya Hindi Signals, out)
+- kkb-hi-combined 3f521174 -> kkb-hi-in-signals (KKB Hindi Inbound Signals)
+- kkb-kn-combined f38da775 -> kkb-kn-in-signals (KKB Kannada Inbound Signals)
+- dkb-hi-combined fabda71d -> dkb-hi-signals (Phase 2)
+- dkb-kn-combined 847a85e2 -> dkb-kn-signals (Phase 2)
+- NEW agent -> maya-hi-in-signals (Maya Inbound Signals)
+Repurpose = PATCH instructions+tools+name on the reused uuid (voice/language already match).

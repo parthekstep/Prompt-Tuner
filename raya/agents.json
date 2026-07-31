@@ -347,14 +347,14 @@
       "deploy": false
     },
     {
-      "id": "kkb-hi-combined",
-      "file": "raya/combined/kkb-hi-combined.md",
+      "id": "kkb-hi-in-signals",
+      "file": "KKB/KKB Placeholder Inbound Signals.md",
       "agent": "KKB",
       "language": "hi",
-      "direction": "combined",
+      "direction": "inbound",
       "kind": "conversation",
       "profile": "conversation",
-      "raya_name": "KKB Combined [call_direction] - Hindi (EXPERIMENTAL)",
+      "raya_name": "KKB Hindi Inbound Signals",
       "raya_agent_id": {
         "prod": "3f521174-574d-43ca-a9be-081849373c18",
         "staging": ""
@@ -363,20 +363,20 @@
       "experimental": true,
       "expected_name_contains": [
         "KKB",
-        "Combined"
+        "Signals"
       ],
-      "_note": "ABANDONED 2026-07-31 — combined ${call_direction} experiment retired (call_direction not injected on API calls; see open-items #12). NOT deleted (no Raya delete route) — flag uuid for manual console deletion. Superseded by the Signals expansion.",
-      "abandoned": true
+      "_note": "REPURPOSED from a combined ${call_direction} experiment into a Signals bot (2026-07-31). uuid reused; instructions+tools+name to be PATCHed to Signals. Phase per raya/signals-expansion/PLAN.md.",
+      "signals": true
     },
     {
-      "id": "kkb-kn-combined",
-      "file": "raya/combined/kkb-kn-combined.md",
+      "id": "kkb-kn-in-signals",
+      "file": "KKB/KKB Placeholder Inbound Kannada Signals.md",
       "agent": "KKB",
       "language": "kn",
-      "direction": "combined",
+      "direction": "inbound",
       "kind": "conversation",
       "profile": "conversation",
-      "raya_name": "KKB Combined [call_direction] - Kannada (EXPERIMENTAL)",
+      "raya_name": "KKB Kannada Inbound Signals",
       "raya_agent_id": {
         "prod": "f38da775-c572-4a50-9340-fe1f42c43901",
         "staging": ""
@@ -385,20 +385,20 @@
       "experimental": true,
       "expected_name_contains": [
         "KKB",
-        "Combined"
+        "Signals"
       ],
-      "_note": "ABANDONED 2026-07-31 — combined ${call_direction} experiment retired (call_direction not injected on API calls; see open-items #12). NOT deleted (no Raya delete route) — flag uuid for manual console deletion. Superseded by the Signals expansion.",
-      "abandoned": true
+      "_note": "REPURPOSED from a combined ${call_direction} experiment into a Signals bot (2026-07-31). uuid reused; instructions+tools+name to be PATCHed to Signals. Phase per raya/signals-expansion/PLAN.md.",
+      "signals": true
     },
     {
-      "id": "maya-hi-combined",
-      "file": "raya/combined/maya-hi-combined.md",
+      "id": "maya-hi-signals",
+      "file": "Maya/Maya Hindi Signals.md",
       "agent": "Maya",
       "language": "hi",
-      "direction": "combined",
+      "direction": "outbound",
       "kind": "conversation",
       "profile": "conversation",
-      "raya_name": "Maya Combined [call_direction] - Hindi (EXPERIMENTAL)",
+      "raya_name": "Maya Hindi Signals",
       "raya_agent_id": {
         "prod": "904f333f-1919-4523-a51d-b22ba382dd22",
         "staging": ""
@@ -407,20 +407,20 @@
       "experimental": true,
       "expected_name_contains": [
         "Maya",
-        "Combined"
+        "Signals"
       ],
-      "_note": "ABANDONED 2026-07-31 — combined ${call_direction} experiment retired (call_direction not injected on API calls; see open-items #12). NOT deleted (no Raya delete route) — flag uuid for manual console deletion. Superseded by the Signals expansion.",
-      "abandoned": true
+      "_note": "REPURPOSED from a combined ${call_direction} experiment into a Signals bot (2026-07-31). uuid reused; instructions+tools+name to be PATCHed to Signals. Phase per raya/signals-expansion/PLAN.md.",
+      "signals": true
     },
     {
-      "id": "dkb-hi-combined",
-      "file": "raya/combined/dkb-hi-combined.md",
+      "id": "dkb-hi-signals",
+      "file": "DKB/DKB Hindi Signals.md",
       "agent": "DKB",
       "language": "hi",
-      "direction": "combined",
+      "direction": "outbound",
       "kind": "conversation",
       "profile": "conversation",
-      "raya_name": "DKB Combined [call_direction] - Hindi (EXPERIMENTAL)",
+      "raya_name": "DKB Hindi Signals",
       "raya_agent_id": {
         "prod": "fabda71d-af75-4ddd-8cf1-fa35c827f753",
         "staging": ""
@@ -429,20 +429,20 @@
       "experimental": true,
       "expected_name_contains": [
         "DKB",
-        "Combined"
+        "Signals"
       ],
-      "_note": "ABANDONED 2026-07-31 — combined ${call_direction} experiment retired (call_direction not injected on API calls; see open-items #12). NOT deleted (no Raya delete route) — flag uuid for manual console deletion. Superseded by the Signals expansion.",
-      "abandoned": true
+      "_note": "REPURPOSED from a combined ${call_direction} experiment into a Signals bot (2026-07-31). uuid reused; instructions+tools+name to be PATCHed to Signals. Phase per raya/signals-expansion/PLAN.md.",
+      "signals": true
     },
     {
-      "id": "dkb-kn-combined",
-      "file": "raya/combined/dkb-kn-combined.md",
+      "id": "dkb-kn-signals",
+      "file": "DKB/DKB Kannada Signals.md",
       "agent": "DKB",
       "language": "kn",
-      "direction": "combined",
+      "direction": "outbound",
       "kind": "conversation",
       "profile": "conversation",
-      "raya_name": "DKB Combined [call_direction] - Kannada (EXPERIMENTAL)",
+      "raya_name": "DKB Kannada Signals",
       "raya_agent_id": {
         "prod": "847a85e2-c5c8-4727-9918-f1db9efad05d",
         "staging": ""
@@ -451,10 +451,31 @@
       "experimental": true,
       "expected_name_contains": [
         "DKB",
-        "Combined"
+        "Signals"
       ],
-      "_note": "ABANDONED 2026-07-31 — combined ${call_direction} experiment retired (call_direction not injected on API calls; see open-items #12). NOT deleted (no Raya delete route) — flag uuid for manual console deletion. Superseded by the Signals expansion.",
-      "abandoned": true
+      "_note": "REPURPOSED from a combined ${call_direction} experiment into a Signals bot (2026-07-31). uuid reused; instructions+tools+name to be PATCHed to Signals. Phase per raya/signals-expansion/PLAN.md.",
+      "signals": true
+    },
+    {
+      "id": "maya-hi-in-signals",
+      "raya_name": "Maya Inbound Signals",
+      "file": "Maya/Maya Inbound Signals.md",
+      "agent": "Maya",
+      "language": "hi",
+      "direction": "inbound",
+      "kind": "conversation",
+      "profile": "conversation",
+      "raya_agent_id": {
+        "prod": "",
+        "staging": ""
+      },
+      "deploy": false,
+      "signals": true,
+      "expected_name_contains": [
+        "Maya",
+        "Signals"
+      ],
+      "_note": "NEW Signals bot (Maya Hindi inbound) — create a fresh Raya agent (clone maya-hi-in config). Phase 1."
     }
   ]
 }
