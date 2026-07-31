@@ -75,8 +75,11 @@ DEPENDENCY: in_dids for the 3 inbound Signals agents (3f521174, f38da775, + Maya
 
 ## Phase 1 progress (2026-07-31 PM)
 - [x] Maya Hindi Signals — 904f333f — VOICE-VERIFIED (b2df2d35)
-- [x] KKB Hindi Inbound Signals — 3f521174 — built+repurposed; interview-readiness gap FIXED + redeployed; inventory=real Signals jobs; TEST-PENDING (inbound-via-outbound)
+- [x] KKB Hindi Inbound Signals — 3f521174 — VOICE-VERIFIED (call 1a8deec0): inbound welcome, Signals get_profile, real-inventory job presented, apply_job 201 SUCCESS. Inbound-via-outbound method WORKS.
 - [x] KKB Kannada Inbound Signals — f38da775 — built (review PASS)+repurposed; inventory=real Signals jobs; TEST-PENDING
 - [x] Maya Inbound Signals — 1c24feda (NEW agent, clone df99f501) — built (PASS)+repurposed+out_did; inventory=real Signals jobs; TEST running
 Inbound test method: trigger the inbound bot (has out_did) to CALL the tester via POST /api/call + agent_args{contact_phone}; grade the inbound flow.
 FOLLOW-UP (cross-cutting): /update-output add consent_status + confirm ready_for_interview in KKB/Maya Output prompts.
+
+## Inbound-via-outbound test method VALIDATED (2026-07-31)
+Trigger the inbound bot to CALL the tester (POST /api/call agent_id=inbound-bot to_number=tester + agent_args{contact_phone}); it runs its inbound prompt; grade the transcript. WORKS on out_did 911204404274. The 918037006352 DID does NOT bridge outbound -> re-pointed f38da775 + 1c24feda to 911204404274.
