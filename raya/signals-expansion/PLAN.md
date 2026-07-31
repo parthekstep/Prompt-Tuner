@@ -54,3 +54,21 @@ DKB = provider/employer side (create/verify job postings, not seeker profiles) �
 - dkb-kn-combined 847a85e2 -> dkb-kn-signals (Phase 2)
 - NEW agent -> maya-hi-in-signals (Maya Inbound Signals, cloned from df99f501)
 Repurpose = PATCH instructions+tools+name on the reused uuid (voice/language already match).
+
+## RESUMPTION STATE (2026-07-31, session usage limit hit — resets 3:30pm IST)
+Bot 1/4 DONE. Subagent builds rate-limited; resume the SAME proven recipe when the limit resets.
+
+DONE:
+- [x] Maya Hindi Signals — 904f333f, voice-verified (call b2df2d35). Committed.
+
+NEXT (exact steps — resume here):
+1. KKB Hi + Kn Inbound Signals — re-run the build workflow:
+   Workflow({scriptPath:".../workflows/scripts/build-kkb-inbound-signals-wf_3be2af3c-a2e.js", resumeFromRunId:"wf_3be2af3c-a2e"})
+   → review → repurpose 3f521174 (Hi) / f38da775 (Kn) via scratchpad/repurpose_agent.py
+     (for Kn pass src=33037201 so languageSpoken=["Kannada"]) → curl-ground → mark inbound voice-test VERIFY-PENDING (needs in_did).
+2. Maya Inbound Signals — build from Maya/Maya Inbound.md + kkb-hi-signals ref; CREATE a NEW agent (clone df99f501 config) via scratchpad/create_combined_agent.py (drop memory_enabled key); repurpose-style PATCH Signals tools + instructions.
+3. Phase 2 DKB — discover provider job_posting_1.0 item_state schema (POST /admin/participant domain=provider); write DKB-signals discovery doc; build DKB Hi/Kn Signals → repurpose fabda71d / 847a85e2.
+
+Repurpose tool: scratchpad/repurpose_agent.py <target_uuid> <instructions_file> "<name>" [signals_src_uuid].
+Real Signals job_ids for grounding/tests: 362b0ad9-fa21-4261-be1f-9582c0cc03a9 (AC Tech), b7513680-6b2f-4223-bba5-893143c949b9 (Data Entry), 7dc7f10b-a42b-4132-ae58-4455f518a37f (Remote CSE) — all apply-verified.
+DEPENDENCY: in_dids for the 3 inbound Signals agents (3f521174, f38da775, + Maya inbound) to voice-test inbound.
