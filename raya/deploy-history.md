@@ -220,3 +220,6 @@ Format:
 2026-07-31 11:15:30 · prod · kkb-kn-signals · 33037201-78ce-405d-b509-a3b6934e20f1 · KKB/KKB Placeholder Kannada Signals.md · sha256:4026e547 · snapshot:pre-deploy-kkb-kn-signals-2026-07-31_111530 · deployed
 2026-07-31 11:15:31 · prod · maya-hi-out · 47fdffe6-0cb0-4fcf-8762-135ddadfb194 · Maya/Maya Hindi.md · sha256:d0591afa · snapshot:pre-deploy-maya-hi-out-2026-07-31_111530 · deployed
 2026-07-31 (repurpose) · prod · maya-hi-signals · 904f333f-1919-4523-a51d-b22ba382dd22 · Maya/Maya Hindi Signals.md · REPURPOSED from maya-hi-combined → Maya Hindi Signals: PATCHed name+instructions(112k)+4 Signals tools (cloned from kkb-hi-signals) · snapshot:raya/snapshots/904f333f.tools.pre-repurpose.json · read-back verified (Signals endpoints live) · voice-test in progress
+2026-07-31 (repurpose) · prod · kkb-hi-in-signals · 3f521174 · KKB Inbound Signals (Hi) · repurposed ex-combined + Signals tools + real-jobs inventory
+2026-07-31 (repurpose) · prod · kkb-kn-in-signals · f38da775 · KKB Inbound Signals (Kn) · repurposed + kn Signals tools + real-jobs inventory
+2026-07-31 (create) · prod · maya-hi-in-signals · 1c24feda · Maya Inbound Signals · new agent (clone df99f501) + Signals tools + real-jobs inventory

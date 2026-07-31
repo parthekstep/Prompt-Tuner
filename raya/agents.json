@@ -359,7 +359,7 @@
         "prod": "3f521174-574d-43ca-a9be-081849373c18",
         "staging": ""
       },
-      "deploy": false,
+      "deploy": true,
       "experimental": true,
       "expected_name_contains": [
         "KKB",
@@ -381,7 +381,7 @@
         "prod": "f38da775-c572-4a50-9340-fe1f42c43901",
         "staging": ""
       },
-      "deploy": false,
+      "deploy": true,
       "experimental": true,
       "expected_name_contains": [
         "KKB",
@@ -466,10 +466,10 @@
       "kind": "conversation",
       "profile": "conversation",
       "raya_agent_id": {
-        "prod": "",
+        "prod": "1c24feda-a584-4012-a865-fa8f950089df",
         "staging": ""
       },
-      "deploy": false,
+      "deploy": true,
       "signals": true,
       "expected_name_contains": [
         "Maya",
