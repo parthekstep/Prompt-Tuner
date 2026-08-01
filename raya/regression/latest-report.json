@@ -1,0 +1,14 @@
+{
+ "prompts_checked": 16,
+ "total_findings": 1,
+ "critical": [],
+ "major": [],
+ "all": [
+  {
+   "severity": "minor",
+   "category": "sync-drift",
+   "file": "DKB/DKB Hindi Signals.md",
+   "message": "DKB outbound signals: Hi/Kn header-count drift (58 vs 53)"
+  }
+ ]
+}
