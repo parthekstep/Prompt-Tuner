@@ -81,10 +81,20 @@ a real job inventory with placeholders). `deploy` also refuses any prompt still 
 
 A change is NOT done when the files are edited/deployed — only when it has been TESTED and confirmed working, with overall sanity intact. Never report a prompt/agent change as "done", "fixed", or "confirmed" until you have actually tested it. Where a bot cannot be harness-tested (inbound bots — the tester can only receive, not dial in; or telephony is down), do the best available verification (post-deploy transcript review + static sanity) and explicitly mark the residual VERIFY-PENDING — never claim done/confirmed on an untested change. Revert on any regression (see /prompt-version).
 
-After deploying a conversation-prompt change:
-1. **Voice-test the changed bot(s)** with `/voice-test`: exercise the exact scenario the change targets (for a bug, the pre-fix repro; for a wording/feature change, a call that hits the changed path) and confirm the NEW behavior appears in the live transcript — on BOTH language variants where the change is agnostic.
-2. **Sanity-check the whole flow** — the change did the intended thing AND broke nothing else (greet → fetch → present → apply → close still work; the sibling language matches).
-3. Only then is it DONE. Untestable → best-available verification + mark VERIFY-PENDING (never "done").
+After deploying a conversation-prompt change, run the **three testing tiers** (repo `CLAUDE.md` →
+"The three testing tiers") — and test **every affected variant independently; never extrapolate**
+("works for Hindi so Kannada is fine" is a recipe for disaster — voice-test Hindi AND Kannada,
+outbound AND inbound, each bot):
+1. **Tier 1 — Fix verification:** `/voice-test` the changed bot(s) on the EXACT scenario the change
+   targets (for a bug, the pre-fix repro) and confirm the NEW behavior in the live transcript, on
+   each language variant.
+2. **Tier 2 — Blast-radius regression:** confirm the change broke nothing adjacent — the whole flow
+   (greet → fetch → present → apply → close) still works, the mirrored twin matches, and any tool
+   payload the change touched is still valid — tested on each variant, not assumed.
+3. **Tier 3 — Daily general regression:** the standing 100+‑case suite (`raya/regression/`) run by
+   the scheduled cloud worker catches longer-tail drift; it does not replace tiers 1–2.
+Only after tiers 1–2 pass on every variant is it DONE. Untestable → best-available verification +
+mark VERIFY-PENDING (never "done").
 
 ## Guardrails
 

@@ -180,6 +180,33 @@ receive, not dial in; or telephony is down), do the best available verification 
 transcript review + static sanity) and explicitly mark the residual **VERIFY-PENDING** — never
 claim done/confirmed on an untested change. Revert on any regression (see `/prompt-version`).
 
+### Test EVERY variant — never extrapolate (recipe-for-disaster rule)
+**"It works for Hindi, so Kannada is fine" is a recipe for disaster.** A change verified on ONE
+bot/language/direction is NOT verified on its twins. Every affected variant is tested
+**independently** — Hindi AND Kannada, outbound AND inbound, KKB/DKB/Maya separately — even when the
+edited logic is "identical agnostic content". Runtime adherence, ASR, and TTS differ per language;
+a mirrored edit can land differently. Static/sync verification is necessary but never sufficient in
+place of a live test of each variant.
+
+### The three testing tiers (mandatory for every bug fix / change)
+A fix is not done until it passes all three, in order:
+
+1. **Tier 1 — Fix verification (did the bug get fixed?).** Reproduce the EXACT reported failure and
+   confirm it no longer occurs, on each affected bot variant, in a real call transcript (not "looks
+   fixed"). No transcript, no claim.
+2. **Tier 2 — Blast-radius regression (did the fix break anything adjacent?).** A fix can break its
+   neighbours. Enumerate what the change could have affected — the same section, the shared agnostic
+   logic, the sibling language/bot that received the mirrored edit, the tool payload it touches — and
+   run targeted tests around those areas on each variant. This is the step that catches "fixed X,
+   silently broke Y".
+3. **Tier 3 — Daily general regression (standing check).** A full regression suite (100+ test cases
+   across all bots) runs automatically **once a day as a scheduled cloud task that survives the
+   developer's machine being off**, catching drift/regressions since the last run. Critical findings
+   are surfaced and (email-digest phase) mailed to the specified addresses. See
+   `raya/regression/` for the suite + the scheduled worker.
+
+Never skip a tier, and never collapse Tier 1/Tier 2 into a single happy-path call.
+
 ## Feedback-loop operating sequence (from the sheet — don't ask to be re-told)
 
 When processing reported bugs from the tracker, run this fixed order (full detail in `/bug-fix`):

@@ -95,6 +95,16 @@ the analyser bug-pattern it guards (e.g. `cf. D40`).
 - Backend / data / true tool-adherence issues are NOT prose-fixable → escalate, don't experiment on
   the live flow.
 
+## Testing quality — the three tiers (see repo `CLAUDE.md` → "The three testing tiers")
+Every fix is verified in three tiers, in order, and **on every affected variant separately — never
+extrapolate from one** ("works for Hindi so Kannada is fine" is a recipe for disaster; test Hindi AND
+Kannada, outbound AND inbound):
+1. **Fix verification** — reproduce the EXACT reported failure; confirm it's gone in a real transcript.
+2. **Blast-radius regression** — test the adjacent areas the fix could have broken (same section,
+   mirrored twin, the tool payload touched), on each variant. Catches "fixed X, broke Y".
+3. **Daily general regression** — the standing 100+‑case suite in `raya/regression/`, run by the
+   scheduled cloud worker once a day (survives the machine being off). Not a substitute for tiers 1–2.
+
 ## Persona library
 
 `raya/personas/` holds grounded personas (from `scenario-catalog.md`, mined from real calls):
