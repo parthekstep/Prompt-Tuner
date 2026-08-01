@@ -28,13 +28,28 @@ A fuller live pass over more bots via the tester agent + the `/voice-test` check
 Not daily (one tester = serial calls; 100+ live calls/day isn't feasible). The weekly routine picks a rotating
 set of bots, fires the harness calls, grades, and appends live findings to the digest.
 
-## The scheduled routines (cloud — survive the dev machine being off)
-Two cron routines run Claude Code in the cloud:
-- **daily** (e.g. 06:30 IST): run the static suite → read `latest-report.json` → if any `critical`, email a
-  well-formatted digest to parth@ekstepplus.org; else a one-line "all clear" (or silent).
-- **weekly** (e.g. Mon 06:30 IST): run the static suite + a sampled live voice regression → email the digest.
+## The scheduler — GitHub Actions (`.github/workflows/regression.yml`)
+The requirement was "runs even if my system is shut off." The two **local** schedulers can't do that:
+`scheduled-tasks` MCP only runs "while this app is open"; `CronCreate` is "session-only, gone when Claude
+exits." The only mechanism that survives the dev machine being off is a **cloud** runner — and since this
+repo is on GitHub (`parthekstep/Prompt-Tuner`), that's **GitHub Actions**: it runs on GitHub's infra, checks
+out the repo, runs the suite with **zero secrets**, and notifies.
 
-Routine prompt (daily): *"Run `python3 raya/regression/static_regression.py` in the Prompt Tuner repo, read
-`raya/regression/latest-report.json`, and if `critical` is non-empty, email a well-formatted digest of the
-critical + major findings to parth@ekstepplus.org (subject `[Prompt Tuner] Daily regression — N critical`).
-If clean, send a one-line all-clear."*
+- **daily** `7 1 * * *` (06:37 IST) — static suite.
+- **weekly** `7 1 * * 1` (Mon 06:37 IST) — static suite (+ live once Raya/Signals secrets are added; see below).
+- `workflow_dispatch` — a manual "Run workflow" button in the Actions tab.
+
+Two independent email paths:
+1. **Guaranteed, zero-config** — on any critical finding the job **exits non-zero**, so GitHub emails the repo
+   owner about the failed run; the run page shows the full digest (`build_digest.py` → job summary + artifact).
+2. **Well-formatted HTML to any address** (`parth@ekstepplus.org`) — the SMTP step, a **no-op until** repo
+   secrets `MAIL_USERNAME` + `MAIL_PASSWORD` (a Gmail **app password**) are set. Add them under
+   *Settings → Secrets and variables → Actions*.
+
+`build_digest.py [daily|weekly]` renders `latest-report.json` into the HTML digest (email body + job summary).
+
+### Two things needed to activate
+- **Merge the workflow to `main`.** GitHub only fires `schedule:` triggers from the **default branch**. The
+  workflow must land on `main` (currently authored on `control-center`).
+- **Weekly live** needs the Raya token + Signals keys as GitHub secrets to fire real calls from the cloud
+  (they're git-ignored locally by design). Until then the weekly run is static-only.

@@ -1,0 +1,90 @@
+name: Prompt Tuner Regression
+
+# Tier-3 standing regression (see repo CLAUDE.md → "The three testing tiers").
+# Runs on GitHub's CLOUD infra, so it fires even when the dev machine is off —
+# which the local schedulers (scheduled-tasks MCP / CronCreate) cannot do.
+#
+# Cadence (user-chosen 2026-08-01): daily static + weekly live.
+#   - daily  06:37 IST (01:07 UTC): static suite (no telephony, no secrets)
+#   - weekly Mon 06:37 IST         : static suite + (optional) live voice regression
+#
+# Email digest -> parth@ekstepplus.org. Two independent notification paths:
+#   1. GUARANTEED, zero-config: on critical findings the job EXITS NON-ZERO, so GitHub
+#      emails the repo owner about the failed run (the run page shows the full digest).
+#   2. OPTIONAL, well-formatted HTML to any address: the SMTP step below, active only
+#      once repo secrets MAIL_USERNAME + MAIL_PASSWORD (a Gmail app password) are set.
+
+on:
+  schedule:
+    - cron: "7 1 * * *"    # daily 06:37 IST — static
+    - cron: "7 1 * * 1"    # Mon    06:37 IST — weekly (static + live if secrets present)
+  workflow_dispatch:        # manual "Run workflow" button
+
+permissions:
+  contents: read
+
+jobs:
+  static:
+    runs-on: ubuntu-latest
+    # job-level env so the SMTP step's `if:` guard can read it (step-level env can't be
+    # referenced in that same step's own `if:`).
+    env:
+      MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+    outputs:
+      critical: ${{ steps.run.outputs.critical }}
+      major: ${{ steps.run.outputs.major }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run static regression suite
+        id: run
+        run: |
+          python3 raya/regression/static_regression.py || true
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          r = json.load(open("raya/regression/latest-report.json"))
+          print(f"critical={len(r['critical'])}")
+          print(f"major={len(r['major'])}")
+          PY
+
+      - name: Build digest -> job summary + email body
+        id: digest
+        run: |
+          python3 raya/regression/build_digest.py daily > digest.html
+          # also drop the markdown report into the run page
+          cat raya/regression/latest-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-report
+          path: |
+            raya/regression/latest-report.md
+            raya/regression/latest-report.json
+
+      # OPTIONAL well-formatted HTML email. No-op until the two secrets exist, so the
+      # workflow is safe to merge before the app password is added.
+      - name: Email digest (SMTP)
+        if: ${{ env.MAIL_PASSWORD != '' }}
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          from: Prompt Tuner Regression <${{ secrets.MAIL_USERNAME }}>
+          to: parth@ekstepplus.org
+          subject: "[Prompt Tuner] Daily regression — ${{ steps.run.outputs.critical }} critical, ${{ steps.run.outputs.major }} major"
+          html_body: file://digest.html
+
+      # GUARANTEED backstop email: a non-zero exit makes GitHub email the repo owner.
+      - name: Fail the run on critical findings
+        if: ${{ steps.run.outputs.critical != '0' }}
+        run: |
+          echo "::error::Regression found ${{ steps.run.outputs.critical }} critical finding(s) — see the job summary."
+          exit 1
