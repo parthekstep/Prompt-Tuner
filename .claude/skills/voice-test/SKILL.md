@@ -13,8 +13,8 @@ is how we find bugs ourselves instead of asking the user to place every call by 
 
 - **Tester agent** — an INBOUND agent whose single prompt is a *persona* (a human the bot talks
   to). Current tester: **"Testing Agent- Blue Dots"**, uuid `f60e0899-aa3a-4be7-9b4f-0296bd28ef48`,
-  inbound DID **`917946350285`**. It is set **non-interruptable** and **max_call_duration ≤ 4 min**
-  (never raise above 4). Its persona is swapped by PATCHing its `instructions`.
+  inbound DID **`917946350285`**. It is set **non-interruptable** and **max_call_duration = 5 min**
+  (bot agents are capped at 15 min by the API; the tester stays at 5 — set 2026-08-01 by Parth, superseding the earlier 4-min cap). Its persona is swapped by PATCHing its `instructions`.
 - **Bot under test** — an OUTBOUND agent (e.g. KKB Hindi Signals `115b38a5-…`). It is *triggered*
   to place a call to the tester's DID; it runs its real prompt + real tools.
 - We then read BOTH call legs and grade the bot.
@@ -71,7 +71,7 @@ python3 scripts/raya_testrun.py <bot_uuid> <tester_10digit_DID> <args.json> <tes
 
 `<args.json>` = the bot's `agent_args` (copy the shape from a known-good past call via
 `scripts/raya_call.py <bot_uuid>`). For a quick smoke test you may temporarily lower the tester's
-`max_call_duration_mins` (e.g. to 2) to cap wait — **never above 4**.
+`max_call_duration_mins` (e.g. to 2) to cap wait — **the tester's standing cap is 5 min**.
 
 ## Grade the call
 

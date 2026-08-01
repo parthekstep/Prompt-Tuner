@@ -10,6 +10,13 @@ Every prompt edit to Maya is logged here. Maya is Hindi-only (KKB spinoff). Entr
 - **Ported from:** <source agent> (only for cross-agent ports)
 ```
 
+## 2026-08-01 — Maya Signals: capture the new seeker profile fields (educationCategory etc.) in Phase 2
+
+- **Feedback/bug:** same as KKB — Signals added the qualification/experience/help fields (`educationCategory` + conditionals, `itiInstitute`, `workExperienceYearsConditional`, `nameOfLastRoleHeld`, `otherHelpNeeded`) that the bot previously skipped. (Email not on Signals — still not asked.)
+- **Change:** added the 15 new fields to `create_profile` + `update_profile` on both Maya Signals agents, and extended Phase-2 in both files (Maya Hindi + Maya Inbound) to ask them post-apply, only if missing — same topic set + byte-exact enums as KKB, **all post-application**. Reversed the old "never ask" line. Maya's divergences kept intact: feminine voice (the new bridge/read-back use "पूछ लूँ"/"confirm कर लूँ"), the MPL competition and HR-contact sharing untouched, and the Phase-2 bridge uses "जानकारी" (not "profile") to respect Maya's ban on speaking "प्रोफाइल".
+- **Files:** Maya/Maya Hindi Signals.md, Maya/Maya Inbound Signals.md; agents 904f333f, 1c24feda (tools + instructions re-deployed).
+- **Test status:** feature validated on the KKB Signals twin (identical agnostic logic); Maya spoken lines are Hindi-adapted + enum-exact (statically verified). Deployed.
+
 ## 2026-08-01 — Maya Signals: fix get_profile/create_profile phone double-91 prefix (CD6)
 
 - **Feedback/bug:** same class as KKB — the prompt templated `91${contact_phone}`, but production passes the full 12-digit `${contact_phone}` (user-confirmed), so the phone doubled to a 14-digit junk value (D17/D39).
