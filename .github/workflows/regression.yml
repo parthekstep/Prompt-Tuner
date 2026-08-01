@@ -26,10 +26,10 @@ permissions:
 jobs:
   static:
     runs-on: ubuntu-latest
-    # job-level env so the SMTP step's `if:` guard can read it (step-level env can't be
+    # job-level env so the email step's `if:` guard can read it (step-level env can't be
     # referenced in that same step's own `if:`).
     env:
-      MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+      GMAIL_SA_JSON_BASE64: ${{ secrets.GMAIL_SA_JSON_BASE64 }}
     outputs:
       critical: ${{ steps.run.outputs.critical }}
       major: ${{ steps.run.outputs.major }}
@@ -66,21 +66,18 @@ jobs:
             raya/regression/latest-report.md
             raya/regression/latest-report.json
 
-      # OPTIONAL well-formatted HTML email. No-op until the two secrets exist, so the
-      # workflow is safe to merge before the app password is added.
-      - name: Email digest (SMTP)
-        if: ${{ env.MAIL_PASSWORD != '' }}
-        uses: dawidd6/action-send-mail@v3
-        with:
-          server_address: smtp.gmail.com
-          server_port: 465
-          secure: true
-          username: ${{ secrets.MAIL_USERNAME }}
-          password: ${{ secrets.MAIL_PASSWORD }}
-          from: Prompt Tuner Regression <${{ secrets.MAIL_USERNAME }}>
-          to: parth@ekstepplus.org
-          subject: "[Prompt Tuner] Daily regression — ${{ steps.run.outputs.critical }} critical, ${{ steps.run.outputs.major }} major"
-          html_body: file://digest.html
+      # OPTIONAL well-formatted HTML email via the Gmail API (service account + domain-wide
+      # delegation). No-op until the GMAIL_SA_JSON_BASE64 secret exists, so the workflow is
+      # safe to merge before Gmail sending is wired up.
+      - name: Email digest (Gmail API)
+        if: ${{ env.GMAIL_SA_JSON_BASE64 != '' }}
+        env:
+          GMAIL_SENDER: ${{ secrets.GMAIL_SENDER }}
+          GMAIL_TO: ${{ secrets.GMAIL_TO }}
+          DIGEST_SUBJECT: "[Prompt Tuner] Daily regression — ${{ steps.run.outputs.critical }} critical, ${{ steps.run.outputs.major }} major"
+        run: |
+          pip install --quiet google-api-python-client google-auth
+          python3 raya/regression/send_digest.py
 
       # GUARANTEED backstop email: a non-zero exit makes GitHub email the repo owner.
       - name: Fail the run on critical findings

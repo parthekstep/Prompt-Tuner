@@ -42,14 +42,19 @@ out the repo, runs the suite with **zero secrets**, and notifies.
 Two independent email paths:
 1. **Guaranteed, zero-config** — on any critical finding the job **exits non-zero**, so GitHub emails the repo
    owner about the failed run; the run page shows the full digest (`build_digest.py` → job summary + artifact).
-2. **Well-formatted HTML to any address** (`parth@ekstepplus.org`) — the SMTP step, a **no-op until** repo
-   secrets `MAIL_USERNAME` + `MAIL_PASSWORD` (a Gmail **app password**) are set. Add them under
-   *Settings → Secrets and variables → Actions*.
+2. **Well-formatted HTML via the Gmail API** (`send_digest.py`) — a service account with **domain-wide
+   delegation** for `gmail.send` impersonates a sender in the ekstepplus.org domain (same auth model as the
+   repo's Sheets service account; no SMTP, no app password). A **no-op until** `GMAIL_SA_JSON_BASE64` is set.
 
-`build_digest.py [daily|weekly]` renders `latest-report.json` into the HTML digest (email body + job summary).
+`build_digest.py [daily|weekly]` renders `latest-report.json` into the HTML digest; `send_digest.py` sends it.
 
-### Two things needed to activate
-- **Merge the workflow to `main`.** GitHub only fires `schedule:` triggers from the **default branch**. The
-  workflow must land on `main` (currently authored on `control-center`).
+### To activate
+- **Merge the workflow to `main`** — GitHub only fires `schedule:` triggers from the **default branch**.
+- **Gmail-API secrets** (*Settings → Secrets and variables → Actions*):
+  - `GMAIL_SA_JSON_BASE64` — base64 of a service-account JSON whose **domain-wide delegation** includes
+    `https://www.googleapis.com/auth/gmail.send` (a Workspace **super-admin** enables the scope in the admin
+    console → *Security → API controls → Domain-wide delegation*; the existing Sheets SA can be reused if the
+    scope is added to it).
+  - `GMAIL_SENDER` — address to send as (e.g. `parth@ekstepplus.org`); `GMAIL_TO` — recipient(s).
 - **Weekly live** needs the Raya token + Signals keys as GitHub secrets to fire real calls from the cloud
   (they're git-ignored locally by design). Until then the weekly run is static-only.
