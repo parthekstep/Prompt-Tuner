@@ -10,6 +10,13 @@ Every prompt edit to KKB is logged here. Entry format:
 - **Ported from:** <source agent> (only for cross-agent ports)
 ```
 
+## 2026-08-01 — KKB Signals: fix get_profile/create_profile phone double-91 prefix (CD6)
+
+- **Feedback/bug:** live test (07699d53) showed `get_profile` sending `phone_number: "91917946350285"` — a doubled 91 (14 digits). The prompts templated the phone as `91${contact_phone}` and documented `${contact_phone}` as a 10-digit mobile, but the user confirmed production passes the **full 12-digit** number (91 + 10-digit). So `91${contact_phone}` doubled it → keys the profile to a junk number / wrong record (D17/D39).
+- **Change:** across all 4 KKB Signals files (out Hi/Kn, in Hi/Kn) changed the literal `91${contact_phone}` → `${contact_phone}` (get_profile, create_profile, example stage-directions) and reworded every phone-format note to "`${contact_phone}` is already the full 12-digit number — pass it AS-IS; never prepend another `91`." (Same fix applied to Maya — see Maya/CHANGELOG.md.)
+- **Files:** KKB Placeholder Hindi/Kannada Signals.md + Inbound Hindi/Kannada Signals.md; all 4 agents re-deployed.
+- **Test status:** deployed; KKB Hi outbound re-test in progress (confirm single-prefix 12-digit phone + apply still succeeds). Analyser D17/D39 covers the class. Revert: git commit 7405bb7 (pre-CD6).
+
 ## 2026-08-01 — KKB Signals deep E2E pass: inbound inventory↔example consistency + sync-drift + are-you-AI + outbound-close
 
 - **Feedback/bug:** (user) deep end-to-end test + fix of every Signals bug. Static audit (3 graders) + live tests surfaced: **(CD2, ship-blocker)** the inbound bots' hardcoded inventory was swapped to 4 real Signals jobs during the build, but the "What's available" line, role-synonym table, Case-B overview, canonical-locations and ALL example dialogues still described the OLD Ghaziabad/Noida retail-food set (McDonald's, Burger King, CY Future, Weavings, Cashier, Sales) — per analyser E1 the model copies examples over inventory → it would present jobs that don't exist (hallucination). Plus several Hi↔Kn sync drifts and two quality gaps (no are-you-AI responder; outbound-frame D5 leak in closings).

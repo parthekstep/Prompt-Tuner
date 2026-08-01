@@ -10,6 +10,13 @@ Every prompt edit to Maya is logged here. Maya is Hindi-only (KKB spinoff). Entr
 - **Ported from:** <source agent> (only for cross-agent ports)
 ```
 
+## 2026-08-01 — Maya Signals: fix get_profile/create_profile phone double-91 prefix (CD6)
+
+- **Feedback/bug:** same class as KKB — the prompt templated `91${contact_phone}`, but production passes the full 12-digit `${contact_phone}` (user-confirmed), so the phone doubled to a 14-digit junk value (D17/D39).
+- **Change:** in both Maya Signals files (outbound + inbound) changed `91${contact_phone}` → `${contact_phone}` and reworded the phone-format notes to "already the full 12-digit number — pass AS-IS, never prepend another 91."
+- **Files:** Maya/Maya Hindi Signals.md, Maya/Maya Inbound Signals.md; both agents re-deployed.
+- **Test status:** deployed with the KKB CD6 fix; validated on the KKB-Hi confirmation call (single-prefix phone). Revert: git commit 7405bb7 (pre-CD6).
+
 ## 2026-08-01 — Maya Signals deep E2E pass: inbound inventory↔example consistency + parity + are-you-AI + outbound-close
 
 - **Feedback/bug:** (user) deep end-to-end test + fix. Static audit found the **Maya Inbound** inventory was swapped to 4 real Signals jobs but the roles-list, synonym/role-family table, Case-B overview, canonical-locations and all example dialogues still described the OLD Ghaziabad/Noida set (CY Future, Weavings, Westside, sales/telecaller/retail) → analyser E1 hallucination risk. Plus small outbound↔inbound parity gaps, malformed inventory markdown, and two quality gaps (no are-you-AI responder; one outbound-frame D5 leak).

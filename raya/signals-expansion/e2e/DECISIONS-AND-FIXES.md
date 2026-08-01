@@ -72,7 +72,9 @@ Snapshots for revert: `raya/signals-expansion/e2e/snapshots/*.pre-*.md` (+ tool 
   Phase 3, create_job fired. DKB-Hi retest in progress.
 - **Revert:** the Turn-2 block + the Phase-1 guard line in both DKB files (this session's edits).
 
-### CD6 — Seeker bots: `get_profile`/`create_profile` phone can DOUBLE the 91 prefix  ⚠️ FLAGGED (fix ready, needs your confirmation — NOT applied)
+### CD6 — Seeker bots: `get_profile`/`create_profile` phone doubled the 91 prefix  ✅ APPLIED (user confirmed 12-digit contract 2026-08-01)
+- **RESOLUTION:** user confirmed production passes the **12-digit** `${contact_phone}` (91 + 10-digit) — matching what the test showed. So `91${contact_phone}` was doubling it. Applied the fix across all 6 seeker files: changed the literal `91${contact_phone}` → `${contact_phone}` (26 occurrences) and reworded every phone-format note to "`${contact_phone}` is already the full 12-digit number — pass it AS-IS; never prepend another `91`." Deployed to all 6 seeker agents. ✅ **VERIFIED** (KKB-Hi confirm call ad8571ff: get_profile now sends `917946350285` — single 12-digit, no doubling; apply→success; the correct phone now resolves the correct user record). Revert: git (pre-CD6 commit `7405bb7`).
+
 - **Found via KKB-Hi outbound test (07699d53):** `get_profile` sent `phone_number: "91917946350285"` — a
   doubled 91 (14 digits). Root cause: all 6 seeker prompts template the phone as **`91${contact_phone}`**,
   and they document `${contact_phone}` as a **10-digit** mobile ("91 + the 10-digit mobile"). But the test
