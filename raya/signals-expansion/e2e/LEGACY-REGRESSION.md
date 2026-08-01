@@ -34,3 +34,19 @@ Bugs to fix by the restructure: silent fetch (no permission-ask), fetch-driven (
 ## Restructure progress
 ### KKB Hindi outbound (da612923) — ✅ RESTRUCTURED + VOICE-VERIFIED (7c1389ae)
 Signals structure on the Dhiway contract. Tier-1 fixes confirmed live: **silent fetch** (no permission-ask, no "जानकारी मिल गई"), **no update_profile** (no 500), **no unstorable "working/studying?" question**, clean post-apply close. Tier-2: **apply_job → Dhiway on_confirm success**, relevance-filtered presentation intact. Correction: KKB-Hi never had a `new_seeker` fork (always-fetch is intended) — the earlier "dead fork" note was a misread; the real bugs (permission-ask / broken update_profile / unstorable question / repetition) are the ones fixed. Minor to apply to all 6: the CD3 outbound-frame close ("हमारी टीम आपसे फिर संपर्क करेगी" vs a callback-invite). Revert snapshot: snapshots/legacy-kkb-hi-out.instructions.pre-restructure.md.
+
+### All 6 restructured + voice-tested (2026-08-01)
+| bot | uuid | verdict |
+|---|---|---|
+| KKB Hindi outbound | da612923 | ✅ silent fetch, apply→Dhiway success, no update_profile/unstorable Q (7c1389ae) |
+| KKB Kannada outbound | 87ab9108 | ✅ structure (silent fetch, single-+91 phone, create_profile SUCCESS); apply 404 = stale test job_id, not a bot bug (f28e565c) |
+| KKB Hindi inbound | b6222233 | ✅ inbound welcome, silent fetch, apply→Dhiway success (2b505a45) |
+| KKB Kannada inbound | 4ac90bf1 | (test running) |
+| Maya Hindi outbound | 47fdffe6 | ✅ campus/feminine/MPL, silent fetch, apply→Dhiway success (75d8ffe1) |
+| Maya Hindi inbound | df99f501 | ✅ campus/feminine/MPL, silent fetch, apply→Dhiway success (59feb365) |
+
+**Phone-doubling fix (CD6-analog for Dhiway).** Maya-inbound caught a real per-variant bug: `phoneNumber:"+91+91…"` (the Dhiway `${contact_phone}` already carries `+91`, but the literal template `+91${contact_phone}` made the model double it) → get_profile empty + create_profile 400. Fixed the literal template → `${contact_phone}` (as-is) in ALL 6 Dhiway rewrites; re-verified Maya-in applies cleanly. **This is the "test every variant" rule paying off — extrapolating from Maya-out passing would have shipped the bug.**
+- out_dids: set 911204404274 on the 3 legacy inbound bots (for inbound-via-outbound testing; harmless on inbound-only). KKB-Kn-out's production out_did (918037006352) restored after testing.
+
+### KKB Kannada inbound (4ac90bf1) — ◑ structure verified, apply VERIFY-PENDING (14b128f3)
+Inbound welcome ✅, silent-ish fetch, real Karnataka inventory presented, consent + HR-fallback ✅. Two findings: (1) **D29** — greeting + get_profile bundled in turn 1 (two-turn router didn't hold; the Hindi twin did it right — runtime variance). (2) **D28** — apply_job used `profile_id:"19"` (numeric) → 404 "Invalid or missing profile_id"; the fetched profile had a numeric top-level id (side-effect of the create_profile run in the KKB-Kn-out test contaminating this phone), so "returning → top-level id" yielded a non-UUID. The Hindi twin (byte-identical structure) applies cleanly with a UUID. **Needs a clean-profile re-test to confirm apply; the structure fixes (silent fetch/no-update_profile/phone) are verified.**

@@ -10,6 +10,13 @@ Every prompt edit to Maya is logged here. Maya is Hindi-only (KKB spinoff). Entr
 - **Ported from:** <source agent> (only for cross-agent ports)
 ```
 
+## 2026-08-01 — Legacy Maya (outbound, Dhiway/up-getjob): restructured to the proven Signals shape
+
+- **Feedback/bug:** the legacy Maya outbound prompt (`Maya Hindi.md`, agent 47fdffe6, Dhiway/up-getjob backend) still carried the old `${new_seeker}` input-fork, a profile-permission ask ("क्या आपकी कुछ बेसिक जानकारी देख सकती हूँ?"), a fetch-narration ("आपकी जानकारी मिल गई"), an unstorable post-apply "working/studying?" question, and framing/recording-line repetition. These are the exact failure classes the Signals restructure already fixed on the Signals twins.
+- **Change:** rewrote `Maya Hindi.md` to have the STRUCTURE of `Maya Hindi Signals.md` (silent `get_profile`, fetch-driven branch on the result, campus identity, feminine voice, MPL, HR-contact, stabilisation guards) while keeping the **Dhiway tool contract** unchanged (get_profile GET `phoneNumber:+91`, response an ARRAY → `profile_id` = top-level `id`, role/age/gender/name from `metadata.*`; `create_profile` callback with `agentId`/`+91` phone/`profileId` UUID; `apply_job` = `profile_id`+`job_id`; NO `update_profile`). Fixes baked in: silent fetch (no permission-ask, no narration); dead `${new_seeker}` fork removed — always fetch, branch on the array; no unstorable "working/studying?" question (no post-apply data write); intro+recording said exactly once (no repetition); CD3 outbound-frame close ("ज़रूरत होने पर हमारी टीम आपसे फिर बात करेगी"). NO Signals-only fields added (educationCategory etc. deliberately excluded — Dhiway has no `update_profile`). Maya divergences preserved: campus caller-identity (never government), `${college_name}`, feminine first-person verbs throughout, MPL competition, HR-contact share post-apply (spoken-only), optional `hr_contact`/`benefits` fields.
+- **Files:** Maya/Maya Hindi.md (rewrite). Not deployed, not tested (produce-file-only task).
+- **Test status:** NOT deployed, NOT tested per task scope. Static verification only: grep-confirmed zero Signals contract tokens and zero masculine first-person forms in spoken lines. VERIFY-PENDING before any deploy.
+
 ## 2026-08-01 — Maya Signals: capture the new seeker profile fields (educationCategory etc.) in Phase 2
 
 - **Feedback/bug:** same as KKB — Signals added the qualification/experience/help fields (`educationCategory` + conditionals, `itiInstitute`, `workExperienceYearsConditional`, `nameOfLastRoleHeld`, `otherHelpNeeded`) that the bot previously skipped. (Email not on Signals — still not asked.)
