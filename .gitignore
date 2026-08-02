@@ -37,3 +37,6 @@ control-center/backend/.venv/
 control-center/frontend/node_modules/
 control-center/frontend/dist/
 control-center/**/__pycache__/
+
+# regression email build artifact
+digest.html
