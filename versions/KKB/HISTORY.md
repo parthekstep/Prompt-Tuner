@@ -129,3 +129,12 @@
 - **2026-07-30_004810** — `pre-deploy-kkb-kn-in-2026-07-30_004810` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(8 files)_
 - **2026-07-30_024527** — `pre-deploy-kkb-hi-out-2026-07-30_024527` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi.md _(8 files)_
 - **2026-07-30_024528** — `pre-deploy-kkb-kn-out-2026-07-30_024528` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(8 files)_
+- **2026-07-30_032312** — `pre-deploy-kkb-hi-out-2026-07-30_032312` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi.md _(8 files)_
+- **2026-07-30_032314** — `pre-deploy-kkb-kn-out-2026-07-30_032314` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(8 files)_
+- **2026-07-30_040146** — `pre-deploy-kkb-hi-out-2026-07-30_040146` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi.md _(8 files)_
+- **2026-07-30_040147** — `pre-deploy-kkb-kn-out-2026-07-30_040147` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(8 files)_
+- **2026-07-31_103810** — `pre-intro-govt-fix` — replace govt intro on outbound+signals; add apply-guard on signals _(8 files)_
+- **2026-07-31_111527** — `pre-deploy-kkb-hi-out-2026-07-31_111527` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi.md _(8 files)_
+- **2026-07-31_111528** — `pre-deploy-kkb-kn-out-2026-07-31_111528` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(8 files)_
+- **2026-07-31_111529** — `pre-deploy-kkb-hi-signals-2026-07-31_111529` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(8 files)_
+- **2026-07-31_111530** — `pre-deploy-kkb-kn-signals-2026-07-31_111530` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada Signals.md _(8 files)_

@@ -74,3 +74,5 @@
 - **2026-07-27_140047** — `pre-deploy-maya-hi-out-2026-07-27_140047` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_
 - **2026-07-30_031010** — `pre-deploy-maya-hi-out-2026-07-30_031010` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_
 - **2026-07-30_031109** — `pre-deploy-maya-hi-in-2026-07-30_031109` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(4 files)_
+- **2026-07-31_104802** — `pre-recs-fallback` — empty-recommendations callback fallback _(4 files)_
+- **2026-07-31_111531** — `pre-deploy-maya-hi-out-2026-07-31_111530` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_
