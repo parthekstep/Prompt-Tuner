@@ -21,6 +21,11 @@ scratchpad_*
 
 # Tool-config snapshots contain live API keys in headers — never commit
 raya/snapshots/
+# E2E tool-config snapshots (.tools.*.json) ALSO embed live x-api-key/BPP keys — never commit.
+# (.md instruction snapshots in the same dir are keyless and stay tracked.)
+raya/signals-expansion/e2e/snapshots/*.json
+control-center/control.db-wal
+control-center/control.db-shm
 
 # tester persona backups (transient)
 raya/personas/_backups/
