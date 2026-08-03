@@ -1,6 +1,6 @@
 # Static regression report
 
-Prompts checked: **16** | Findings: **1** (critical **0**, major **0**)
+Prompts checked: **16** | Findings: **1** (critical **0**, major **0**, minor **1**)
 
 ## MINOR (1)
-- [sync-drift] `DKB/DKB Hindi Signals.md` — DKB outbound signals: Hi/Kn header-count drift (58 vs 53)
+- **DKB Hindi · outbound · Signals** (`DKB/DKB Hindi Signals.md`) — The Hindi and Kannada versions of this bot are laid out differently — Hindi has 58 sections, Kannada has 53. Both languages are meant to follow the same script, so a gap can mean one language is missing a rule the other has. A small gap is usually just formatting.

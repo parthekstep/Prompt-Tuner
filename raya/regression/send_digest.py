@@ -24,6 +24,7 @@ Exits 0 when no provider is configured, so the workflow never fails just because
 isn't wired up yet.
 """
 import base64, json, os, sys, smtplib, urllib.request, urllib.error
+from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
@@ -37,11 +38,34 @@ def env(*names, default=""):
     return default
 
 
+def html_to_text(html):
+    """Crude but adequate plain-text alternative for clients that strip HTML."""
+    import re
+    t = re.sub(r"(?is)<(script|style).*?</\1>", "", html)
+    t = re.sub(r"(?i)</(div|p|tr|table)>", "\n", t)
+    t = re.sub(r"(?i)<br\s*/?>", "\n", t)
+    t = re.sub(r"<[^>]+>", "", t)
+    for a, b in (("&nbsp;", " "), ("&amp;", "&"), ("&lt;", "<"), ("&gt;", ">"),
+                 ("&ldquo;", '"'), ("&rdquo;", '"'), ("&mdash;", "—")):
+        t = t.replace(a, b)
+    lines = [ln.strip() for ln in t.splitlines()]
+    out, blank = [], False
+    for ln in lines:                       # collapse runs of blank lines
+        if ln:
+            out.append(ln); blank = False
+        elif not blank:
+            out.append(""); blank = True
+    return "\n".join(out).strip()
+
+
 def build_message(sender, to, subject, html):
-    msg = MIMEText(html, "html", "utf-8")
+    """multipart/alternative: plain-text part + the HTML digest."""
+    msg = MIMEMultipart("alternative")
     msg["To"] = to
     msg["From"] = sender
     msg["Subject"] = subject
+    msg.attach(MIMEText(html_to_text(html), "plain", "utf-8"))
+    msg.attach(MIMEText(html, "html", "utf-8"))
     return msg
 
 

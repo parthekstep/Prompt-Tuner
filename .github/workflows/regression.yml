@@ -58,6 +58,18 @@ jobs:
           r = json.load(open("raya/regression/latest-report.json"))
           print(f"critical={len(r['critical'])}")
           print(f"major={len(r['major'])}")
+          try:
+              items = json.load(open("raya/regression/open-items.json"))["items"]
+          except Exception:
+              items = []
+          highs = len([i for i in items if i.get("priority") == "high"])
+          print(f"highs={highs}")
+          # subject line that tells you the state without opening the mail
+          bits = []
+          if len(r["critical"]): bits.append(f"{len(r['critical'])} critical")
+          if len(r["major"]):    bits.append(f"{len(r['major'])} major")
+          if highs:              bits.append(f"{highs} high-priority open")
+          print("headline=" + (", ".join(bits) if bits else "all clear"))
           PY
 
       - name: Build digest -> job summary + email body
@@ -83,7 +95,7 @@ jobs:
         env:
           GMAIL_SENDER: ${{ secrets.GMAIL_SENDER }}
           GMAIL_TO: ${{ secrets.GMAIL_TO }}
-          DIGEST_SUBJECT: "[Prompt Tuner] Daily regression — ${{ steps.run.outputs.critical }} critical, ${{ steps.run.outputs.major }} major"
+          DIGEST_SUBJECT: "[Prompt Tuner] Daily bot health check — ${{ steps.run.outputs.headline }}"
         run: |
           if [ -n "$GMAIL_OAUTH_REFRESH_TOKEN$GMAIL_SA_JSON_BASE64" ]; then
             pip install --quiet google-api-python-client google-auth
