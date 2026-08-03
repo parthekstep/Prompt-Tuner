@@ -56,9 +56,21 @@ Two independent email paths:
 `build_digest.py [daily|weekly]` renders `latest-report.json` to HTML; `send_digest.py` sends it;
 `test_email.py` does a one-command local end-to-end send using `secrets/*`.
 
-### Recommended setup — Gmail via Google Cloud Console (no admin needed)
-The DWD route (#4) requires a Workspace super-admin. The **Cloud Console OAuth** route (#1) needs only your
-own consent:
+### ✅ LIVE — Gmail via Google Cloud Console (set up 2026-08-03, no admin needed)
+Provider #1 is **configured and verified end-to-end**: the daily cloud run emails the digest to
+parth@ekstepplus.org, sent as parth@ekstepplus.org.
+
+- GCP project `operation-rozgar`; Gmail API **enabled**; OAuth consent screen app
+  *"Prompt Tuner Regression Digest"*, audience **Internal** (deliberate: an External app in testing mode
+  expires refresh tokens every 7 days, which would silently break the daily digest).
+- OAuth client (Desktop) `prompt-tuner-regression-digest`, client id `1066399042934-…`; single scope
+  `gmail.send` (send only — no mailbox read access).
+- Repo secrets `GMAIL_OAUTH_CLIENT_ID` / `_CLIENT_SECRET` / `_REFRESH_TOKEN` are set.
+  Local copies: `secrets/gmail-oauth.json` + `secrets/oauth-client.json` (git-ignored, chmod 600).
+- Verified: local send → inbox ✓, and cloud run 30816144239 "Email digest" step → inbox ✓
+  (subject `[Prompt Tuner] Daily regression — 0 critical, 0 major`).
+
+To redo it (new project, rotated token, or a different sender), the steps are:
 
 1. **console.cloud.google.com** → pick/create a project (e.g. `operation-rozgar`)
 2. *APIs & Services → Library* → enable **Gmail API**

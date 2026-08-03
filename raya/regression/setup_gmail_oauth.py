@@ -49,9 +49,14 @@ def main():
         return 1
 
     flow = InstalledAppFlow.from_client_secrets_file(client_file, SCOPES)
-    # opens your browser; consent as the account you want the digest sent FROM
-    creds = flow.run_local_server(port=0, prompt="consent",
-                                  authorization_prompt_message="Opening browser — consent as the sender account…")
+    # Opens your browser; consent as the account you want the digest sent FROM.
+    # SETUP_NO_BROWSER=1 prints the URL instead of launching a browser (lets an automated
+    # session drive the consent page in a controlled tab).
+    no_browser = os.environ.get("SETUP_NO_BROWSER", "").strip() in ("1", "y", "yes")
+    creds = flow.run_local_server(
+        port=int(os.environ.get("SETUP_OAUTH_PORT", "0")), prompt="consent",
+        open_browser=not no_browser,
+        authorization_prompt_message="Visit this URL to authorize: {url}")
     if not creds.refresh_token:
         print("No refresh_token returned. Re-run (consent must be fresh).", file=sys.stderr)
         return 1
@@ -65,7 +70,8 @@ def main():
     print(f"  client_id: {creds.client_id[:18]}…  refresh_token: …{creds.refresh_token[-4:]} (masked)")
 
     # Push to GitHub secrets so the scheduled cloud run can use them.
-    if input("Set the GitHub repo secrets now via gh? [y/N] ").strip().lower().startswith("y"):
+    auto = os.environ.get("SETUP_SET_SECRETS", "").strip().lower() in ("1", "y", "yes")
+    if auto or input("Set the GitHub repo secrets now via gh? [y/N] ").strip().lower().startswith("y"):
         for name, value in (("GMAIL_OAUTH_CLIENT_ID", creds.client_id),
                             ("GMAIL_OAUTH_CLIENT_SECRET", creds.client_secret),
                             ("GMAIL_OAUTH_REFRESH_TOKEN", creds.refresh_token)):
