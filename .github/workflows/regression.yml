@@ -26,9 +26,18 @@ permissions:
 jobs:
   static:
     runs-on: ubuntu-latest
-    # job-level env so the email step's `if:` guard can read it (step-level env can't be
-    # referenced in that same step's own `if:`).
+    # job-level env so the email step's `if:` guard can read these (step-level env can't be
+    # referenced in that same step's own `if:`). Whichever provider secret exists wins —
+    # see raya/regression/send_digest.py for the priority order.
     env:
+      GMAIL_OAUTH_CLIENT_ID: ${{ secrets.GMAIL_OAUTH_CLIENT_ID }}
+      GMAIL_OAUTH_CLIENT_SECRET: ${{ secrets.GMAIL_OAUTH_CLIENT_SECRET }}
+      GMAIL_OAUTH_REFRESH_TOKEN: ${{ secrets.GMAIL_OAUTH_REFRESH_TOKEN }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      SMTP_HOST: ${{ secrets.SMTP_HOST }}
+      SMTP_PORT: ${{ secrets.SMTP_PORT }}
+      SMTP_USER: ${{ secrets.SMTP_USER }}
+      SMTP_PASS: ${{ secrets.SMTP_PASS }}
       GMAIL_SA_JSON_BASE64: ${{ secrets.GMAIL_SA_JSON_BASE64 }}
     outputs:
       critical: ${{ steps.run.outputs.critical }}
@@ -66,17 +75,19 @@ jobs:
             raya/regression/latest-report.md
             raya/regression/latest-report.json
 
-      # OPTIONAL well-formatted HTML email via the Gmail API (service account + domain-wide
-      # delegation). No-op until the GMAIL_SA_JSON_BASE64 secret exists, so the workflow is
-      # safe to merge before Gmail sending is wired up.
-      - name: Email digest (Gmail API)
-        if: ${{ env.GMAIL_SA_JSON_BASE64 != '' }}
+      # OPTIONAL well-formatted HTML email. Multi-provider: Gmail-OAuth (no admin needed) /
+      # Resend / SMTP / service-account+DWD — whichever secret is present. Skipped entirely
+      # when none is set, so the workflow is safe to run before email is wired up.
+      - name: Email digest
+        if: ${{ env.GMAIL_OAUTH_REFRESH_TOKEN != '' || env.RESEND_API_KEY != '' || env.SMTP_PASS != '' || env.GMAIL_SA_JSON_BASE64 != '' }}
         env:
           GMAIL_SENDER: ${{ secrets.GMAIL_SENDER }}
           GMAIL_TO: ${{ secrets.GMAIL_TO }}
           DIGEST_SUBJECT: "[Prompt Tuner] Daily regression — ${{ steps.run.outputs.critical }} critical, ${{ steps.run.outputs.major }} major"
         run: |
-          pip install --quiet google-api-python-client google-auth
+          if [ -n "$GMAIL_OAUTH_REFRESH_TOKEN$GMAIL_SA_JSON_BASE64" ]; then
+            pip install --quiet google-api-python-client google-auth
+          fi
           python3 raya/regression/send_digest.py
 
       # GUARANTEED backstop email: a non-zero exit makes GitHub email the repo owner.

@@ -42,19 +42,36 @@ out the repo, runs the suite with **zero secrets**, and notifies.
 Two independent email paths:
 1. **Guaranteed, zero-config** — on any critical finding the job **exits non-zero**, so GitHub emails the repo
    owner about the failed run; the run page shows the full digest (`build_digest.py` → job summary + artifact).
-2. **Well-formatted HTML via the Gmail API** (`send_digest.py`) — a service account with **domain-wide
-   delegation** for `gmail.send` impersonates a sender in the ekstepplus.org domain (same auth model as the
-   repo's Sheets service account; no SMTP, no app password). A **no-op until** `GMAIL_SA_JSON_BASE64` is set.
+2. **Well-formatted HTML email** (`send_digest.py`) — multi-provider, auto-detected from whichever secret is
+   present. Skipped cleanly (exit 0) when none is set, so the workflow never fails just because email isn't
+   wired up. Priority order:
 
-`build_digest.py [daily|weekly]` renders `latest-report.json` into the HTML digest; `send_digest.py` sends it.
+| # | Provider | Secrets | Needs Workspace admin? |
+|---|---|---|---|
+| 1 | **Gmail API as you** (OAuth refresh token) | `GMAIL_OAUTH_CLIENT_ID` + `_CLIENT_SECRET` + `_REFRESH_TOKEN` | **No** — your own consent |
+| 2 | **Resend** HTTP API | `RESEND_API_KEY` | No — no Google at all |
+| 3 | **Generic SMTP** (app password, Mailgun, SES…) | `SMTP_HOST/_PORT/_USER/_PASS` | No (app passwords can be org-blocked) |
+| 4 | Service account + domain-wide delegation | `GMAIL_SA_JSON_BASE64` | **Yes** — admin must grant `gmail.send` |
 
-### To activate
-- **Merge the workflow to `main`** — GitHub only fires `schedule:` triggers from the **default branch**.
-- **Gmail-API secrets** (*Settings → Secrets and variables → Actions*):
-  - `GMAIL_SA_JSON_BASE64` — base64 of a service-account JSON whose **domain-wide delegation** includes
-    `https://www.googleapis.com/auth/gmail.send` (a Workspace **super-admin** enables the scope in the admin
-    console → *Security → API controls → Domain-wide delegation*; the existing Sheets SA can be reused if the
-    scope is added to it).
-  - `GMAIL_SENDER` — address to send as (e.g. `parth@ekstepplus.org`); `GMAIL_TO` — recipient(s).
+`build_digest.py [daily|weekly]` renders `latest-report.json` to HTML; `send_digest.py` sends it;
+`test_email.py` does a one-command local end-to-end send using `secrets/*`.
+
+### Recommended setup — Gmail via Google Cloud Console (no admin needed)
+The DWD route (#4) requires a Workspace super-admin. The **Cloud Console OAuth** route (#1) needs only your
+own consent:
+
+1. **console.cloud.google.com** → pick/create a project (e.g. `operation-rozgar`)
+2. *APIs & Services → Library* → enable **Gmail API**
+3. *OAuth consent screen* → **Internal** (or External + add yourself as a Test user); add scope
+   `https://www.googleapis.com/auth/gmail.send`
+4. *Credentials → Create credentials → OAuth client ID* → **Desktop app** → **Download JSON**
+5. `python3 raya/regression/setup_gmail_oauth.py ~/Downloads/client_secret_*.json`
+   — opens a browser for consent, stores the refresh token in `secrets/gmail-oauth.json` (git-ignored), and
+   offers to set the three GitHub secrets via `gh`. The token is never printed.
+6. Test end to end: `python3 raya/regression/test_email.py`
+
+`GMAIL_SENDER` / `GMAIL_TO` override the from/to (both default to `parth@ekstepplus.org`).
+For Resend without a verified domain, the from-address **must** be `onboarding@resend.dev`.
+
 - **Weekly live** needs the Raya token + Signals keys as GitHub secrets to fire real calls from the cloud
   (they're git-ignored locally by design). Until then the weekly run is static-only.
