@@ -225,3 +225,5 @@ Format:
 2026-07-31 (create) · prod · maya-hi-in-signals · 1c24feda · Maya Inbound Signals · new agent (clone df99f501) + Signals tools + real-jobs inventory
 2026-07-31 (repurpose) · prod · dkb-hi-signals · fabda71d · DKB Hindi Signals · Signals create_job/update_job (provider job_posting) + get_talent_insights; create_job curl-grounded (item f6c3d7bb)
 2026-07-31 (repurpose) · prod · dkb-kn-signals · 847a85e2 · DKB Kannada Signals · same Signals provider tools
+2026-08-04 17:46:09 · prod · kkb-kn-signals · 33037201-78ce-405d-b509-a3b6934e20f1 · KKB/KKB Placeholder Kannada Signals.md · sha256:7f606fac · snapshot:pre-deploy-kkb-kn-signals-2026-08-04_174608 · deployed
+2026-08-04 17:46:09 · prod · kkb-kn-in-signals · f38da775-c572-4a50-9340-fe1f42c43901 · KKB/KKB Placeholder Inbound Kannada Signals.md · sha256:aa98e2a0 · snapshot:pre-deploy-kkb-kn-in-signals-2026-08-04_174609 · deployed

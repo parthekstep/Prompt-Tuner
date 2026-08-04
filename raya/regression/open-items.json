@@ -1,10 +1,12 @@
 {
- "updated": "2026-08-03",
+ "updated": "2026-08-04",
  "note": "Curated list of known open work per bot. The automated static check reads the scripts and cannot see these — they come from live call testing and from features we know are unfinished. Keep this file current; the daily digest reads it verbatim. Remove an item the day it is genuinely closed.",
  "items": [
   {
    "id": "kkb-kn-in-apply-unverified",
-   "bots": ["KKB Kannada · inbound · legacy"],
+   "bots": [
+    "KKB Kannada · inbound · legacy"
+   ],
    "title": "The \"apply for the job\" step has never been confirmed working on this bot",
    "what": "In the last test call the bot tried to submit the application using an internal record number instead of the caller's proper profile ID, and the backend rejected it (404 \"invalid or missing profile_id\"). The Hindi version of the same bot applies successfully, so this is specific to the Kannada inbound bot — or to the test profile that call used, which had been left in a bad state by an earlier test.",
    "why": "Applying to a job is the whole point of the call. Until a clean test passes, we cannot say this bot can actually place an application for a Kannada caller who rings in.",
@@ -14,7 +16,9 @@
   },
   {
    "id": "weekly-live-not-wired",
-   "bots": ["all"],
+   "bots": [
+    "all"
+   ],
    "title": "The weekly real-phone-call test is not switched on yet",
    "what": "This daily check only reads the scripts; it never dials a phone. The planned weekly test that places actual calls to each bot cannot run from the cloud yet, because the phone-platform and backend keys it needs have not been added to the GitHub repository secrets.",
    "why": "Reading a script catches wrong wording and wrong field names, but only a real call catches problems in how the bot actually behaves on the phone — speech recognition, tone, and whether the backend truly saves the data.",
@@ -24,7 +28,9 @@
   },
   {
    "id": "output-prompts-missing-vars",
-   "bots": ["all"],
+   "bots": [
+    "all"
+   ],
    "title": "Two call outcomes are not being captured after the call ends",
    "what": "Each bot has a separate \"output\" script that reads the finished conversation and pulls out structured results. Two useful results are not being extracted yet: whether the caller gave consent, and whether they are ready for an interview.",
    "why": "Without these, the team has to listen to or read the transcript to answer basic questions like \"how many callers consented?\" — it cannot be reported automatically.",
@@ -34,7 +40,14 @@
   },
   {
    "id": "signals-inventory-ids",
-   "bots": ["KKB Hindi · outbound · Signals", "KKB Kannada · outbound · Signals", "KKB Hindi · inbound · Signals", "KKB Kannada · inbound · Signals", "Maya Hindi · outbound · Signals", "Maya Hindi · inbound · Signals"],
+   "bots": [
+    "KKB Hindi · outbound · Signals",
+    "KKB Kannada · outbound · Signals",
+    "KKB Hindi · inbound · Signals",
+    "KKB Kannada · inbound · Signals",
+    "Maya Hindi · outbound · Signals",
+    "Maya Hindi · inbound · Signals"
+   ],
    "title": "Job list used for testing is not the real production job list",
    "what": "The job openings these bots read out during testing are sample entries. The real, current openings are maintained by the team directly on the phone-platform console.",
    "why": "A bot can pass every test and still fail in production if it offers a job whose ID no longer exists — the application then errors out for a real caller.",
@@ -44,13 +57,29 @@
   },
   {
    "id": "cd7-wording-outbound",
-   "bots": ["KKB Hindi · outbound · Signals", "KKB Kannada · outbound · Signals"],
+   "bots": [
+    "KKB Hindi · outbound · Signals",
+    "KKB Kannada · outbound · Signals"
+   ],
    "title": "Slightly stiff wording when the bot refers to the caller's details",
    "what": "On outbound calls the bot says \"प्रोफाइल\" (profile) where the warmer, more everyday \"जानकारी\" (your details) would sound more natural to a worker.",
    "why": "Cosmetic only — nothing breaks. It affects how natural the bot sounds, not whether the call succeeds.",
    "next": "Swap the wording next time these scripts are edited for something else; not worth a dedicated deployment.",
    "priority": "low",
    "since": "2026-08-01"
+  },
+  {
+   "id": "fetch-leak-kn-signals",
+   "bots": [
+    "KKB Kannada · outbound · Signals",
+    "KKB Kannada · inbound · Signals"
+   ],
+   "title": "The bot hints out loud that it looked the caller up",
+   "what": "The script explicitly says the caller must never hear that a lookup happened. In test calls on 2026-08-04 the bot said “ನಾನು ನೋಡ್ತಿದ್ದೀನಿ” (“I’m having a look”) on the outbound call, and “ನಿಮ್ಮ ಮಾಹಿತಿಯಲ್ಲಿ … ಕಾಣ್ತಿದೆ” (“I can see in your information”) on the inbound one — both reveal it.",
+   "why": "The prose already forbids this clearly, so it is a model-adherence miss rather than a missing instruction; adding more wording tends to make it worse. Impact is on how natural and discreet the call feels, not on whether it succeeds — nothing fails because of it.",
+   "next": "Try a structural fix rather than more prose: bind the post-fetch turn to a fixed opening phrase so there is no room to narrate. Check the Hindi twins for the same phrasing first — do not change Kannada alone if both drift.",
+   "priority": "medium",
+   "since": "2026-08-04"
   }
  ]
 }
