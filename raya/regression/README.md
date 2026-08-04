@@ -35,9 +35,18 @@ exits." The only mechanism that survives the dev machine being off is a **cloud*
 repo is on GitHub (`parthekstep/Prompt-Tuner`), that's **GitHub Actions**: it runs on GitHub's infra, checks
 out the repo, runs the suite with **zero secrets**, and notifies.
 
-- **daily** `7 1 * * *` (06:37 IST) — static suite.
-- **weekly** `7 1 * * 1` (Mon 06:37 IST) — static suite (+ live once Raya/Signals secrets are added; see below).
-- `workflow_dispatch` — a manual "Run workflow" button in the Actions tab.
+### What actually runs, and when (as of 2026-08-04)
+- **One job, once a day.** Cron `7 1 * * *` (nominally 06:37 IST). **GitHub's shared cron queue delays
+  scheduled runs** — observed arrival ~04:20–04:40 UTC (~09:50–10:10 IST), i.e. up to ~3.5 h late. Treat the
+  time as "each morning", not a guaranteed clock time. Anything time-critical should not depend on this.
+- **Every run checks all 16 bot scripts.** No per-bot rotation, no sampling, no ordering — one pass over the
+  full inventory (8 KKB, 4 DKB, 4 Maya). Runtime ~6 s.
+- **No run ever places a phone call.** This tier reads scripts only.
+- **The weekly live voice regression does not exist yet** — no live-call script, and the Raya/Signals keys
+  aren't in repo secrets. A second `7 1 * * 1` cron used to sit here; because it matched the same minute as
+  the daily one, Mondays fired **twice** (observed 2026-08-03 04:35:58Z + 04:37:09Z = duplicate emails). It
+  has been removed. When the live test is built it gets its own job at its own distinct time.
+- `workflow_dispatch` — manual "Run workflow" button, any time.
 
 Two independent email paths:
 1. **Guaranteed, zero-config** — on any critical finding the job **exits non-zero**, so GitHub emails the repo

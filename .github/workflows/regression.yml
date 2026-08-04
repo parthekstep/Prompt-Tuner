@@ -4,9 +4,12 @@ name: Prompt Tuner Regression
 # Runs on GitHub's CLOUD infra, so it fires even when the dev machine is off —
 # which the local schedulers (scheduled-tasks MCP / CronCreate) cannot do.
 #
-# Cadence (user-chosen 2026-08-01): daily static + weekly live.
-#   - daily  06:37 IST (01:07 UTC): static suite (no telephony, no secrets)
-#   - weekly Mon 06:37 IST         : static suite + (optional) live voice regression
+# CURRENT STATE (be precise — this is the only thing that actually runs):
+#   - ONE job, `static`, once a day. It reads all 16 bot scripts every run: no per-bot
+#     rotation, no sampling, and it NEVER places a phone call.
+#   - The weekly LIVE voice regression is NOT implemented yet (no live-call script exists, and
+#     the Raya/Signals keys it needs aren't in repo secrets). Until it is, there is no weekly
+#     job — see raya/regression/open-items.json -> weekly-live-not-wired.
 #
 # Email digest -> parth@ekstepplus.org. Two independent notification paths:
 #   1. GUARANTEED, zero-config: on critical findings the job EXITS NON-ZERO, so GitHub
@@ -16,8 +19,12 @@ name: Prompt Tuner Regression
 
 on:
   schedule:
-    - cron: "7 1 * * *"    # daily 06:37 IST — static
-    - cron: "7 1 * * 1"    # Mon    06:37 IST — weekly (static + live if secrets present)
+    # ONE entry only. A second "weekly" entry at the same time also matched on Mondays, so
+    # GitHub fired two runs (observed 2026-08-03: 04:35:58Z and 04:37:09Z) = duplicate emails.
+    # When the live-call test exists it gets its OWN job + its own distinct time, not a
+    # second cron on the same schedule as this one.
+    - cron: "7 1 * * *"     # nominally 06:37 IST. NOTE: GitHub's shared cron queue delays
+                            # scheduled runs — observed arrival ~04:20-04:40 UTC (~09:50 IST).
   workflow_dispatch:        # manual "Run workflow" button
 
 permissions:
