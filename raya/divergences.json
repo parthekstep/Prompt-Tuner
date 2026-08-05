@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "_note": "DELIBERATE-DIVERGENCE REGISTRY. Some differences between a bot's language files are INTENTIONAL, owner-approved decisions -- not drift. This file is the machine-checkable record of them. `/sync-check` loads it and reports a covered difference as 'EXPECTED (registered divergence)' instead of drift; an UNREGISTERED difference in language-agnostic content is what gets flagged. `/update-prompt` and `/port-feature` MUST add an entry here -- in the same change as the prompt edit and the CHANGELOG entry -- whenever they knowingly apply a change to some languages of a sync family and not others, or otherwise suspend the master->mirror sync rule. No entry = the next audit will 'correct' the divergence and silently undo an owner decision. An entry is a NARROW carve-out (specific targets, languages, sections and tokens), never a blanket licence for a language to differ; everything in `still_must_match` is audited normally. Lives next to agents.json because it is fleet data read by /sync-check, /update-prompt, /port-feature and raya/regression/static_regression.py -- not skill prose. Schema notes: .claude/skills/sync-check/reference/n-language-parity.md",
+  "_schema": {
+    "id": "stable kebab-case key; cited verbatim in audit reports",
+    "bot": "the bot/agent the divergence belongs to (KKB, DKB, Maya, purple-dots, ...)",
+    "sync_family": "'bot · direction · variant' -- scopes the entry to ONE sync family; files in other families are not mirrors of each other",
+    "targets": "raya/agents.json target ids this divergence applies to",
+    "master_language": "the family's master language at the time of approval",
+    "languages_affected": "language codes that legitimately differ from the master",
+    "direction": "mirror-only | master-only | both-differ",
+    "scope": "the sections/lines that legitimately differ. Each item: section (heading, matched by intent not exact string), kind (persona|spoken-line|rule), what (plain English), contains[] (tokens a script can match inside the actual delta)",
+    "why": "the owner's reason, in plain English",
+    "approved_by": "the human who decided, and how (explicit instruction / email approval)",
+    "approved_on": "YYYY-MM-DD",
+    "changelog_ref": "the CHANGELOG.md entry that records the edit",
+    "still_must_match": "everything this entry does NOT excuse -- audited normally",
+    "not_applied_to": "sibling targets deliberately left alone (stops scope creep)",
+    "review_on": "optional; after this date the entry must be re-confirmed or it is reported as a registry gap",
+    "expires": "optional hard expiry; after it, the divergence is drift again",
+    "_match_rule": "A difference is EXPECTED only if ALL hold: (1) the file's target id is in `targets` and its family matches `sync_family`; (2) the file's language is in `languages_affected`; (3) the differing section matches a scope[].section by intent; (4) the delta text contains at least one of that scope item's `contains` tokens. Anything else is UNREGISTERED = drift. If a scope item's `contains` tokens are NO LONGER present in the covered files, the divergence was undone -- report a registry gap / possible silent revert and ask the owner; do not delete the entry and do not silently re-apply it."
+  },
+  "divergences": [
+    {
+      "id": "kkb-kn-signals-maya-name",
+      "bot": "KKB",
+      "sync_family": "KKB · outbound+inbound · signals (Kannada Signals pair)",
+      "targets": ["kkb-kn-signals", "kkb-kn-in-signals"],
+      "files": [
+        "KKB/KKB Placeholder Kannada Signals.md",
+        "KKB/KKB Placeholder Inbound Kannada Signals.md"
+      ],
+      "master_language": "hi",
+      "languages_affected": ["kn"],
+      "direction": "mirror-only",
+      "scope": [
+        {
+          "section": "Introduction (persona line)",
+          "kind": "persona",
+          "what": "The Kannada Signals bots name the agent in the persona line -- 'You are ಮಾಯಾ (Maya), the named voice of the ಕೆಲಸದ ಮಾತು initiative' -- plus the rule that it answers 'who are you?' with that name mid-call. The Hindi Signals twins intentionally keep the institution-only persona ('You are काम की बात') with no personal name.",
+          "contains": ["ಮಾಯಾ (Maya)", "the named voice of", "Your name is ಮಾಯಾ"]
+        },
+        {
+          "section": "Call Introduction Rules → Introduction Script (fixed opening line)",
+          "kind": "spoken-line",
+          "what": "The fixed opening line carries one extra short sentence, 'ನಾನು ಮಾಯಾ.', inserted after 'ನಮಸ್ಕಾರ.' and before the existing institutional welcome. Everything else in the greeting -- including the recording disclosure and its position -- is byte-identical to before. The Hindi opening line has no equivalent self-naming sentence.",
+          "contains": ["ನಾನು ಮಾಯಾ."]
+        },
+        {
+          "section": "Call Introduction Rules → Intro-turn rules",
+          "kind": "rule",
+          "what": "Kannada-only intro-turn rules that exist because of the name: (a) 'give your name once in this intro turn, never repeat it in later turns' (guards the repetition failure class); (b) the identity anchor reads that the NAME TOGETHER WITH the city-administration initiative is the whole identity -- the Hindi twins still read that the institutional anchor is the entire identity, which would contradict a personal name; (c) an explicit guard that being named ಮಾಯಾ does not make the agent a private individual, an agent, or a company representative.",
+          "contains": [
+            "Give your name once, in this intro turn",
+            "together with",
+            "does not make you a private individual"
+          ]
+        }
+      ],
+      "why": "Feature request from the owner: the KKB Kannada bots should be called Maya and state that name in their introduction. Applied to the Kannada Signals pair ONLY, at the owner's explicit instruction -- the Hindi Signals twins and BOTH legacy Kannada bots keep the institution-only intro with no personal name. For this pair the normal 'Hindi is source of truth, mirror to Kannada' rule was consciously suspended for a language-specific persona choice. A /sync-check WILL see a persona-line, opening-line and intro-turn-rule difference between KKB Hindi Signals and KKB Kannada Signals: that is EXPECTED, not drift. ('Maya' is also the name of the separate Maya agent -- Hindi-only, UP campus recruitment, ${college_name}. Different agents, different prompts, different uuids; the shared first name is intentional and has no functional coupling.)",
+      "approved_by": "Parth (owner) — explicit instruction",
+      "approved_on": "2026-08-04",
+      "changelog_ref": "KKB/CHANGELOG.md → '2026-08-04 — KKB Kannada SIGNALS bots: introduce as \"ಮಾಯಾ\" (Maya)'",
+      "still_must_match": [
+        "All call-flow logic, phase/step structure, conditions and routing",
+        "All tool names, JSON payloads, payload field names, fixed params and enum literals",
+        "All ${input variables}",
+        "The memory-injection block '{${contact_memory}}'",
+        "The 'do NOT add ಗವರ್ನಮೆಂಟ್ / do NOT claim to be calling from the government' ban (preserved verbatim)",
+        "The inbound 'do NOT say I'm calling you' ban (preserved verbatim on the inbound file)",
+        "The recording disclosure and its position in the intro turn",
+        "Every other section of both files"
+      ],
+      "not_applied_to": [
+        "kkb-hi-signals",
+        "kkb-hi-in-signals",
+        "kkb-kn-out",
+        "kkb-kn-in"
+      ],
+      "review_on": null,
+      "expires": null
+    }
+  ]
+}

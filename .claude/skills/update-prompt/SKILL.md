@@ -56,13 +56,23 @@ a real job inventory with placeholders). `deploy` also refuses any prompt still 
    Marketing Masters League, feminine-voice rule — see `CLAUDE.md`). Never overwrite those.
 7. **Changelog.** Append an entry to `<Agent>/CHANGELOG.md` (date, feedback/bug, change,
    files touched). If Maya was also updated, add an entry to `Maya/CHANGELOG.md` too.
-8. **Feedback loop (bug fixes only).** If this change fixed a bug, teach `/prompt-analyser` to
+8. **Register a deliberate divergence (only if the change is NOT landing in every language).** If
+   you knowingly apply this change to some languages of the sync family and not others — or
+   otherwise suspend the mirror rule — add or update the entry in **`raya/divergences.json`** in
+   the SAME change as the prompt edit and the changelog entry. Use the schema in
+   `../sync-check/reference/n-language-parity.md` → "5. Registry — `raya/divergences.json`"
+   (id, bot, sync_family, targets, master_language, languages_affected, direction, scope[] with
+   `contains` tokens, why, approved_by, approved_on, changelog_ref, still_must_match). Without the
+   entry the next `/sync-check` reads the difference as drift and reconciles the deliberate
+   decision away. `/sync-check` is what reads the registry today (the daily static suite does not
+   yet — follow-up), so the entry is the only durable record of the owner's call.
+9. **Feedback loop (bug fixes only).** If this change fixed a bug, teach `/prompt-analyser` to
    catch it next time: add or sharpen an entry in
    `../prompt-analyser/reference/bug-patterns.md` (symptom → root cause → detection heuristic →
    fix direction → source agent + date), and update
    `../prompt-analyser/reference/section-checklists.md` if the bug implies a section that must
    always exist. See `CLAUDE.md` → "Bug-fix feedback loop". Skip for pure feature additions.
-9. **Report.** Summarize what changed in each file, the classification used, and a
+10. **Report.** Summarize what changed in each file, the classification used, and a
    structural-parity note (confirm Hindi/Kannada section skeletons still align). For MIXED
    changes, show the Hindi line and its Kannada adaptation side by side.
 

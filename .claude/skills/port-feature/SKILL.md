@@ -32,7 +32,18 @@ via the path map in the repo root `CLAUDE.md`.
    parts to the target's Kannada verbatim, adapt SPECIFIC parts. **Skip for Maya (Hindi only).**
 6. **Changelog.** Append to the **target** agent's `CHANGELOG.md` with a
    `**Ported from:** <source agent>` line in addition to the standard fields.
-7. **Report.** Show what was ported, the variable/tool remapping table used, any flagged gaps,
+7. **Register a deliberate divergence (only if the port does NOT land in every language).** If the
+   ported feature is deliberately applied to some languages of the target's sync family and not
+   others — or the mirror in step 5 is knowingly skipped — add or update the entry in
+   **`raya/divergences.json`** in the SAME change as the prompt edit and the changelog entry,
+   following the schema in `../sync-check/reference/n-language-parity.md` → "5. Registry —
+   `raya/divergences.json`" (id, bot, sync_family, targets, master_language, languages_affected,
+   direction, scope[] with `contains` tokens, why, approved_by, approved_on, changelog_ref,
+   still_must_match). Without it the next `/sync-check` reads the gap as drift and reconciles the
+   deliberate decision away. `/sync-check` is what reads the registry today (the daily static suite
+   does not yet — follow-up). Maya is Hindi-only, so a KKB→Maya port needs no entry on that ground
+   alone.
+8. **Report.** Show what was ported, the variable/tool remapping table used, any flagged gaps,
    and the files touched per target.
 
 ## Test before done (MANDATORY — the port is not DONE until tested)

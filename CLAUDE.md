@@ -5,6 +5,33 @@ working here is to **iterate on these prompts from feedback/bugs while keeping t
 language variants in sync**. Do not treat these as ordinary docs — a wording change
 in one language that does not land in its twin is a regression.
 
+## Multi-project — do not assume three bots and two languages
+
+The Tuner is now a **shared rail across several BlueDot-team projects**, not a three-bot tool.
+Assume **N projects, N bots, N languages** in everything you write here.
+
+- **Blue Dots** — the employment rail: **KKB** (seeker job-matching), **DKB** (employer job
+  capture), **Maya** (campus recruitment). Hindi (master) + Kannada; Maya Hindi-only.
+- **Purple Dots** — a bot rail for **people with disabilities**, being taken multi-Indic.
+  Accessibility (pacing, silence tolerance, repeat-on-request, never making a caller's
+  disability the topic of the call) is a first-class grading concern for the whole fleet.
+- **More to come.** A new project is first-class, never an exception: record it as
+  `project: <kebab-case-name>` and register it like any other.
+
+So never hard-code a bot list or a language pair — resolve bots through the path map below and
+`raya/agents.json`, and resolve languages from the manifest, not from filenames.
+
+**Two documents to read alongside this one:**
+
+- **`docs/WORKFLOW.md`** — the **end-to-end map**: the full onboarding → registration → analysis →
+  test-case generation → live testing → fix → deploy → re-verify → language expansion → standing
+  regression path, a decision table ("I want to ___ → run /___"), three worked scenarios, and the
+  known limits/gotchas. This is what you hand a third person instead of a verbal handover.
+- **`docs/MULTI-PROJECT-ROADMAP.md`** — the **multi-project spec of record**: why the new skills
+  exist, and the structural gaps G1–G8 (path map, `/register-bot`, N-language `/sync-check`,
+  config-driven regression fleet, per-language personas, per-bot checklists, digest labels,
+  accessibility checks) with their resolutions and build order.
+
 ## Surgical edits only — these prompts are fragile
 
 These prompts run live voice agents; a stray change can break the whole agent. Every edit
@@ -83,6 +110,25 @@ is the **source of truth**; changes are applied there first, then mirrored to Ka
 any new change, the prompt pair must already be in sync — `/update-prompt` runs
 `/sync-check` first to guarantee this.
 
+**One master, N mirrors.** Two languages is the special case, not the model. A bot's languages
+are one **master** (edited first) and **N mirrors** (each brought up independently): for KKB/DKB
+that is Hindi → Kannada, for an N-language bot it is master → every mirror. `/sync-check` audits
+the master against **each** mirror and reports a per-language matrix; the master language is
+marked in the path map, and the language set is discovered from `raya/agents.json`, never
+enumerated in a skill. A change that lands in some languages and not others is a regression.
+
+**Deliberate divergences are registered, not remembered.** Some language differences are
+intentional and must never be reconciled away (e.g. the 2026-08-04 KKB Kannada Signals persona
+name **ಮಾಯಾ / Maya**, kept while the Hindi Signals twins keep the institution-only intro). These
+live in **`raya/divergences.json`** — the machine-checkable divergence registry recording which
+bot/targets and languages diverge, which sections/`contains` tokens legitimately differ, why, who
+approved it, when, the changelog reference, and what must **still** match. `/sync-check` consults
+it and downgrades covered differences to *EXPECTED (registered divergence)*; only **unregistered**
+differences in agnostic content are flagged as drift. Whenever `/update-prompt` or
+`/port-feature` deliberately applies a change to some languages and not others, it **must** add
+the registry entry in the same change as the prompt edit and the changelog entry — no entry means
+the next audit will "fix" the divergence away. A registry entry is scoped, not a licence to drift.
+
 ## Maya rule (flag-and-ask)
 
 Maya inherits KKB's language-agnostic core but has its own divergences that must **never**
@@ -156,12 +202,19 @@ additions or ports of already-working behaviour.
 | Create or edit an agent's memory prompt | `/update-memory` |
 | Create or edit an agent's output prompt | `/update-output` |
 | Audit whether the language variants have drifted | `/sync-check` |
+| Take a bot into a NEW Indic language — re-author the spoken content the way that language is actually spoken, re-derive its TTS/script machinery, stand up + test the new agent ("add Telugu/Tamil/Marathi", "make it multi-language") | `/translate-prompt` |
 | Carry a feature from one agent to another (e.g. KKB → DKB / Maya) | `/port-feature` |
 | Audit a prompt for latent gaps / bug-prone patterns before running it | `/prompt-analyser` |
 | Reconcile a repo prompt against the LIVE prompt on Raya (who's ahead) | `/raya-reconcile` |
 | Run the feedback loop end-to-end: sheet → transcript → fix → deploy → sheet | `/bug-fix` |
 | Test a live agent by having a persona "tester" agent CALL it, then grade the call against generic + bot-specific checklists (find bugs ourselves; verify a fix end-to-end) | `/voice-test` |
+| Build ONE bot's own test suite — scenarios from its flow/tools/audience/reported issues + the learned bug patterns → test manifest, tester personas, bot checklist with explicit pass/fail detection ("what should we test on this bot") | `/generate-test-cases` |
 | Onboard a new user/customer bringing a voice bot (or point at an existing repo bot) | `/onboard` |
+| Register a new bot — or a new language/direction variant — so every skill and script resolves it: folder + prompt files + `CHANGELOG.md`, path-map rows, `raya/agents.json` target(s) with hand-copied uuids, regression fleet entry ("wire up Purple Dots", "add a Tamil variant") | `/register-bot` |
+
+**The end-to-end map is `docs/WORKFLOW.md`** — how these skills chain together from intake to the
+standing daily regression, plus a decision table for every real situation, three worked scenarios,
+and the platform gotchas. Point a newcomer there rather than explaining the pipeline in chat.
 
 `/update-prompt` auto-runs `/sync-check` first, so a new change always lands on an
 aligned base. `/prompt-analyser` is a read-only pre-flight review (flags, does not fix);
@@ -169,6 +222,14 @@ route its confirmed findings to `/update-prompt`. **Always route prompt edits th
 `/update-prompt`** (or `/port-feature` for cross-agent) — it enforces the sync rule, the
 English-instructions rule, the changelog entry, and the analyser update; don't hand-edit a
 prompt file directly.
+
+**The only other sanctioned write paths** are `/translate-prompt` (authors a **new** language
+variant of an existing prompt) and `/register-bot` (files a customer's supplied prompt **verbatim**
+as a new baseline). Those two **create** prompt files; only `/update-prompt` / `/port-feature`
+change content that already exists. All four still owe the same obligations — the pre-edit snapshot
+(`/prompt-version`), the `CHANGELOG.md` entry, and the sync obligations of the family they touch
+(a new variant is registered as a mirror of its master and audited by `/sync-check` like any other).
+Anything outside these four is hand-editing a prompt file, which is never allowed.
 
 ## Testing is mandatory — a change is not DONE until tested
 
