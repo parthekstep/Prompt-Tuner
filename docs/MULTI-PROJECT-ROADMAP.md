@@ -78,11 +78,11 @@ These are not in the owner's list but block it. Found by auditing the repo on 20
 | G1 | Path map hard-codes 3 bots | root `CLAUDE.md` | make per-project; `/register-bot` maintains it |
 | G2 | No executable "add a new bot/project" step — only prose inside `/onboard` | `.claude/skills/onboard` | **NEW `/register-bot`** skill |
 | G3 | `/sync-check` assumes exactly **two** languages (Hindi↔Kannada) | `.claude/skills/sync-check` | **EXTEND to N languages**, master + N mirrors |
-| G4 | Daily regression suite hard-codes a 16-file fleet list and Hi/Kn parity | `raya/regression/static_regression.py` | make **config-driven** (fleet manifest), N-language parity |
+| G4 | Daily regression suite hard-codes its fleet list and Hi/Kn parity | `raya/regression/static_regression.py` | **PARTLY DONE 2026-08-05:** the list was missing 2 LIVE bots (`dkb-hi-in`, `dkb-kn-in`) so they went unchecked while the digest said "16 bots" — added (now 18), plus a **coverage self-check** that emits a CRITICAL finding if any live deploy target is unchecked, and `scripts/build_fleet_manifest.py` generates `raya/regression/fleet.json`. REMAINING: make the suite *read* the manifest, and N-language parity |
 | G5 | Tester personas exist only for `hi`/`kn` | `raya/personas/` | `/generate-test-cases` emits per-language personas |
 | G6 | Voice-test checklists exist only for `{kkb,dkb,maya}` | `voice-test/reference/checklists/` | `/generate-test-cases` seeds a new bot's checklist |
 | G7 | Digest bot labels assume KKB/DKB/Maya families | `raya/regression/*.py`, `open-items.json` | derive labels from the fleet manifest (G4) |
-| G8 | Accessibility is a first-class concern for Purple Dots and has no checklist | new | disability-aware checks in the generic checklist |
+| G8 | Accessibility is a first-class concern for Purple Dots and has no checklist | new | **DONE 2026-08-05:** `## 14. Accessibility & access needs` added to `voice-test/reference/checklists/generic.md` — 7 fleet-wide items (pace, one-question-per-turn, silence-as-needs-time, repeat-on-request, no talking over, completes for non-default-speed callers, proxy/hand-over, no condescension) |
 
 **G8 note.** Purple Dots serves people with disabilities. That has real prompt consequences —
 pacing, patience/silence tolerance, repetition-on-request, screen-reader-free interaction, not
@@ -103,7 +103,7 @@ identity of the call. These belong in the **generic** checklist, not a per-bot o
        └──────┬─────────┘  CHANGELOG, fleet manifest entry
               │
        ┌──────▼──────────┐
-       │/prompt-analyser │  read-only pre-flight audit vs 74 learned bug patterns
+       │/prompt-analyser │  read-only pre-flight audit vs learned bug patterns (67 as of 2026-08-05)
        └──────┬──────────┘
               │
        ┌──────▼────────────────┐
@@ -128,7 +128,7 @@ identity of the call. These belong in the **generic** checklist, not a per-bot o
               │
        ┌──────▼──────────────┐      ┌──────────────────────┐
        │ /translate-prompt   │      │ daily standing check │  Tier 3, cloud cron,
-       │ (language expansion)│      │ + digest email       │  100+ checks, emails issues
+       │ (language expansion)│      │ + digest email       │  6 check classes × every bot
        └─────────────────────┘      └──────────────────────┘
 ```
 

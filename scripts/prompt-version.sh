@@ -28,13 +28,34 @@ VERSIONS_DIR="$REPO_ROOT/versions"
 
 die() { echo "error: $*" >&2; exit 1; }
 
+# Discover bot folders instead of hard-coding them (2026-08-05). The repo now serves multiple
+# projects (Blue Dots: KKB/DKB/Maya; Purple Dots: ...), so a new bot must NOT require editing this
+# script — a hard-coded case list meant `save` died on any newly registered bot, which silently
+# blocked the "snapshot before edit" law for exactly the bots most likely to need it.
+# A bot folder = a top-level dir holding a CHANGELOG.md and at least one other *.md prompt file.
+bot_dirs() {
+  local d
+  for d in "$REPO_ROOT"/*/; do
+    d="${d%/}"
+    [ -f "$d/CHANGELOG.md" ] || continue
+    # must have at least one prompt file besides CHANGELOG.md
+    if [ -n "$(find "$d" -maxdepth 1 -type f -name '*.md' ! -name 'CHANGELOG.md' -print -quit)" ]; then
+      basename "$d"
+    fi
+  done
+}
+
 resolve_agent() {
-  case "$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')" in
-    kkb)  echo "KKB" ;;
-    dkb)  echo "DKB" ;;
-    maya) echo "Maya" ;;
-    *)    die "unknown agent '$1' (expected KKB | DKB | Maya)" ;;
-  esac
+  local want known
+  # normalise: lowercase, and treat - and _ as spaces so "purple-dots" matches "Purple Dots"
+  want="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]' | tr '_-' '  ')"
+  while IFS= read -r known; do
+    [ -n "$known" ] || continue
+    if [ "$(printf '%s' "$known" | tr '[:upper:]' '[:lower:]' | tr '_-' '  ')" = "$want" ]; then
+      echo "$known"; return 0
+    fi
+  done <<< "$(bot_dirs)"
+  die "unknown agent '$1' (known bots: $(bot_dirs | paste -sd' ' -))"
 }
 
 stamp_now() { date +%Y-%m-%d_%H%M%S; }
@@ -66,7 +87,11 @@ cmd_save() {
 
 cmd_list() {
   local agents=()
-  if [ $# -ge 1 ]; then agents=("$(resolve_agent "$1")"); else agents=(KKB DKB Maya); fi
+  if [ $# -ge 1 ]; then
+    agents=("$(resolve_agent "$1")")
+  else
+    while IFS= read -r a; do [ -n "$a" ] && agents+=("$a"); done <<< "$(bot_dirs)"
+  fi
   for a in "${agents[@]}"; do
     echo "== $a =="
     if [ -d "$VERSIONS_DIR/$a" ]; then

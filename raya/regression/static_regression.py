@@ -35,7 +35,13 @@ def discover_prompts():
         "KKB": ["KKB Placeholder Hindi.md","KKB Placeholder Kannada.md","KKB Placeholder Inbound.md",
                 "KKB Placeholder Inbound Kannada.md","KKB Placeholder Hindi Signals.md","KKB Placeholder Kannada Signals.md",
                 "KKB Placeholder Inbound Signals.md","KKB Placeholder Inbound Kannada Signals.md"],
-        "DKB": ["DKB Hindi.md","DKB Kannada.md","DKB Hindi Signals.md","DKB Kannada Signals.md"],
+        # NOTE 2026-08-05: "DKB Inbound Hindi.md"/"DKB Inbound Kannada.md" were missing from this
+        # list while being live deploy:true targets (dkb-hi-in, dkb-kn-in) — so two production bots
+        # went unchecked and the digest under-reported the fleet as 16. Added. Follow-up (gap G4):
+        # derive this list from raya/agents.json instead of hard-coding it, so a newly registered
+        # bot can never be silently omitted again.
+        "DKB": ["DKB Hindi.md","DKB Kannada.md","DKB Hindi Signals.md","DKB Kannada Signals.md",
+                "DKB Inbound Hindi.md","DKB Inbound Kannada.md"],
         "Maya": ["Maya Hindi.md","Maya Inbound.md","Maya Hindi Signals.md","Maya Inbound Signals.md"],
     }
     for agent_dir, fns in files.items():
@@ -155,9 +161,41 @@ def sync_parity(prompts):
     return out
 
 
+def coverage_gap(prompts):
+    """Self-check: is any LIVE conversation deploy target missing from this suite?
+
+    Added 2026-08-05 after two live bots (dkb-hi-in, dkb-kn-in) sat unchecked for days because
+    discover_prompts() hard-codes its file list while raya/agents.json is the real fleet. A suite
+    that can silently under-cover the fleet is worse than no suite: the digest reported "16 bots
+    checked" and read as full coverage. This makes that failure loud instead of invisible.
+    """
+    out = []
+    try:
+        d = json.load(io.open(os.path.join(REPO, "raya/agents.json"), encoding="utf-8"))
+        targets = d["targets"] if isinstance(d, dict) and "targets" in d else d
+        live = {t["file"]: t.get("id", "?") for t in targets
+                if t.get("kind") == "conversation" and t.get("deploy")}
+    except Exception as e:
+        return [{"severity": "major", "category": "coverage", "file": "raya/agents.json",
+                 "bot": "(suite self-check)", "agent": "-", "blurb": "regression suite coverage",
+                 "message": f"Could not read the deploy manifest to verify fleet coverage ({e}); "
+                            f"this suite cannot prove it checked every live bot.", "detail": {}}]
+    checked = {p["path"] for p in prompts}
+    for f, tid in sorted(live.items()):
+        if f not in checked:
+            out.append({"severity": "critical", "category": "coverage", "file": f,
+                        "bot": f"(unchecked: {tid})", "agent": "-",
+                        "blurb": "a live bot this suite is not checking",
+                        "message": (f"'{f}' is a LIVE deploy target ({tid}) but this daily suite is "
+                                    f"not checking it — so nothing here says anything about that "
+                                    f"bot's health. Add it to discover_prompts()."),
+                        "detail": {"target_id": tid}})
+    return out
+
+
 def main():
     prompts = discover_prompts()
-    findings = []
+    findings = coverage_gap(prompts)
     bots = []
     for p in prompts:
         fs = check(p)

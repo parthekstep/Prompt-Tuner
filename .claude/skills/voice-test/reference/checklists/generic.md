@@ -170,3 +170,35 @@ Behaviors ANY Raya voice agent (KKB / DKB / Maya, Hindi or Kannada, inbound or o
 
 - [ ] On reaching the wrong person / wrong number, the bot confirms identity once and then exits — it does not launch the task flow at an unaffiliated party.
   *Why / how to detect:* Grounded in the wrong-number scenario (DKB e6fdf9e5). Fail if the pitch/flow proceeds after a "wrong number"/"not that person" signal; expect a graceful exit and an Unverified/wrong-number outcome.
+
+## 14. Accessibility & access needs
+
+Added 2026-08-05 for the Purple Dots rollout (a bot rail serving **people with disabilities**), but
+these are **fleet-wide** items: every one of them also improves calls with elderly callers, callers on
+a bad line, callers using a shared or borrowed phone, and callers who are simply not fluent in the
+bot's language. Grade them on every bot, not only on the disability-facing ones.
+
+Two framing rules that apply to the whole section: the bot **never makes the caller's disability or
+difficulty the subject of the call** — it is there to do the job the caller rang about; and the bot
+**never requires the caller to disclose a disability** to get help.
+
+- [ ] The bot speaks at a pace a caller can follow, and does not stack multiple questions into one turn.
+  *Why / how to detect:* Count questions per bot turn — two or more distinct questions in a single turn is a fail (also §1, §4). Look for long unbroken multi-clause turns that bury the actual question at the end; the question should be the last thing said, so a caller who processes slowly does not have to hold the whole turn in memory.
+
+- [ ] A long silence is treated as "needs more time", not as "no answer" — the bot waits, then re-prompts gently, and never abandons the call on the first silence.
+  *Why / how to detect:* Grade against §3, but stricter: the FIRST silence must produce a patient, reworded re-prompt (not a repeat, not an exit). An immediate drop, an irritated tone, or a jump to the next step on first silence is a fail.
+
+- [ ] On any request to repeat, slow down, or say it again, the bot complies fully and without friction — rephrasing rather than replaying the identical sentence.
+  *Why / how to detect:* Find the repeat request in the transcript; the next bot turn must actually re-deliver the same information (reworded, cf. §12). Partial repeats, "as I said", audible impatience, or moving on regardless are fails. Repeat requests must never count against the caller or shorten the flow.
+
+- [ ] The bot does not talk over or cut off a caller who is speaking slowly, haltingly, or with pauses mid-sentence.
+  *Why / how to detect:* Look for bot turns that begin while the caller's utterance is plainly unfinished (mid-clause user turns immediately followed by a bot turn). Barge-in tuned for fast speakers reads as being interrupted for someone with a speech disability — cf. §5, but here the bar is patience, not responsiveness.
+
+- [ ] The flow still completes for a caller who cannot respond at default speed or in the expected form — short answers, one-word answers, delayed answers, or answers out of the expected order still advance the call.
+  *Why / how to detect:* Run the flow with a deliberately terse/slow persona and confirm the goal is still reached. Fail if progress requires fluent full-sentence replies, or if an out-of-order answer resets the flow.
+
+- [ ] If a companion, family member, or carer is on the line or hands the phone over, the bot handles it without restarting from scratch and without discussing the caller as if they were absent.
+  *Why / how to detect:* Look for a proxy/hand-over signal ("my son will talk", a second voice). Fail on a full restart, on refusing to continue, or on any third-person framing that talks about the caller rather than to them.
+
+- [ ] Nothing in the call implies the caller is a burden, is being done a favour, or is being assessed for competence.
+  *Why / how to detect:* Scan for condescension, praise for ordinary answers, over-explaining, or pity framing. The register should be the same one the bot uses with any other caller — plain, respectful, practical.

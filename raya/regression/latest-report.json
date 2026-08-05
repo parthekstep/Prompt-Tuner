@@ -1,5 +1,5 @@
 {
- "prompts_checked": 16,
+ "prompts_checked": 18,
  "total_findings": 1,
  "bots": [
   {
@@ -84,6 +84,20 @@
    "blurb": "Job posting & verification for employers (MSMEs) — the bot phones the person, in Kannada, on the new Signals DPG backend",
    "agent": "DKB",
    "file": "DKB/DKB Kannada Signals.md",
+   "findings": 0
+  },
+  {
+   "bot": "DKB Hindi · inbound · legacy",
+   "blurb": "Job posting & verification for employers (MSMEs) — the person phones the bot, in Hindi, on the older Dhiway/ONEST backend",
+   "agent": "DKB",
+   "file": "DKB/DKB Inbound Hindi.md",
+   "findings": 0
+  },
+  {
+   "bot": "DKB Kannada · inbound · legacy",
+   "blurb": "Job posting & verification for employers (MSMEs) — the person phones the bot, in Kannada, on the older Dhiway/ONEST backend",
+   "agent": "DKB",
+   "file": "DKB/DKB Inbound Kannada.md",
    "findings": 0
   },
   {

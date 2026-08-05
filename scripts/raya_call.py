@@ -42,9 +42,23 @@ def main():
         tr = c.get("call_transcript") or []
         print("\n" + "=" * 72)
         print(f"call {c0.get('uuid')} | {c.get('created_at')} | dur={c.get('call_duration')} "
-              f"| caller={c.get('caller_no')} to={c.get('to_number')} | new_seeker={aa.get('new_seeker')!r}")
-        print(f"output: drop_reason={co.get('drop_reason')!r} applied_to_job={co.get('applied_to_job')!r} "
-              f"mpl_presented={co.get('mpl_presented')!r}")
+              f"| caller={c.get('caller_no')} to={c.get('to_number')}")
+        # Print the FULL agent_args and call_output, not a hand-picked few (2026-08-05). These were
+        # hard-coded to three KKB-era keys (new_seeker / drop_reason / applied_to_job /
+        # mpl_presented), so for any other bot the inputs and outputs read as absent. That matters:
+        # the repo's own rule is to root-cause a report against BOTH the transcript AND the call's
+        # input args before touching a prompt — you cannot do that if the args are not shown, and a
+        # real bug was once mis-filed as a bot fault when the jobs had been sent in the wrong field.
+        # Long values are truncated per key so a big ${recommendations} list stays readable.
+        def _brief(v, cap=220):
+            s = json.dumps(v, ensure_ascii=False) if not isinstance(v, str) else v
+            return s if len(s) <= cap else s[:cap] + f"… (+{len(s) - cap} chars)"
+        print("agent_args:" + ("" if aa else " (none)"))
+        for k in sorted(aa):
+            print(f"    {k} = {_brief(aa[k])}")
+        print("call_output:" + ("" if co else " (none)"))
+        for k in sorted(co):
+            print(f"    {k} = {_brief(co[k])}")
         for t in tr:
             role = t.get("role")
             for tc in (t.get("tool_calls") or []):
