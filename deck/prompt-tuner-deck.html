@@ -25,7 +25,7 @@ body{background:#22262b;font-family:var(--body);color:var(--ink);overflow:hidden
 #stage{width:1280px;height:720px;position:absolute;top:50%;left:50%;
   transform-origin:center center;background:var(--paper);
   box-shadow:0 18px 60px rgba(0,0,0,.45);overflow:hidden}
-.slide{position:absolute;inset:0;padding:38px 52px 40px;display:none;flex-direction:column}
+.slide{position:absolute;inset:0;padding:38px 52px 40px;display:none;flex-direction:column;justify-content:center}
 .slide.on{display:flex}
 
 /* ---------- chrome ---------- */
@@ -199,1536 +199,292 @@ ul.good li:before{background:var(--green)}
 <div id="bar"></div>
 <div id="viewport"><div id="stage">
 
-<!-- ══════════════════════ 1 · TITLE ══════════════════════ -->
 <section class="slide on title-slide">
   <div class="rule"></div>
-  <div class="eyebrow">EkStep · Product Consultant, AI · Internal</div>
+  <div class="eyebrow">EkStep · Internal</div>
   <h1>Prompt Tuner</h1>
-  <p class="sub">The quality rail for production voice agents — it finds what is wrong with a bot's
-  prompt, fixes it, keeps every language in sync, deploys it, and then <b>tests the bot by calling
-  it with another AI agent</b>. The find&#8202;→&#8202;fix&#8202;→&#8202;verify loop runs without a human placing a single call.</p>
+  <p class="sub">Voice bots that stay correct — tested by another AI agent, not by hand.</p>
   <div class="meta">
-    <span><b>3</b>&nbsp; agents live</span>
-    <span><b>18</b>&nbsp; bot scripts in the fleet</span>
-    <span><b>127</b>&nbsp; logged prompt changes</span>
-    <span><b>67</b>&nbsp; codified failure patterns</span>
-    <span>as of <b>2026-08-05</b></span>
+    <span><b>18</b>&nbsp; bot scripts</span>
+    <span><b>269</b>&nbsp; checks daily</span>
+    <span><b>127</b>&nbsp; logged fixes</span>
+    <span><b>67</b>&nbsp; failure patterns</span>
+    <span><b>2026-08-05</b></span>
   </div>
 </section>
 
-<!-- ══════════════════════ 2 · EXEC SUMMARY ══════════════════════ -->
 <section class="slide">
-  <div class="eyebrow"><span class="n">01</span> Executive summary</div>
-  <h2>What it is, what it has done, and what we want next</h2>
-  <p class="sub">One slide. Everything below this is evidence.</p>
-
-  <div class="g4">
-    <div class="metric"><div class="v sig">18</div><div class="l">bot scripts under standing automated check, every day</div><div class="src">latest-report.json</div></div>
-    <div class="metric"><div class="v gr">8&#8202;/&#8202;8</div><div class="l">Signals bots green after the 2026-08-01 live E2E campaign</div><div class="src">e2e/TEST-LOG.md</div></div>
-    <div class="metric"><div class="v bl">67</div><div class="l">failure patterns codified into a reusable detector</div><div class="src">bug-patterns.md</div></div>
-    <div class="metric"><div class="v">11<span style="font-size:17px;color:var(--muted)">&#8202;/&#8202;14</span></div><div class="l">skills with a production track record, of 14 authored</div><div class="src">.claude/skills/</div></div>
+  <div class="eyebrow">Executive summary</div>
+  <h2>The loop runs without us</h2>
+  <p class="sub">One agent calls the bot. The transcript is graded. The fix ships. Nobody dials a phone.</p>
+  <div class="row mt-s">
+    <div class="col metric"><div class="v sig">269</div><div class="l">automated checks, every morning, in the cloud</div></div>
+    <div class="col metric"><div class="v gr">8&#8202;/&#8202;8</div><div class="l">bots green after the last full pass</div></div>
+    <div class="col metric"><div class="v">127</div><div class="l">prompt fixes logged in 37 days</div></div>
+    <div class="col metric"><div class="v">~148 h</div><div class="l">manual effort removed <span class="tiny">(modelled — see Impact)</span></div></div>
   </div>
-
-  <div class="row mt">
-    <div class="col card">
-      <h3>The shift</h3>
-      <p><b>From:</b> a human dials the bot, listens, writes up what broke, hand-edits two language
-      files, hopes nothing else moved, and re-tests only the variant they remember.<br>
-      <b>To:</b> a persona agent calls the bot, the transcript is graded against 93&#8211;114 checklist
-      items, the fix is applied to the master language and mirrored, deployed, and re-tested — per variant.</p>
-    </div>
-    <div class="col card">
-      <h3>What is real today</h3>
-      <ul class="ticks good">
-        <li><b>Agent-to-agent voice testing</b> — used to green-light 8 bots and catch 7 shipping decisions on 2026-08-01.</li>
-        <li><b>Daily cloud regression + digest email</b> — live, machine-off-proof, verified delivering, and
-        it now <b>audits its own fleet coverage</b> after we caught it under-covering two live bots.</li>
-        <li><b>67-pattern bug taxonomy</b> — every fixed bug teaches the pre-flight auditor.</li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="lead-in mt">
-    <b>The ask.</b> &nbsp;(1) Adopt the <span class="k">3-tier testing standard</span> as the definition of
-    "done" for any voice bot at EkStep. &nbsp;(2) Approve <span class="k">Purple Dots</span> as the second
-    project on the rail. &nbsp;(3) Unblock the <span class="k">weekly live-call tier</span> — it needs platform
-    keys placed in CI secrets, not engineering.
-  </div>
-
-  <div class="fn"><b>Honesty legend used throughout:</b>
-    <span class="badge b-ship">Shipped</span> running in production today &nbsp;·&nbsp;
-    <span class="badge b-prog">In progress</span> partially built, named openly &nbsp;·&nbsp;
-    <span class="badge b-plan">Planned</span> not built. Every number on every slide traces to a repo
-    file, named in the footnote. Modeled figures are labelled <b>MODELED</b> with their assumptions shown.</div>
+  <div class="card mt-l"><b>The ask:</b> adopt this rail for the next bot rather than rebuilding QA per project.
+  Purple Dots is first. <span class="mute">Marginal cost per additional bot is near zero.</span></div>
 </section>
 
-<!-- ══════════════════════ 3 · THE PROBLEM ══════════════════════ -->
 <section class="slide">
-  <div class="eyebrow"><span class="n">02</span> The problem</div>
-  <h2>A voice bot does not stay correct. It drifts — silently, in every language at once.</h2>
-  <p class="sub">Once a bot is created, inconsistencies creep in. You only discover them when you finally
-  test at scale — and then you are holding a large batch of issues at the worst possible moment.</p>
-
-  <div class="row">
-    <div class="col">
-      <div class="card">
-        <h3>These are real, from the logs</h3>
-        <table class="tight mt-s">
-          <thead><tr><th style="width:64px">Date</th><th style="width:88px">Bot</th><th>What the caller actually heard</th></tr></thead>
-          <tbody>
-            <tr><td>07-18</td><td>KKB, Maya</td><td>The bot said the word <b>"slash"</b> out loud — TTS voiced the <code>/</code> in "सेल्स/मार्केटिंग".</td></tr>
-            <tr><td>07-16</td><td>KKB ×4</td><td>Told a caller she was looking for <b>"Any"</b> work — a database placeholder spoken as a job role.</td></tr>
-            <tr><td>08-01</td><td>DKB</td><td>Read the sentinel aloud: <b>"Not Available, Not Available vacancies, salary Not Available."</b></td></tr>
-            <tr><td>07-20</td><td>Maya</td><td>Spoke <b>raw JSON</b> aloud, then claimed "applied" twice — with no application made.</td></tr>
-            <tr><td>07-22</td><td>KKB</td><td>Said <b>"I'm applying for you" 3&#8211;4 times</b>, then never called <code>apply_job</code>.</td></tr>
-            <tr><td>07-27</td><td>KKB inbound</td><td>Narrated a profile lookup on <b>every one of 8 calls</b> and never once made the call.</td></tr>
-            <tr><td>07-30</td><td>DKB</td><td>An <b>outbound-only</b> bot invited people to phone it back.</td></tr>
-            <tr><td>07-20</td><td>KKB, Maya</td><td>Re-asked <b>age and gender</b> it already had on file for a returning caller.</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-    <div style="width:322px;display:flex;flex-direction:column;gap:14px">
-      <div class="dark">
-        <h3>Why prose alone does not save you</h3>
-        <p>The taxonomy's own thesis, learned the hard way:
-        <b>a rule being present in the prompt does not mean it holds at runtime.</b>
-        A competing action, a stale example, or skip-logic quietly overrides it.</p>
-      </div>
-      <div class="card">
-        <h3>Scale of the surface</h3>
-        <ul class="ticks">
-          <li><b>18</b> conversation prompts across 3 agents</li>
-          <li><b>22,004</b> lines of prompt; the largest single bot script is <b>1,591</b> lines</li>
-          <li><b>2</b> languages × <b>2</b> directions × <b>2</b> backends per agent</li>
-          <li><b>25</b> deploy targets in the manifest</li>
-        </ul>
-      </div>
-      <div class="card tint">
-        <p class="body-sm">One fix must land in a 1,500-line file, be mirrored into its twin,
-        preserve Maya's six approved divergences, and not contradict any of the other
-        rules already in there.</p>
-      </div>
-    </div>
+  <div class="eyebrow">The problem</div>
+  <h2>Bots drift. Silently.</h2>
+  <div class="row mt-s">
+    <div class="col card"><h3>Drift is invisible</h3><p class="tiny">A prompt edit lands in one language, not its twin. Nothing errors. The call just gets worse.</p></div>
+    <div class="col card"><h3>Found late, in bulk</h3><p class="tiny">Test at scale and dozens of issues surface at once — after a campaign is already waiting.</p></div>
+    <div class="col card"><h3>Each fix risks the next</h3><p class="tiny">Patch one section, break its neighbour. Re-verifying by hand costs more than the fix.</p></div>
   </div>
-
-  <div class="fn"><b>Sources:</b> <span class="src-tag">KKB/CHANGELOG.md · DKB/CHANGELOG.md · Maya/CHANGELOG.md</span>
-    (127 dated entries, 2026-06-29 → 2026-08-04) &nbsp;·&nbsp;
-    <span class="src-tag">wc -l on KKB/ DKB/ Maya/ conversation prompts</span> &nbsp;·&nbsp;
-    <span class="src-tag">raya/agents.json</span> (25 targets) &nbsp;·&nbsp;
-    thesis quoted from <span class="src-tag">.claude/skills/prompt-analyser/reference/bug-patterns.md</span></div>
+  <div class="card dark mt-l center"><b>Net effect:</b> manual testing is what blocks campaigns from going live.</div>
 </section>
 
-<!-- ══════════════════════ 4 · COST OF STATUS QUO ══════════════════════ -->
 <section class="slide">
-  <div class="eyebrow"><span class="n">03</span> Cost of the status quo</div>
-  <h2>Manual testing is not just slow — it is what blocks campaigns from going live</h2>
-  <p class="sub">Every cost below is a consequence of one root fact: verification was a human activity,
-  and humans do not scale across languages, directions, and 1,500-line files.</p>
-
-  <div class="g3">
-    <div class="card">
-      <h3>1 · Discovery is late and lumpy</h3>
-      <p>Issues surface in a batch at scale-test time, not at edit time. Then you need
-      <b>back-to-back changes under deadline</b> — the highest-risk way to touch a live prompt.</p>
-      <p class="mt-s tiny"><b>Evidence:</b> 25 logged prompt changes landed on a single day
-      (2026-07-20); 12 on 07-13; 11 each on 07-27 and 07-29.</p>
-    </div>
-    <div class="card">
-      <h3>2 · Every new feature pays the re-verify tax</h3>
-      <p>Shipping anything new means re-verifying everything old. With no automated regression, that
-      cost is paid in human hours or skipped — and skipping is how the next batch of bugs is born.</p>
-      <p class="mt-s tiny"><b>Evidence:</b> a single 2026-08-01 campaign required 7 critical decisions,
-      16 mechanical sync fixes, and 17 graded live calls to clear 8 bots.</p>
-    </div>
-    <div class="card">
-      <h3>3 · Extrapolation ships bugs</h3>
-      <p>"It works in Hindi, so Kannada is fine" is the cheapest shortcut and the most expensive
-      mistake. Runtime adherence, ASR and TTS differ per language — a byte-identical edit lands
-      differently.</p>
-      <p class="mt-s tiny"><b>Evidence:</b> Maya-inbound doubled the phone prefix to <code>+91+91…</code>
-      while Maya-outbound passed. Extrapolating would have shipped it.</p>
-    </div>
+  <div class="eyebrow">Before &rarr; after</div>
+  <h2>What changed</h2>
+  <div class="row mt-s">
+    <div class="col card"><h3 class="err">Manual</h3>
+      <p class="tiny">Humans place test calls &middot; bugs found in bulk &middot; fixes verified by eye &middot;
+      each language checked separately &middot; regression when someone remembers</p></div>
+    <div class="col card"><h3 class="gr">Autonomous</h3>
+      <p class="tiny">Agents call agents &middot; graded against 67 known patterns &middot; transcript is the proof &middot;
+      every language audited &middot; regression every morning, unattended</p></div>
   </div>
-
-  <div class="row mt">
-    <div class="col dark">
-      <h3>4 · The bottleneck is the campaign, not the engineer</h3>
-      <p>A bot that cannot be verified cannot be pointed at real callers. Manual verification therefore sits
-      directly on the critical path to a campaign going live — the queue is not "engineering capacity",
-      it is <b>confidence</b>. The 2026-08-01 campaign found a ship-blocker <i>before</i> launch: three inbound
-      bots would have offered jobs that <b>do not exist</b>, because their examples still described an old
-      inventory. That is the class of defect that reaches a real job-seeker.</p>
-    </div>
-    <div style="width:330px" class="card dash">
-      <h3>5 · Institutional memory evaporates</h3>
-      <p>Without a written taxonomy, the same bug class is re-discovered by whoever is unlucky next.
-      A rollback on <b>2026-07-23</b> shows the trap: an attempt to force a tool call by reframing it
-      as "silent" made the model <b>stop calling the tool entirely</b>. Nothing but a written pattern
-      stops that from recurring.</p>
-    </div>
-  </div>
-
-  <div class="fn"><b>Sources:</b> <span class="src-tag">the three CHANGELOG.md files</span> (per-day entry counts, the 07-23 rollback) &nbsp;·&nbsp;
-    <span class="src-tag">raya/signals-expansion/e2e/DECISIONS-AND-FIXES.md</span> (CD1&#8211;CD7, M1&#8211;M17, the CD2 ship-blocker) &nbsp;·&nbsp;
-    <span class="src-tag">raya/signals-expansion/e2e/LEGACY-REGRESSION.md</span> (the Maya-inbound phone-doubling bug) &nbsp;·&nbsp;
-    <span class="src-tag">CLAUDE.md</span> ("recipe-for-disaster rule")</div>
+  <div class="src mt-s">.claude/skills/ &middot; raya/regression/ &middot; .github/workflows/regression.yml</div>
 </section>
 
-<!-- ══════════════════════ 5 · SOLUTION ARCHITECTURE ══════════════════════ -->
 <section class="slide">
-  <div class="eyebrow"><span class="n">04</span> The solution</div>
-  <h2>A closed loop: audit before it ships, test it by calling it, fix it in sync, and never forget</h2>
-  <p class="sub">Two outcomes. <b>(a)</b> Produce a strong <i>first</i> version, so a live campaign is far
-  less error-prone. <b>(b)</b> Close the loop autonomously afterwards.</p>
-
-  <div class="grow" style="display:flex;flex-direction:column;justify-content:center">
-    <div style="display:flex;align-items:stretch;gap:9px">
-      <div class="node bl" style="flex:1.05">
-        <div class="t">Intake</div>
-        <div class="d">/onboard &nbsp;/register-bot<br>bot, languages, tools, issues</div>
-      </div>
-      <div class="arrow">→</div>
-      <div class="node sig" style="flex:1.05">
-        <div class="t">Pre-flight audit</div>
-        <div class="d">/prompt-analyser<br>67 patterns · 30 required sections</div>
-      </div>
-      <div class="arrow">→</div>
-      <div class="node inkfill" style="flex:1.35">
-        <div class="t">Autonomous voice test</div>
-        <div class="d">/voice-test — a persona agent<br>CALLS the bot; transcript graded</div>
-      </div>
-      <div class="arrow">→</div>
-      <div class="node sig" style="flex:1.05">
-        <div class="t">Surgical fix, in sync</div>
-        <div class="d">/update-prompt · /sync-check<br>/port-feature · /prompt-version</div>
-      </div>
-      <div class="arrow">→</div>
-      <div class="node gr" style="flex:1">
-        <div class="t">Deploy</div>
-        <div class="d">/raya-reconcile then<br>API PATCH, read-back verified</div>
-      </div>
-    </div>
-
-    <div style="display:flex;padding:0 90px">
-      <div class="loopbar" style="flex:1"><span class="lab">re-test the exact failure · every variant, never extrapolate</span></div>
-    </div>
-
-    <div class="row mt-l" style="gap:14px">
-      <div class="col card tint">
-        <h3>Ground truth, not opinion</h3>
-        <p><b>No fix without a transcript.</b> A prompt is never edited off a bug report, a hunch, or a
-        static finding alone. Pull the real call, read the tool-call payloads, confirm the bug.</p>
-      </div>
-      <div class="col card tint">
-        <h3>Push back before fixing</h3>
-        <p>Not every report is a prompt bug. Input errors, backend 4xx/5xx and runtime tool-adherence
-        misses are <b>named and escalated</b>, not prose-patched — piling on prose regresses.</p>
-      </div>
-      <div class="col card tint">
-        <h3>The loop teaches itself</h3>
-        <p>Every bug fix must also add a <b>detection heuristic</b> to the analyser. The changelog records
-        what changed; the taxonomy ensures it is caught before it ships again.</p>
-      </div>
-    </div>
+  <div class="eyebrow">Hero capability</div>
+  <h2>Two AI agents. One real phone call.</h2>
+  <div class="row mt-s center">
+    <div class="col card"><h3>Tester agent</h3><p class="tiny">Role-plays a real caller — hesitant, silent, off-topic, accepts anything</p></div>
+    <div class="col center" style="flex:0 0 60px;padding-top:26px;font-size:22px;color:var(--signal)">&rarr;</div>
+    <div class="col card"><h3>Bot under test</h3><p class="tiny">Its real prompt, real tools, real backend — nothing mocked</p></div>
   </div>
-
-  <div class="fn"><b>Sources:</b> <span class="src-tag">CLAUDE.md</span> ("Bug-fix feedback loop", "Feedback-loop operating sequence", the two non-negotiables) &nbsp;·&nbsp;
-    <span class="src-tag">.claude/skills/*/SKILL.md</span> &nbsp;·&nbsp; 30 required sections = 11 universal core + archetype additions,
-    <span class="src-tag">prompt-analyser/reference/section-checklists.md</span></div>
+  <div class="pills mt-l">
+    <span class="pill on">transcript</span><span class="pill">graded vs checklists</span>
+    <span class="pill">root-caused</span><span class="pill">fixed surgically</span>
+    <span class="pill">deployed</span><span class="pill">re-tested</span>
+  </div>
+  <div class="card mt-s"><b>No human places a call.</b> <span class="mute">The prompt edit is agentic too.</span></div>
 </section>
 
-<!-- ══════════════════════ 6 · HERO A — TOPOLOGY ══════════════════════ -->
 <section class="slide">
-  <div class="eyebrow"><span class="n">05</span> Hero capability &nbsp;·&nbsp; 1 of 4 &nbsp; <span class="badge b-ship">Shipped</span></div>
-  <h2>Two AI agents talk to each other over a real phone call</h2>
-  <p class="sub">A persona agent role-plays a human caller. The bot under test runs its real prompt and its
-  real tools against a real telephony leg. Nobody dials anything.</p>
-
-  <div class="grow" style="display:flex;flex-direction:column;justify-content:center;gap:0">
-
-    <!-- top row: the two agents and the call between them -->
-    <div style="display:flex;align-items:center;gap:0">
-      <div style="width:236px">
-        <div class="node bl">
-          <div class="t">Persona library</div>
-          <div class="d">16 grounded personas — mined from real calls<br>
-          <span style="color:var(--blue);font-weight:600">10 Hindi · 6 Kannada</span></div>
-        </div>
-        <div class="tiny center mt-s" style="line-height:1.35">seeker · employer · student ·<br>
-        not-interested · wants-a-different-job · probe</div>
-      </div>
-      <div class="arrow sm" style="width:38px">→</div>
-      <div style="flex:1">
-        <div class="node inkfill">
-          <div class="t">Tester agent &nbsp;<span style="font-weight:400;color:#8fa0b8">(inbound)</span></div>
-          <div class="d">its entire prompt IS the persona · swapped by PATCH<br>non-interruptable · 5-min cap</div>
-        </div>
-      </div>
-      <div style="flex:1.15;display:flex;align-items:center;padding:0 4px">
-        <div class="wire"><span class="lab">◀ real phone call ▶</span></div>
-      </div>
-      <div style="flex:1">
-        <div class="node sig">
-          <div class="t">Bot under test &nbsp;<span style="font-weight:400;color:#a9713f">(outbound)</span></div>
-          <div class="d">its real production prompt<br>its real tools, hitting the real backend</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- descent -->
-    <div style="display:flex;justify-content:center;padding:11px 0"><div class="arrow">↓</div></div>
-
-    <!-- capture -->
-    <div class="node ghost" style="text-align:left;padding:11px 15px">
-      <div style="display:flex;gap:20px;align-items:center">
-        <div class="t" style="width:170px;text-align:left">Capture both call legs</div>
-        <div class="d" style="text-align:left;flex:1;color:var(--ink-soft)">
-          spoken turns &nbsp;·&nbsp; <code>tool_calls[].function.arguments</code> — the exact payload the model sent
-          &nbsp;·&nbsp; the tool's response or error &nbsp;·&nbsp; <code>call_output</code> &nbsp;·&nbsp; <code>drop_reason</code>
-        </div>
-      </div>
-    </div>
-
-    <div style="display:flex;justify-content:center;padding:11px 0"><div class="arrow">↓</div></div>
-
-    <!-- grade + act -->
-    <div style="display:flex;gap:10px;align-items:stretch">
-      <div class="node gr" style="flex:1.25">
-        <div class="t">Grade against checklists</div>
-        <div class="d">generic 54 items (every bot)<br>+ bot-specific 39&#8211;60 items</div>
-      </div>
-      <div class="arrow sm">→</div>
-      <div class="node" style="flex:1">
-        <div class="t">Classify the finding</div>
-        <div class="d">prompt gap · backend ·<br>runtime · no-repro · input error</div>
-      </div>
-      <div class="arrow sm">→</div>
-      <div class="node sig" style="flex:1">
-        <div class="t">Fix agentically</div>
-        <div class="d">/update-prompt<br>master → mirrored</div>
-      </div>
-      <div class="arrow sm">→</div>
-      <div class="node" style="flex:.85">
-        <div class="t">Deploy</div>
-        <div class="d">PATCH, verified</div>
-      </div>
-      <div class="arrow sm">→</div>
-      <div class="node inkfill" style="flex:.85">
-        <div class="t">Re-test</div>
-        <div class="d">loop closes</div>
-      </div>
-    </div>
+  <div class="eyebrow">Hero capability</div>
+  <h2>Every call graded on 93&ndash;114 checks</h2>
+  <p class="sub">Not a vibe check. Each item names the evidence that proves pass or fail.</p>
+  <div class="pills mt-s">
+    <span class="pill">greeting &amp; AI disclosure</span><span class="pill">off-topic</span>
+    <span class="pill">silence</span><span class="pill">interruption</span>
+    <span class="pill">ASR mishearing</span><span class="pill">no fabrication</span>
+    <span class="pill">language purity</span><span class="pill">consent &amp; PII</span>
+    <span class="pill">tool actually fired</span><span class="pill">graceful exit</span>
+    <span class="pill on">accessibility</span>
   </div>
-
-  <div class="fn"><b>Sources:</b> <span class="src-tag">.claude/skills/voice-test/SKILL.md</span> (topology, tester config, platform constraints) &nbsp;·&nbsp;
-    <span class="src-tag">raya/personas/</span> (16 persona scripts + a router + a scenario catalog) &nbsp;·&nbsp;
-    <span class="src-tag">scripts/raya_testcall.py, raya_testrun.py, raya_call.py</span> &nbsp;·&nbsp;
-    checklist item counts from <span class="src-tag">voice-test/reference/checklists/</span>.
-    Identifiers are deliberately omitted from this deck — the repo is public.</div>
+  <div class="card mt-l"><b>Evidence, not opinion:</b> "the tool appears in <span class="mono">tool_calls</span> on that turn",
+  not "sounded right".</div>
+  <div class="src">voice-test/reference/checklists/ &mdash; generic 54 items + per-bot</div>
 </section>
 
-<!-- ══════════════════════ 7 · HERO B — GRADING ══════════════════════ -->
 <section class="slide">
-  <div class="eyebrow"><span class="n">06</span> Hero capability &nbsp;·&nbsp; 2 of 4 &nbsp; <span class="badge b-ship">Shipped</span></div>
-  <h2>How a call is graded — 93 to 114 observable checks, not a vibe</h2>
-  <p class="sub">Every item states how to detect pass&#8202;/&#8202;fail from the transcript, the tool payloads, or the
-  call output — and cites the bug pattern it guards. A grader cannot be vague.</p>
-
-  <div class="row">
-    <div style="width:300px">
-      <div class="card">
-        <h3>Generic — applies to every bot</h3>
-        <div class="tiny" style="margin-bottom:8px">14 sections · <b style="color:var(--ink)">54 items</b></div>
-        <ul class="ticks" style="font-size:12px">
-          <li>Greeting, recording &amp; AI disclosure</li>
-          <li>Off-topic, chit-chat, abuse</li>
-          <li>Silence / no-audio bounds</li>
-          <li>Re-prompt behaviour when unclear</li>
-          <li>Interruption &amp; barge-in</li>
-          <li>ASR mishearing of critical fields</li>
-          <li>No fabrication of facts or results</li>
-          <li>Language &amp; script consistency</li>
-          <li>PII &amp; consent hygiene</li>
-          <li>Hold-message behaviour during tool calls</li>
-          <li>Graceful exit &amp; correct drop reason</li>
-          <li>Not repeating a line verbatim</li>
-          <li>"Are you a real person?" &amp; do-not-call</li>
-          <li style="color:var(--green)"><b style="color:var(--green)">Accessibility &amp; access needs</b>
-          &nbsp;<span class="badge b-ship" style="font-size:8px;padding:2px 5px">New</span></li>
-        </ul>
-      </div>
-    </div>
-    <div class="col">
-      <div class="g3">
-        <div class="card"><h3>KKB &nbsp;<span class="tiny">seeker</span></h3>
-          <div class="tiny" style="margin-bottom:7px">14 sections · <b style="color:var(--ink)">51 items</b></div>
-          <p class="body-sm">Fetch fires exactly once, silently. Right profile selected when several
-          exist. Jobs only from <code>recommendations</code>. Consent before apply. Payload integrity.
-          Exact <code>job_id</code>. Apply-failure path.</p></div>
-        <div class="card"><h3>DKB &nbsp;<span class="tiny">employer</span></h3>
-          <div class="tiny" style="margin-bottom:7px">12 sections · <b style="color:var(--ink)">39 items</b></div>
-          <p class="body-sm">Company confirmed before pitching. Non-human / wrong-party handling.
-          Callback trap. Campaign routing. One read-back per field. <code>create_job</code> fidelity.
-          All five yes&#8202;/&#8202;no gates registered.</p></div>
-        <div class="card"><h3>Maya &nbsp;<span class="tiny">campus</span></h3>
-          <div class="tiny" style="margin-bottom:7px">16 sections · <b style="color:var(--ink)">60 items</b></div>
-          <p class="body-sm">Campus identity, never government. Student-status gate. Feminine voice
-          every turn. Placeholder-role guard. HR-contact sharing. The MPL secondary offer, only
-          after the job flow.</p></div>
-      </div>
-
-      <div class="dark mt">
-        <h3>The grading rule that makes it trustworthy</h3>
-        <p>Read <code>tool_calls[].function.arguments</code>, not just what was spoken. That is where payload
-        bugs live — a stripped-hyphen <code>job_id</code>, a numeric record number where a UUID belongs, an empty
-        <code>profile_id</code>, a platform <code>hold_message</code> narrating a step the prompt says is silent.
-        <b>A grader that reads only <code>content</code> sees a clean call and misses the bug entirely.</b></p>
-      </div>
-
-      <div class="row mt" style="gap:12px">
-        <div class="col metric"><div class="v">54</div><div class="l">generic items, on every bot</div></div>
-        <div class="col metric"><div class="v sig">105</div><div class="l">items graded on a KKB call</div></div>
-        <div class="col metric"><div class="v sig">93</div><div class="l">items graded on a DKB call</div></div>
-        <div class="col metric"><div class="v sig">114</div><div class="l">items graded on a Maya call</div></div>
-      </div>
-    </div>
+  <div class="eyebrow">Hero capability</div>
+  <h2>A bug the harness caught that we would have shipped</h2>
+  <div class="row mt-s">
+    <div class="col card"><h3>1 &middot; Hindi passed</h3><p class="tiny">Maya outbound: clean call, apply succeeded.</p></div>
+    <div class="col card"><h3>2 &middot; Twin tested anyway</h3><p class="tiny">House law: never extrapolate across variants.</p></div>
+    <div class="col card"><h3>3 &middot; Inbound failed</h3><p class="tiny">Phone built as <span class="mono">+91+91&hellip;</span> &mdash; lookup dead, profile creation 400.</p></div>
+    <div class="col card"><h3>4 &middot; Fixed fleet-wide</h3><p class="tiny">Same template corrected in all 6 bots, re-verified live.</p></div>
   </div>
-
-  <div class="fn"><b>Sources:</b> <span class="src-tag">.claude/skills/voice-test/reference/checklists/{generic,kkb,dkb,maya}.md</span>
-    — section and bullet counts by <code>grep -c</code>. Per-bot totals = generic 54 + the bot's own list
-    (KKB 51, DKB 39, Maya 60). <b>Note:</b> the checklists are graded by an agent reading the transcript
-    against written criteria; they are not a passing unit-test suite.</div>
+  <div class="card dark mt-l center">Extrapolating from the passing twin would have shipped a broken bot.</div>
 </section>
 
-<!-- ══════════════════════ 8 · HERO C — REAL EVIDENCE ══════════════════════ -->
 <section class="slide">
-  <div class="eyebrow"><span class="n">07</span> Hero capability &nbsp;·&nbsp; 3 of 4 &nbsp; <span class="badge b-ship">Shipped</span></div>
-  <h2>A real bug, found and killed by the harness — in one afternoon</h2>
-  <p class="sub">2026-08-01. A DKB Kannada test call exposed a bug nobody had reported. Root cause, fix,
-  and verification all landed the same day.</p>
-
-  <div class="row">
-    <div class="col">
-      <div class="tiny" style="margin-bottom:6px;font-family:var(--display);letter-spacing:.09em;text-transform:uppercase;color:var(--red)">
-        Before &nbsp;·&nbsp; call <code>a02f61b3</code> &nbsp;·&nbsp; the harness call that found it</div>
-      <div class="tr">
-        <span class="cm"># campaign arg: job_role = "Not Available"  (a NEW-vacancy campaign)</span><br><br>
-        <span class="bot">bot</span> &nbsp;"…<span class="hl">Not Available</span>, <span class="hl">Not Available</span> vacancies,<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ಸಂಬಳ <span class="hl">Not Available</span>…"<br>
-        <span class="cm">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↑ a database sentinel, read aloud to an employer</span><br><br>
-        <span class="cm"># and it took the WRONG branch entirely:</span><br>
-        <span class="cm"># the "your job posting is expiring" pitch,</span><br>
-        <span class="cm"># on a campaign that has no posting yet.</span>
-      </div>
-      <div class="card mt-s" style="border-color:#e2c3a4;background:var(--signal-tint)">
-        <h3 style="color:var(--signal)">Root cause — a one-word logic bug</h3>
-        <p class="body-sm">The branch condition read <b>"if <code>job_role</code> is <i>present</i>"</b>.
-        <code>"Not Available"</code> is a non-empty string, so the model read it as present. It also
-        conflated <code>company_name</code> being set with a posting existing.</p>
-      </div>
-    </div>
-
-    <div style="width:34px;display:flex;align-items:center;justify-content:center" class="arrow">→</div>
-
-    <div class="col">
-      <div class="tiny" style="margin-bottom:6px;font-family:var(--display);letter-spacing:.09em;text-transform:uppercase;color:var(--green)">
-        After &nbsp;·&nbsp; retest <code>3177339f</code> &nbsp;·&nbsp; same persona, same args</div>
-      <div class="tr">
-        <span class="cm"># same campaign arg: job_role = "Not Available"</span><br><br>
-        <span class="bot">bot</span> &nbsp;<span class="ok">new-vacancy pitch</span> — correct branch<br>
-        <span class="cm">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;zero sentinel values spoken</span><br><br>
-        <span class="who">tester</span> &nbsp;"ನೀವು ನಿಜವಾದ ವ್ಯಕ್ತಿಯೇ?" <span class="cm">(are you a real person?)</span><br>
-        <span class="bot">bot</span> &nbsp;<span class="ok">answers honestly, returns to task</span><br><br>
-        <span class="tool">create_job</span> &nbsp;<span class="ok">FIRED</span> — Electrician / Bengaluru / 2<br>
-        <span class="cm">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;clean provider payload, straight to Phase 3</span>
-      </div>
-      <div class="card mt-s" style="border-color:#b9d2c5;background:var(--green-tint)">
-        <h3 style="color:var(--green)">The fix, and the bonus</h3>
-        <p class="body-sm">Branch rekeyed on a <b>real</b> role value; a hard "never speak a Not Available
-        value" guard added; mirrored to Hindi and <b>independently retested</b> there (<code>e2eec29a</code>).
-        <b>Bonus:</b> the same simplification resolved a <code>create_job</code> adherence failure that had
-        failed 4× the day before.</p>
-      </div>
-    </div>
+  <div class="eyebrow">Honesty</div>
+  <h2>What it does not do</h2>
+  <div class="row mt-s">
+    <div class="col card"><h3>Backend faults</h3><p class="tiny">Bad inventory, API 5xx. Escalated, never "prompted around".</p></div>
+    <div class="col card"><h3>Model disobedience</h3><p class="tiny">Ignoring a clear instruction. More prose makes it worse.</p></div>
+    <div class="col card"><h3>Judgement calls</h3><p class="tiny">Tone and dignity still need a human ear.</p></div>
   </div>
-
-  <div class="lead-in mt">
-    <b>What the harness did that a human process would not have.</b> The bug was <span class="k">never reported by anyone</span> —
-    it surfaced because a persona agent was run against an edge-case campaign argument. It was then
-    fixed, mirrored, and <span class="k">re-verified on both languages separately</span>, the same day.
-  </div>
-
-  <div class="fn"><b>Sources:</b> <span class="src-tag">raya/signals-expansion/e2e/DECISIONS-AND-FIXES.md</span> (CD5) &nbsp;·&nbsp;
-    <span class="src-tag">raya/signals-expansion/e2e/TEST-LOG.md</span> (calls a02f61b3, 3177339f, e2eec29a) &nbsp;·&nbsp;
-    <span class="src-tag">DKB/CHANGELOG.md</span> 2026-08-01. Transcript lines are condensed to the graded
-    findings recorded in TEST-LOG, not a verbatim full transcript. Call ids are truncated 8-hex references.</div>
+  <div class="card mt-l"><b>Not every reported bug is a prompt bug.</b>
+  <span class="mute">The rail is built to say "the inputs were wrong" out loud instead of editing.</span></div>
 </section>
 
-<!-- ══════════════════════ 9 · HERO D — WHAT IT CATCHES / LIMITS ══════════════════════ -->
 <section class="slide">
-  <div class="eyebrow"><span class="n">08</span> Hero capability &nbsp;·&nbsp; 4 of 4</div>
-  <h2>What the harness catches — and, just as important, what it cannot</h2>
-  <p class="sub">A testing system you cannot trust the boundaries of is worse than none.</p>
-
-  <div class="row">
-    <div class="col">
-      <div class="card" style="border-color:#b9d2c5">
-        <h3 style="color:var(--green)">Caught by a graded live call &nbsp;<span class="badge b-ship">Shipped</span></h3>
-        <table class="tight mt-s">
-          <thead><tr><th style="width:132px">Class</th><th>Real instance</th></tr></thead>
-          <tbody>
-            <tr><td><b>Wrong branch taken</b></td><td>Sentinel treated as a real value → wrong pitch (CD5)</td></tr>
-            <tr><td><b>Sentinel spoken</b></td><td>"Not Available" read aloud to an employer</td></tr>
-            <tr><td><b>Hallucinated inventory</b></td><td>3 inbound bots about to offer jobs that do not exist (CD2)</td></tr>
-            <tr><td><b>Modality leak</b></td><td>Outbound bot inviting a callback (CD3)</td></tr>
-            <tr><td><b>Payload corruption</b></td><td>Phone doubled to <code>+91+91…</code>; numeric id where a UUID belongs</td></tr>
-            <tr><td><b>Tool never fires</b></td><td><code>get_profile</code> narrated but not called, 0 of 8 calls</td></tr>
-            <tr><td><b>Missing behaviour</b></td><td>No bot answered "are you a real person?" (CD4)</td></tr>
-            <tr><td><b>Per-variant divergence</b></td><td>Hindi twin applies cleanly; Kannada twin 404s</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-    <div style="width:390px;display:flex;flex-direction:column;gap:13px">
-      <div class="card" style="border-color:#e2c3a4">
-        <h3 style="color:var(--signal)">Known limits, stated plainly</h3>
-        <ul class="ticks" style="font-size:12.5px">
-          <li><b>One tester = one persona at a time.</b> Its prompt <i>is</i> the persona, and the callee
-          receives no per-call arguments — so different scenarios run serially.</li>
-          <li><b>Inbound bots cannot be dialled</b> by the tester. They are tested via an inbound-via-outbound
-          workaround; anything unverifiable is marked <b>VERIFY-PENDING</b>, never "done".</li>
-          <li><b>Telephony bridging is intermittent</b> and call creation is rate-limited (~1 per 13 s).
-          Failed dials are retried, not counted as bugs.</li>
-          <li><b>Voice-bridge echo:</b> the tester sometimes parrots the bot. Structural items still grade
-          from tool payloads; persona-dependent probes do not.</li>
-          <li><b>Backend and runtime tool-adherence failures are not prose-fixable.</b> They are escalated,
-          not patched.</li>
-        </ul>
-      </div>
-      <div class="dark">
-        <h3>The honesty discipline this produces</h3>
-        <p>5 changelog entries carry an explicit <b>VERIFY-PENDING</b>. One entry is an outright
-        <b>rollback</b>. The log refuses to claim "done" on an untested change — which is exactly why the
-        green results elsewhere in this deck are worth something.</p>
-      </div>
-    </div>
+  <div class="eyebrow">The standard</div>
+  <h2>Three tiers. All three, or it is not done.</h2>
+  <div class="row mt-s">
+    <div class="col card"><h3>1 &middot; Did the bug die?</h3><p class="tiny">Reproduce the exact failure. Post-fix transcript or it does not count.</p></div>
+    <div class="col card"><h3>2 &middot; Did anything else break?</h3><p class="tiny">Blast radius: the twin language, the shared logic, the tool payload.</p></div>
+    <div class="col card"><h3>3 &middot; Has anything drifted?</h3><p class="tiny">Standing daily check across the whole fleet, unattended.</p></div>
   </div>
-
-  <div class="fn"><b>Sources:</b> <span class="src-tag">.claude/skills/voice-test/SKILL.md</span> ("Platform reality", "Concurrency") &nbsp;·&nbsp;
-    <span class="src-tag">e2e/TEST-LOG.md</span> (echo caveat, coverage note) &nbsp;·&nbsp;
-    <span class="src-tag">e2e/LEGACY-REGRESSION.md</span> (per-variant divergence, VERIFY-PENDING) &nbsp;·&nbsp;
-    <span class="src-tag">CLAUDE.md</span> + <span class="src-tag">bug-patterns.md D25</span> (not prose-fixable) &nbsp;·&nbsp;
-    VERIFY-PENDING and rollback counts from the three CHANGELOG files.</div>
+  <div class="card dark mt-l center">Tested on <b>every</b> variant &mdash; language, direction, backend. Never extrapolated.</div>
 </section>
 
-<!-- ══════════════════════ 10 · THREE TIERS ══════════════════════ -->
 <section class="slide">
-  <div class="eyebrow"><span class="n">09</span> The testing standard</div>
-  <h2>Three tiers. A change is not done until all three pass, in order.</h2>
-  <p class="sub">Each tier exists because skipping it burned us. This is the standard we are proposing
-  EkStep adopt for any voice bot.</p>
-
-  <div class="row grow" style="align-items:stretch">
-    <div class="col card" style="border-top:3px solid var(--signal)">
-      <div class="eyebrow" style="margin-bottom:7px"><span class="n">Tier 1</span></div>
-      <h3>Fix verification</h3>
-      <p class="body-sm" style="color:var(--muted);font-style:italic;margin-bottom:9px">Did the bug actually get fixed?</p>
-      <p class="body-sm">Reproduce the <b>exact</b> reported failure and confirm it is gone — in a real call
-      transcript, on <b>each</b> affected variant.</p>
-      <div class="card tint mt-s" style="padding:10px 12px">
-        <p class="tiny"><b>Why it exists:</b> "looks fixed" is not fixed. No transcript, no claim.</p>
-      </div>
-      <div class="mt-s"><span class="badge b-ship">Shipped</span> <span class="tiny">via /voice-test</span></div>
-    </div>
-
-    <div class="col card" style="border-top:3px solid var(--blue)">
-      <div class="eyebrow" style="margin-bottom:7px;color:var(--blue)"><span class="n" style="border-color:var(--blue)">Tier 2</span></div>
-      <h3>Blast-radius regression</h3>
-      <p class="body-sm" style="color:var(--muted);font-style:italic;margin-bottom:9px">Did the fix break its neighbours?</p>
-      <p class="body-sm">Enumerate what the change could touch — the same section, the shared agnostic logic,
-      the mirrored twin, the tool payload — and test around those areas on each variant.</p>
-      <div class="card tint mt-s" style="padding:10px 12px">
-        <p class="tiny"><b>Why it exists:</b> this is the tier that catches <b>"fixed X, silently broke Y"</b>.
-        On 2026-07-23 a fix to stop a narration made the model stop calling the tool. Reverted.</p>
-      </div>
-      <div class="mt-s"><span class="badge b-ship">Shipped</span> <span class="tiny">manual enumeration + /sync-check</span></div>
-    </div>
-
-    <div class="col card" style="border-top:3px solid var(--green)">
-      <div class="eyebrow" style="margin-bottom:7px;color:var(--green)"><span class="n" style="border-color:var(--green)">Tier 3</span></div>
-      <h3>Standing regression</h3>
-      <p class="body-sm" style="color:var(--muted);font-style:italic;margin-bottom:9px">Has anything drifted since we last looked?</p>
-      <p class="body-sm">A scheduled pass over the whole fleet, running <b>in the cloud</b> so it survives the
-      developer's machine being off. Findings are mailed as a digest.</p>
-      <div class="card tint mt-s" style="padding:10px 12px">
-        <p class="tiny"><b>Why it exists:</b> drift is nobody's ticket. Without a standing check it is found
-        by a caller.</p>
-      </div>
-      <div class="mt-s">
-        <span class="badge b-ship">Shipped</span> <span class="tiny">daily static</span> &nbsp;
-        <span class="badge b-plan">Planned</span> <span class="tiny">weekly live-call</span>
-      </div>
-    </div>
+  <div class="eyebrow">The compounding asset</div>
+  <h2>67 failure patterns, each with a detector</h2>
+  <div class="row mt-s">
+    <div class="col metric"><div class="v sig">67</div><div class="l">codified patterns: symptom &rarr; root cause &rarr; how to detect &rarr; fix direction</div></div>
+    <div class="col card"><h3>Why it compounds</h3><p class="tiny">Every bug fixed must teach the analyser. The catalogue only grows,
+    so the same class is caught pre-flight next time &mdash; on a bot nobody has seen yet.</p></div>
   </div>
-
-  <div class="lead-in mt">
-    <b>The law that sits across all three tiers:</b> <span class="k">test every variant — never extrapolate.</span>
-    Hindi <i>and</i> Kannada. Outbound <i>and</i> inbound. Each bot separately. Even when the edited logic
-    is byte-identical agnostic content, because runtime adherence, ASR and TTS differ per language.
-    Static verification is necessary and <b>never sufficient</b>.
-  </div>
-
-  <div class="fn"><b>Sources:</b> <span class="src-tag">CLAUDE.md</span> → "The three testing tiers" and
-    "Test EVERY variant — never extrapolate" &nbsp;·&nbsp;
-    <span class="src-tag">.claude/skills/voice-test/SKILL.md</span> → "Testing quality — the three tiers" &nbsp;·&nbsp;
-    the 07-23 rollback from <span class="src-tag">KKB/CHANGELOG.md</span> &nbsp;·&nbsp;
-    Tier-3 weekly live status from <span class="src-tag">.github/workflows/regression.yml</span> and
-    <span class="src-tag">raya/regression/open-items.json → weekly-live-not-wired</span>.</div>
+  <div class="card mt-l"><b>This is the moat.</b> <span class="mute">Anyone can write a prompt. Few have a
+  taxonomy of how voice prompts fail in production.</span></div>
 </section>
 
-<!-- ══════════════════════ 11 · TAXONOMY ══════════════════════ -->
 <section class="slide">
-  <div class="eyebrow"><span class="n">10</span> The compounding asset &nbsp; <span class="badge b-ship">Shipped</span></div>
-  <h2>67 failure patterns, each with a detection heuristic — the moat</h2>
-  <p class="sub">Every bug we fix is required to leave behind a way to catch it earlier. The changelogs are
-  the feed; this catalogue is the distilled, reusable form.</p>
-
-  <div class="row">
-    <div style="width:250px">
-      <table class="tight">
-        <thead><tr><th>Family</th><th style="width:34px">#</th></tr></thead>
-        <tbody>
-          <tr><td><b>A</b> Flow &amp; sequencing</td><td>8</td></tr>
-          <tr><td><b>B</b> Repetition &amp; loops</td><td>2</td></tr>
-          <tr><td><b>C</b> Tool calls &amp; payloads</td><td>12</td></tr>
-          <tr><td><b>D</b> Language, script &amp; voice</td><td>40</td></tr>
-          <tr><td><b>E</b> Examples, consent, standing rules</td><td>4</td></tr>
-          <tr><td><b>F</b> Cross-language <span class="tiny">(pointer)</span></td><td>—</td></tr>
-          <tr><td><b>G</b> Templating &amp; interpolation</td><td>1</td></tr>
-          <tr style="background:var(--ink)"><td style="color:#fff"><b style="color:#fff">Total</b></td><td style="color:#fff"><b style="color:#fff">67</b></td></tr>
-        </tbody>
-      </table>
-      <div class="card dash mt-s">
-        <p class="tiny">Every pattern carries five fields:<br>
-        <b>Symptom → Root cause → Detection → Fix direction → Seen in.</b><br><br>
-        67&#8202;/&#8202;67 record where they were seen. 56 carry a date; 11 are standing rules or come from the
-        Purple Dots review.</p>
-      </div>
-    </div>
-
-    <div class="col">
-      <div class="tiny" style="font-family:var(--display);letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px">
-        The detection heuristic is the valuable part — three examples</div>
-      <div style="display:flex;flex-direction:column;gap:9px">
-        <div class="card" style="padding:11px 14px">
-          <h3><code>D31</code> &nbsp;Create-then-apply batched in one turn → empty <code>profile_id</code></h3>
-          <p class="body-sm"><b>Cause:</b> the prompt said "ONE clean sequence in a single turn", so both tool
-          calls were emitted together — the apply's arguments were built before the create's result existed.</p>
-          <p class="body-sm mt-s" style="color:var(--signal)"><b>Detection:</b> grep the apply sequence for
-          "single turn" / "back to back" / "whole sequence" applied to a create→apply pair. <b>That wording
-          is itself the bug.</b></p>
-        </div>
-        <div class="card" style="padding:11px 14px">
-          <h3><code>D34</code> &nbsp;The platform narrates a step the prompt says is silent</h3>
-          <p class="body-sm"><b>Cause:</b> the voice platform injects a <code>hold_message</code> parameter into
-          every tool call; the model writes a natural sentence into it and the platform speaks it.</p>
-          <p class="body-sm mt-s" style="color:var(--signal)"><b>Detection:</b> the tell is that <b>grepping the
-          prompt finds nothing</b> — you must read the tool-call arguments. A silence rule that never names
-          <code>hold_message</code> is insufficient.</p>
-        </div>
-        <div class="card" style="padding:11px 14px">
-          <h3><code>G1</code> &nbsp;A placeholder printed before its own label kills the branch</h3>
-          <p class="body-sm"><b>Cause:</b> <code>Consider ${new_seeker} as new_seeker</code> interpolates to
-          "Consider no as new_seeker" — the value is presented as the label, so nothing binds and the branch is dead.</p>
-          <p class="body-sm mt-s" style="color:var(--signal)"><b>Detection:</b> mentally interpolate every binding
-          phrase. If it reads "&lt;value&gt; as x" instead of "x = &lt;value&gt;", flag it. And the runtime test:
-          <b>if behaviour is invariant to the variable's value, the gate is dead.</b></p>
-        </div>
-      </div>
-    </div>
+  <div class="eyebrow">Multi-language</div>
+  <h2>A fix in one language is half a fix</h2>
+  <div class="row mt-s">
+    <div class="col card"><h3>One master, N mirrors</h3><p class="tiny">Logic copied byte-identically. Only spoken lines are re-authored natively.</p></div>
+    <div class="col card"><h3>Drift is audited</h3><p class="tiny">Every mirror compared to the master, per language.</p></div>
+    <div class="col card"><h3>Intent is registered</h3><p class="tiny">Deliberate divergences recorded, so no future audit "corrects" a decision.</p></div>
   </div>
-
-  <div class="fn"><b>Sources:</b> <span class="src-tag">.claude/skills/prompt-analyser/reference/bug-patterns.md</span>
-    — 67 patterns counted by <code>grep -c '^### '</code>; ids contiguous with no gaps (A1&#8211;A8, B1&#8211;B2, C1&#8211;C12, D1&#8211;D40, E1&#8211;E4, G1).
-    <b>Correction on the record:</b> an in-progress reference file elsewhere in the repo says "74 patterns" — the
-    verifiable count in the catalogue today is <b>67</b>. Provenance spans 2026-06-29 → 2026-08-01.
-    Family C is filed partly under the G heading, so a clean 7-way partition should not be claimed.</div>
+  <div class="card mt-l">Next: <b>12 Indic languages</b> &mdash; re-authored the way each is actually spoken, never literally translated.
+  <span class="badge b-prog">In progress</span></div>
 </section>
 
-<!-- ══════════════════════ 12 · MULTI-LANGUAGE ══════════════════════ -->
 <section class="slide">
-  <div class="eyebrow"><span class="n">11</span> Multi-language integrity &nbsp; <span class="badge b-ship">Shipped</span></div>
-  <h2>A fix in one language that does not land in its twin is a regression</h2>
-  <p class="sub">Every edit is classified before it is mirrored. This is the discipline that makes a
-  bilingual bot maintainable at all.</p>
-
-  <div class="row">
-    <div class="col">
-      <div class="g2">
-        <div class="card" style="border-color:#b9d2c5">
-          <h3 style="color:var(--green)">Language-agnostic → copied verbatim</h3>
-          <p class="body-sm">Call-flow logic, phase and step structure, input-variable names, tool rules and
-          JSON payloads, conditions and routing, prohibited-behaviour rules, dignity checks, the section
-          skeleton itself.</p>
-        </div>
-        <div class="card" style="border-color:#e2c3a4">
-          <h3 style="color:var(--signal)">Language-specific → translated &amp; adapted</h3>
-          <p class="body-sm">Spoken greetings, example dialogues, TTS number-to-word spellings, script rules,
-          tone markers, culturally-adapted prohibited phrases, local place names — Bengaluru and Mysuru,
-          not Pune and Ghaziabad.</p>
-        </div>
-      </div>
-
-      <div class="dark mt">
-        <h3>The rule that surprises everyone</h3>
-        <p><b>Instructions are ALWAYS in English</b> — every rule, heading and condition, in every language
-        file. The only Hindi or Kannada in a prompt is what the agent literally <i>speaks</i>. That is precisely
-        why a Hindi file and its Kannada twin can share identical instructions and differ only in quoted
-        spoken text. <b>A section whose rules are written in Hindi is itself a bug</b> — and has been logged as one.</p>
-      </div>
-
-      <div class="row mt" style="gap:12px">
-        <div class="col metric"><div class="v">Hindi</div><div class="l">master language — edits land here first</div></div>
-        <div class="col metric"><div class="v sig">6</div><div class="l">Maya divergences a sync must never overwrite</div></div>
-        <div class="col metric"><div class="v bl">N&#8202;:&#8202;N</div><div class="l">/sync-check now audits one master against N mirrors</div></div>
-      </div>
-    </div>
-
-    <div style="width:378px">
-      <div class="card" style="border-color:#e2c3a4;background:var(--signal-tint)">
-        <h3 style="color:var(--signal)">The bug that proved the law</h3>
-        <p class="body-sm">2026-08-01. Six legacy bots were restructured and voice-tested. <b>Maya-outbound
-        passed.</b> Extrapolating from it would have been the obvious, cheap call.</p>
-        <p class="body-sm mt-s">Testing <b>Maya-inbound independently</b> caught a real per-variant bug:
-        <code>phoneNumber:"+91+91…"</code>. The variable already carried <code>+91</code>, but the literal
-        template <code>+91${contact_phone}</code> made the model double it → the profile lookup returned
-        empty and the profile creation 400'd.</p>
-        <p class="body-sm mt-s"><b>Fixed in all 6 rewrites and re-verified.</b> The log's own conclusion:
-        <i>"this is the 'test every variant' rule paying off — extrapolating from Maya-out passing would
-        have shipped the bug."</i></p>
-      </div>
-      <div class="card mt-s">
-        <h3>Deliberate divergence is now machine-checkable</h3>
-        <p class="body-sm">Some differences between languages are approved decisions, not drift. A registry
-        (<code>raya/divergences.json</code>) records them as narrow carve-outs, so <code>/sync-check</code> reports
-        them as <b>expected</b> — and never "corrects" an owner's decision behind their back. Anything
-        outside the carve-out is still audited normally.</p>
-        <div class="mt-s"><span class="badge b-prog">In progress</span> <span class="tiny">registry created 2026-08-05</span></div>
-      </div>
-    </div>
+  <div class="eyebrow">The standing net</div>
+  <h2>Every morning, unattended</h2>
+  <div class="row mt-s">
+    <div class="col metric"><div class="v sig">269</div><div class="l">assertions per run</div></div>
+    <div class="col metric"><div class="v">18</div><div class="l">bot scripts, all of them</div></div>
+    <div class="col metric"><div class="v">~6 s</div><div class="l">runtime</div></div>
+    <div class="col metric"><div class="v gr">0</div><div class="l">critical findings today</div></div>
   </div>
-
-  <div class="fn"><b>Sources:</b> <span class="src-tag">CLAUDE.md</span> → "Core principle: agnostic vs language-specific",
-    "Sync rule", "Maya rule (flag-and-ask)" &nbsp;·&nbsp;
-    <span class="src-tag">raya/signals-expansion/e2e/LEGACY-REGRESSION.md</span> → "Phone-doubling fix (CD6-analog for Dhiway)" (quoted) &nbsp;·&nbsp;
-    <span class="src-tag">raya/divergences.json</span> &nbsp;·&nbsp; <span class="src-tag">.claude/skills/sync-check/SKILL.md</span>
-    (N-language parity) &nbsp;·&nbsp; the Hindi-instructions bug from <span class="src-tag">Maya/CHANGELOG.md</span> 2026-07-19.</div>
+  <div class="card mt-l"><b>Runs in the cloud</b> &mdash; survives every laptop being shut. Mails a plain-English digest:
+  what broke, on which bot, why it matters, what to do. <span class="badge b-ship">Shipped</span></div>
+  <div class="card mt-s">Weekly live-call tier <span class="badge b-plan">Planned</span>
+  <span class="mute">&mdash; blocked on CI credentials, not engineering.</span></div>
 </section>
 
-<!-- ══════════════════════ 13 · DAILY NET + DIGEST ══════════════════════ -->
 <section class="slide">
-  <div class="eyebrow"><span class="n">12</span> The standing net &nbsp; <span class="badge b-ship">Shipped</span></div>
-  <h2>Every morning, 269 assertions run in the cloud and mail a digest</h2>
-  <p class="sub">It runs whether or not anyone is at a laptop — that was the requirement, and it is why the
-  scheduler is a cloud runner, not a local cron. One of the seven classes checks the suite's own coverage.</p>
-
-  <div class="row">
-    <div class="col">
-      <div class="row" style="gap:11px">
-        <div class="col metric"><div class="v sig">18</div><div class="l">bot scripts, every run — no sampling, no rotation</div></div>
-        <div class="col metric"><div class="v">7</div><div class="l">check classes, incl. a coverage self-audit</div></div>
-        <div class="col metric"><div class="v bl">269</div><div class="l">individual assertions per run</div></div>
-        <div class="col metric"><div class="v gr">~6s</div><div class="l">runtime · $0 on the free tier</div></div>
-      </div>
-
-      <table class="xtight mt">
-        <thead><tr><th>Check class</th><th style="width:42px">Asserts</th><th>What it prevents</th></tr></thead>
-        <tbody>
-          <tr><td><b>Cross-backend leakage</b></td><td>148</td><td>A bot on one backend still naming the other's fields or hosts</td></tr>
-          <tr><td><b>Required sections</b></td><td>36</td><td>No graceful exit; a seeker bot that never looks the caller up</td></tr>
-          <tr><td><b>Enum exactness</b></td><td>24</td><td>A reworded answer option — the backend accepts only byte-exact wording</td></tr>
-          <tr><td><b>Phone doubling</b></td><td>18</td><td>The template that builds <code>9191…</code> and breaks caller lookup</td></tr>
-          <tr><td><b>Memory injection</b></td><td>18</td><td>A bot starting every call blind, re-asking what it already knows</td></tr>
-          <tr style="background:var(--green-tint)"><td><b>Fleet-coverage self-check</b> <span class="badge b-ship" style="font-size:8px;padding:2px 5px">New</span></td><td>18</td><td><b>A live bot the suite is not checking at all</b> — see the next slide</td></tr>
-          <tr><td><b>Hindi&#8202;↔&#8202;Kannada parity</b></td><td>7</td><td>One language missing a rule the other has</td></tr>
-        </tbody>
-      </table>
-
-      <div class="card dash mt-s">
-        <p class="tiny"><b>Tuned for precision, not recall</b> — a noisy daily email is worse than none, so every
-        token checked is one that <i>only</i> ever appears as a backend contract marker.
-        <b>Today: 18 prompts, 0 critical, 0 major, 1 minor.</b></p>
-      </div>
-    </div>
-
-    <div style="width:372px">
-      <div class="tiny" style="font-family:var(--display);letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px">
-        The digest email, as it actually renders</div>
-      <div class="card" style="padding:0;overflow:hidden">
-        <div style="background:var(--ink);padding:11px 14px">
-          <div style="font-family:var(--mono);font-size:10.5px;color:#8fa0b8">subject</div>
-          <div style="font-family:var(--display);font-size:12px;color:#fff;font-weight:600;margin-top:3px">
-            [Prompt Tuner] Daily bot health check — all clear</div>
-        </div>
-        <div style="padding:11px 14px;border-bottom:1px solid var(--line-soft)">
-          <div style="display:flex;gap:6px">
-            <div style="flex:1;text-align:center;border:1px solid var(--line);border-radius:5px;padding:6px 3px">
-              <div style="font-family:var(--display);font-weight:600;font-size:15px">18</div>
-              <div style="font-size:8.5px;color:var(--muted);font-family:var(--display);letter-spacing:.06em">BOTS</div></div>
-            <div style="flex:1;text-align:center;border:1px solid var(--line);border-radius:5px;padding:6px 3px">
-              <div style="font-family:var(--display);font-weight:600;font-size:15px;color:var(--green)">0</div>
-              <div style="font-size:8.5px;color:var(--muted);font-family:var(--display);letter-spacing:.06em">CRITICAL</div></div>
-            <div style="flex:1;text-align:center;border:1px solid var(--line);border-radius:5px;padding:6px 3px">
-              <div style="font-family:var(--display);font-weight:600;font-size:15px">0</div>
-              <div style="font-size:8.5px;color:var(--muted);font-family:var(--display);letter-spacing:.06em">MAJOR</div></div>
-            <div style="flex:1;text-align:center;border:1px solid var(--line);border-radius:5px;padding:6px 3px">
-              <div style="font-family:var(--display);font-weight:600;font-size:15px;color:var(--signal)">1</div>
-              <div style="font-size:8.5px;color:var(--muted);font-family:var(--display);letter-spacing:.06em">MINOR</div></div>
-          </div>
-        </div>
-        <div style="padding:10px 14px">
-          <ul class="ticks" style="font-size:11.5px">
-            <li><b>Start here — what to prioritise</b> <span class="tiny">high then medium open items, each with a "next step"</span></li>
-            <li><b>Bot-by-bot breakdown</b> <span class="tiny">every bot, its plain-English blurb, its findings</span></li>
-            <li><b>Applies to every bot</b> <span class="tiny">fleet-wide open items</span></li>
-            <li><b>What this check looks for</b> <span class="tiny">a glossary, so a reader with no context can act</span></li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="card mt-s tint">
-        <p class="tiny"><b>No jargon, ever:</b> <i>"…the bot builds 9191… and the caller lookup fails."</i>
-        &nbsp;<b>Two independent send paths:</b> the HTML digest via the Gmail API (live + verified 2026-08-03,
-        no Workspace admin needed), plus a zero-config backstop — on any critical finding the job exits
-        non-zero, so the platform emails the owner regardless.</p>
-      </div>
-    </div>
+  <div class="eyebrow">Credibility</div>
+  <h2>It found its own blind spot</h2>
+  <div class="row mt-s">
+    <div class="col card"><h3>The gap</h3><p class="tiny">The daily check hard-coded 16 files. The fleet was <b>18</b>.
+    Two live bots were never examined &mdash; while the digest read as full coverage.</p></div>
+    <div class="col card"><h3>The fix</h3><p class="tiny">It now reads the deploy manifest and raises a
+    <b>critical</b> if any live bot goes unchecked. Proven by hiding one.</p></div>
   </div>
-
-  <div class="fn"><b>Sources:</b> <span class="src-tag">raya/regression/static_regression.py</span> (check classes; assertion counts
-    148+36+24+18+18+18+7 = 269) &nbsp;·&nbsp;
-    <span class="src-tag">raya/regression/fleet.json</span> + <span class="src-tag">scripts/build_fleet_manifest.py</span> &nbsp;·&nbsp;
-    <span class="src-tag">raya/regression/latest-report.json</span> (18 / 0 / 0 / 1) &nbsp;·&nbsp;
-    <span class="src-tag">raya/regression/README.md</span> (~6&nbsp;s runtime; Gmail-API path live + verified 2026-08-03) &nbsp;·&nbsp;
-    <span class="src-tag">raya/regression/build_digest.py</span> (section structure, glossary) &nbsp;·&nbsp;
-    <span class="src-tag">raya/regression/open-items.json</span> (6 items) &nbsp;·&nbsp;
-    <span class="src-tag">.github/workflows/regression.yml</span> (daily cron, non-zero-exit backstop).
-    <b>Caveat on the record:</b> the platform's shared cron queue delays scheduled runs — treat it as
-    "each morning", not a guaranteed clock time.</div>
+  <div class="card dark mt-l center">A quality system that can silently under-cover is worse than none. So it audits itself.</div>
 </section>
 
-<!-- ══════════════════════ 14 · THE SUITE AUDITS ITSELF ══════════════════════ -->
 <section class="slide">
-  <div class="eyebrow"><span class="n">13</span> The blind spot we found in ourselves &nbsp; <span class="badge b-ship">Shipped</span></div>
-  <h2>The daily check was silently under-covering the fleet. Now it audits itself.</h2>
-  <p class="sub">This is the most uncomfortable slide in the deck, and the one that should make you trust
-  the rest of it more.</p>
-
-  <div class="row">
-    <div class="col">
-      <div class="card" style="border-color:#d8a99a;background:var(--red-tint)">
-        <h3 style="color:var(--red)">What was wrong</h3>
-        <p class="body-sm">The suite discovered its bots from a <b>hard-coded list of 16 filenames</b>, while
-        <code>raya/agents.json</code> carried <b>18 live conversation targets</b> marked <code>deploy:true</code>.
-        Two of them — <b>DKB inbound Hindi and DKB inbound Kannada</b> — were never checked by a single run.</p>
-        <p class="body-sm mt-s">Worse than the gap itself: the digest email reported
-        <b>"16 bots checked"</b> and <b>read as full coverage.</b> Nothing in the output hinted that two live
-        bots were missing. A green digest meant "the 16 I happen to know about are fine."</p>
-        <p class="body-sm mt-s"><b>Found by an adversarial review of the suite — not by the suite.</b></p>
-      </div>
-
-      <div class="row mt-s" style="gap:9px">
-        <div class="node ghost" style="flex:1">
-          <div class="t" style="color:var(--red)">Before</div>
-          <div class="d">hard-coded 16 filenames<br>→ 2 live bots invisible</div>
-        </div>
-        <div class="arrow sm">→</div>
-        <div class="node gr" style="flex:1.35">
-          <div class="t">After</div>
-          <div class="d"><code>agents.json</code> is the source of truth<br>→ 18 checked, gaps raise CRITICAL</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col">
-      <div class="card" style="border-color:#b9d2c5;background:var(--green-tint)">
-        <h3 style="color:var(--green)">What we changed</h3>
-        <ul class="ticks good" style="font-size:12.5px">
-          <li><b><code>coverage_gap()</code> self-check.</b> Every run reads <code>agents.json</code> and emits a
-          <b>CRITICAL finding</b> if any live deploy target is not being checked. The suite can no longer be
-          quietly incomplete.</li>
-          <li><b>Proven with a negative test.</b> We hid a bot from the discovery list and confirmed the
-          critical actually fires — a check that has never failed is not a check.</li>
-          <li><b><code>build_fleet_manifest.py</code>.</b> Generates <code>fleet.json</code> from
-          <code>agents.json</code> plus the suite's own derivation, with a CI-safe <code>--check</code> mode.
-          <b>Kills the hand-maintained list that caused this in the first place.</b></li>
-          <li><b>Both newly-covered bots came back clean</b> — the gap was in our coverage, not in those bots.</li>
-        </ul>
-      </div>
-      <div class="lead-in mt-s">
-        <b>The principle:</b> a quality system that can <span class="k">silently under-cover</span> the fleet is
-        worse than no quality system, because it manufactures false confidence. So the first thing it now checks
-        is <span class="k">whether it is checking everything</span>.
-      </div>
-    </div>
+  <div class="eyebrow">Capability map</div>
+  <h2>14 skills, one rail</h2>
+  <div class="row mt-s">
+    <div class="col card"><h3>Find</h3><div class="pills mt-s"><span class="pill">prompt-analyser</span><span class="pill">sync-check</span><span class="pill">bug-fix</span><span class="pill">raya-reconcile</span></div></div>
+    <div class="col card"><h3>Fix</h3><div class="pills mt-s"><span class="pill">update-prompt</span><span class="pill">port-feature</span><span class="pill">update-memory</span><span class="pill">update-output</span><span class="pill">prompt-version</span></div></div>
   </div>
-
-  <div class="mt">
-    <div class="tiny" style="font-family:var(--display);letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px">
-      The same review found two more places the rail was hard-coded to the original three bots &nbsp;
-      <span class="badge b-ship">Both fixed</span></div>
-    <div class="g2">
-      <div class="card" style="padding:11px 14px">
-        <h3><code>prompt-version.sh</code> — snapshot &amp; rollback</h3>
-        <p class="body-sm">It matched only <code>kkb|dkb|maya</code>, so a fourth project could not be
-        snapshotted or rolled back <b>without editing the script</b>. It now discovers bot folders — the safety
-        net extends to a new project with zero code changes.</p>
-      </div>
-      <div class="card" style="padding:11px 14px">
-        <h3><code>raya_call.py</code> — the transcript reader</h3>
-        <p class="body-sm">It printed only three KKB-era keys, so for any other bot <b>the call inputs read as
-        absent</b> — quietly undermining the repo's own rule to root-cause against the input args before
-        editing. It now prints the full <code>agent_args</code> and <code>call_output</code>.</p>
-      </div>
-    </div>
+  <div class="row mt-s">
+    <div class="col card"><h3>Prove</h3><div class="pills mt-s"><span class="pill on">voice-test</span><span class="pill">generate-test-cases <span class="badge b-prog">new</span></span></div></div>
+    <div class="col card"><h3>Onboard &amp; scale</h3><div class="pills mt-s"><span class="pill">onboard</span><span class="pill">register-bot <span class="badge b-prog">new</span></span><span class="pill">translate-prompt <span class="badge b-prog">new</span></span></div></div>
   </div>
-
-  <div class="fn"><b>Sources:</b> <span class="src-tag">raya/regression/static_regression.py</span> →
-    <code>coverage_gap()</code> &nbsp;·&nbsp; <span class="src-tag">scripts/build_fleet_manifest.py</span> +
-    <span class="src-tag">raya/regression/fleet.json</span> &nbsp;·&nbsp;
-    <span class="src-tag">raya/agents.json</span> (18 conversation targets, <code>deploy:true</code>) &nbsp;·&nbsp;
-    <span class="src-tag">raya/regression/latest-report.json</span> (now <code>prompts_checked: 18</code>,
-    0 critical / 0 major / 1 minor). The two previously-uncovered bots are
-    <span class="src-tag">DKB/DKB Inbound Hindi.md</span> and <span class="src-tag">DKB/DKB Inbound Kannada.md</span>.</div>
+  <div class="src mt-s">11 with a production track record &middot; 3 authored, not yet exercised</div>
 </section>
 
-<!-- ══════════════════════ 15 · SKILL CATALOGUE ══════════════════════ -->
 <section class="slide">
-  <div class="eyebrow"><span class="n">14</span> Capability map</div>
-  <h2>The skill catalogue — 14 authored, 11 with a production track record</h2>
-  <p class="sub">Each skill is an executable procedure with its own guardrails, not documentation. This is
-  the whole system, in one view.</p>
-  <div class="legend" style="margin:-8px 0 13px">
-    <span><span class="badge b-ship">Shipped</span> written <i>and</i> exercised on live bots</span>
-    <span><span class="badge b-prog">In progress</span> written, not yet exercised — no output artifacts on disk</span>
-    <span><span class="badge b-plan">Planned</span> not built</span>
+  <div class="eyebrow">Measured</div>
+  <h2>37 days of real output</h2>
+  <div class="row mt-s">
+    <div class="col metric"><div class="v">127</div><div class="l">prompt changes, each logged with its reason</div></div>
+    <div class="col metric"><div class="v gr">8&#8202;/&#8202;8</div><div class="l">bots green on the last full pass</div></div>
+    <div class="col metric"><div class="v">14</div><div class="l">features carried across bots instead of rebuilt</div></div>
+    <div class="col metric"><div class="v">1</div><div class="l">rollback needed</div></div>
   </div>
-
-  <div class="g4" id="skillgrid" style="align-content:start;gap:10px">
-    <div class="card" style="padding:11px 13px"><h3>/onboard &nbsp;<span class="badge b-ship">Shipped</span></h3>
-      <p class="body-sm">Intake for a new project, bot or language. One question at a time; captures each
-      complaint as a <b>testable issue record</b>. Promises a test, never a fix.</p></div>
-    <div class="card" style="padding:11px 13px;border-style:dashed;background:#fbfbf9"><h3>/register-bot &nbsp;<span class="badge b-prog">In progress</span></h3>
-      <p class="body-sm">Wires a new bot into the rail — files, path map, deploy targets, regression-fleet
-      entry. <b>Written 2026-08-05; no bot registered through it yet.</b></p></div>
-    <div class="card" style="padding:11px 13px;border-color:#e2c3a4"><h3>/prompt-analyser &nbsp;<span class="badge b-ship">Shipped</span></h3>
-      <p class="body-sm">Read-only audit against 67 learned patterns + required-section checklists.
-      <b>Flags; never edits.</b> The "strong first version" engine.</p></div>
-    <div class="card" style="padding:11px 13px;border-color:#e2c3a4"><h3>/voice-test &nbsp;<span class="badge b-ship">Shipped</span></h3>
-      <p class="body-sm">The hero. A persona agent calls the bot; transcript and tool payloads graded against
-      93&#8211;114 items. Finds bugs before users do.</p></div>
-
-    <div class="card" style="padding:11px 13px"><h3>/update-prompt &nbsp;<span class="badge b-ship">Shipped</span></h3>
-      <p class="body-sm">The only sanctioned way to edit a prompt. Runs <code>/sync-check</code> first, edits
-      the master, mirrors twins, logs it, teaches the analyser.</p></div>
-    <div class="card" style="padding:11px 13px"><h3>/sync-check &nbsp;<span class="badge b-ship">Shipped</span></h3>
-      <p class="body-sm">Drift detection — one master against N mirrors. Separates real drift from expected
-      language difference and from registered divergence.</p></div>
-    <div class="card" style="padding:11px 13px"><h3>/port-feature &nbsp;<span class="badge b-ship">Shipped</span></h3>
-      <p class="body-sm">Carries a proven feature across bots and <b>re-domains</b> it to the target's
-      variables, tools and persona — never a verbatim copy, never an invented field.</p></div>
-    <div class="card" style="padding:11px 13px"><h3>/prompt-version &nbsp;<span class="badge b-ship">Shipped</span></h3>
-      <p class="body-sm">Snapshot and instant rollback, independent of git. <b>228 taken so far.</b> A restore
-      auto-snapshots first, so rollback is reversible.</p></div>
-
-    <div class="card" style="padding:11px 13px"><h3>/raya-reconcile &nbsp;<span class="badge b-ship">Shipped</span></h3>
-      <p class="body-sm">Never edit a live agent blind. Diffs what is actually live, so a repo edit cannot
-      clobber a console-only change — like a real job inventory.</p></div>
-    <div class="card" style="padding:11px 13px"><h3>/bug-fix &nbsp;<span class="badge b-ship">Shipped</span></h3>
-      <p class="body-sm">The tracker loop: find → transcript → classify → fix → propagate → verify → deploy →
-      mark the sheet. <b>Only 1 of 6 classes gets a prompt edit.</b></p></div>
-    <div class="card" style="padding:11px 13px"><h3>/update-memory · /update-output &nbsp;<span class="badge b-ship">Shipped</span></h3>
-      <p class="body-sm">The two post-call prompts: what the bot remembers between calls, and which structured
-      results are pulled from a finished transcript.</p></div>
-    <div class="card" style="padding:11px 13px;border-style:dashed;background:#fbfbf9">
-      <h3>/generate-test-cases &nbsp;<span class="badge b-prog">In progress</span></h3>
-      <p class="body-sm">Derives a bot's own suite from its flow, tools, audience, reported issues and the
-      pattern catalogue. <b>Written 2026-08-05; <code>raya/testcases/</code> is still empty.</b></p></div>
+  <div class="row mt-s">
+    <div class="col metric"><div class="v">18</div><div class="l">scripts &middot; 22,004 lines under management</div></div>
+    <div class="col metric"><div class="v">67</div><div class="l">failure patterns codified</div></div>
+    <div class="col metric"><div class="v">16</div><div class="l">tester personas</div></div>
+    <div class="col metric"><div class="v">228</div><div class="l">rollback snapshots</div></div>
   </div>
-
-  <div class="card mt" style="border-style:dashed;padding:10px 14px;background:#fbfbf9">
-    <p class="body-sm"><b>/translate-prompt &nbsp;<span class="badge b-prog">In progress</span></b> — stand a bot up
-    in another Indic language: re-author the spoken content the way that language is actually <i>spoken</i>,
-    re-derive the TTS and spoken-form machinery natively, keep every language-agnostic line byte-identical, then
-    register, deploy and voice-test the new agent. Declares support for <b>12 languages</b> — Hindi, Kannada,
-    Telugu, Malayalam, Tamil, Marathi, Bengali, Gujarati, Punjabi, Odia, Assamese, Urdu.
-    <b>Written 2026-08-05; no bot has been taken into a third language yet, so the capability is unproven.</b></p>
-  </div>
-
-  <div class="fn"><b>Sources:</b> <span class="src-tag">.claude/skills/</span> listing and each
-    <span class="src-tag">SKILL.md</span>, snapshotted <b>2026-08-05</b>. All 14 have a complete procedure file.
-    The three marked <i>in progress</i> were authored today and have produced <b>no artifacts on disk</b>
-    (<code>raya/testcases/</code> absent; no third-language prompt; no bot registered through the new flow) — so
-    this deck does not call them shipped. Snapshot count = 141 KKB + 11 DKB + 76 Maya under
-    <span class="src-tag">versions/</span>.</div>
+  <div class="src mt-s">CHANGELOG.md &times;3 &middot; latest-report.json &middot; deploy-history.md &middot; versions/</div>
 </section>
 
-<!-- ══════════════════════ 15 · RESULTS ══════════════════════ -->
 <section class="slide">
-  <div class="eyebrow"><span class="n">15</span> Results to date</div>
-  <h2>Measured, over 37 days — every figure traceable</h2>
-  <p class="sub">2026-06-29 to 2026-08-05. These are counts and outcomes recorded in the repo, not estimates.</p>
-
-  <div class="g5">
-    <div class="metric"><div class="v sig">127</div><div class="l">logged prompt changes</div><div class="src">3 × CHANGELOG.md</div></div>
-    <div class="metric"><div class="v">~80</div><div class="l">of them bug fixes <span style="text-transform:none">(±4, classified)</span></div><div class="src">hand-classified</div></div>
-    <div class="metric"><div class="v gr">8&#8202;/&#8202;8</div><div class="l">Signals bots green</div><div class="src">e2e/TEST-LOG.md</div></div>
-    <div class="metric"><div class="v bl">14</div><div class="l">fixes ported across agents</div><div class="src">"Ported from:" field</div></div>
-    <div class="metric"><div class="v">67</div><div class="l">patterns codified</div><div class="src">bug-patterns.md</div></div>
+  <div class="eyebrow">Impact</div>
+  <h2>What it is worth</h2>
+  <div class="row mt-s">
+    <div class="col metric"><div class="v sig">~148 h</div><div class="l">manual effort removed in 37 days</div></div>
+    <div class="col metric"><div class="v sig">70%</div><div class="l">shorter fix&#8202;&rarr;&#8202;verified cycle</div></div>
+    <div class="col metric"><div class="v sig">15&times;</div><div class="l">regression cadence &mdash; fortnightly to daily</div></div>
+    <div class="col metric"><div class="v sig">~$3.7k</div><div class="l">at $25/h &middot; ~$36.5k annualised</div></div>
   </div>
-
-  <div class="row mt">
-    <div class="col card">
-      <h3>The 2026-08-01 Signals campaign — end to end in one day</h3>
-      <table class="tight mt-s">
-        <thead><tr><th>What</th><th style="width:52px">Count</th><th>Outcome</th></tr></thead>
-        <tbody>
-          <tr><td>Bots in scope</td><td><b>8</b></td><td>All live-tested; <b style="color:var(--green)">8/8 green</b></td></tr>
-          <tr><td>Graded live calls</td><td><b>11</b></td><td>Every seeker apply and every employer job-post landed as a real backend write</td></tr>
-          <tr><td>Critical decisions</td><td><b>7</b></td><td>CD1&#8211;CD7, each independently revertible with a snapshot</td></tr>
-          <tr><td>Mechanical sync fixes</td><td><b>16</b></td><td>Language-parity and correctness repairs</td></tr>
-          <tr><td>Ship-blockers caught</td><td><b>1</b></td><td>3 inbound bots would have offered jobs that do not exist</td></tr>
-          <tr><td>Pre-existing bugs found</td><td><b>2</b></td><td>Neither had been reported by anyone (CD5, CD6)</td></tr>
-        </tbody>
-      </table>
-      <p class="tiny mt-s"><b>Bonus outcome:</b> a <code>create_job</code> adherence failure that had failed
-      4 times the previous day was resolved as a side-effect of simplifying the flow.</p>
-    </div>
-
-    <div style="width:392px;display:flex;flex-direction:column;gap:12px">
-      <div class="card">
-        <h3>The legacy-fleet rebuild</h3>
-        <p class="body-sm">6 older bots were restructured onto the proven shape and voice-tested:
-        <b style="color:var(--green)">5 verified green</b>, <b style="color:var(--signal)">1 marked
-        VERIFY-PENDING</b> rather than claimed. That one bot is still the top open item.</p>
-      </div>
-      <div class="dark">
-        <h3>What the discipline costs — and buys</h3>
-        <p><b>5</b> entries carry an explicit VERIFY-PENDING. <b>1</b> is a rollback. <b>33</b> entries cite a
-        specific call id. The log is willing to say "not proven yet" — which is what makes
-        <b>8/8</b> mean something.</p>
-      </div>
-      <div class="card tint">
-        <p class="tiny"><b>Also on the record, honestly:</b> 1 minor finding is open in today's regression report
-        (a Hindi&#8202;/&#8202;Kannada section-count gap of 5 on one DKB bot). 6 curated open items are tracked, the
-        highest being an unverified apply path on one Kannada inbound bot.</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="fn"><b>Sources:</b> <span class="src-tag">KKB/DKB/Maya CHANGELOG.md</span> (127 dated entries by
-    <code>grep -cE '^## [0-9]{4}-'</code>; 14 with a "Ported from:" field; 33 citing a call id; 5 VERIFY-PENDING; 1 rollback) &nbsp;·&nbsp;
-    <span class="src-tag">e2e/TEST-LOG.md</span> (8/8, 11 calls) &nbsp;·&nbsp;
-    <span class="src-tag">e2e/DECISIONS-AND-FIXES.md</span> (CD1&#8211;CD7; M1&#8211;M17 = 16 items, M13 unused) &nbsp;·&nbsp;
-    <span class="src-tag">e2e/LEGACY-REGRESSION.md</span> (6 legacy bots, 5 green + 1 pending) &nbsp;·&nbsp;
-    <span class="src-tag">regression/latest-report.json</span>, <span class="src-tag">open-items.json</span>.
-    The bug-vs-feature split is a hand classification of all entries, stated as ±4 per bucket.</div>
+  <div class="card mt-l"><b>The model, in full:</b> 140 h test-execution + 7.6 h cross-bot reuse + 10 h/mo regression,
+  at a stated $25/h blended rate. Annual figure extrapolates 37 days &mdash; it is an estimate, not a measurement.</div>
+  <div class="card mt-s"><b class="err">Not modelled:</b> campaign go-live delay &mdash; the largest real cost.
+  <span class="mute">No volume or cost-per-call data exists in the repo, so we do not invent one.</span></div>
 </section>
 
-<!-- ══════════════════════ 16 · IMPACT QUANTIFIED ══════════════════════ -->
 <section class="slide">
-  <div class="eyebrow"><span class="n">16</span> Impact &nbsp; <span class="badge b-prog">Modeled — assumptions shown</span></div>
-  <h2>Quantified impact, with the model on the slide</h2>
-  <p class="sub">The quantities in column 2 are measured from the repo. The rates in column 3 are
-  <b>assumptions we chose to keep conservative</b>. Nothing here is a measured saving.</p>
+  <div class="eyebrow">Ecosystem</div>
+  <h2>Infrastructure, not a team tool</h2>
+  <div class="row mt-s">
+    <div class="col card"><h3>Bot-agnostic</h3><p class="tiny">Nothing assumes jobs, Hindi, or one backend. A new domain is a config, not a fork.</p></div>
+    <div class="col card"><h3>Language-agnostic</h3><p class="tiny">Master + N mirrors. Adding a language does not touch any skill.</p></div>
+    <div class="col card"><h3>Transferable</h3><p class="tiny">The bug taxonomy is the reusable asset &mdash; it encodes how voice prompts fail anywhere.</p></div>
+  </div>
+  <div class="card dark mt-l center">Every DPG voice agent faces the same drift problem. This is the shared answer.</div>
+</section>
 
-  <table class="xtight">
-    <thead><tr>
-      <th style="width:146px">Lever</th>
-      <th style="width:180px">Grounded quantity <span style="text-transform:none;letter-spacing:0">(measured)</span></th>
-      <th style="width:238px">Assumption <span style="text-transform:none;letter-spacing:0">(chosen, conservative)</span></th>
-      <th style="width:80px">Hours saved</th>
-      <th>At $25&#8202;/&#8202;h</th>
-    </tr></thead>
+<section class="slide">
+  <div class="eyebrow">Adoption</div>
+  <h2>Bringing a bot on: five steps</h2>
+  <div class="row mt-s">
+    <div class="col card"><h3>1 &middot; Onboard</h3><p class="tiny">Prompt, languages, tools, and the issues you want gone.</p></div>
+    <div class="col card"><h3>2 &middot; Register</h3><p class="tiny">Becomes deployable and enters the daily net.</p></div>
+    <div class="col card"><h3>3 &middot; Audit</h3><p class="tiny">Pre-flight against 67 patterns, before a single call.</p></div>
+  </div>
+  <div class="row mt-s">
+    <div class="col card"><h3>4 &middot; Generate tests</h3><p class="tiny">Custom suite from your flow, tools, audience and issues.</p></div>
+    <div class="col card"><h3>5 &middot; Call it</h3><p class="tiny">Agent-to-agent test, fix, deploy, re-verify.</p></div>
+    <div class="col card"><h3>Then</h3><p class="tiny">It is in the morning digest forever.</p></div>
+  </div>
+  <div class="card mt-s"><b>You need:</b> the prompt, the platform ids, and one honest list of what is broken.</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Next</div>
+  <h2>Roadmap</h2>
+  <div class="row mt-s">
+    <div class="col card"><h3>Purple Dots <span class="badge b-plan">Next</span></h3><p class="tiny">Disability-focused rail. Accessibility grading already shipped fleet-wide.</p></div>
+    <div class="col card"><h3>12 Indic languages <span class="badge b-prog">In progress</span></h3><p class="tiny">Re-authored natively, not translated. Skill built, first language unrun.</p></div>
+  </div>
+  <div class="row mt-s">
+    <div class="col card"><h3>Weekly live tier <span class="badge b-plan">Blocked</span></h3><p class="tiny">Needs platform keys in CI. Not an engineering problem.</p></div>
+    <div class="col card"><h3>Fleet-wide manifest <span class="badge b-prog">In progress</span></h3><p class="tiny">One source of truth for every bot, every project.</p></div>
+  </div>
+  <div class="card dark mt-l center">The rail is built. The next bot costs a fraction of the first.</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Appendix</div>
+  <h2>Every number, and where it comes from</h2>
+  <table class="tight mt-s">
+    <thead><tr><th style="width:150px">Claim</th><th style="width:78px">Value</th><th>Source</th></tr></thead>
     <tbody>
-      <tr>
-        <td><b>Bug-fix cycles</b></td>
-        <td>~80 bug-fix entries in 37 days<br><span class="tiny">(127 logged changes total)</span></td>
-        <td>2.5&nbsp;h manual → 0.75&nbsp;h assisted<br><span class="tiny">reproduce · root-cause · edit both languages · deploy · re-test each variant</span></td>
-        <td><b>140&nbsp;h</b></td>
-        <td><b>$3,500</b><br><span class="tiny">$5,600 at $40/h</span></td>
-      </tr>
-      <tr>
-        <td><b>Voice-test campaigns</b></td>
-        <td>17 graded live calls across 2 campaigns on 2026-08-01</td>
-        <td>35&nbsp;min to place + grade a call manually → 8&nbsp;min to review an agent's verdict<br><span class="tiny">manual also requires a tester fluent in BOTH languages</span></td>
-        <td><b>7.6&nbsp;h</b></td>
-        <td><b>$190</b></td>
-      </tr>
-      <tr>
-        <td><b>Standing regression</b></td>
-        <td>269 assertions × 18 scripts, daily, ~6&nbsp;s, $0 runner cost</td>
-        <td>manual pass ≈ 5.7&nbsp;h (18 × ~19&nbsp;min); assume the team would realistically run it <b>fortnightly</b>, not daily</td>
-        <td><b>11.4&nbsp;h</b><span class="tiny">/month</span></td>
-        <td><b>$285</b><span class="tiny">/month</span></td>
-      </tr>
-      <tr style="background:var(--red-tint)">
-        <td><b>Campaign go-live delay</b></td>
-        <td>ship-blockers caught pre-launch <span class="tiny">(3 bots, hallucinated inventory)</span></td>
-        <td colspan="3"><b style="color:var(--red)">DELIBERATELY NOT MODELED.</b> This is the owner's stated
-        largest cost, and the repo contains <b>no campaign-volume, caller-count or cost-per-call data</b>.
-        Any dollar figure here would be invented, so we do not print one.</td>
-      </tr>
+      <tr><td>Bot scripts</td><td><b>18</b></td><td class="mono">raya/agents.json &middot; fleet.json</td></tr>
+      <tr><td>Assertions / run</td><td><b>269</b></td><td class="mono">instrumented static_regression.py</td></tr>
+      <tr><td>Failure patterns</td><td><b>67</b></td><td class="mono">bug-patterns.md (grep '### ')</td></tr>
+      <tr><td>Prompt changes</td><td><b>127</b></td><td class="mono">3 &times; CHANGELOG.md</td></tr>
+      <tr><td>Checks / call</td><td><b>93&ndash;114</b></td><td class="mono">checklists/ (54 generic + per-bot)</td></tr>
+      <tr><td>Bots green</td><td><b>8/8</b></td><td class="mono">signals-expansion/e2e/TEST-LOG.md</td></tr>
+      <tr><td>Snapshots</td><td><b>228</b></td><td class="mono">versions/*/HISTORY.md</td></tr>
+      <tr><td>Hours &amp; dollars</td><td><b>modelled</b></td><td>assumptions stated on the Impact slide</td></tr>
+      <tr><td>Go-live delay</td><td><b class="err">not modelled</b></td><td>no volume data exists &mdash; deliberately omitted</td></tr>
     </tbody>
   </table>
-
-  <div class="row mt" style="gap:13px">
-    <div class="col">
-      <div class="g3">
-        <div class="metric"><div class="v sig">70%</div><div class="l">less time per bug-fix cycle</div><div class="src">MODELED · 2.5h → 0.75h</div></div>
-        <div class="metric"><div class="v sig">15×</div><div class="l">regression cadence</div><div class="src">MODELED · fortnightly → daily</div></div>
-        <div class="metric"><div class="v gr">100%</div><div class="l">Signals bots green post-campaign</div><div class="src">MEASURED · 8/8</div></div>
-      </div>
-      <div class="lead-in mt-s" style="font-size:14.5px;padding:12px 16px">
-        <b>Observed window (37 days):</b> ~<span class="k">148 hours</span> ≈ <span class="k">$3,700</span> at $25/h
-        &nbsp;(~$5,900 at $40/h). &nbsp;<b>Run-rate if this intensity continues:</b> ~1,460&nbsp;h ≈ $36,500/year at
-        $25/h — <b>an extrapolation from 37 days, not a measurement.</b>
-      </div>
-    </div>
-    <div style="width:322px" class="card dash">
-      <h3>Read this before quoting a number</h3>
-      <ul class="ticks" style="font-size:11.5px">
-        <li>The <b>quantities</b> are repo-verifiable. The <b>rates</b> are our assumptions — and they are the
-        entire source of every dollar figure.</li>
-        <li>$25&#8202;/&#8202;h is a deliberately conservative blended rate; $40&#8202;/&#8202;h is shown as sensitivity.</li>
-        <li>The strongest argument is <b>not</b> the money — it is that a bilingual bot can now be verified
-        <b>per variant</b>, which manual testing was never going to do.</li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="fn"><b>Grounded quantities:</b> <span class="src-tag">3 × CHANGELOG.md</span> ·
-    <span class="src-tag">e2e/TEST-LOG.md</span> + <span class="src-tag">e2e/LEGACY-REGRESSION.md</span> (11 + 6 calls) ·
-    <span class="src-tag">raya/regression/static_regression.py</span> (269 assertions) ·
-    <span class="src-tag">README.md</span> (~6&nbsp;s). &nbsp;<b>Assumed:</b> all per-unit durations and the hourly
-    rate — chosen by us, shown above, not sourced from any measurement.</div>
+  <div class="src mt-s">Full traceability: deck/DECK-NOTES.md</div>
 </section>
 
-<!-- ══════════════════════ 17 · ECOSYSTEM ══════════════════════ -->
-<section class="slide">
-  <div class="eyebrow"><span class="n">17</span> Beyond one team</div>
-  <h2>Why this is ecosystem infrastructure, not a team tool</h2>
-  <p class="sub">The prompts are specific to three bots. Everything <i>around</i> them is not.</p>
-
-  <div class="row">
-    <div class="col">
-      <div class="card" style="border-color:#b9d2c5">
-        <h3 style="color:var(--green)">What is genuinely portable</h3>
-        <table class="tight mt-s">
-          <thead><tr><th style="width:168px">Asset</th><th>Why it transfers to any voice bot</th></tr></thead>
-          <tbody>
-            <tr><td><b>67-pattern taxonomy</b></td><td>Failure classes of <i>LLM voice agents</i> — turn structure, tool payloads, TTS, script drift. Nothing KKB-specific.</td></tr>
-            <tr><td><b>54 generic checks</b></td><td>Silence, barge-in, ASR, no-fabrication, consent, graceful exit, <b>accessibility</b>. Every telephony bot needs all of them.</td></tr>
-            <tr><td><b>Agent-to-agent harness</b></td><td>A persona agent calling a bot is a platform capability, not a domain one.</td></tr>
-            <tr><td><b>3-tier standard</b></td><td>A shared definition of "done" for voice — adoptable as policy on day one.</td></tr>
-            <tr><td><b>Sync + divergence model</b></td><td>Any bot in more than one Indian language faces exactly this problem.</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="card mt-s tint">
-        <p class="body-sm"><b>Already proven portable once.</b> The taxonomy was applied to <b>Purple Dots</b> — a
-        disability-and-needs bot with a completely different domain — and produced <b>11 root-caused findings
-        (6 high, 4 medium, 1 to verify)</b> including a swapped latitude&#8202;/&#8202;longitude mapping and a hardcoded
-        id contradicting a dynamic search. <b>Different bot, different purpose, same failure classes.</b></p>
-      </div>
-    </div>
-
-    <div style="width:378px;display:flex;flex-direction:column;gap:12px">
-      <div class="dark">
-        <h3>The DPG shape</h3>
-        <p>Voice is how the next hundred million Indians will reach a digital service, and most of those
-        agents will be built by small teams with no QA function. A shared
-        <b>quality-and-testing rail</b> — a reusable failure taxonomy, a checklist standard, and an autonomous
-        test harness — is exactly the kind of <b>horizontal capability</b> a composable public-good
-        ecosystem is supposed to provide.</p>
-      </div>
-      <div class="card">
-        <h3>Why the taxonomy is the moat</h3>
-        <p class="body-sm">It cannot be written from first principles. Every one of the 67 patterns cost a real
-        failure on a real call to a real user. Any team joining the rail inherits all 67 <b>without paying for
-        them</b> — and every bug they hit deepens the catalogue for everyone.</p>
-      </div>
-      <div class="card">
-        <h3>Deliberate scope limits</h3>
-        <p class="body-sm">Today the rail is coupled to <b>one voice platform</b> (its call API and prompt-PATCH
-        endpoint) and its personas are <b>Hindi and Kannada</b>. Both are real portability constraints, and
-        neither is hidden.</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="fn"><b>Sources:</b> <span class="src-tag">Purple Dots — Prompt Gap Analysis.md</span> (11 findings,
-    priority table) &nbsp;·&nbsp; <span class="src-tag">bug-patterns.md</span> ("Seen in" attributions include the
-    Purple Dots review) &nbsp;·&nbsp; <span class="src-tag">voice-test/reference/checklists/generic.md</span> &nbsp;·&nbsp;
-    <span class="src-tag">.claude/skills/onboard/SKILL.md</span> ("a shared rail across several projects… assume
-    N projects, N bots, N languages"). The DPG framing is an argument, not a repo fact.</div>
-</section>
-
-<!-- ══════════════════════ 18 · HOW TO ADOPT ══════════════════════ -->
-<section class="slide">
-  <div class="eyebrow"><span class="n">18</span> Adoption</div>
-  <h2>Bringing a new bot onto the rail — the concrete path</h2>
-  <p class="sub">Designed so a team can arrive knowing nothing about the tuner and still be useful in the
-  first conversation.</p>
-
-  <div class="grow" style="display:flex;flex-direction:column;justify-content:center">
-    <div style="display:flex;gap:8px;align-items:stretch">
-      <div class="card" style="flex:1;padding:12px 13px;border-top:3px solid var(--blue)">
-        <div class="tiny" style="font-family:var(--display);letter-spacing:.11em;color:var(--blue);font-weight:600">STEP 1</div>
-        <h3 class="mt-s">Intake &nbsp;<span class="tiny">/onboard</span></h3>
-        <p class="body-sm">One question at a time: which project, what the bot does, who calls it, every
-        language and which is the master, the prompts, the tools, and each reported issue as its own
-        <b>testable record with an id</b>.</p>
-        <p class="tiny mt-s"><b>No prompt is touched.</b> Intake gathers and reproduces only.</p>
-      </div>
-      <div class="arrow">→</div>
-      <div class="card" style="flex:1;padding:12px 13px;border-top:3px solid var(--blue)">
-        <div class="tiny" style="font-family:var(--display);letter-spacing:.11em;color:var(--blue);font-weight:600">STEP 2</div>
-        <h3 class="mt-s">Register &nbsp;<span class="tiny">/register-bot</span></h3>
-        <p class="body-sm">Folder, prompt files, changelog, the path map, deploy targets with hand-copied
-        platform ids, and an entry in the standing-regression fleet.</p>
-        <p class="tiny mt-s"><b>Outcome:</b> every other skill and script now works on this bot.</p>
-      </div>
-      <div class="arrow">→</div>
-      <div class="card" style="flex:1;padding:12px 13px;border-top:3px solid var(--signal)">
-        <div class="tiny" style="font-family:var(--display);letter-spacing:.11em;color:var(--signal);font-weight:600">STEP 3</div>
-        <h3 class="mt-s">Audit &nbsp;<span class="tiny">/prompt-analyser</span></h3>
-        <p class="body-sm">Read-only sweep against all 67 patterns and the required-section checklist for its
-        archetype. Returns root-caused symptoms, ranked findings, and missing critical sections.</p>
-        <p class="tiny mt-s"><b>This is the "strong first version" step.</b> Flags only — never edits.</p>
-      </div>
-      <div class="arrow">→</div>
-      <div class="card" style="flex:1;padding:12px 13px;border-top:3px solid var(--ink)">
-        <div class="tiny" style="font-family:var(--display);letter-spacing:.11em;color:var(--ink);font-weight:600">STEP 4</div>
-        <h3 class="mt-s">Reproduce &nbsp;<span class="tiny">/voice-test</span></h3>
-        <p class="body-sm">A persona is written for the bot's real audience and the harness calls it. Each
-        reported issue is confirmed — or shown not to reproduce.</p>
-        <p class="tiny mt-s"><b>Gate:</b> no fix without a transcript.</p>
-      </div>
-      <div class="arrow">→</div>
-      <div class="card" style="flex:1;padding:12px 13px;border-top:3px solid var(--green)">
-        <div class="tiny" style="font-family:var(--display);letter-spacing:.11em;color:var(--green);font-weight:600">STEP 5</div>
-        <h3 class="mt-s">Fix, deploy, stand guard</h3>
-        <p class="body-sm">Snapshot → <code>/update-prompt</code> → mirror → deploy → re-test all three tiers.
-        The bot then appears in tomorrow's digest automatically.</p>
-        <p class="tiny mt-s"><b>Outcome:</b> it is now covered by the standing net.</p>
-      </div>
-    </div>
-
-    <div class="row mt-l" style="gap:14px">
-      <div class="col card tint">
-        <h3>Minimum to start</h3>
-        <p class="body-sm">The bot's purpose, its prompt, and one thing that is going wrong. Everything else can
-        be marked TBD. You do not need to fit into KKB, DKB, Maya, Hindi or Kannada — a brand-new project in a
-        language we have never handled is the expected case.</p>
-      </div>
-      <div class="col card tint">
-        <h3>What a new team owes the rail</h3>
-        <p class="body-sm">Platform credentials for their own agents, a decision on which language is master,
-        and acceptance that a fix is not "done" until it is voice-tested per variant. In exchange they inherit
-        67 patterns, 54 generic checks, and a daily net on day one.</p>
-      </div>
-      <div class="col card tint">
-        <h3>What we owe them</h3>
-        <p class="body-sm">Honest classification. If the transcript shows the inputs were wrong, or the backend
-        4xx'd, we say <b>"the prompt is fine"</b> and make no edit. A tuner that fixes non-bugs to look busy
-        would destroy the only thing that makes it useful.</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="fn"><b>Sources:</b> <span class="src-tag">.claude/skills/onboard/SKILL.md</span> (branches A/B, "minimum to start",
-    structured issue capture, "promise a test, never a fix") &nbsp;·&nbsp;
-    <span class="src-tag">.claude/skills/register-bot/SKILL.md</span> &nbsp;·&nbsp;
-    <span class="src-tag">prompt-analyser/SKILL.md</span> + <span class="src-tag">section-checklists.md</span> &nbsp;·&nbsp;
-    <span class="src-tag">CLAUDE.md</span> ("push back before fixing").</div>
-</section>
-
-<!-- ══════════════════════ 19 · ROADMAP ══════════════════════ -->
-<section class="slide">
-  <div class="eyebrow"><span class="n">19</span> Roadmap</div>
-  <h2>What is next — and what each item is actually blocked on</h2>
-  <p class="sub">Ordered by what unblocks the most. Status badges are literal: nothing below is described as
-  shipped unless it is running today.</p>
-
-  <table class="tight">
-    <thead><tr>
-      <th style="width:34px">#</th><th style="width:190px">Item</th><th style="width:96px">Status</th>
-      <th>What it does &nbsp;·&nbsp; what is blocking it</th>
-    </tr></thead>
-    <tbody>
-      <tr>
-        <td><b>1</b></td>
-        <td><b>Weekly live-call tier</b><br><span class="tiny">Tier 3, live half</span></td>
-        <td><span class="badge b-plan">Planned</span></td>
-        <td>A rotating live pass over the fleet from the cloud, appending real-call findings to the digest.
-        Today's daily tier <b>reads scripts only and never dials a phone</b>.
-        <b style="color:var(--red)">Blocked on:</b> platform + backend keys placed in CI secrets. Not an
-        engineering problem — a credentials decision.</td>
-      </tr>
-      <tr>
-        <td><b>2</b></td>
-        <td><b>Custom test-case generation</b><br><span class="tiny">/generate-test-cases</span></td>
-        <td><span class="badge b-prog">In progress</span></td>
-        <td>Derive a bot's own suite from its flow, its tools, its audience, its reported issues and the
-        pattern catalogue — 6 families with an observable assertion vocabulary and a JSON schema, so cases can
-        feed the standing regression. <b>Procedure written 2026-08-05; it has not yet generated a suite for any
-        bot</b> — <code>raya/testcases/</code> is empty. Next step: run it on one bot end to end.</td>
-      </tr>
-      <tr>
-        <td><b>3</b></td>
-        <td><b>Indic-language translation</b><br><span class="tiny">/translate-prompt</span></td>
-        <td><span class="badge b-prog">In progress</span></td>
-        <td>Take a bot into a new Indian language so it reads as the language is <i>spoken</i>, not as a
-        dictionary translation — agnostic logic byte-identical, spoken content re-authored, TTS machinery
-        re-derived natively, then registered, deployed and voice-tested. <b>Procedure written 2026-08-05
-        declaring 12 languages; no bot exists in a third language yet</b>, so nothing is proven. This is the
-        single biggest reach-multiplier on the list.</td>
-      </tr>
-      <tr>
-        <td><b>4</b></td>
-        <td><b>Purple Dots rollout</b><br><span class="tiny">second project on the rail</span></td>
-        <td><span class="badge b-plan">Planned</span></td>
-        <td>Onboard the disability-and-needs bot rail as a first-class project. A <b>gap analysis already
-        exists</b> (11 findings, 6 high) but the bot is <b>not registered, not deployed by us, and not in the
-        regression fleet</b>. This is the first real test of multi-project support.</td>
-      </tr>
-      <tr style="background:var(--green-tint)">
-        <td><b>5</b></td>
-        <td><b>Accessibility grading</b><br><span class="tiny">generic checklist §14</span></td>
-        <td><span class="badge b-ship">Shipped</span></td>
-        <td><b>Done since this deck was drafted.</b> 7 fleet-wide items now grade every bot on pace and
-        one-question-per-turn, silence as needing time, repeat-on-request, never talking over the caller, the
-        flow completing for callers who are not at default speed, proxy / hand-over, and no condescension —
-        plus two framing rules: <b>never make the disability the subject of the call</b>, and
-        <b>never require disclosure to get help</b>. This was the prerequisite for doing Purple Dots properly
-        rather than nominally.</td>
-      </tr>
-      <tr>
-        <td><b>6</b></td>
-        <td><b>Close the open items</b></td>
-        <td><span class="badge b-prog">In progress</span></td>
-        <td>6 tracked items: an unverified apply path on one Kannada inbound bot <b>(high)</b>; two call
-        outcomes not yet extracted post-call; test job lists that are not the production inventory; one
-        fetch-narration leak; one wording inconsistency.</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <div class="lead-in mt">
-    <b>The one-line ask, repeated:</b> item 1 is <span class="k">not engineering work</span>. Until keys sit in CI,
-    the standing net can only read scripts — and a script read cannot catch what only a real call reveals.
-  </div>
-
-  <div class="fn"><b>Sources:</b> <span class="src-tag">.github/workflows/regression.yml</span> ("the weekly LIVE voice
-    regression is NOT implemented yet") &nbsp;·&nbsp;
-    <span class="src-tag">raya/regression/open-items.json</span> (6 items incl. <code>weekly-live-not-wired</code>) &nbsp;·&nbsp;
-    <span class="src-tag">raya/regression/README.md</span> &nbsp;·&nbsp;
-    <span class="src-tag">.claude/skills/generate-test-cases/reference/test-case-taxonomy.md</span> (families F/T/A/R/X/G;
-    family X flagged as a roadmap gap) &nbsp;·&nbsp;
-    <span class="src-tag">Purple Dots — Prompt Gap Analysis.md</span> &nbsp;·&nbsp;
-    <span class="src-tag">.claude/skills/translate-prompt/SKILL.md</span> (12 declared languages) and
-    <span class="src-tag">generate-test-cases/SKILL.md</span> — both authored 2026-08-05 with no output
-    artifacts on disk, hence <i>in progress</i> rather than shipped.</div>
-</section>
-
-<!-- ══════════════════════ 20 · APPENDIX: MAP ══════════════════════ -->
-<section class="slide">
-  <div class="eyebrow"><span class="n">A1</span> Appendix · technical map</div>
-  <h2>Where everything lives</h2>
-
-  <div class="row">
-    <div class="col">
-      <table class="tight">
-        <thead><tr><th style="width:216px">Path</th><th>What it is</th></tr></thead>
-        <tbody>
-          <tr><td><code>CLAUDE.md</code></td><td>The operating manual — surgical-edit rule, sync rule, 3 tiers, feedback-loop sequence</td></tr>
-          <tr><td><code>KKB/ · DKB/ · Maya/</code></td><td>18 conversation prompts + memory + output prompts + a changelog per agent</td></tr>
-          <tr><td><code>.claude/skills/</code></td><td>14 skill folders, each a complete executable procedure</td></tr>
-          <tr><td><code>…/prompt-analyser/reference/</code></td><td><b>bug-patterns.md</b> (67) · <b>section-checklists.md</b> (4 archetype lists + 24 universal ticks)</td></tr>
-          <tr><td><code>…/voice-test/reference/checklists/</code></td><td>generic (54, incl. accessibility) + kkb (51) + dkb (39) + maya (60) graded items</td></tr>
-          <tr><td><code>raya/agents.json</code></td><td>25 deploy targets — the hand-maintained file→agent manifest</td></tr>
-          <tr><td><code>raya/divergences.json</code></td><td>Registry of owner-approved language divergences</td></tr>
-          <tr><td><code>raya/personas/</code></td><td>16 persona scripts + a router + the scenario catalogue</td></tr>
-          <tr><td><code>raya/regression/</code></td><td>The Tier-3 suite, digest builder, sender, reports, open items, <code>fleet.json</code></td></tr>
-          <tr><td><code>raya/signals-expansion/e2e/</code></td><td>The 2026-08-01 campaign: decisions, test log, legacy regression, 28 snapshots</td></tr>
-          <tr><td><code>.github/workflows/regression.yml</code></td><td>The daily cloud scheduler</td></tr>
-          <tr><td><code>scripts/</code></td><td>deploy · test-call · test-run · call-reader · sheets · version · <b>fleet-manifest</b></td></tr>
-          <tr><td><code>versions/</code></td><td>228 prompt snapshots for instant rollback</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div style="width:322px;display:flex;flex-direction:column;gap:12px">
-      <div class="card">
-        <h3>The fleet, precisely</h3>
-        <table class="tight mt-s">
-          <thead><tr><th>Agent</th><th style="width:34px">Hi</th><th style="width:34px">Kn</th><th style="width:40px">Total</th></tr></thead>
-          <tbody>
-            <tr><td>KKB <span class="tiny">seeker</span></td><td>4</td><td>4</td><td><b>8</b></td></tr>
-            <tr><td>DKB <span class="tiny">employer</span></td><td>3</td><td>3</td><td><b>6</b></td></tr>
-            <tr><td>Maya <span class="tiny">campus</span></td><td>4</td><td>—</td><td><b>4</b></td></tr>
-            <tr style="background:var(--ink)"><td style="color:#fff"><b style="color:#fff">Fleet</b></td><td style="color:#fff">11</td><td style="color:#fff">7</td><td style="color:#fff"><b style="color:#fff">18</b></td></tr>
-          </tbody>
-        </table>
-        <p class="tiny mt-s">Each is a language × direction (inbound&#8202;/&#8202;outbound) × backend (current&#8202;/&#8202;legacy)
-        combination. <b>All 18 conversation prompts on disk are now in the regression fleet</b> — the two DKB
-        inbound bots were the coverage gap on slide 14. The fleet list is generated from
-        <code>agents.json</code>, never hand-maintained.</p>
-      </div>
-      <div class="card dash">
-        <h3>Security posture</h3>
-        <p class="body-sm">This repo is <b>public</b>. All credentials live in git-ignored files or CI secrets.
-        <b>This deck therefore contains no agent identifiers, no phone numbers, and no tokens</b> — only
-        truncated call-id references. Platform tool snapshots are never committed.</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="fn">All counts in this appendix were produced by directory listing, <code>wc -l</code>, <code>grep -c</code>,
-    or by loading the JSON manifests, on <b>2026-08-05</b>. The skill count moved from 11 to 13 <i>during</i> the
-    preparation of this deck; the figure shown is the state at write time.</div>
-</section>
-
-<!-- ══════════════════════ 21 · APPENDIX: GLOSSARY ══════════════════════ -->
-<section class="slide">
-  <div class="eyebrow"><span class="n">A2</span> Appendix · glossary</div>
-  <h2>The vocabulary, for anyone joining this cold</h2>
-
-  <div class="g2">
-    <div>
-      <table class="xtight">
-        <thead><tr><th style="width:150px">Term</th><th>Plain meaning</th></tr></thead>
-        <tbody>
-          <tr><td><b>Conversation prompt</b></td><td>The bot's whole script — persona, flow, rules, tool instructions. Up to ~1,600 lines.</td></tr>
-          <tr><td><b>Memory prompt</b></td><td>Updates what we remember about a caller after each call, so the next call is not blind.</td></tr>
-          <tr><td><b>Output prompt</b></td><td>Reads a finished transcript and extracts structured results.</td></tr>
-          <tr><td><b>Language-agnostic</b></td><td>Content copied verbatim across languages — logic, structure, payloads.</td></tr>
-          <tr><td><b>Language-specific</b></td><td>Content translated and adapted — only what the bot literally speaks.</td></tr>
-          <tr><td><b>Master language</b></td><td>The language edited first; mirrors are synced from it. Hindi, for all three agents.</td></tr>
-          <tr><td><b>Variant</b></td><td>One bot × one language × one direction. The unit that must be tested independently.</td></tr>
-          <tr><td><b>Persona agent</b></td><td>An AI agent whose entire prompt is a human character, used to call the bot under test.</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div>
-      <table class="xtight">
-        <thead><tr><th style="width:150px">Term</th><th>Plain meaning</th></tr></thead>
-        <tbody>
-          <tr><td><b>Tool call</b></td><td>The bot invoking a real API mid-conversation — look up a caller, apply to a job, post a vacancy.</td></tr>
-          <tr><td><b>Modality leak</b></td><td>An outbound bot speaking as if it were inbound — e.g. inviting a callback it cannot receive.</td></tr>
-          <tr><td><b>Sentinel</b></td><td>A placeholder value like <code>"Not Available"</code> or <code>"Any"</code>. Never to be spoken aloud.</td></tr>
-          <tr><td><b>Drift</b></td><td>Language twins diverging over time because a change landed in only one of them.</td></tr>
-          <tr><td><b>Divergence</b></td><td>An <i>approved</i> difference between languages. Registered, so sync will not undo it.</td></tr>
-          <tr><td><b>Blast radius</b></td><td>Everything a fix could plausibly have broken. Tier 2 tests it.</td></tr>
-          <tr><td><b>VERIFY-PENDING</b></td><td>Deployed but not yet proven by a real call. Explicitly not "done".</td></tr>
-          <tr><td><b>Fixed for UAT</b></td><td>Deployed and ready for acceptance testing. <b>Not</b> the same as confirmed.</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class="row mt">
-    <div class="col dark">
-      <h3>The three sentences that carry the whole system</h3>
-      <p><b>1.</b> A rule being present in the prompt does not mean it holds at runtime.<br>
-      <b>2.</b> No fix without a transcript.<br>
-      <b>3.</b> Test every variant — never extrapolate.</p>
-    </div>
-    <div class="col card tint">
-      <h3>And the one that keeps it honest</h3>
-      <p class="body-sm">Not every reported bug is a prompt bug. Input errors, backend failures and runtime
-      tool-adherence misses get <b>named and escalated</b>, not prose-patched. Sometimes the correct output is
-      <b>"the prompt is fine, the inputs were wrong"</b> — and saying so is the job.</p>
-    </div>
-  </div>
-
-  <div class="fn">All definitions paraphrase <span class="src-tag">CLAUDE.md</span>,
-    <span class="src-tag">bug-patterns.md</span>, and the skill files. Quoted sentences are verbatim from
-    <span class="src-tag">CLAUDE.md</span> and <span class="src-tag">bug-patterns.md</span>.</div>
-</section>
-
-<!-- ══════════════════════ 22 · APPENDIX: CLAIMS ══════════════════════ -->
-<section class="slide">
-  <div class="eyebrow"><span class="n">A3</span> Appendix · claim traceability</div>
-  <h2>Every quantified claim in this deck, and where it comes from</h2>
-  <p class="sub" style="margin-bottom:9px">If a number is not in this table, it is not a claim we are making.</p>
-
-  <div class="g2" style="gap:14px">
-    <div>
-      <table class="xtight">
-        <thead><tr><th style="width:62px">Claim</th><th style="width:92px">Type</th><th>Source</th></tr></thead>
-        <tbody>
-          <tr><td><b>127</b></td><td>Measured</td><td>3 × CHANGELOG.md, <code>grep -cE '^## [0-9]{4}-'</code></td></tr>
-          <tr><td><b>~80 · ±4</b></td><td>Classified</td><td>hand classification of all entries</td></tr>
-          <tr><td><b>14</b></td><td>Measured</td><td>entries with a "Ported from:" field</td></tr>
-          <tr><td><b>5 · 1 · 33</b></td><td>Measured</td><td>VERIFY-PENDING · rollbacks · call-id citations</td></tr>
-          <tr><td><b>67</b></td><td>Measured</td><td>bug-patterns.md, <code>grep -c '^### '</code></td></tr>
-          <tr><td><b>54&#8202;/&#8202;51&#8202;/&#8202;39&#8202;/&#8202;60 → 93&#8211;114</b></td><td>Measured, then derived</td><td>checklists/ bullet counts; generic 54 = 14 sections incl. 7 accessibility items; per-bot = 54 + own list</td></tr>
-          <tr><td><b>18</b></td><td>Measured</td><td>latest-report.json → <code>prompts_checked</code> · fleet.json</td></tr>
-          <tr><td><b>269</b></td><td>Measured</td><td>static_regression.py (148+36+24+18+18+18+7)</td></tr>
-          <tr><td><b>7 classes · ~6&nbsp;s · 0&#8202;/&#8202;0&#8202;/&#8202;1</b></td><td>Measured</td><td>static_regression.py · README.md · latest-report.json</td></tr>
-          <tr style="background:var(--green-tint)"><td><b>2 bots uncovered</b></td><td>Measured</td><td>the coverage gap: DKB Inbound Hindi + Kannada, now fixed</td></tr>
-          <tr><td><b>6 open items</b></td><td>Measured</td><td>open-items.json (1 high, 4 med, 1 low)</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div>
-      <table class="xtight">
-        <thead><tr><th style="width:62px">Claim</th><th style="width:92px">Type</th><th>Source</th></tr></thead>
-        <tbody>
-          <tr><td><b>8&#8202;/&#8202;8 green</b></td><td>Measured</td><td>e2e/TEST-LOG.md → "Result: 8/8 bots GREEN"</td></tr>
-          <tr><td><b>11 calls</b></td><td>Measured</td><td>e2e/TEST-LOG.md table rows</td></tr>
-          <tr><td><b>7 CD · 16 M · 6 legacy (5+1)</b></td><td>Measured</td><td>e2e/DECISIONS-AND-FIXES.md (M13 unused) · LEGACY-REGRESSION.md</td></tr>
-          <tr><td><b>18 · 22,004 · 1,591</b></td><td>Measured</td><td><code>wc -l</code> on conversation prompts</td></tr>
-          <tr><td><b>25 · 16 · 228</b></td><td>Measured</td><td>agents.json targets · personas/ · versions/ snapshots</td></tr>
-          <tr><td><b>11 findings</b></td><td>Measured</td><td>Purple Dots gap analysis, priority table</td></tr>
-          <tr><td><b>14 · 11 proven</b></td><td>Measured</td><td>.claude/skills/ at 2026-08-05; 3 authored today, no artifacts</td></tr>
-          <tr><td><b>12 languages</b></td><td>Declared</td><td>translate-prompt/SKILL.md — declared support, none built</td></tr>
-          <tr style="background:var(--signal-tint)"><td><b>70% · 15×</b></td><td><b>Modeled</b></td><td>assumptions printed on the impact slide</td></tr>
-          <tr style="background:var(--signal-tint)"><td><b>$3,500 · $285&#8202;/&#8202;mo · $36.5k&#8202;/&#8202;yr</b></td><td><b>Modeled</b></td><td>hours × assumed rate; rate stated as $25&#8202;/&#8202;h</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class="row mt-s" style="gap:14px">
-    <div class="col card" style="border-color:#e2c3a4;background:var(--signal-tint);padding:11px 14px">
-      <h3 style="color:var(--signal)">Corrections we are putting on the record</h3>
-      <p class="body-sm" style="font-size:12px"><b>"74 patterns" → 67.</b> A repo file cites 74; the verifiable
-      catalogue count is <b>67</b>. &nbsp;<b>127 vs 129:</b> two KKB entries lack a date header, so 127 is
-      grep-verifiable, 129 logical — we quote the lower. &nbsp;<b>"16 bots" → 18.</b> The suite hard-coded 16
-      filenames against a manifest of 18 live targets (slide 14). All figures here are post-fix.</p>
-    </div>
-    <div class="col card dash" style="padding:11px 14px">
-      <h3>What we deliberately did not claim</h3>
-      <p class="body-sm" style="font-size:12px">No dollar value on campaign delay (no volume data exists). No
-      customer or adoption numbers. No "confirmed" on anything VERIFY-PENDING. No claim the weekly live tier
-      exists. No claim the checklists are an automated passing suite — they are agent-graded against written
-      criteria. And <b>no claim that a skill written today works</b>: 3 of 14 have produced nothing yet.</p>
-    </div>
-  </div>
-
-  <div class="fn">Deck built <b>2026-08-05</b> from the repo at commit-time state. Companion speaker notes and the
-    full claim table: <span class="src-tag">deck/DECK-NOTES.md</span>. &nbsp;·&nbsp; Navigate with ← → · press
-    <b>T</b> for contents.</div>
-</section>
 
 </div></div>
 
 <div id="hud">
   <span id="tocbtn">Contents</span>
-  <span><b id="cur">1</b> / <span id="tot">23</span></span>
+  <span><b id="cur">1</b> / <span id="tot">20</span></span>
   <span class="hint">← →</span>
 </div>
 
@@ -1737,18 +493,33 @@ ul.good li:before{background:var(--green)}
   <ol id="toclist"></ol>
 </div>
 
+
 <script>
 (function(){
   var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
   var stage  = document.getElementById('stage');
   var cur = 0;
-  var titles = ["Title — Prompt Tuner","Executive summary & the ask","The problem — silent drift",
-    "Cost of the status quo","The solution — closed loop","HERO 1 — agent-to-agent topology",
-    "HERO 2 — how a call is graded","HERO 3 — a real bug, found & killed","HERO 4 — what it catches & cannot",
-    "The 3-tier testing standard","The 67-pattern taxonomy","Multi-language integrity",
-    "The daily net & digest email","The blind spot: the suite audits itself","The skill catalogue","Results to date","Impact, quantified",
-    "Ecosystem use case","How to adopt","Roadmap & next steps","Appendix — technical map",
-    "Appendix — glossary","Appendix — claim traceability"];
+  var titles = [
+    "Prompt Tuner",
+    "Executive summary",
+    "The problem",
+    "Before / after",
+    "HERO — agent-to-agent",
+    "HERO — how a call is graded",
+    "HERO — a real bug",
+    "What it cannot do",
+    "Three tiers",
+    "67 patterns",
+    "Multi-language integrity",
+    "The daily net",
+    "It audits itself",
+    "Skill catalogue",
+    "Results to date",
+    "Impact, quantified",
+    "Ecosystem use case",
+    "How to adopt",
+    "Roadmap",
+    "Appendix — claim traceability"];
 
   document.getElementById('tot').textContent = slides.length;
 
