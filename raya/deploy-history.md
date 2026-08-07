@@ -227,3 +227,11 @@ Format:
 2026-07-31 (repurpose) · prod · dkb-kn-signals · 847a85e2 · DKB Kannada Signals · same Signals provider tools
 2026-08-04 17:46:09 · prod · kkb-kn-signals · 33037201-78ce-405d-b509-a3b6934e20f1 · KKB/KKB Placeholder Kannada Signals.md · sha256:7f606fac · snapshot:pre-deploy-kkb-kn-signals-2026-08-04_174608 · deployed
 2026-08-04 17:46:09 · prod · kkb-kn-in-signals · f38da775-c572-4a50-9340-fe1f42c43901 · KKB/KKB Placeholder Inbound Kannada Signals.md · sha256:aa98e2a0 · snapshot:pre-deploy-kkb-kn-in-signals-2026-08-04_174609 · deployed
+2026-08-07 15:51:32 · prod · kkb-kn-out · 87ab9108-5d66-4a13-a20a-575eaa9aae36 · KKB/KKB Placeholder Kannada.md · sha256:a619d0bd · snapshot:pre-deploy-kkb-kn-out-2026-08-07_155132 · deployed
+2026-08-07 15:51:33 · prod · kkb-hi-out · da612923-1927-45d7-9ad0-b1c7cbb15294 · KKB/KKB Placeholder Hindi.md · sha256:f06ec9f2 · snapshot:pre-deploy-kkb-hi-out-2026-08-07_155132 · deployed
+2026-08-07 15:51:33 · prod · kkb-kn-in · 4ac90bf1-a740-4b1c-92b0-45bda099e53f · KKB/KKB Placeholder Inbound Kannada.md · sha256:574cc9bc · snapshot:pre-deploy-kkb-kn-in-2026-08-07_155133 · deployed
+2026-08-07 15:51:34 · prod · kkb-hi-in · b6222233-8a8d-49a6-9950-d07e9d159757 · KKB/KKB Placeholder Inbound.md · sha256:b921fa74 · snapshot:pre-deploy-kkb-hi-in-2026-08-07_155133 · deployed
+2026-08-07 15:51:34 · prod · kkb-kn-signals · 33037201-78ce-405d-b509-a3b6934e20f1 · KKB/KKB Placeholder Kannada Signals.md · sha256:f074dbd2 · snapshot:pre-deploy-kkb-kn-signals-2026-08-07_155134 · deployed
+2026-08-07 15:51:35 · prod · kkb-hi-signals · 115b38a5-42ef-4082-be69-84a871bb226a · KKB/KKB Placeholder Hindi Signals.md · sha256:2b7e299c · snapshot:pre-deploy-kkb-hi-signals-2026-08-07_155135 · deployed
+2026-08-07 15:51:36 · prod · kkb-kn-in-signals · f38da775-c572-4a50-9340-fe1f42c43901 · KKB/KKB Placeholder Inbound Kannada Signals.md · sha256:401e1148 · snapshot:pre-deploy-kkb-kn-in-signals-2026-08-07_155135 · deployed
+2026-08-07 15:51:36 · prod · kkb-hi-in-signals · 3f521174-574d-43ca-a9be-081849373c18 · KKB/KKB Placeholder Inbound Signals.md · sha256:10f2f5ed · snapshot:pre-deploy-kkb-hi-in-signals-2026-08-07_155136 · deployed

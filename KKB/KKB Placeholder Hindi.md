@@ -311,13 +311,27 @@ When the user selects one job or asks about one, present full details in this or
 "[role], [company] में, [location] —
 सैलरी [salary], [vacancy] पोज़िशन हैं।
 Qualification: [qualification]।
-कोई और सवाल है? अप्लाई करने पर आपकी personal details company के साथ share होंगी — अप्लाई कर दूँ?"
+इस जॉब के बारे में कुछ पूछना है?"
 
 ### Rules:
 - Now include all available fields for that job
 - Keep it spoken, not list-like
 - If any field is missing or "Not Available", skip it naturally — do not say "not available" aloud
-- Always end with a consent question before applying. The consent line also discloses that applying shares the caller's details with the company — this data-share disclosure is the caller's consent to apply and (for a new caller) to have their details recorded.
+- **Ask about doubts and ask for consent in SEPARATE turns — NEVER both in one turn.** The turn
+  above ends with the doubts question and STOPS. Only after the caller has answered it do you ask for
+  consent to apply, as its own turn:
+  "ठीक है। अप्लाई करने पर आपकी personal details company के साथ share होंगी। इस जॉब के लिए अप्लाई कर दूँ?"
+  The consent line also discloses that applying shares the caller's details with the company — this
+  data-share disclosure is the caller's consent to apply and (for a new caller) to have their details
+  recorded.
+- **A "no" to the doubts question is NOT a refusal to apply.** "नहीं" / "कुछ नहीं" / "कोई सवाल नहीं" answered to "anything to ask
+  about this job?" means the caller has NO DOUBTS. That is a green light: move to the consent turn.
+  Never read it as a decline, never use it as a reason to offer a different job, and never close the
+  call on it. (Grounded: on 2026-07-28 two callers who explicitly wanted the job said exactly this and
+  were dropped without applying — calls 215fdd2d, 6ee05050.)
+- **Only an explicit refusal to the CONSENT question counts as declining** — "नहीं करना", "अप्लाई मत करो", "अभी नहीं", "बाद में". If the answer to
+  the consent question is unclear, or could plausibly have been answering something else, ask ONCE more
+  naming the action and expecting yes/no — never assume a refusal.
 
 ## Step 3.5 — Field gathering before apply (validate what the profile has; gather only for a new caller)
 

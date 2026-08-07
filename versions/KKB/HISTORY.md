@@ -141,3 +141,12 @@
 - **2026-08-04_174256** — `pre-maya-name-kn-signals` — before adding personal name Maya to the 2 KKB Kannada Signals bots' intro (Kannada-only, deliberate divergence) _(10 files)_
 - **2026-08-04_174608** — `pre-deploy-kkb-kn-signals-2026-08-04_174608` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada Signals.md _(10 files)_
 - **2026-08-04_174609** — `pre-deploy-kkb-kn-in-signals-2026-08-04_174609` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada Signals.md _(10 files)_
+- **2026-08-07_154826** — `pre-split-confirm-turn` — before splitting the bundled 'any questions? + shall I apply?' turn (2026-07-28 lost-candidate reports) _(10 files)_
+- **2026-08-07_155132** — `pre-deploy-kkb-kn-out-2026-08-07_155132` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(10 files)_
+- **2026-08-07_155133** — `pre-deploy-kkb-hi-out-2026-08-07_155132` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi.md _(10 files)_
+- **2026-08-07_155133** — `pre-deploy-kkb-kn-in-2026-08-07_155133` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(10 files)_
+- **2026-08-07_155134** — `pre-deploy-kkb-hi-in-2026-08-07_155133` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(10 files)_
+- **2026-08-07_155134** — `pre-deploy-kkb-kn-signals-2026-08-07_155134` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada Signals.md _(10 files)_
+- **2026-08-07_155135** — `pre-deploy-kkb-hi-signals-2026-08-07_155135` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
+- **2026-08-07_155135** — `pre-deploy-kkb-kn-in-signals-2026-08-07_155135` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada Signals.md _(10 files)_
+- **2026-08-07_155136** — `pre-deploy-kkb-hi-in-signals-2026-08-07_155136` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Signals.md _(10 files)_
