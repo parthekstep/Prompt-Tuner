@@ -82,35 +82,16 @@
    "since": "2026-08-04"
   },
   {
-   "id": "maya-bundled-confirm-not-fixed",
+   "id": "confirm-turn-2-inbound-legacy-unreached",
    "bots": [
-    "Maya Hindi · outbound · Signals",
-    "Maya Hindi · inbound · Signals",
-    "Maya Hindi · outbound · legacy",
-    "Maya Hindi · inbound · legacy"
-   ],
-   "title": "Maya still bundles \"any questions?\" with \"shall I apply?\" in one turn",
-   "what": "On 2026-07-28 two real KKB Kannada callers who wanted a job answered \"no questions\" to a turn that asked both \"any questions?\" and \"shall I apply?\", and the bot read the \"no\" as a refusal and closed without applying. The fix (splitting those into two separate turns) was applied to all 8 KKB prompts on 2026-08-07. Maya carries the identical bundled line and has NOT been changed.",
-   "why": "Maya can lose a willing candidate the same way KKB did. It is the same defect, unfixed, on a live bot.",
-   "next": "Apply the identical split-turn fix to the 4 Maya prompts. It was deliberately held back because house rules require asking the owner before a KKB change is carried into Maya.",
-   "priority": "high",
-   "since": "2026-08-07"
-  },
-  {
-   "id": "split-confirm-variants-verify-pending",
-   "bots": [
-    "KKB Hindi · inbound · Signals",
-    "KKB Kannada · inbound · Signals",
-    "KKB Hindi · outbound · legacy",
-    "KKB Kannada · outbound · legacy",
-    "KKB Hindi · inbound · legacy",
+    "Maya Hindi · inbound · legacy",
     "KKB Kannada · inbound · legacy"
    ],
-   "title": "Six of the eight bots carrying the confirm-turn fix have not had a live test call",
-   "what": "The split-turn fix was deployed to all 8 KKB bots and live-verified on two of them (Kannada outbound Signals and Hindi outbound Signals) — a caller answering \"no questions\" now gets a clean, separate apply question and the application goes through. The other six have the identical edit but no test call of their own. The originally reported bot (Kannada outbound legacy) would not connect across 12 attempts.",
-   "why": "House rule is that every variant is tested independently and never assumed from a passing twin — a mirrored edit has landed differently before. These are deployed and expected to be correct, but not proven.",
-   "next": "Place one harness call per remaining bot with the \"no questions\" persona and confirm the separate consent turn appears and the application is submitted.",
-   "priority": "medium",
+   "title": "Two inbound bots could not be driven as far as the apply-confirmation step",
+   "what": "The split-turn confirm fix was deployed to all 12 bots and live-verified on 10. On these two the test call never reached the confirmation step: both said no job in the list matched what the caller asked for, so the conversation ended before the point being tested. That is correct behaviour given the test job list, not a fault.",
+   "why": "The edit is identical to the ten that passed, so it is very likely fine — but the house rule is that a variant is only proven by its own call, never assumed from a twin.",
+   "next": "Re-run with a job list that matches what the inbound flow will actually offer these two bots, and confirm the separate consent question appears.",
+   "priority": "low",
    "since": "2026-08-07"
   }
  ]
