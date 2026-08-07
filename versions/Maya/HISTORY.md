@@ -76,3 +76,13 @@
 - **2026-07-30_031109** — `pre-deploy-maya-hi-in-2026-07-30_031109` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(4 files)_
 - **2026-07-31_104802** — `pre-recs-fallback` — empty-recommendations callback fallback _(4 files)_
 - **2026-07-31_111531** — `pre-deploy-maya-hi-out-2026-07-31_111530` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(4 files)_
+- **2026-08-07_172646** — `pre-split-confirm-turn` — carry KKB's split-turn confirm fix into Maya (owner-approved 2026-08-07) _(6 files)_
+- **2026-08-07_172730** — `pre-deploy-maya-hi-out-2026-08-07_172730` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-08-07_172731** — `pre-deploy-maya-hi-in-2026-08-07_172731` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_
+- **2026-08-07_172732** — `pre-deploy-maya-hi-signals-2026-08-07_172732` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-08-07_172733** — `pre-deploy-maya-hi-in-signals-2026-08-07_172733` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-08-07_173049** — `pre-college-name-fix` — before removing hardcoded college literals from Maya sample dialogues (E1) _(6 files)_
+- **2026-08-07_173228** — `pre-deploy-maya-hi-signals-2026-08-07_173228` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-08-07_173229** — `pre-deploy-maya-hi-in-signals-2026-08-07_173229` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-08-07_173230** — `pre-deploy-maya-hi-out-2026-08-07_173230` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-08-07_173231** — `pre-deploy-maya-hi-in-2026-08-07_173231` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_
