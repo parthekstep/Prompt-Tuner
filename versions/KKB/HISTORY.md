@@ -171,3 +171,5 @@
 - **2026-08-10_185456** — `pre-frequency-fix` — before removing the 5 verbatim default-opening repetitions _(10 files)_
 - **2026-08-10_185513** — `pre-deploy-kkb-hi-signals-2026-08-10_185513` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
 - **2026-08-10_185712** — `pre-deploy-kkb-hi-signals-2026-08-10_185712` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
+- **2026-08-10_194945** — `pre-option2-fold` — before folding the callback into the post-fetch turn _(10 files)_
+- **2026-08-10_195038** — `pre-deploy-kkb-hi-signals-2026-08-10_195038` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_

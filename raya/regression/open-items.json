@@ -170,14 +170,14 @@
    "severity": "minor"
   },
   {
-   "id": "returning-caller-duplicates-existing-behaviour",
+   "id": "returning-caller-working-rollout-pending",
    "bots": [
     "KKB Hindi · outbound · Signals"
    ],
-   "title": "DECISION NEEDED — the \"we spoke last time\" opening duplicates something the bot already does a turn later",
-   "what": "The new opening never happened across six rounds of fixes and six live calls. The last call showed why: one turn later the bot already greets the caller by name and reflects their work back to them — \"Sunita ji, I can see you are doing data entry work — are you still looking for that kind of job?\" That has been in the script for months, and it does the same job as the new opening, just a turn later and based on the caller's stored profile instead of the record of the last conversation. The bot does it once, in the place the script has always done it, and skips the new one. Everything the new opening depends on is working: the caller history is stored, read back, and handed to the bot at the start of the call — all three verified separately.",
-   "why": "There is nothing left to fix in the opening — the competing behaviour is wanted, not a bug, so removing rules cannot help. Continuing to edit would burn calls for nothing. This is now a choice about what we want the call to sound like.",
-   "next": "Pick one. EITHER accept what the bot already does — it recognises returning callers by name and role, which may be enough, and delete the new opening. OR move the reference to the previous conversation into that same later turn, so the bot says the caller's name, mentions what was discussed last time, and then asks its question — one acknowledgement in one place. The second option is closer to what was originally asked for, because it refers to the earlier conversation rather than to profile data. Either way: no more changes to the opening section.",
+   "title": "The \"we spoke last time\" line now WORKS on the pilot bot — rollout to the other bots is the remaining work",
+   "what": "After six failed attempts to put this in the opening, it was moved into the turn the bot already speaks after looking the caller up — the turn where it greets them by name and asks about their trade. It now says, in one turn: the caller's name, what was discussed last time, and the question about whether they still want that kind of work. Verified on a live call, with the topic taken correctly from the stored history rather than invented.",
+   "why": "This was one of four requested changes and is now working on one bot. It is not yet on the other seven KKB bots or the four Maya bots, and each of those needs its own call to confirm — the wording has to be re-authored for Kannada and for Maya's campus context and feminine verb forms.",
+   "next": "Copy the clause into the other KKB and Maya scripts, translating the spoken part for Kannada and adapting it for Maya, then place one live call per bot. Two things to check in each transcript: the clause appears, and the turn still ends on a single question rather than stacking two. Also still unconfirmed: what happens for a caller with NO history under the new shape — the test number's history is now permanent, so confirming that needs either a fresh number or deleting that history row from the console.",
    "severity": "major"
   }
  ]
