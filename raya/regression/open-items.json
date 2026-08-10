@@ -137,30 +137,6 @@
    "severity": "major"
   },
   {
-   "id": "contact-memory-not-populated-in-production",
-   "bots": [
-    "KKB Hindi · outbound · Signals",
-    "KKB Hindi · outbound · legacy",
-    "Maya Hindi · outbound · legacy"
-   ],
-   "title": "The caller-history field the returning-caller line depends on is mostly empty or holds something else entirely",
-   "what": "The new returning-caller line reads a caller-history field. In production that field almost never contains caller history. On the KKB Hindi campaign bot it was empty on 27 of the last 30 calls. On the older KKB Hindi bot it instead carries campaign spreadsheet columns — sector, course, and a dialling status that literally says the person has not been called yet. On Maya it is usually the text \"Not Available\". Separately, the component that would write real caller history after each call is not switched on for any KKB bot, and is off entirely on all six of the newer Signals bots.",
-   "why": "Left as it is, the returning-caller line will almost never appear in production even though it is built and working. Worse, the campaign data that IS in that field says people have not been dialled — so a version of this feature without a safety check would have told first-time callers we had spoken before.",
-   "next": "Decide who fills that field. Either the campaign starts sending real caller history, or the per-call memory writer gets switched on for the KKB bots. Until then, treat the returning-caller line as built and safe but effectively dormant.",
-   "severity": "major"
-  },
-  {
-   "id": "returning-caller-line-does-not-fire",
-   "bots": [
-    "KKB Hindi · outbound · Signals"
-   ],
-   "title": "The \"we spoke last time\" opening does not work, after four separate attempts to fix it",
-   "what": "The bot is supposed to open differently for someone we have spoken to before, referring to what the last conversation was about. It has never once done this on a live call, across four test calls with a caller record that clearly described a previous conversation. Four different rules elsewhere in the same script were found to be blocking it and all four were removed — a rule saying the call always opens the same way, a rule saying to behave as if the caller were new until their profile is fetched, the fact that five of the six worked examples in the script show the ordinary opening, and finally a rule stating that decisions must never be made from a supplied value. The bot still opens the ordinary way every time.",
-   "why": "This was one of four requested changes. It is not causing harm — the safety check works, so the bot never wrongly claims to have spoken to a first-time caller — but the feature simply does not happen. It should not be copied to other bots while it does not work, and it should not be reported as delivered.",
-   "next": "Stop trying to fix this with more wording. The reliable pattern, which worked twice today for the wrong-college-name bug and for the job title on the new TRRAIN bot, is to let the platform fill the value in rather than asking the bot to work it out: have the campaign send the previous conversation's topic as its own input value, and put that value directly into the spoken line. That needs a small change on the campaign side, so it is a decision to take rather than something to just do. Until then the feature is dormant — which it would be anyway, since the caller-history field is empty on almost every real call.",
-   "severity": "major"
-  },
-  {
    "id": "intro-spoken-twice-once-in-nine-calls",
    "bots": [
     "KKB Hindi · outbound · Signals"
@@ -181,6 +157,33 @@
    "why": "This is the model not following a clear instruction rather than the instruction being unclear, so writing the rule more forcefully tends to make things worse, not better. It matters because a skipped lookup means no name, and a guessed name is worse than none.",
    "next": "The name problem is fixed — the bot is now told to say the name exactly as given or leave it out entirely. The skipped lookup should be raised with the platform team rather than patched in the script. The bot copes without it: it drops the name and still names the job correctly, because the job title comes from a supplied value.",
    "severity": "minor"
+  },
+  {
+   "id": "returning-caller-awaiting-real-memory",
+   "bots": [
+    "KKB Hindi · outbound · Signals"
+   ],
+   "title": "The \"we spoke last time\" opening is built and its blocker is fixed, but it has still never been seen working",
+   "what": "This opening never happened on four test calls. The reason turned out not to be the script at all: the bots had caller-memory switched ON but no memory-writing instructions, so the platform was supplying an always-empty memory and throwing away anything the campaign sent in its place. Proved by running the same test twice on a scratch bot with only that one setting changed — with it off the bot read the memory back word for word, with it on the bot said the memory was empty. The missing memory-writing instructions have now been added to all six KKB bots, so a memory is written after every call from here on. A first attempt at a two-call test (one call to create the memory, a second to use it) still opened the ordinary way, but only about three minutes separated them and there is no way to look at the stored memory to check whether it had been written yet, so that attempt proves nothing either way.",
+   "why": "The feature was one of four requested changes and it is the only one not yet seen working. The blocker is understood and fixed, so what remains is confirmation rather than investigation — and it should not be copied to other bots until it is confirmed.",
+   "next": "Leave the script alone — no more wording changes; four rules were already rewritten chasing this and none of them was the cause. Once a few real calls have gone through and memories have been written, place a second call to a number that has already been called and check whether the opening references the earlier conversation. If it does, copy it to the other KKB bots and to Maya. If it still does not, the next thing to check is whether the memory is actually being stored — which needs the platform team, since there is no way to read it back.",
+   "severity": "major"
+  },
+  {
+   "id": "memory-ownership-decision-for-six-signals-bots",
+   "bots": [
+    "KKB Hindi · inbound · Signals",
+    "KKB Kannada · inbound · Signals",
+    "Maya Hindi · outbound · Signals",
+    "Maya Hindi · inbound · Signals",
+    "DKB Hindi · outbound · Signals",
+    "DKB Kannada · outbound · Signals"
+   ],
+   "title": "Six bots have caller memory switched off, and switching it on would discard what their campaigns send",
+   "what": "Caller memory is either the platform's job or the campaign's job, never both. When it is switched on, the platform supplies the caller history itself and ignores whatever the campaign sends in that field. These six bots currently have it switched off and no memory-writing instructions, so they keep no history between calls — but whatever their campaigns put in that field does reach them.",
+   "why": "Switching memory on for these six would make them remember callers between calls, which is the point of the feature. It would also silently start discarding whatever their campaigns are sending in that field today — and on at least one other bot the campaign is actively sending course and dialling information there. Turning it on without checking would quietly break that.",
+   "next": "For each of the six, find out whether its campaign relies on sending caller history. Where it does not, switch memory on AND add that bot's memory-writing instructions at the same time — the platform rejects memory being on without them. Where it does, leave memory off and keep the campaign in charge.",
+   "severity": "major"
   }
  ]
 }
