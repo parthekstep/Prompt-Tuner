@@ -159,31 +159,15 @@
    "severity": "minor"
   },
   {
-   "id": "returning-caller-awaiting-real-memory",
+   "id": "platform-not-storing-caller-memory",
    "bots": [
-    "KKB Hindi · outbound · Signals"
+    "ALL 18 live conversation agents"
    ],
-   "title": "The \"we spoke last time\" opening is built and its blocker is fixed, but it has still never been seen working",
-   "what": "This opening never happened on four test calls. The reason turned out not to be the script at all: the bots had caller-memory switched ON but no memory-writing instructions, so the platform was supplying an always-empty memory and throwing away anything the campaign sent in its place. Proved by running the same test twice on a scratch bot with only that one setting changed — with it off the bot read the memory back word for word, with it on the bot said the memory was empty. The missing memory-writing instructions have now been added to all six KKB bots, so a memory is written after every call from here on. A first attempt at a two-call test (one call to create the memory, a second to use it) still opened the ordinary way, but only about three minutes separated them and there is no way to look at the stored memory to check whether it had been written yet, so that attempt proves nothing either way.",
-   "why": "The feature was one of four requested changes and it is the only one not yet seen working. The blocker is understood and fixed, so what remains is confirmation rather than investigation — and it should not be copied to other bots until it is confirmed.",
-   "next": "Leave the script alone — no more wording changes; four rules were already rewritten chasing this and none of them was the cause. Once a few real calls have gone through and memories have been written, place a second call to a number that has already been called and check whether the opening references the earlier conversation. If it does, copy it to the other KKB bots and to Maya. If it still does not, the next thing to check is whether the memory is actually being stored — which needs the platform team, since there is no way to read it back.",
-   "severity": "major"
-  },
-  {
-   "id": "memory-ownership-decision-for-six-signals-bots",
-   "bots": [
-    "KKB Hindi · inbound · Signals",
-    "KKB Kannada · inbound · Signals",
-    "Maya Hindi · outbound · Signals",
-    "Maya Hindi · inbound · Signals",
-    "DKB Hindi · outbound · Signals",
-    "DKB Kannada · outbound · Signals"
-   ],
-   "title": "Six bots have caller memory switched off, and switching it on would discard what their campaigns send",
-   "what": "Caller memory is either the platform's job or the campaign's job, never both. When it is switched on, the platform supplies the caller history itself and ignores whatever the campaign sends in that field. These six bots currently have it switched off and no memory-writing instructions, so they keep no history between calls — but whatever their campaigns put in that field does reach them.",
-   "why": "Switching memory on for these six would make them remember callers between calls, which is the point of the feature. It would also silently start discarding whatever their campaigns are sending in that field today — and on at least one other bot the campaign is actively sending course and dialling information there. Turning it on without checking would quietly break that.",
-   "next": "For each of the six, find out whether its campaign relies on sending caller history. Where it does not, switch memory on AND add that bot's memory-writing instructions at the same time — the platform rejects memory being on without them. Where it does, leave memory off and keep the campaign in charge.",
-   "severity": "major"
+   "title": "PLATFORM ISSUE — caller memory is switched on everywhere but nothing is ever stored or handed back",
+   "what": "Caller memory is now switched on for all eighteen live bots, each with its memory-writing instructions in place, and every bot's script carries the block that receives the memory. Despite that, the memory handed to a bot at the start of a call is always empty. Three separate checks: a full two-minute call that applied for a job and gathered the caller's details, then a second call to the same number ten minutes later — the second call opened as if it had never spoken to them. A purpose-built diagnostic bot whose only job is to read its own memory aloud reported it empty, both before and after a prior call. And the same diagnostic bot proved that when memory is switched OFF, a value sent by the campaign comes through perfectly — so the receiving end works; it is the storing end that does not.",
+   "why": "This blocks the \"we spoke last time\" opening entirely, and it blocks anything else that would depend on remembering a caller between calls. It is not a script problem and not a settings problem — both of those have been checked and corrected. Notably, the OTHER after-the-call job on the same bots does work: the call summary and extracted fields are produced reliably. So post-call processing runs; it is specifically the memory that is not being kept.",
+   "next": "Raise with the platform team (LitWiz / Raya) with these three observations. Questions for them: does the memory-writing step actually run after a call, is its result stored anywhere, and is it keyed to the number dialled? There is no way to check from outside — there is no endpoint that returns a caller's stored memory (six likely addresses were tried, all not found), which is itself worth asking about. Until they confirm storage works, treat every memory-dependent feature as blocked, and do NOT make further script changes chasing it.",
+   "severity": "critical"
   }
  ]
 }
