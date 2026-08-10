@@ -277,3 +277,39 @@ Format:
 2026-08-10 14:07:09 · prod · maya-hi-in · df99f501-e636-4f3d-80dc-e06e82240082 · Maya/Maya Inbound.md · sha256:bcd38427 · snapshot:pre-deploy-maya-hi-in-2026-08-10_140709 · deployed
 2026-08-10 14:24:15 · prod · kkb-hi-signals · 115b38a5-42ef-4082-be69-84a871bb226a · KKB/KKB Placeholder Hindi Signals.md · sha256:2aea38c4 · snapshot:pre-deploy-kkb-hi-signals-2026-08-10_142415 · deployed
 2026-08-10 14:34:43 · prod · kkb-hi-signals · 115b38a5-42ef-4082-be69-84a871bb226a · KKB/KKB Placeholder Hindi Signals.md · sha256:8ce3cfd1 · snapshot:pre-deploy-kkb-hi-signals-2026-08-10_143443 · deployed
+
+## 2026-08-10 — Caller memory turned ON fleet-wide, with each agent's memory prompt deployed
+
+Config-only change (no prompt content edited), so it leaves no diff in the prompt files — recorded
+here because it changes runtime behaviour on every live agent.
+
+**Why.** `memory_enabled=true` makes the PLATFORM own `${contact_memory}`: it injects its own stored
+per-caller memory and **discards whatever the campaign passes in `agent_args`**. Confirmed by a
+controlled A/B on a scratch agent (same prompt, same args, one field changed): with the flag off the
+bot read the supplied memory back verbatim; with it on the bot reported the memory as empty. The
+campaigns send nothing in that field, so the platform is the right owner — but the flag is inert
+without a memory-writer prompt, and the API rejects that combination outright:
+`400 memory_instructions is required when memory_enabled is true`.
+
+**Before:** six KKB agents had `memory_enabled=true` with `memory_instructions=NULL` — memory on,
+nothing writing it, so an always-empty memory was injected on every call. Six Signals agents had
+memory off entirely. Only DKB hi/kn outbound and Maya hi out/in had a working setup.
+
+**Applied:**
+- `KKB/KKB Memory.md` → kkb-hi-out, kkb-kn-out, kkb-hi-in, kkb-kn-in, kkb-hi-signals, kkb-kn-signals
+- `KKB/KKB Memory.md` → kkb-hi-in-signals, kkb-kn-in-signals (also flipped `memory_enabled` on)
+- `Maya/Maya Memory.md` → maya-hi-signals, maya-hi-in-signals (flag flipped on)
+- `DKB/DKB Memory.md` → dkb-hi-signals, dkb-kn-signals (flag flipped on)
+- TRRAIN hi/kn were created with memory on and their prompt already deployed.
+
+**Result:** all 18 live conversation agents now have memory ON with a writer prompt. Verified that
+all 20 conversation prompts carry the required `### Contact context` injection block verbatim first.
+
+**Known drift, deliberately NOT touched:** `dkb-hi-out`'s live memory prompt is 8575 chars against
+the repo's 8005 (`dkb-kn-out` live is 8005 and matches). Live is ahead on DKB Memory and needs a
+proper reconcile — `scripts/raya_deploy.py pull` then commit — rather than being overwritten in
+passing. The two DKB Signals agents received the repo version.
+
+**Consequence for testing:** on a memory-enabled agent, passing `contact_memory` through
+`agent_args` does nothing. Any memory-driven behaviour can only be tested with TWO sequential calls
+to the same number — the first writing the memory, the second consuming it.
