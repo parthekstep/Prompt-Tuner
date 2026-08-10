@@ -46,6 +46,8 @@ the call record as well as the transcript.
 
 - [ ] **Wrong person** (says they never applied / wrong number) → apologise and close, **offer never made**.
   *Why / how to detect:* `trrain_pitched` must be "No". An offer made to someone who just said they never applied is a **critical fail**.
+- [ ] The denial is acted on the FIRST time it is said — the introduction is never repeated at them.
+  *Why / how to detect:* Find the caller's denial, then read the very next bot turn. It must be the apology + close. A verbatim re-delivery of the introduction (or of the hold line) before closing is a fail — observed on 2026-08-10 and fixed with a "Turn 2 is said once and never repeated" rule.
 - [ ] **Do-not-call** → comply immediately, no final pitch.
 - [ ] **Proxy** (someone else answers) → no offer, no detail about the application disclosed to them.
 - [ ] **Busy / angry** → no offer, brief courteous close.
