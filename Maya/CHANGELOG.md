@@ -10,6 +10,16 @@ Every prompt edit to Maya is logged here. Maya is Hindi-only (KKB spinoff). Entr
 - **Ported from:** <source agent> (only for cross-agent ports)
 ```
 
+## 2026-08-10 — Audio-check intro turn (ported from the KKB pilot)
+- **Feedback/bug:** Fleet-wide intro change: the bot was launching into the full introduction while the caller was still saying "hello, who is this?", so the introduction was talked over. Requested that outbound bots instead open with a short "can you hear me?" and give the real introduction only after the caller confirms.
+- **Change:** Added `## Turn 1 — Audio check` as the first spoken turn of every call — "हैलो, मेरी आवाज़ आ रही है?" and nothing else — with branches for confirm / cannot-hear (ONE slower repeat, then a polite close) / silence. The existing campus introduction became the turn AFTER the caller confirms; its wording, the `${college_name}` identity, the student question, and the recording disclosure are all untouched. The canonical-flow line in the sample conversations was updated so the examples do not imply the audio check is skipped. `say_hello` set to **false** on both Maya outbound agents.
+- **Maya gate:** this is shared core intro logic inherited from KKB, so it falls under the flag-and-ask rule. The user's instruction covering it was explicit — the intro change was specified for the fleet, and items 1 and 3 were to be piloted on KKB and then "implemented across other bots". Maya's divergences are preserved untouched: campus caller identity, `${college_name}`, `hr_contact`/`benefits`, Experience Capture, HR-number sharing, the MPL Competition offer, and the feminine-voice rule.
+- **Files:** `Maya/Maya Hindi.md`, `Maya/Maya Hindi Signals.md`.
+- **Ported from:** KKB (pilot `KKB Placeholder Hindi Signals.md`, verified live on 4 calls before rollout).
+- **Not yet ported (deliberate):** the returning-caller callback line and the Need Capture offer are still KKB-pilot-only, pending live verification on the pilot. Maya inbound is untouched — for an inbound call the caller dialled us, so an audio check is not warranted and disabling the greeting would risk dead air on pickup.
+- **VERIFY-PENDING:** the audio-check turn is verified live on KKB Hindi Signals, not yet on either Maya variant. Per the never-extrapolate rule, both Maya outbound variants still need their own live call.
+
+
 ## 2026-08-07 — Wrong college name spoken: remove hardcoded institutions from the examples (E1)
 - **Feedback/bug:** "KKB Maya- Signals — wrong college name; given VTU it's saying Saraswati" (+91905…073, 07/08/2026 10:40 am). VALIDATED against call `44d9aff4` on `maya-hi-signals`: `agent_args` carried `college_name: "VTU"`, and the agent opened with *"नमस्ते। मैं माया, सरस्वती कॉलेज की ओर से बात कर रही हूँ… क्या आप सरस्वती कॉलेज की स्टूडेंट हैं?"* — naming a completely different institution, twice, in the first turn.
 - **Root cause:** analyser pattern **E1** (examples override the real data). The opening-line template correctly used `[college_name]`, but the worked sample dialogues further down HARDCODED real institution names (`सरस्वती कॉलेज`, `पीईएस यूनिवर्सिटी`) in the agent's spoken lines. The model copied the example literal instead of substituting `${college_name}`. Nothing was wrong with the input args.

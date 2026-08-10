@@ -10,6 +10,15 @@ Every prompt edit to DKB is logged here. Entry format:
 - **Ported from:** <source agent> (only for cross-agent ports)
 ```
 
+## 2026-08-10 — Audio-check turn added ahead of Turn 1 (ported from the KKB pilot)
+- **Feedback/bug:** Fleet-wide intro change: outbound bots were launching into their opening line while the person who just picked up was still saying "hello, who is this?" — so the opening was talked over. Requested that outbound bots first ask a short "can you hear me?" and only continue once the person confirms.
+- **Change:** Added `## Turn 0 — Audio check` immediately before the existing `Turn 1 — Opening`, in all four DKB **outbound** prompts. It speaks only the audio check ("हैलो, मेरी आवाज़ आ रही है?" / "ಹಲೋ, ನನ್ನ ಧ್ವನಿ ಕೇಳಿಸ್ತಾ ಇದೆಯಾ?"), then waits; branches for confirm / cannot-hear (ONE slower repeat, then a polite close) / silence. `Turn 1` was renamed from "spoken immediately when call connects" to "spoken once the caller has confirmed they can hear you" — its business-owner question, the `${company_name}` / `${job_role}` branching, and every later turn are untouched. **Numbered Turn 0 deliberately** so the existing Turn 1 / Turn 2 / Turn 3 cross-references throughout the prompt stay valid — a renumber would have been a far larger and riskier diff. `say_hello` set to **false** on the four outbound agents.
+- **Domain adaptation:** the shared block's "do NOT ask about work" line (seeker framing) was reworded for DKB to "do NOT ask who they are or about their business", since DKB's first real turn asks whether the caller is a business owner.
+- **Files:** `DKB/DKB Hindi.md`, `DKB/DKB Kannada.md`, `DKB/DKB Hindi Signals.md`, `DKB/DKB Kannada Signals.md`.
+- **Ported from:** KKB (pilot `KKB Placeholder Hindi Signals.md`, verified live on 4 calls before rollout).
+- **Not ported (deliberate):** the returning-caller callback line and the Need Capture service-provider offer are **not** applied to DKB. Need Capture is meaningless here — it offers a job-seeker help finding work, and DKB's caller is the employer. The returning-caller line would need employer-specific wording ("we spoke about your job posting") and is left for a separate decision. The two DKB **inbound** prompts are also untouched: the caller dialled us, so an audio check is not warranted and disabling the greeting would risk dead air on pickup.
+- **VERIFY-PENDING:** verified live on KKB Hindi Signals only. Per the never-extrapolate rule each DKB variant still needs its own live call — Hindi and Kannada, legacy and Signals.
+
 ## 2026-08-01 — DKB Signals: remove get_talent_insights + are-you-AI + fix Not-Available routing (CD1/CD4/CD5)
 
 - **Feedback/bug:** (user, deep E2E pass) the DKB Signals bots still carried the ONEST/Dhiway `get_talent_insights` tool and its whole market-picture step, guarded as a "backend dependency" that could only ever return nothing on Signals — a step that could stall or invite fabrication. There is **no Signals talent-insights endpoint**, so keeping a stub was worse than removing it.
