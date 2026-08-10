@@ -202,3 +202,46 @@ difficulty the subject of the call** — it is there to do the job the caller ra
 
 - [ ] Nothing in the call implies the caller is a burden, is being done a favour, or is being assessed for competence.
   *Why / how to detect:* Scan for condescension, praise for ordinary answers, over-explaining, or pity framing. The register should be the same one the bot uses with any other caller — plain, respectful, practical.
+
+---
+
+## 15. Audio-check opening turn (outbound bots, 2026-08-10 onward)
+
+Outbound bots run with `say_hello=false` and open with a short audio check instead of the full introduction. Grade every outbound call against these.
+
+- [ ] The bot's FIRST spoken turn is the audio check alone — "हैलो, मेरी आवाज़ आ रही है?" / "ಹಲೋ, ನನ್ನ ಧ್ವನಿ ಕೇಳಿಸ್ತಾ ಇದೆಯಾ?" — and nothing else.
+  *Why / how to detect:* Read the first `[assistant]` turn. Any greeting, initiative name, reason for calling, question about work, or recording disclosure in that turn is a fail — those all belong to the next turn. (The transcript's leading `[user] hello` is a platform-injected seed turn, not the caller; ignore it.)
+
+- [ ] The real introduction is spoken only AFTER the caller confirms they can hear.
+  *Why / how to detect:* There must be a caller turn between the audio check and the introduction. An introduction delivered in the same turn as the audio check, or before any caller reply, is a fail — that is the bug this turn exists to fix.
+
+- [ ] A caller who cannot hear gets exactly ONE slower repeat, then a polite close — never a march onward into the introduction.
+  *Why / how to detect:* Find a caller turn saying the line is bad ("आवाज़ नहीं आ रही", "क्या?"). The next bot turn must be the single re-ask; if the caller still cannot hear, the bot must close with the bad-line line and end. Two or more re-asks, or ploughing into the introduction over a caller who cannot hear, are both fails.
+
+- [ ] The audio check is never repeated later in the call.
+  *Why / how to detect:* Search the whole transcript for the audio-check phrasing; more than the permitted one repeat (both in the opening) is a fail.
+
+## 16. Returning-caller opening (seeker bots with `${contact_memory}`)
+
+- [ ] The bot claims a previous conversation ONLY when the memory actually records one.
+  *Why / how to detect:* Read the call's `agent_args.contact_memory` FIRST, then the opening turn. If the memory is empty, "Not Available", the "No Old Memory" sentinel, a job list, or campaign metadata (sector / course / batch / "Call status: not_dialled"), the bot must use the default greeting. **Any "पिछली बार हमारी बात हुई थी" to such a caller is a critical fail — it is a false claim to a first-time caller.**
+
+- [ ] When the memory does record a previous conversation, the callback line fires and names only what the memory holds.
+  *Why / how to detect:* With a memory carrying a call summary / a job shown or applied to / a last action, the opening must reference it in one short sentence. A default greeting here is a miss (the feature silently not firing — see analyser A9). An invented role, company, or outcome is a critical fail.
+
+- [ ] The callback line uses no name and invents no recency.
+  *Why / how to detect:* The caller's name must not appear before `get_profile` returns. "कुछ दिन पहले" is only allowed when the memory carries a date/timeframe; otherwise the neutral "पिछली बार" must be used. Raw memory text, JSON, or field names spoken aloud are fails.
+
+## 17. Need Capture offer (KKB / Maya seeker bots)
+
+- [ ] Every engaged call ends with exactly ONE service-provider offer, before the closing line.
+  *Why / how to detect:* If the caller talked past the introduction, the offer must appear before the goodbye — whether they applied, declined, or stayed undecided. A closing with no offer on an engaged call is a fail. Two offers, a rephrased re-ask, or any push after a refusal is also a fail.
+
+- [ ] The path matches the call outcome.
+  *Why / how to detect:* Applied, or declined for a CONCRETE reason (too far, salary too low) → Path A ("जॉब मिलने के चांस…"). Confused / undecided / declined with no clear reason → Path B ("मैं समझती हूँ, डिसाइड करना मुश्किल…"). A caller who was clear about why the jobs did not fit is NOT confused — Path B for them is a fail.
+
+- [ ] The offer is skipped entirely for a do-not-call request, a disengaged caller, or a call that never got past the greeting.
+  *Why / how to detect:* On a do-not-call transcript, confirm the bot complies and closes with NO final pitch. A pitch squeezed in after a do-not-call is a critical fail.
+
+- [ ] TRRAIN (or any partner) is never named, and the service is never described beyond one sentence.
+  *Why / how to detect:* Search the transcript for "TRRAIN" / any partner name — any occurrence is a critical fail. If the caller asked what the service is, the answer must be a single sentence, and the follow-up questions ("क्या आपको सर्टिफिकेट चाहिए?") must not appear.

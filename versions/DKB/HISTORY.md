@@ -11,3 +11,8 @@
 - **2026-07-22_133021** — `pre-deploy-dkb-kn-out-2026-07-22_133021` — auto snapshot before Raya deploy of DKB/DKB Kannada.md _(6 files)_
 - **2026-07-30_024108** — `pre-deploy-dkb-hi-out-2026-07-30_024108` — auto snapshot before Raya deploy of DKB/DKB Hindi.md _(6 files)_
 - **2026-07-30_024109** — `pre-deploy-dkb-kn-out-2026-07-30_024109` — auto snapshot before Raya deploy of DKB/DKB Kannada.md _(6 files)_
+- **2026-08-10_132553** — `pre-audiocheck` — before fleet audio-check rollout _(8 files)_
+- **2026-08-10_133907** — `pre-deploy-dkb-hi-signals-2026-08-10_133907` — auto snapshot before Raya deploy of DKB/DKB Hindi Signals.md _(8 files)_
+- **2026-08-10_133908** — `pre-deploy-dkb-kn-signals-2026-08-10_133908` — auto snapshot before Raya deploy of DKB/DKB Kannada Signals.md _(8 files)_
+- **2026-08-10_133908** — `pre-deploy-dkb-hi-out-2026-08-10_133908` — auto snapshot before Raya deploy of DKB/DKB Hindi.md _(8 files)_
+- **2026-08-10_133909** — `pre-deploy-dkb-kn-out-2026-08-10_133909` — auto snapshot before Raya deploy of DKB/DKB Kannada.md _(8 files)_

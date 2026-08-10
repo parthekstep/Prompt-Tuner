@@ -55,6 +55,7 @@ must be **surgical**: change only what the task requires, and nothing more.
 - **KKB** — government job-matching agent for workers/seekers (Hindi + Kannada). Persona: *काम की बात / ಕೆಲಸದ ಮಾತು*.
 - **DKB** — "Dhandhe Ki Baat", job verification & capture agent for MSME business owners/employers (Hindi + Kannada). Persona: *धंधे की बात*.
 - **Maya** — a KKB spinoff for higher-ed graduates in UP; campus-recruitment context. **Hindi only.** Persona: *माया, [college_name] की ओर से*.
+- **TRRAIN** — an **outbound-only** follow-up campaign (Hindi + Kannada) calling seekers who have **already applied** to a job, to offer them one free support service and capture their interest. **It has no tools** — it cannot fetch, apply, or update anything. Short call (under two minutes), one offer per call, the partner is never named aloud.
 
 Each agent has three prompt types: a **conversation prompt** (one file per language),
 a **memory prompt** (one language-agnostic file, English output), and an
@@ -69,6 +70,7 @@ Filenames are kept as-is (note KKB's "Placeholder" naming). Always resolve files
 | KKB | `KKB/KKB Placeholder Hindi.md` | `KKB/KKB Placeholder Kannada.md` | `KKB/KKB Memory.md` | `KKB/KKB Output.md` |
 | DKB | `DKB/DKB Hindi.md` | `DKB/DKB Kannada.md` | `DKB/DKB Memory.md` | `DKB/DKB Output.md` |
 | Maya | `Maya/Maya Hindi.md` | — (none) | `Maya/Maya Memory.md` | `Maya/Maya Output.md` |
+| TRRAIN | `TRRAIN/TRRAIN Hindi.md` | `TRRAIN/TRRAIN Kannada.md` | `TRRAIN/TRRAIN Memory.md` | `TRRAIN/TRRAIN Output.md` |
 
 ## Core principle: agnostic vs language-specific
 

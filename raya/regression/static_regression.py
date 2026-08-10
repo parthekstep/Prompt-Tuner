@@ -24,44 +24,48 @@ AGENT_BLURB = {
     "KKB": "Government-job matching for workers / job-seekers",
     "DKB": "Job posting & verification for employers (MSMEs)",
     "Maya": "Campus recruitment for UP graduates",
+    "TRRAIN": "Follow-up call offering a free support service to seekers who already applied",
 }
+# Agents whose callers are job-seekers (vs employers) — drives the seeker-only checks.
+SEEKER_AGENTS = ("KKB", "Maya", "TRRAIN")
 DIRECTION_BLURB = {"outbound": "the bot phones the person", "inbound": "the person phones the bot"}
 BACKEND_BLURB = {"signals": "new Signals DPG backend", "dhiway": "older Dhiway/ONEST backend"}
 
 
 def discover_prompts():
+    """Derive the checked set from raya/agents.json — never a hard-coded list.
+
+    Gap G4. This list used to be hand-maintained and twice fell behind reality: the two DKB
+    inbound bots (2026-08-05) and then TRRAIN (2026-08-10) were live deploy targets that the
+    daily suite silently ignored, while the digest read as full coverage. Deriving it from the
+    same manifest the deploys use means a newly registered bot is checked the day it lands.
+    coverage_gap() stays as the backstop.
+    """
     out = []
-    files = {
-        "KKB": ["KKB Placeholder Hindi.md","KKB Placeholder Kannada.md","KKB Placeholder Inbound.md",
-                "KKB Placeholder Inbound Kannada.md","KKB Placeholder Hindi Signals.md","KKB Placeholder Kannada Signals.md",
-                "KKB Placeholder Inbound Signals.md","KKB Placeholder Inbound Kannada Signals.md"],
-        # NOTE 2026-08-05: "DKB Inbound Hindi.md"/"DKB Inbound Kannada.md" were missing from this
-        # list while being live deploy:true targets (dkb-hi-in, dkb-kn-in) — so two production bots
-        # went unchecked and the digest under-reported the fleet as 16. Added. Follow-up (gap G4):
-        # derive this list from raya/agents.json instead of hard-coding it, so a newly registered
-        # bot can never be silently omitted again.
-        "DKB": ["DKB Hindi.md","DKB Kannada.md","DKB Hindi Signals.md","DKB Kannada Signals.md",
-                "DKB Inbound Hindi.md","DKB Inbound Kannada.md"],
-        "Maya": ["Maya Hindi.md","Maya Inbound.md","Maya Hindi Signals.md","Maya Inbound Signals.md"],
-    }
-    for agent_dir, fns in files.items():
-        for fn in fns:
-            p = os.path.join(REPO, agent_dir, fn)
-            if not os.path.exists(p): continue
-            name = fn.lower()
-            lang = "Kannada" if "kannada" in name else "Hindi"
-            direction = "inbound" if "inbound" in name else "outbound"
-            backend = "signals" if "signals" in name else "dhiway"
-            out.append({
-                "path": os.path.join(agent_dir, fn), "agent": agent_dir,
-                "lang": "kn" if lang == "Kannada" else "hi",
-                "direction": direction, "backend": backend,
-                "seeker": agent_dir in ("KKB", "Maya"),
-                # friendly identity used throughout the email
-                "bot": f"{agent_dir} {lang} · {direction} · {'Signals' if backend=='signals' else 'legacy'}",
-                "blurb": (f"{AGENT_BLURB[agent_dir]} — {DIRECTION_BLURB[direction]}, in {lang}, "
-                          f"on the {BACKEND_BLURB[backend]}"),
-                "text": io.open(p, encoding="utf-8").read()})
+    manifest = json.load(io.open(os.path.join(REPO, "raya/agents.json"), encoding="utf-8"))
+    for t in manifest.get("targets", []):
+        if t.get("kind") != "conversation" or not t.get("deploy"):
+            continue
+        rel = t["file"]
+        p = os.path.join(REPO, rel)
+        if not os.path.exists(p):
+            continue
+        agent_dir = rel.split("/")[0]
+        name = rel.lower()
+        lang = "Kannada" if t.get("language") == "kn" or "kannada" in name else "Hindi"
+        direction = t.get("direction") or ("inbound" if "inbound" in name else "outbound")
+        backend = "signals" if (t.get("signals") or "signals" in name) else "dhiway"
+        out.append({
+            "path": rel, "agent": agent_dir,
+            "lang": "kn" if lang == "Kannada" else "hi",
+            "direction": direction, "backend": backend,
+            "seeker": agent_dir in SEEKER_AGENTS,
+            # friendly identity used throughout the email
+            "bot": f"{agent_dir} {lang} \u00b7 {direction} \u00b7 {'Signals' if backend=='signals' else 'legacy'}",
+            "blurb": (f"{AGENT_BLURB.get(agent_dir, agent_dir)} \u2014 {DIRECTION_BLURB[direction]}, in {lang}, "
+                      f"on the {BACKEND_BLURB[backend]}"),
+            "text": io.open(p, encoding="utf-8").read()})
+    out.sort(key=lambda x: (x["agent"], x["direction"], x["lang"]))
     return out
 
 
@@ -123,7 +127,10 @@ def check(p):
         add("major", "missing-section",
             "No \"Graceful Exit\" section — the part that tells the bot how to end a call politely when "
             "the caller declines or wants to stop.", {"section": "Graceful Exit"})
-    if p["seeker"] and "get_profile" not in t:
+    # A toolless bot (e.g. the TRRAIN follow-up campaign) has no profile flow BY DESIGN — it only
+    # talks and listens. Requiring get_profile of it is a false positive, so exempt it explicitly.
+    toolless = "You have no tools" in t
+    if p["seeker"] and not toolless and "get_profile" not in t:
         add("major", "missing-section",
             "This is a job-seeker bot, but its script never looks the caller up (no get_profile), so it "
             "cannot tell a returning caller from a brand-new one.", {"section": "get_profile"})

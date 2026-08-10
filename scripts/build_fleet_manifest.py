@@ -30,6 +30,7 @@ PROJECTS = {
     "KKB": "blue-dots",
     "DKB": "blue-dots",
     "Maya": "blue-dots",
+    "TRRAIN": "blue-dots",
 }
 
 

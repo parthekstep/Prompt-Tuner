@@ -477,6 +477,113 @@
       ],
       "source_agent_for_clone": "df99f501-e636-4f3d-80dc-e06e82240082",
       "_note": "NEW Signals agent (Maya Hindi INBOUND) — base Maya/Maya Inbound.md; create by cloning maya-hi-in (df99f501) config + Signals tools. Phase 1."
+    },
+    {
+      "id": "trrain-hi-out",
+      "file": "TRRAIN/TRRAIN Hindi.md",
+      "agent": "TRRAIN",
+      "language": "hi",
+      "direction": "outbound",
+      "kind": "conversation",
+      "profile": "conversation",
+      "master": true,
+      "raya_name": "TRRAIN Hindi",
+      "expected_name_contains": [
+        "TRRAIN"
+      ],
+      "raya_agent_id": {
+        "prod": "cf39a59a-3b24-4842-ba03-4248ec245aa1",
+        "staging": ""
+      },
+      "deploy": true,
+      "_note": "New 2026-08-10. Outbound-only follow-up campaign for seekers who already applied. NO tools. say_hello=false + audio-check Turn 1."
+    },
+    {
+      "id": "trrain-kn-out",
+      "file": "TRRAIN/TRRAIN Kannada.md",
+      "agent": "TRRAIN",
+      "language": "kn",
+      "direction": "outbound",
+      "kind": "conversation",
+      "profile": "conversation",
+      "raya_name": "TRRAIN Kannada",
+      "expected_name_contains": [
+        "TRRAIN"
+      ],
+      "raya_agent_id": {
+        "prod": "dfeda883-3d2d-4a74-a0b5-1a47fdde2282",
+        "staging": ""
+      },
+      "deploy": true,
+      "_note": "Mirror of trrain-hi-out (master = Hindi)."
+    },
+    {
+      "id": "trrain-hi-memory",
+      "file": "TRRAIN/TRRAIN Memory.md",
+      "agent": "TRRAIN",
+      "language": "xx",
+      "direction": "postcall",
+      "kind": "memory",
+      "profile": "memory",
+      "expected_name_contains": [
+        "TRRAIN"
+      ],
+      "raya_agent_id": {
+        "prod": "cf39a59a-3b24-4842-ba03-4248ec245aa1",
+        "staging": ""
+      },
+      "deploy": true
+    },
+    {
+      "id": "trrain-kn-memory",
+      "file": "TRRAIN/TRRAIN Memory.md",
+      "agent": "TRRAIN",
+      "language": "xx",
+      "direction": "postcall",
+      "kind": "memory",
+      "profile": "memory",
+      "expected_name_contains": [
+        "TRRAIN"
+      ],
+      "raya_agent_id": {
+        "prod": "dfeda883-3d2d-4a74-a0b5-1a47fdde2282",
+        "staging": ""
+      },
+      "deploy": true
+    },
+    {
+      "id": "trrain-hi-output",
+      "file": "TRRAIN/TRRAIN Output.md",
+      "agent": "TRRAIN",
+      "language": "xx",
+      "direction": "postcall",
+      "kind": "output",
+      "profile": "output",
+      "expected_name_contains": [
+        "TRRAIN"
+      ],
+      "raya_agent_id": {
+        "prod": "cf39a59a-3b24-4842-ba03-4248ec245aa1",
+        "staging": ""
+      },
+      "deploy": true
+    },
+    {
+      "id": "trrain-kn-output",
+      "file": "TRRAIN/TRRAIN Output.md",
+      "agent": "TRRAIN",
+      "language": "xx",
+      "direction": "postcall",
+      "kind": "output",
+      "profile": "output",
+      "expected_name_contains": [
+        "TRRAIN"
+      ],
+      "raya_agent_id": {
+        "prod": "dfeda883-3d2d-4a74-a0b5-1a47fdde2282",
+        "staging": ""
+      },
+      "deploy": true
     }
   ]
 }

@@ -1,91 +1,7 @@
 {
- "prompts_checked": 18,
- "total_findings": 1,
+ "prompts_checked": 20,
+ "total_findings": 2,
  "bots": [
-  {
-   "bot": "KKB Hindi · outbound · legacy",
-   "blurb": "Government-job matching for workers / job-seekers — the bot phones the person, in Hindi, on the older Dhiway/ONEST backend",
-   "agent": "KKB",
-   "file": "KKB/KKB Placeholder Hindi.md",
-   "findings": 0
-  },
-  {
-   "bot": "KKB Kannada · outbound · legacy",
-   "blurb": "Government-job matching for workers / job-seekers — the bot phones the person, in Kannada, on the older Dhiway/ONEST backend",
-   "agent": "KKB",
-   "file": "KKB/KKB Placeholder Kannada.md",
-   "findings": 0
-  },
-  {
-   "bot": "KKB Hindi · inbound · legacy",
-   "blurb": "Government-job matching for workers / job-seekers — the person phones the bot, in Hindi, on the older Dhiway/ONEST backend",
-   "agent": "KKB",
-   "file": "KKB/KKB Placeholder Inbound.md",
-   "findings": 0
-  },
-  {
-   "bot": "KKB Kannada · inbound · legacy",
-   "blurb": "Government-job matching for workers / job-seekers — the person phones the bot, in Kannada, on the older Dhiway/ONEST backend",
-   "agent": "KKB",
-   "file": "KKB/KKB Placeholder Inbound Kannada.md",
-   "findings": 0
-  },
-  {
-   "bot": "KKB Hindi · outbound · Signals",
-   "blurb": "Government-job matching for workers / job-seekers — the bot phones the person, in Hindi, on the new Signals DPG backend",
-   "agent": "KKB",
-   "file": "KKB/KKB Placeholder Hindi Signals.md",
-   "findings": 0
-  },
-  {
-   "bot": "KKB Kannada · outbound · Signals",
-   "blurb": "Government-job matching for workers / job-seekers — the bot phones the person, in Kannada, on the new Signals DPG backend",
-   "agent": "KKB",
-   "file": "KKB/KKB Placeholder Kannada Signals.md",
-   "findings": 0
-  },
-  {
-   "bot": "KKB Hindi · inbound · Signals",
-   "blurb": "Government-job matching for workers / job-seekers — the person phones the bot, in Hindi, on the new Signals DPG backend",
-   "agent": "KKB",
-   "file": "KKB/KKB Placeholder Inbound Signals.md",
-   "findings": 0
-  },
-  {
-   "bot": "KKB Kannada · inbound · Signals",
-   "blurb": "Government-job matching for workers / job-seekers — the person phones the bot, in Kannada, on the new Signals DPG backend",
-   "agent": "KKB",
-   "file": "KKB/KKB Placeholder Inbound Kannada Signals.md",
-   "findings": 0
-  },
-  {
-   "bot": "DKB Hindi · outbound · legacy",
-   "blurb": "Job posting & verification for employers (MSMEs) — the bot phones the person, in Hindi, on the older Dhiway/ONEST backend",
-   "agent": "DKB",
-   "file": "DKB/DKB Hindi.md",
-   "findings": 0
-  },
-  {
-   "bot": "DKB Kannada · outbound · legacy",
-   "blurb": "Job posting & verification for employers (MSMEs) — the bot phones the person, in Kannada, on the older Dhiway/ONEST backend",
-   "agent": "DKB",
-   "file": "DKB/DKB Kannada.md",
-   "findings": 0
-  },
-  {
-   "bot": "DKB Hindi · outbound · Signals",
-   "blurb": "Job posting & verification for employers (MSMEs) — the bot phones the person, in Hindi, on the new Signals DPG backend",
-   "agent": "DKB",
-   "file": "DKB/DKB Hindi Signals.md",
-   "findings": 1
-  },
-  {
-   "bot": "DKB Kannada · outbound · Signals",
-   "blurb": "Job posting & verification for employers (MSMEs) — the bot phones the person, in Kannada, on the new Signals DPG backend",
-   "agent": "DKB",
-   "file": "DKB/DKB Kannada Signals.md",
-   "findings": 0
-  },
   {
    "bot": "DKB Hindi · inbound · legacy",
    "blurb": "Job posting & verification for employers (MSMEs) — the person phones the bot, in Hindi, on the older Dhiway/ONEST backend",
@@ -101,10 +17,87 @@
    "findings": 0
   },
   {
-   "bot": "Maya Hindi · outbound · legacy",
-   "blurb": "Campus recruitment for UP graduates — the bot phones the person, in Hindi, on the older Dhiway/ONEST backend",
-   "agent": "Maya",
-   "file": "Maya/Maya Hindi.md",
+   "bot": "DKB Hindi · outbound · legacy",
+   "blurb": "Job posting & verification for employers (MSMEs) — the bot phones the person, in Hindi, on the older Dhiway/ONEST backend",
+   "agent": "DKB",
+   "file": "DKB/DKB Hindi.md",
+   "findings": 0
+  },
+  {
+   "bot": "DKB Hindi · outbound · Signals",
+   "blurb": "Job posting & verification for employers (MSMEs) — the bot phones the person, in Hindi, on the new Signals DPG backend",
+   "agent": "DKB",
+   "file": "DKB/DKB Hindi Signals.md",
+   "findings": 1
+  },
+  {
+   "bot": "DKB Kannada · outbound · legacy",
+   "blurb": "Job posting & verification for employers (MSMEs) — the bot phones the person, in Kannada, on the older Dhiway/ONEST backend",
+   "agent": "DKB",
+   "file": "DKB/DKB Kannada.md",
+   "findings": 0
+  },
+  {
+   "bot": "DKB Kannada · outbound · Signals",
+   "blurb": "Job posting & verification for employers (MSMEs) — the bot phones the person, in Kannada, on the new Signals DPG backend",
+   "agent": "DKB",
+   "file": "DKB/DKB Kannada Signals.md",
+   "findings": 0
+  },
+  {
+   "bot": "KKB Hindi · inbound · legacy",
+   "blurb": "Government-job matching for workers / job-seekers — the person phones the bot, in Hindi, on the older Dhiway/ONEST backend",
+   "agent": "KKB",
+   "file": "KKB/KKB Placeholder Inbound.md",
+   "findings": 0
+  },
+  {
+   "bot": "KKB Hindi · inbound · Signals",
+   "blurb": "Government-job matching for workers / job-seekers — the person phones the bot, in Hindi, on the new Signals DPG backend",
+   "agent": "KKB",
+   "file": "KKB/KKB Placeholder Inbound Signals.md",
+   "findings": 0
+  },
+  {
+   "bot": "KKB Kannada · inbound · legacy",
+   "blurb": "Government-job matching for workers / job-seekers — the person phones the bot, in Kannada, on the older Dhiway/ONEST backend",
+   "agent": "KKB",
+   "file": "KKB/KKB Placeholder Inbound Kannada.md",
+   "findings": 0
+  },
+  {
+   "bot": "KKB Kannada · inbound · Signals",
+   "blurb": "Government-job matching for workers / job-seekers — the person phones the bot, in Kannada, on the new Signals DPG backend",
+   "agent": "KKB",
+   "file": "KKB/KKB Placeholder Inbound Kannada Signals.md",
+   "findings": 0
+  },
+  {
+   "bot": "KKB Hindi · outbound · legacy",
+   "blurb": "Government-job matching for workers / job-seekers — the bot phones the person, in Hindi, on the older Dhiway/ONEST backend",
+   "agent": "KKB",
+   "file": "KKB/KKB Placeholder Hindi.md",
+   "findings": 0
+  },
+  {
+   "bot": "KKB Hindi · outbound · Signals",
+   "blurb": "Government-job matching for workers / job-seekers — the bot phones the person, in Hindi, on the new Signals DPG backend",
+   "agent": "KKB",
+   "file": "KKB/KKB Placeholder Hindi Signals.md",
+   "findings": 1
+  },
+  {
+   "bot": "KKB Kannada · outbound · legacy",
+   "blurb": "Government-job matching for workers / job-seekers — the bot phones the person, in Kannada, on the older Dhiway/ONEST backend",
+   "agent": "KKB",
+   "file": "KKB/KKB Placeholder Kannada.md",
+   "findings": 0
+  },
+  {
+   "bot": "KKB Kannada · outbound · Signals",
+   "blurb": "Government-job matching for workers / job-seekers — the bot phones the person, in Kannada, on the new Signals DPG backend",
+   "agent": "KKB",
+   "file": "KKB/KKB Placeholder Kannada Signals.md",
    "findings": 0
   },
   {
@@ -115,6 +108,20 @@
    "findings": 0
   },
   {
+   "bot": "Maya Hindi · inbound · Signals",
+   "blurb": "Campus recruitment for UP graduates — the person phones the bot, in Hindi, on the new Signals DPG backend",
+   "agent": "Maya",
+   "file": "Maya/Maya Inbound Signals.md",
+   "findings": 0
+  },
+  {
+   "bot": "Maya Hindi · outbound · legacy",
+   "blurb": "Campus recruitment for UP graduates — the bot phones the person, in Hindi, on the older Dhiway/ONEST backend",
+   "agent": "Maya",
+   "file": "Maya/Maya Hindi.md",
+   "findings": 0
+  },
+  {
    "bot": "Maya Hindi · outbound · Signals",
    "blurb": "Campus recruitment for UP graduates — the bot phones the person, in Hindi, on the new Signals DPG backend",
    "agent": "Maya",
@@ -122,10 +129,17 @@
    "findings": 0
   },
   {
-   "bot": "Maya Hindi · inbound · Signals",
-   "blurb": "Campus recruitment for UP graduates — the person phones the bot, in Hindi, on the new Signals DPG backend",
-   "agent": "Maya",
-   "file": "Maya/Maya Inbound Signals.md",
+   "bot": "TRRAIN Hindi · outbound · legacy",
+   "blurb": "Follow-up call offering a free support service to seekers who already applied — the bot phones the person, in Hindi, on the older Dhiway/ONEST backend",
+   "agent": "TRRAIN",
+   "file": "TRRAIN/TRRAIN Hindi.md",
+   "findings": 0
+  },
+  {
+   "bot": "TRRAIN Kannada · outbound · legacy",
+   "blurb": "Follow-up call offering a free support service to seekers who already applied — the bot phones the person, in Kannada, on the older Dhiway/ONEST backend",
+   "agent": "TRRAIN",
+   "file": "TRRAIN/TRRAIN Kannada.md",
    "findings": 0
   }
  ],
@@ -139,12 +153,27 @@
    "bot": "DKB Hindi · outbound · Signals",
    "agent": "DKB",
    "blurb": "Job posting & verification for employers (MSMEs) — the bot phones the person, in Hindi, on the new Signals DPG backend",
-   "message": "The Hindi and Kannada versions of this bot are laid out differently — Hindi has 58 sections, Kannada has 53. Both languages are meant to follow the same script, so a gap can mean one language is missing a rule the other has. A small gap is usually just formatting.",
+   "message": "The Hindi and Kannada versions of this bot are laid out differently — Hindi has 59 sections, Kannada has 54. Both languages are meant to follow the same script, so a gap can mean one language is missing a rule the other has. A small gap is usually just formatting.",
    "detail": {
-    "hindi_sections": 58,
-    "kannada_sections": 53,
+    "hindi_sections": 59,
+    "kannada_sections": 54,
     "difference": 5,
     "kannada_file": "DKB/DKB Kannada Signals.md"
+   }
+  },
+  {
+   "severity": "minor",
+   "category": "sync-drift",
+   "file": "KKB/KKB Placeholder Hindi Signals.md",
+   "bot": "KKB Hindi · outbound · Signals",
+   "agent": "KKB",
+   "blurb": "Government-job matching for workers / job-seekers — the bot phones the person, in Hindi, on the new Signals DPG backend",
+   "message": "The Hindi and Kannada versions of this bot are laid out differently — Hindi has 118 sections, Kannada has 113. Both languages are meant to follow the same script, so a gap can mean one language is missing a rule the other has. A small gap is usually just formatting.",
+   "detail": {
+    "hindi_sections": 118,
+    "kannada_sections": 113,
+    "difference": 5,
+    "kannada_file": "KKB/KKB Placeholder Kannada Signals.md"
    }
   }
  ],
@@ -156,12 +185,27 @@
    "bot": "DKB Hindi · outbound · Signals",
    "agent": "DKB",
    "blurb": "Job posting & verification for employers (MSMEs) — the bot phones the person, in Hindi, on the new Signals DPG backend",
-   "message": "The Hindi and Kannada versions of this bot are laid out differently — Hindi has 58 sections, Kannada has 53. Both languages are meant to follow the same script, so a gap can mean one language is missing a rule the other has. A small gap is usually just formatting.",
+   "message": "The Hindi and Kannada versions of this bot are laid out differently — Hindi has 59 sections, Kannada has 54. Both languages are meant to follow the same script, so a gap can mean one language is missing a rule the other has. A small gap is usually just formatting.",
    "detail": {
-    "hindi_sections": 58,
-    "kannada_sections": 53,
+    "hindi_sections": 59,
+    "kannada_sections": 54,
     "difference": 5,
     "kannada_file": "DKB/DKB Kannada Signals.md"
+   }
+  },
+  {
+   "severity": "minor",
+   "category": "sync-drift",
+   "file": "KKB/KKB Placeholder Hindi Signals.md",
+   "bot": "KKB Hindi · outbound · Signals",
+   "agent": "KKB",
+   "blurb": "Government-job matching for workers / job-seekers — the bot phones the person, in Hindi, on the new Signals DPG backend",
+   "message": "The Hindi and Kannada versions of this bot are laid out differently — Hindi has 118 sections, Kannada has 113. Both languages are meant to follow the same script, so a gap can mean one language is missing a rule the other has. A small gap is usually just formatting.",
+   "detail": {
+    "hindi_sections": 118,
+    "kannada_sections": 113,
+    "difference": 5,
+    "kannada_file": "KKB/KKB Placeholder Kannada Signals.md"
    }
   }
  ]

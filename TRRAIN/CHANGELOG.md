@@ -1,0 +1,19 @@
+# TRRAIN — Changelog
+
+## 2026-08-10 — New bot: TRRAIN service-offer follow-up campaign (Hindi + Kannada, outbound)
+- **Feedback/bug:** New requirement — a separate outbound campaign calling seekers who have ALREADY applied to a job, to offer them a free support service (delivered by TRRAIN) and capture their interest. Supplied as a short offer snippet; built out into a full bot as instructed ("if it's a new bot, prompt and turns will be much more than this").
+- **Change:** Created the agent from scratch, Hindi as master + Kannada mirror. Structure: audio-check Turn 1 → introduction + reference to the previous application (Turn 2) → the offer, said exactly once (Turn 3) → answer capture → close. Deliberate design decisions beyond the supplied snippet:
+  - **Exactly one tool: `get_profile`.** Called once, silently, right after the audio check and before the introduction, so the caller can be greeted by their real first name and the call is confidently with the right person. Nothing else is available — no apply, no create/update profile, no status lookup — which keeps every apply/profile failure mode out of a call that does not need them. (Built toolless first; `get_profile` added the same day on review.)
+  - **Guard: the profile's role is NOT the applied role.** `nameOfJobRolesInterestedIn` is what the seeker said they want; the job this call is about comes only from `${applied_job_role}`. Confusing the two would tell a caller they applied to something they never did — the same failure shape as the Maya E1 wrong-college bug.
+  - **An empty fetch is not a wrong number.** It produces a normal nameless greeting; only the caller saying "I never applied" triggers the wrong-person exit.
+  - **Turn 2 added** (not in the snippet): the snippet began at "after the seeker has acknowledged the previous call", which presumes an acknowledgement that nothing produced. Turn 2 is what earns it, and it is also where a wrong-number is caught.
+  - **`${applied_job_role}` / `${applied_job_company}` tolerate "Not Available"** with a generic fallback line, matching the DKB convention — a "Not Available" value must never be read aloud.
+  - **Wrong person / do-not-call / proxy / busy / angry → the offer is NEVER made.** The snippet had no such gate.
+  - **All spoken content rewritten in Devanagari / Kannada script.** The supplied snippet was heavily Latin-script ("service providers", "interested", "free", "team"), which violates the Script Output Rule and is a TTS hazard.
+  - Compliance fields added to the output prompt (`offer_repeated`, `partner_named`, `promised_outcome`) so a rule break is visible in the call record rather than only in a transcript read.
+- **Files:** `TRRAIN/TRRAIN Hindi.md` (new), `TRRAIN/TRRAIN Kannada.md` (new), `TRRAIN/TRRAIN Output.md` (new), `TRRAIN/TRRAIN Memory.md` (new), `TRRAIN/CHANGELOG.md` (new), `raya/agents.json`, `CLAUDE.md` (path map).
+- **Raya agents:** `TRRAIN Hindi` = `cf39a59a-3b24-4842-ba03-4248ec245aa1`, `TRRAIN Kannada` = `dfeda883-3d2d-4a74-a0b5-1a47fdde2282`. Both created via `POST /api/agent` with `say_hello=false`, `max_call_duration_mins=5`, memory enabled.
+
+### Platform notes learned while creating these agents (worth keeping)
+- `POST /api/agent` requires only `name`; everything else defaults. It **rejects** `agent_args`, `memory_enabled` and `memory_instructions` on create — the latter two must be set by a follow-up `PATCH`.
+- **`agent_args` is not settable at all.** Raya derives it from the `${...}` tokens in `instructions`. A literal `${...}` written as an *example* inside a prompt therefore creates a phantom argument named `...` — the first build of these prompts did exactly that, and the wording was changed to avoid it.
