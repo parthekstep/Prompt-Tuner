@@ -1,5 +1,5 @@
 {
- "updated": "2026-08-07",
+ "updated": "2026-08-10",
  "note": "Curated list of known open work per bot. The automated static check reads the scripts and cannot see these — they come from live call testing and from features we know are unfinished. Keep this file current; the daily digest reads it verbatim. Remove an item the day it is genuinely closed.",
  "items": [
   {
@@ -93,6 +93,61 @@
    "next": "Re-run with a job list that matches what the inbound flow will actually offer these two bots, and confirm the separate consent question appears.",
    "priority": "low",
    "since": "2026-08-07"
+  },
+  {
+   "id": "audiocheck-verify-pending-9-variants",
+   "bots": [
+    "KKB Kannada · outbound · Signals",
+    "KKB Hindi · outbound · legacy",
+    "KKB Kannada · outbound · legacy",
+    "Maya Hindi · outbound · Signals",
+    "Maya Hindi · outbound · legacy",
+    "DKB Hindi · outbound · Signals",
+    "DKB Kannada · outbound · Signals",
+    "DKB Hindi · outbound · legacy",
+    "DKB Kannada · outbound · legacy"
+   ],
+   "title": "The new \"can you hear me?\" opening turn is live on 9 more bots but has only been tested on one of them",
+   "what": "Outbound bots now open with a short audio check and only give their real introduction after the caller confirms. That behaviour was tested on live calls for KKB Hindi Signals and works there. The same change was then applied to nine more outbound bots and deployed, but none of those nine has had its own test call yet.",
+   "why": "A change that works in one language or on one bot is not proof it works on its twin — the speech recognition, the voice, and the way the model follows the instruction all differ per language. This is exactly the case where assuming would be a mistake.",
+   "next": "Run one live call per bot — Hindi and Kannada, legacy and Signals — and confirm three things in each transcript: the first thing said is only the audio check, the real introduction comes after the caller answers, and a caller who cannot hear gets exactly one slower repeat and then a polite goodbye.",
+   "severity": "major"
+  },
+  {
+   "id": "trrain-new-bot-partial-verification",
+   "bots": [
+    "TRRAIN Hindi · outbound",
+    "TRRAIN Kannada · outbound"
+   ],
+   "title": "The new TRRAIN follow-up bot works on the happy path but several scenarios are still untested",
+   "what": "TRRAIN calls seekers who already applied to a job and offers them one free support service. Live calls confirm the Hindi bot handles the ordinary case correctly and handles a missing job title without ever reading \"Not Available\" aloud. Still untested: what happens when we reach the wrong person (the offer must not be made at all), the Kannada version end to end, and a re-test of the fix that makes the bot name the actual job the person applied to.",
+   "why": "The wrong-person case is the one that matters most for trust — offering a service to somebody who never applied to anything, on a call that opens by telling them they did, is the worst outcome this bot can produce.",
+   "next": "Run the wrong-person scenario on the Hindi bot, run the decline scenario on the Kannada bot, and re-run the ordinary case to confirm the bot now says the real job title instead of a vague \"a job\".",
+   "severity": "major"
+  },
+  {
+   "id": "returning-caller-and-need-capture-pilot-only",
+   "bots": [
+    "KKB Hindi · outbound · Signals"
+   ],
+   "title": "Two new features are live on one bot only, on purpose, until they are confirmed",
+   "what": "Two additions are running on KKB Hindi Signals and nowhere else: a line that references a previous conversation when we genuinely have one on record, and a single offer of help from a service provider made just before the call ends. Both were asked to be piloted on one bot before being copied to the rest.",
+   "why": "The first one took two attempts to make work and must be seen firing on a real call before it is copied anywhere. The second one silently did not happen on a call where the caller was undecided, which was fixed but not yet re-confirmed.",
+   "next": "Confirm both on live calls for this bot, then copy them to the other KKB bots and to Maya. Neither belongs on DKB — its caller is the employer, so an offer to help someone find a job makes no sense there.",
+   "severity": "major"
+  },
+  {
+   "id": "contact-memory-not-populated-in-production",
+   "bots": [
+    "KKB Hindi · outbound · Signals",
+    "KKB Hindi · outbound · legacy",
+    "Maya Hindi · outbound · legacy"
+   ],
+   "title": "The caller-history field the returning-caller line depends on is mostly empty or holds something else entirely",
+   "what": "The new returning-caller line reads a caller-history field. In production that field almost never contains caller history. On the KKB Hindi campaign bot it was empty on 27 of the last 30 calls. On the older KKB Hindi bot it instead carries campaign spreadsheet columns — sector, course, and a dialling status that literally says the person has not been called yet. On Maya it is usually the text \"Not Available\". Separately, the component that would write real caller history after each call is not switched on for any KKB bot, and is off entirely on all six of the newer Signals bots.",
+   "why": "Left as it is, the returning-caller line will almost never appear in production even though it is built and working. Worse, the campaign data that IS in that field says people have not been dialled — so a version of this feature without a safety check would have told first-time callers we had spoken before.",
+   "next": "Decide who fills that field. Either the campaign starts sending real caller history, or the per-call memory writer gets switched on for the KKB bots. Until then, treat the returning-caller line as built and safe but effectively dormant.",
+   "severity": "major"
   }
  ]
 }
