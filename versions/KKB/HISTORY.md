@@ -168,3 +168,6 @@
 - **2026-08-10_140658** — `pre-deploy-kkb-kn-in-signals-2026-08-10_140658` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada Signals.md _(10 files)_
 - **2026-08-10_142415** — `pre-deploy-kkb-hi-signals-2026-08-10_142415` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
 - **2026-08-10_143443** — `pre-deploy-kkb-hi-signals-2026-08-10_143443` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
+- **2026-08-10_185456** — `pre-frequency-fix` — before removing the 5 verbatim default-opening repetitions _(10 files)_
+- **2026-08-10_185513** — `pre-deploy-kkb-hi-signals-2026-08-10_185513` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
+- **2026-08-10_185712** — `pre-deploy-kkb-hi-signals-2026-08-10_185712` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
