@@ -749,3 +749,45 @@ Things a newcomer otherwise learns by wasting a day.
 - **`raya/divergences.json` is not a licence to drift.** An entry is scoped to the listed sections,
   tokens and languages; everything in `still_must_match` is still audited, and a stale entry is
   reported as a registry gap rather than silently honoured.
+
+### 8.x Platform facts learned by experiment (2026-08-10) — don't re-derive these
+
+**Creating an agent via the API works, but in two steps.** `POST /api/agent` requires only `name`;
+everything else defaults (and the defaults are not what you want — `max_call_duration_mins` 60,
+English `language_id`, `allow_interruption` false, `say_hello` true). It **rejects** three keys that
+`PATCH` accepts: `memory_enabled`, `memory_instructions`, and `agent_args`. So: create with name +
+instructions + output_instructions + language/voice/dids, then `PATCH` memory on.
+
+**`agent_args` is not settable at all.** Raya *derives* it from the `${...}` tokens in
+`instructions`. Two consequences: you never maintain it by hand, and **a literal `${...}` written as
+an example inside a prompt becomes a phantom declared argument** (analyser **G2** — it happened on
+both new TRRAIN agents the first time round).
+
+**`say_hello` is the "agent speaks first" toggle, and the agent still speaks with it off.** Every
+production transcript — before and after flipping it — begins with a synthetic `[user] 'hello'` seed
+turn injected by the platform; that seed is what prompts the model to produce the first line. Verified
+against live production calls plus a controlled A/B on a scratch agent. So turning `say_hello` off
+does **not** risk dead air on an outbound call; what changes is only that the bot's first *generated*
+line is whatever the prompt puts first. (Read that leading `[user] hello` as platform noise, never as
+something the caller said.)
+
+**`${contact_memory}` really is interpolated.** Proven directly: a scratch agent instructed to read
+its own context block aloud spoke the memory JSON back verbatim. So if a memory-driven branch does not
+fire, the cause is in the prompt, not the platform — check for a competing absolute (analyser **A9**)
+before anything else.
+
+**`${contact_phone}` binds to the number actually DIALLED, and not always with the country code.**
+On the same tester DID, one bot's `get_profile` received `917946350285` and another's received
+`7946350285` — the second returned no profile. Always make the prompt normalise: strip `+`/spaces,
+prepend `91` only if 10 digits remain, never double an existing `91`.
+
+**Parallel test calls to one tester cause 429s and kill bridging.** Three calls staggered 16s apart
+all failed to bridge with repeated 429s; the same scenarios run sequentially with ~30s between them
+connected. Run one call at a time. Separately, bridging is genuinely intermittent — a wave can lose
+several calls in a row to `outcome=Failure, dur=0` with nothing wrong on either agent, so re-run
+before concluding anything about a bot.
+
+**Two test waves must never overlap.** A wave whose wait-loop watched only `raya_testrun.py` started
+during a gap between another wave's calls and PATCHed the tester's persona out from under an
+in-flight test. Have a wave wait on the other wave's *script* name too, not just the runner process.
+
