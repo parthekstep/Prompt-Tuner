@@ -159,15 +159,26 @@
    "severity": "minor"
   },
   {
-   "id": "platform-not-storing-caller-memory",
+   "id": "returning-caller-not-firing-despite-stored-memory",
    "bots": [
-    "ALL 18 live conversation agents"
+    "KKB Hindi · outbound · Signals"
    ],
-   "title": "PLATFORM ISSUE — caller memory is switched on everywhere but nothing is ever stored or handed back",
-   "what": "Caller memory is now switched on for all eighteen live bots, each with its memory-writing instructions in place, and every bot's script carries the block that receives the memory. Despite that, the memory handed to a bot at the start of a call is always empty. Three separate checks: a full two-minute call that applied for a job and gathered the caller's details, then a second call to the same number ten minutes later — the second call opened as if it had never spoken to them. A purpose-built diagnostic bot whose only job is to read its own memory aloud reported it empty, both before and after a prior call. And the same diagnostic bot proved that when memory is switched OFF, a value sent by the campaign comes through perfectly — so the receiving end works; it is the storing end that does not.",
-   "why": "This blocks the \"we spoke last time\" opening entirely, and it blocks anything else that would depend on remembering a caller between calls. It is not a script problem and not a settings problem — both of those have been checked and corrected. Notably, the OTHER after-the-call job on the same bots does work: the call summary and extracted fields are produced reliably. So post-call processing runs; it is specifically the memory that is not being kept.",
-   "next": "Raise with the platform team (LitWiz / Raya) with these three observations. Questions for them: does the memory-writing step actually run after a call, is its result stored anywhere, and is it keyed to the number dialled? There is no way to check from outside — there is no endpoint that returns a caller's stored memory (six likely addresses were tried, all not found), which is itself worth asking about. Until they confirm storage works, treat every memory-dependent feature as blocked, and do NOT make further script changes chasing it.",
-   "severity": "critical"
+   "title": "The \"we spoke last time\" opening still does not happen, even though a full caller history is now stored",
+   "what": "Caller memory IS being stored correctly — the console at console.getraya.app/memories lists 5,329 stored memories, and the entry for this bot and the test number is detailed: four sessions, three job applications, and a written summary of what was discussed. So the storing side works. What has not been seen working is the bot using it: on every test call so far the bot has opened with the ordinary greeting rather than referring to the earlier conversation.",
+   "why": "This was one of four requested changes and is the only one still unconfirmed. It is not causing harm — the bot never wrongly claims to have spoken to a first-time caller — but the feature does not visibly happen, and it should not be copied to other bots until it does.",
+   "next": "A call is being made now against the known-good stored history, which is the first time the input is certain rather than assumed. If the opening still does not change, the remaining question is whether the stored history is actually handed to the bot at the start of a call, which the platform team can answer. Do NOT make further wording changes — four rules were already rewritten before any of this was understood.",
+   "severity": "major"
+  },
+  {
+   "id": "memory-store-key-format",
+   "bots": [
+    "ALL"
+   ],
+   "title": "Stored memories are keyed on the 10-digit number while the bots look profiles up on 12 digits",
+   "what": "The stored-memory list keys each entry on a 10-digit phone number (for example 7946350285), whereas the bots pass the 12-digit form with the country code (917946350285) when they look up a caller's profile. Both forms are in play across the system.",
+   "why": "Probably harmless, since the platform both stores and retrieves memory itself and will be self-consistent. Worth noting only because a mismatch between the two forms has already caused one real bug today — a profile lookup silently returned nothing because it was sent 10 digits instead of 12.",
+   "next": "Confirm with the platform team which form memory is keyed on, so nobody later assumes the two systems agree.",
+   "severity": "minor"
   }
  ]
 }
