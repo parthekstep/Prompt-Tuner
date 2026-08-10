@@ -10,6 +10,13 @@ Every prompt edit to KKB is logged here. Entry format:
 - **Ported from:** <source agent> (only for cross-agent ports)
 ```
 
+## 2026-08-10 — Need Capture rolled out to the remaining KKB prompts (pilot verified first)
+- **Feedback/bug:** Requested that the service-provider offer be piloted on the KKB Hindi bot, tested across scenarios, and only then replicated. That gate is now met.
+- **Verified on the pilot before rolling out** (`KKB Placeholder Hindi Signals.md`, live calls): Path A + clear yes; Path A + clear no with **no second pitch**; Path B + ambiguous answer → Maybe (the undecided path, which originally produced NO offer at all and was fixed by making the block fire by default for any engaged call). `service_provider_pitched: "Yes"` / `service_provider_interest: "Yes"` confirmed present in the extracted `call_output`, not just the transcript.
+- **Change:** Added the same `# Need Capture (ONE offer, immediately before Graceful Exit)` section to the other seven KKB conversation prompts — Hindi + Kannada, outbound + inbound, legacy + Signals — with the spoken lines translated into Kannada for the Kannada files (agnostic rules copied verbatim). Graceful Exit in each now checks whether the offer has been made before speaking the closing line. `KKB Output.md` deployed to all six live KKB agents so the two new fields are extracted everywhere the block now runs.
+- **Files:** `KKB/KKB Placeholder Kannada Signals.md`, `KKB/KKB Placeholder Hindi.md`, `KKB/KKB Placeholder Kannada.md`, `KKB/KKB Placeholder Inbound.md`, `KKB/KKB Placeholder Inbound Kannada.md`, `KKB/KKB Placeholder Inbound Signals.md`, `KKB/KKB Placeholder Inbound Kannada Signals.md`, `KKB/KKB Output.md`.
+- **VERIFY-PENDING:** verified live on KKB Hindi Signals only. Every other variant owes its own live call — Kannada especially, since the spoken lines are new there. Telephony bridging succeeded on only 12 of 69 dial attempts during this session, which is why the per-variant sweep is not yet done rather than skipped.
+
 ## 2026-08-10 — Audio-check intro turn, returning-caller callback line, and the Need Capture offer (KKB Hindi Signals pilot)
 
 Three requested changes, piloted together on **KKB Hindi Signals outbound** (`kkb-hi-signals`) before any fleet rollout.

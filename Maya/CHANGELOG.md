@@ -10,6 +10,14 @@ Every prompt edit to Maya is logged here. Maya is Hindi-only (KKB spinoff). Entr
 - **Ported from:** <source agent> (only for cross-agent ports)
 ```
 
+## 2026-08-10 — Need Capture ported to Maya (pilot verified on KKB first)
+- **Feedback/bug:** Same fleet-wide requirement as KKB: one service-provider offer before goodbye, piloted and tested before replication.
+- **Change:** Added `# Need Capture (ONE offer, immediately before Graceful Exit)` to all four Maya conversation prompts, and the Graceful Exit check that fires it if it has not happened. Added `service_provider_pitched` and `service_provider_interest` to `Maya/Maya Output.md`, with an explicit rule that they are **independent of `mpl_presented`** — the MPL Competition and the service-provider offer are two different offers and must never be inferred from one another.
+- **Maya gate:** shared core logic inherited from KKB, covered by the instruction to replicate after the pilot passed. Maya's divergences untouched: campus identity, `${college_name}`, `hr_contact`/`benefits`, Experience Capture, HR-number sharing, the MPL Competition offer, and the feminine-voice rule. The Need Capture offer sits after the job flow and before goodbye, so it does not interrupt or displace MPL.
+- **Files:** `Maya/Maya Hindi.md`, `Maya/Maya Hindi Signals.md`, `Maya/Maya Inbound.md`, `Maya/Maya Inbound Signals.md`, `Maya/Maya Output.md`.
+- **Ported from:** KKB.
+- **VERIFY-PENDING:** no Maya variant has had its own live call for this block yet. Watch specifically for the two offers colliding — MPL and the service-provider offer must both be at most once, and neither may interrupt the job flow.
+
 ## 2026-08-10 — Audio-check intro turn (ported from the KKB pilot)
 - **Feedback/bug:** Fleet-wide intro change: the bot was launching into the full introduction while the caller was still saying "hello, who is this?", so the introduction was talked over. Requested that outbound bots instead open with a short "can you hear me?" and give the real introduction only after the caller confirms.
 - **Change:** Added `## Turn 1 — Audio check` as the first spoken turn of every call — "हैलो, मेरी आवाज़ आ रही है?" and nothing else — with branches for confirm / cannot-hear (ONE slower repeat, then a polite close) / silence. The existing campus introduction became the turn AFTER the caller confirms; its wording, the `${college_name}` identity, the student question, and the recording disclosure are all untouched. The canonical-flow line in the sample conversations was updated so the examples do not imply the audio check is skipped. `say_hello` set to **false** on both Maya outbound agents.

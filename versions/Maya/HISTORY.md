@@ -97,3 +97,8 @@
 - **2026-08-10_132553** — `pre-audiocheck` — before fleet audio-check rollout _(6 files)_
 - **2026-08-10_133906** — `pre-deploy-maya-hi-signals-2026-08-10_133906` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
 - **2026-08-10_133907** — `pre-deploy-maya-hi-out-2026-08-10_133907` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-08-10_140530** — `pre-needcapture-rollout` — before Need Capture fleet rollout _(6 files)_
+- **2026-08-10_140701** — `pre-deploy-maya-hi-signals-2026-08-10_140701` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-08-10_140704** — `pre-deploy-maya-hi-out-2026-08-10_140703` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-08-10_140706** — `pre-deploy-maya-hi-in-signals-2026-08-10_140706` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-08-10_140709** — `pre-deploy-maya-hi-in-2026-08-10_140709` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_

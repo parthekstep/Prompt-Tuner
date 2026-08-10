@@ -1,6 +1,6 @@
 {
  "prompts_checked": 20,
- "total_findings": 2,
+ "total_findings": 1,
  "bots": [
   {
    "bot": "DKB Hindi · inbound · legacy",
@@ -84,7 +84,7 @@
    "blurb": "Government-job matching for workers / job-seekers — the bot phones the person, in Hindi, on the new Signals DPG backend",
    "agent": "KKB",
    "file": "KKB/KKB Placeholder Hindi Signals.md",
-   "findings": 1
+   "findings": 0
   },
   {
    "bot": "KKB Kannada · outbound · legacy",
@@ -160,21 +160,6 @@
     "difference": 5,
     "kannada_file": "DKB/DKB Kannada Signals.md"
    }
-  },
-  {
-   "severity": "minor",
-   "category": "sync-drift",
-   "file": "KKB/KKB Placeholder Hindi Signals.md",
-   "bot": "KKB Hindi · outbound · Signals",
-   "agent": "KKB",
-   "blurb": "Government-job matching for workers / job-seekers — the bot phones the person, in Hindi, on the new Signals DPG backend",
-   "message": "The Hindi and Kannada versions of this bot are laid out differently — Hindi has 118 sections, Kannada has 113. Both languages are meant to follow the same script, so a gap can mean one language is missing a rule the other has. A small gap is usually just formatting.",
-   "detail": {
-    "hindi_sections": 118,
-    "kannada_sections": 113,
-    "difference": 5,
-    "kannada_file": "KKB/KKB Placeholder Kannada Signals.md"
-   }
   }
  ],
  "all": [
@@ -191,21 +176,6 @@
     "kannada_sections": 54,
     "difference": 5,
     "kannada_file": "DKB/DKB Kannada Signals.md"
-   }
-  },
-  {
-   "severity": "minor",
-   "category": "sync-drift",
-   "file": "KKB/KKB Placeholder Hindi Signals.md",
-   "bot": "KKB Hindi · outbound · Signals",
-   "agent": "KKB",
-   "blurb": "Government-job matching for workers / job-seekers — the bot phones the person, in Hindi, on the new Signals DPG backend",
-   "message": "The Hindi and Kannada versions of this bot are laid out differently — Hindi has 118 sections, Kannada has 113. Both languages are meant to follow the same script, so a gap can mean one language is missing a rule the other has. A small gap is usually just formatting.",
-   "detail": {
-    "hindi_sections": 118,
-    "kannada_sections": 113,
-    "difference": 5,
-    "kannada_file": "KKB/KKB Placeholder Kannada Signals.md"
    }
   }
  ]
