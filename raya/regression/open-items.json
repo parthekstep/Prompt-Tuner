@@ -159,17 +159,6 @@
    "severity": "minor"
   },
   {
-   "id": "returning-caller-not-firing-despite-stored-memory",
-   "bots": [
-    "KKB Hindi · outbound · Signals"
-   ],
-   "title": "The \"we spoke last time\" opening still does not happen, even though a full caller history is now stored",
-   "what": "Caller memory IS being stored correctly — the console at console.getraya.app/memories lists 5,329 stored memories, and the entry for this bot and the test number is detailed: four sessions, three job applications, and a written summary of what was discussed. So the storing side works. What has not been seen working is the bot using it: on every test call so far the bot has opened with the ordinary greeting rather than referring to the earlier conversation.",
-   "why": "This was one of four requested changes and is the only one still unconfirmed. It is not causing harm — the bot never wrongly claims to have spoken to a first-time caller — but the feature does not visibly happen, and it should not be copied to other bots until it does.",
-   "next": "A call is being made now against the known-good stored history, which is the first time the input is certain rather than assumed. If the opening still does not change, the remaining question is whether the stored history is actually handed to the bot at the start of a call, which the platform team can answer. Do NOT make further wording changes — four rules were already rewritten before any of this was understood.",
-   "severity": "major"
-  },
-  {
    "id": "memory-store-key-format",
    "bots": [
     "ALL"
@@ -179,6 +168,17 @@
    "why": "Probably harmless, since the platform both stores and retrieves memory itself and will be self-consistent. Worth noting only because a mismatch between the two forms has already caused one real bug today — a profile lookup silently returned nothing because it was sent 10 digits instead of 12.",
    "next": "Confirm with the platform team which form memory is keyed on, so nobody later assumes the two systems agree.",
    "severity": "minor"
+  },
+  {
+   "id": "returning-caller-duplicates-existing-behaviour",
+   "bots": [
+    "KKB Hindi · outbound · Signals"
+   ],
+   "title": "DECISION NEEDED — the \"we spoke last time\" opening duplicates something the bot already does a turn later",
+   "what": "The new opening never happened across six rounds of fixes and six live calls. The last call showed why: one turn later the bot already greets the caller by name and reflects their work back to them — \"Sunita ji, I can see you are doing data entry work — are you still looking for that kind of job?\" That has been in the script for months, and it does the same job as the new opening, just a turn later and based on the caller's stored profile instead of the record of the last conversation. The bot does it once, in the place the script has always done it, and skips the new one. Everything the new opening depends on is working: the caller history is stored, read back, and handed to the bot at the start of the call — all three verified separately.",
+   "why": "There is nothing left to fix in the opening — the competing behaviour is wanted, not a bug, so removing rules cannot help. Continuing to edit would burn calls for nothing. This is now a choice about what we want the call to sound like.",
+   "next": "Pick one. EITHER accept what the bot already does — it recognises returning callers by name and role, which may be enough, and delete the new opening. OR move the reference to the previous conversation into that same later turn, so the bot says the caller's name, mentions what was discussed last time, and then asks its question — one acknowledgement in one place. The second option is closer to what was originally asked for, because it refers to the earlier conversation rather than to profile data. Either way: no more changes to the opening section.",
+   "severity": "major"
   }
  ]
 }
