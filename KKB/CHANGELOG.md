@@ -17,6 +17,20 @@ Every prompt edit to KKB is logged here. Entry format:
 - **Files:** `KKB/KKB Placeholder Kannada Signals.md`, `KKB/KKB Placeholder Hindi.md`, `KKB/KKB Placeholder Kannada.md`, `KKB/KKB Placeholder Inbound.md`, `KKB/KKB Placeholder Inbound Kannada.md`, `KKB/KKB Placeholder Inbound Signals.md`, `KKB/KKB Placeholder Inbound Kannada Signals.md`, `KKB/KKB Output.md`.
 - **VERIFY-PENDING:** verified live on KKB Hindi Signals only. Every other variant owes its own live call — Kannada especially, since the spoken lines are new there. Telephony bridging succeeded on only 12 of 69 dial attempts during this session, which is why the per-variant sweep is not yet done rather than skipped.
 
+## 2026-08-10 — Truncated `${recommendations}` on KKB Kannada Signals ("no jobs recommended")
+- **Feedback/bug:** Two calls to +91916…842 on KKB Kannada Signals — 11:02 (`bc961b88`) and 11:06 (`17a2e1e2`) — reported as "no jobs were recommended".
+- **Root-caused against the input args FIRST, and the report is only half right.** The 11:06 call did show no jobs (`jobs_shown: "No"`) and its final assistant turn was **completely empty**. The 11:02 call DID present a job (`jobs_shown: "Yes"`) but ended mid-sentence while reading it out.
+- **The real defect is in the DATA, not the prompt.** `agent_args.recommendations` arrived **truncated at exactly 1023 characters**, cut mid-value at `"qualification": "NSQF Refrigeration` — 4 `job_id`s but only 3 closing braces, so the JSON is unparseable. Unable to parse it, the bot improvised: on 11:02 it spoke a **"ಎಲೆಕ್ಟ್ರಿಷಿಯನ್" job that does not exist in the list** (scraped from the EV Charging Technician's qualification text "ITI/NSQF Electrician or Solar Technician"), and on 11:06 it produced nothing at all.
+- **Scale — this is not two calls.** **20 of the last 40 calls on `kkb-kn-signals` carry the identical truncated payload**, while `kkb-hi-signals` parsed **39 of 39**. Not a platform field cap either: a 1907-char payload on the same agent parses fine. Something upstream is emitting a pre-truncated string for this campaign.
+- **Change (prompt hardening only — the payload fix is upstream and not ours):** added to the Pre-check in both KKB Signals prompts —
+  - use only the job entries that are COMPLETE; discard a final entry cut mid-value; never guess the missing part;
+  - a partial delivery is NOT a missing-data case — if at least one complete entry survives, carry on with those (closing the call while usable jobs exist is the worse outcome); fall back only when ZERO complete entries remain;
+  - **name only real `role` values** — never a trade inferred from a `qualification`, company name, or any other field (this is exactly what produced the phantom Electrician);
+  - **never end a turn with nothing** — say the missing-data line and close rather than emitting silence.
+- **Files:** `KKB/KKB Placeholder Hindi Signals.md` (master), `KKB/KKB Placeholder Kannada Signals.md` (mirror — agnostic logic copied verbatim, each file keeps its own spoken fallback line). Both deployed.
+- **Analyser:** catalogued as **D42**, including the diagnostic that finds it in seconds — `json.loads()` the args before reading the transcript, and check `count('job_id') > count('}')`.
+- **VERIFY-PENDING:** the hardening has not yet been exercised on a live call with a truncated payload. **It does not fix the reported bug** — it stops the bot inventing a role or going silent. Callers still get fewer jobs than intended until the payload is fixed at source.
+
 ## 2026-08-10 — Audio-check intro turn, returning-caller callback line, and the Need Capture offer (KKB Hindi Signals pilot)
 
 Three requested changes, piloted together on **KKB Hindi Signals outbound** (`kkb-hi-signals`) before any fleet rollout.
