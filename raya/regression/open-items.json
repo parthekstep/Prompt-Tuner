@@ -179,17 +179,6 @@
    "why": "This was one of four requested changes and is now working on one bot. It is not yet on the other seven KKB bots or the four Maya bots, and each of those needs its own call to confirm — the wording has to be re-authored for Kannada and for Maya's campus context and feminine verb forms.",
    "next": "Copy the clause into the other KKB and Maya scripts, translating the spoken part for Kannada and adapting it for Maya, then place one live call per bot. Two things to check in each transcript: the clause appears, and the turn still ends on a single question rather than stacking two. Also still unconfirmed: what happens for a caller with NO history under the new shape — the test number's history is now permanent, so confirming that needs either a fresh number or deleting that history row from the console.",
    "severity": "major"
-  },
-  {
-   "id": "kn-signals-truncated-job-list",
-   "bots": [
-    "KKB Kannada · outbound · Signals"
-   ],
-   "title": "UPSTREAM DATA BUG — half the calls to the Kannada bot receive a job list that is cut off part-way",
-   "what": "The list of jobs sent into each call is arriving chopped off in the middle of the last job, so the bot cannot read it properly. Twenty of the last forty calls to this bot were affected; every one of them was cut at exactly the same point. The Hindi version of the same bot is completely unaffected — all forty of its recent calls were fine. Because the bot could not read the list, on one reported call it said nothing at all where the jobs should have been, and on another it offered an 'Electrician' job that does not exist, having picked the word out of another job's qualification text.",
-   "why": "This is the reported 'no jobs were recommended' complaint, and it is affecting roughly half of all Kannada calls — not the two that were reported. Callers are being offered fewer jobs than we have, or none. The bot's script is not at fault; the data being handed to it is incomplete before it ever arrives.",
-   "next": "Someone needs to look at whatever builds the job list for this campaign and find why it is being cut short — it is not a platform size limit, because a longer list on the same bot came through intact. Meanwhile the bot has been made to cope: it now uses whichever jobs arrived complete, ignores the chopped-off one, and never invents a job or falls silent. That reduces the damage but does not fix it — callers will still see fewer jobs than intended until the list is sent whole.",
-   "severity": "critical"
   }
  ]
 }

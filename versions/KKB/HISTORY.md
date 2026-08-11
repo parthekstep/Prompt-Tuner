@@ -176,3 +176,5 @@
 - **2026-08-12_020146** — `pre-truncated-recs` — before truncated-recommendations hardening _(10 files)_
 - **2026-08-12_020211** — `pre-deploy-kkb-hi-signals-2026-08-12_020211` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
 - **2026-08-12_020213** — `pre-deploy-kkb-kn-signals-2026-08-12_020213` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada Signals.md _(10 files)_
+- **2026-08-12_020811** — `pre-deploy-kkb-hi-signals-2026-08-12_020811` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
+- **2026-08-12_020814** — `pre-deploy-kkb-kn-signals-2026-08-12_020814` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada Signals.md _(10 files)_
