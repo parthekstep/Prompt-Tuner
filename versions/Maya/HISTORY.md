@@ -102,3 +102,8 @@
 - **2026-08-10_140704** — `pre-deploy-maya-hi-out-2026-08-10_140703` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
 - **2026-08-10_140706** — `pre-deploy-maya-hi-in-signals-2026-08-10_140706` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
 - **2026-08-10_140709** — `pre-deploy-maya-hi-in-2026-08-10_140709` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_
+- **2026-08-12_113103** — `pre-fleet-hardening` — before fleet-wide guard/name/needcapture fixes _(6 files)_
+- **2026-08-12_113215** — `pre-deploy-maya-hi-out-2026-08-12_113215` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-08-12_113218** — `pre-deploy-maya-hi-in-2026-08-12_113218` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_
+- **2026-08-12_113220** — `pre-deploy-maya-hi-signals-2026-08-12_113220` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-08-12_113223** — `pre-deploy-maya-hi-in-signals-2026-08-12_113223` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
