@@ -17,6 +17,19 @@ Every prompt edit to KKB is logged here. Entry format:
 - **Files:** `KKB/KKB Placeholder Kannada Signals.md`, `KKB/KKB Placeholder Hindi.md`, `KKB/KKB Placeholder Kannada.md`, `KKB/KKB Placeholder Inbound.md`, `KKB/KKB Placeholder Inbound Kannada.md`, `KKB/KKB Placeholder Inbound Signals.md`, `KKB/KKB Placeholder Inbound Kannada Signals.md`, `KKB/KKB Output.md`.
 - **VERIFY-PENDING:** verified live on KKB Hindi Signals only. Every other variant owes its own live call — Kannada especially, since the spoken lines are new there. Telephony bridging succeeded on only 12 of 69 dial attempts during this session, which is why the per-variant sweep is not yet done rather than skipped.
 
+## 2026-08-10 — Job flow ended with jobs still unshown ("discontinued after 2nd set")
+- **Feedback/bug:** +916360275910, 07/08/2026 18:52 — "Job flow discontinued after 2nd set of recommendations." Call `54e8b166` on **`kkb-kn-out`** (KKB Kannada legacy outbound, not Signals).
+- **Root-caused against the args first — the inputs were FINE this time.** `recommendations` carried **8 valid jobs**, 1861 chars, parsed cleanly. This is a genuine prompt bug, not a data one.
+- **What happened.** Set 1: Electrician. Caller asked for something else. Set 2: Fitter, CNC Operator, Mechanic. Caller said "ಬೇಡರೀ" (no). The bot then spoke the **No-Match Fallback** — "ನಿಮಗೆ relevant ಜಾಬ್‌ಗಳು ಈಗ ಕಾಣ್ತಿಲ್ಲ" — and hung up, **while four jobs it had never mentioned were still in the array**: Machine Operator, Assembly Trainee, Welder, Customer Service Executive. Four of eight shown; the caller was told nothing relevant existed.
+- **Root cause.** No-Match Fallback triggers on "the user explicitly says none of the available jobs are relevant". A short "no" after a set satisfies that reading, and nothing in the prompt required the list to be exhausted first. So a set-level refusal was treated as a call-level rejection.
+- **Change (agnostic logic, Hindi master → Kannada mirror, English rules copied verbatim):** a HARD GUARD on No-Match Fallback —
+  - never declare No-Match while `${recommendations}` still holds jobs not yet presented on this call; present the next set instead (Step 2 format, up to three, best-fit first);
+  - **a short "no" ends a SET, not the call** — treat it as a request for the next set while stock remains;
+  - keep track across sets: never re-present a declined job, never restart from the top of the array;
+  - both No-Match sections in each file carry the guard (the second points at it), since the fallback can be reached from either.
+- **Files:** `KKB/KKB Placeholder Hindi.md` (master), `KKB/KKB Placeholder Kannada.md` (mirror). Both deployed.
+- **VERIFY-PENDING:** not yet exercised on a live call. Needs a caller who declines successive sets against a multi-set inventory, confirming the bot works through the list and only closes when it is genuinely empty.
+
 ## 2026-08-10 — Truncated `${recommendations}` on KKB Kannada Signals ("no jobs recommended")
 - **Feedback/bug:** Two calls to +91916…842 on KKB Kannada Signals — 11:02 (`bc961b88`) and 11:06 (`17a2e1e2`) — reported as "no jobs were recommended".
 - **Root-caused against the input args FIRST, and the report is only half right.** The 11:06 call did show no jobs (`jobs_shown: "No"`) and its final assistant turn was **completely empty**. The 11:02 call DID present a job (`jobs_shown: "Yes"`) but ended mid-sentence while reading it out.

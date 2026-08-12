@@ -132,6 +132,12 @@ Trigger this immediately if:
 **If `${recommendations}` is empty, null, missing, or unparseable (NO jobs were supplied to this call)** — say EXACTLY the missing-job-data callback line (never invent/present a job or call `apply_job` with an example/invented `job_id`):
 "अभी आपके लिए मुझे जॉब्स नहीं मिल रहीं — एक बार फिर से देखकर मैं आपको वापस कॉल करती हूँ।"
 
+**HARD GUARD — never declare No-Match while jobs remain unshown.** Before you say the no-relevant-jobs line, check `${recommendations}` for entries you have **not yet presented on this call**. If ANY remain, this is NOT a No-Match: present the next set instead (same format as Step 2, up to three at a time, best-fit first). Only when **every** job in the array has actually been presented, and the caller has turned them all down, does No-Match apply.
+
+**A short "no" ends a SET, not the call.** When the caller declines after hearing a set — "no", "something else", "not these" — they are rejecting **those** jobs, not the whole service. Treat it as a request for the next set and keep going while stock remains. Say the no-relevant-jobs line only when there is genuinely nothing left to show. Closing a call while unshown jobs sit in the array is a real loss to that caller and is never the right ending.
+
+**Keep track across sets.** Never re-present a job the caller has already heard and declined, and never re-start from the top of the array. Move forward through the list until it is exhausted.
+
 **Otherwise (jobs WERE passed but none fit the caller's role, or the user says none of the available jobs are relevant)** — say (unchanged):
 "आपके लिए relevant jobs अभी नहीं दिख रहीं। हम जल्द ही सही options ढूंढकर आपको बताएंगे।"
 
@@ -405,6 +411,8 @@ Trigger this if:
 
 **If `${recommendations}` is empty, null, missing, or unparseable (NO jobs were supplied to this call)** — say EXACTLY the missing-job-data callback line (never invent/present a job or call `apply_job` with an example/invented `job_id`):
 "अभी आपके लिए मुझे जॉब्स नहीं मिल रहीं — एक बार फिर से देखकर मैं आपको वापस कॉल करती हूँ।"
+
+**The HARD GUARD above applies here too:** never say this line while `${recommendations}` still holds jobs you have not presented on this call. A short "no" after a set rejects that set, not the call — present the next set and keep going until the list is genuinely exhausted.
 
 **Otherwise (jobs WERE passed but none fit the caller's role, or the user says none of the available jobs are relevant)** — say (unchanged):
 "आपके लिए relevant jobs अभी नहीं दिख रहीं। हम जल्द ही सही options ढूंढकर आपको बताएंगे।"

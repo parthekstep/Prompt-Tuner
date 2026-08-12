@@ -178,3 +178,6 @@
 - **2026-08-12_020213** — `pre-deploy-kkb-kn-signals-2026-08-12_020213` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada Signals.md _(10 files)_
 - **2026-08-12_020811** — `pre-deploy-kkb-hi-signals-2026-08-12_020811` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
 - **2026-08-12_020814** — `pre-deploy-kkb-kn-signals-2026-08-12_020814` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada Signals.md _(10 files)_
+- **2026-08-12_110149** — `pre-exhaust-list` — before exhaust-the-list No-Match guard _(10 files)_
+- **2026-08-12_110209** — `pre-deploy-kkb-hi-out-2026-08-12_110209` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi.md _(10 files)_
+- **2026-08-12_110212** — `pre-deploy-kkb-kn-out-2026-08-12_110212` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(10 files)_
