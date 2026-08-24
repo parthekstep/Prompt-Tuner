@@ -55,7 +55,7 @@ must be **surgical**: change only what the task requires, and nothing more.
 - **KKB** — government job-matching agent for workers/seekers (Hindi + Kannada). Persona: *काम की बात / ಕೆಲಸದ ಮಾತು*.
 - **DKB** — "Dhandhe Ki Baat", job verification & capture agent for MSME business owners/employers (Hindi + Kannada). Persona: *धंधे की बात*.
 - **Maya** — a KKB spinoff for higher-ed graduates in UP; campus-recruitment context. **Hindi only.** Persona: *माया, [college_name] की ओर से*.
-- **TRRAIN** — an **outbound-only** follow-up campaign (Hindi + Kannada) calling seekers who have **already applied** to a job, to offer them one free support service and capture their interest. **It has no tools** — it cannot fetch, apply, or update anything. Short call (under two minutes), one offer per call, the partner is never named aloud.
+- **TRRAIN** — an **outbound-only** follow-up campaign (Hindi + Kannada) calling seekers who have **already applied** to a job, to offer them one free support service and capture their interest. **Its only tool is `get_profile`** (added 2026-08-11, so it can greet the caller by their real name and reference the role they actually applied for); it **cannot** fetch jobs, apply, create or update anything — it cannot fetch, apply, or update anything. Short call (under two minutes), one offer per call, the partner is never named aloud.
 
 Each agent has three prompt types: a **conversation prompt** (one file per language),
 a **memory prompt** (one language-agnostic file, English output), and an

@@ -107,3 +107,29 @@
 - **2026-08-12_113218** — `pre-deploy-maya-hi-in-2026-08-12_113218` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_
 - **2026-08-12_113220** — `pre-deploy-maya-hi-signals-2026-08-12_113220` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
 - **2026-08-12_113223** — `pre-deploy-maya-hi-in-signals-2026-08-12_113223` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-08-12_131526** — `pre-caller-gender-fix` — caller-address verbs follow caller gender, not Maya's _(6 files)_
+- **2026-08-12_131752** — `pre-deploy-maya-hi-in-2026-08-12_131752` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_
+- **2026-08-12_131753** — `pre-deploy-maya-hi-in-signals-2026-08-12_131753` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-08-12_131754** — `pre-deploy-maya-hi-out-2026-08-12_131754` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-08-12_131755** — `pre-deploy-maya-hi-signals-2026-08-12_131755` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-08-12_134419** — `pre-deploy-maya-hi-in-2026-08-12_134419` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_
+- **2026-08-12_134420** — `pre-deploy-maya-hi-in-signals-2026-08-12_134420` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-08-12_134421** — `pre-deploy-maya-hi-out-2026-08-12_134420` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-08-12_134421** — `pre-deploy-maya-hi-signals-2026-08-12_134421` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-08-12_135104** — `pre-consent-turn-fix` — same consent defect in Need Capture _(6 files)_
+- **2026-08-12_135357** — `pre-restore-2026-08-12_135357` — auto-saved before restoring 'pre-consent-turn-fix' _(6 files)_
+- **2026-08-12_135538** — `pre-deploy-maya-hi-out-2026-08-12_135538` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-08-12_135539** — `pre-deploy-maya-hi-signals-2026-08-12_135539` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-08-12_135540** — `pre-deploy-maya-hi-in-2026-08-12_135540` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_
+- **2026-08-12_135541** — `pre-deploy-maya-hi-in-signals-2026-08-12_135540` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-08-12_141009** — `pre-deploy-maya-hi-out-2026-08-12_141009` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-08-12_141009** — `pre-deploy-maya-hi-signals-2026-08-12_141009` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-08-12_144423** — `pre-deploy-maya-hi-in-2026-08-12_144423` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_
+- **2026-08-12_144425** — `pre-deploy-maya-hi-in-signals-2026-08-12_144425` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-08-24_183847** — `pre-r96-98-needcapture` — substantive service answer + returning-caller port _(6 files)_
+- **2026-08-24_184344** — `pre-deploy-maya-hi-out-2026-08-24_184344` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-08-24_184345** — `pre-deploy-maya-hi-signals-2026-08-24_184345` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-08-24_184346** — `pre-deploy-maya-hi-in-2026-08-24_184346` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_
+- **2026-08-24_184347** — `pre-deploy-maya-hi-in-signals-2026-08-24_184346` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-08-24_190358** — `pre-deploy-maya-hi-out-2026-08-24_190358` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-08-24_190358** — `pre-deploy-maya-hi-in-2026-08-24_190358` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_

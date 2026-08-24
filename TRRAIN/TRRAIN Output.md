@@ -28,7 +28,9 @@ If a value is not present, use "NA" for strings, [] for arrays, or 0 for counts.
    Values: "Yes" if the offer was made, "No" if the call ended before it (wrong 
    person, do-not-call, busy, angry, bad line, or silence).
 
-7. trrain_interest — How did the seeker respond to that offer? 
+7. trrain_interest — How did the seeker respond to that offer? Record their FINAL 
+   answer: if they accepted, then heard the one-sentence clarification and withdrew, 
+   the value is "No" — a withdrawn acceptance is never recorded as "Yes". 
    Values: "Yes" for a clear acceptance, "No" for a clear refusal, "Maybe" if the 
    answer was unclear or they gave no real answer, "NA" if trrain_pitched is "No".
 

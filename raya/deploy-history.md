@@ -334,3 +334,61 @@ to the same number — the first writing the memory, the second consuming it.
 2026-08-12 11:32:18 · prod · maya-hi-in · df99f501-e636-4f3d-80dc-e06e82240082 · Maya/Maya Inbound.md · sha256:2ec86595 · snapshot:pre-deploy-maya-hi-in-2026-08-12_113218 · deployed
 2026-08-12 11:32:21 · prod · maya-hi-signals · 904f333f-1919-4523-a51d-b22ba382dd22 · Maya/Maya Hindi Signals.md · sha256:f7950a15 · snapshot:pre-deploy-maya-hi-signals-2026-08-12_113220 · deployed
 2026-08-12 11:32:24 · prod · maya-hi-in-signals · 1c24feda-a584-4012-a865-fa8f950089df · Maya/Maya Inbound Signals.md · sha256:56579da4 · snapshot:pre-deploy-maya-hi-in-signals-2026-08-12_113223 · deployed
+2026-08-12 13:17:50 · prod · kkb-hi-in · b6222233-8a8d-49a6-9950-d07e9d159757 · KKB/KKB Placeholder Inbound.md · sha256:31396ae8 · snapshot:pre-deploy-kkb-hi-in-2026-08-12_131749 · deployed
+2026-08-12 13:17:51 · prod · kkb-kn-in · 4ac90bf1-a740-4b1c-92b0-45bda099e53f · KKB/KKB Placeholder Inbound Kannada.md · sha256:2b7a32d7 · snapshot:pre-deploy-kkb-kn-in-2026-08-12_131750 · deployed
+2026-08-12 13:17:51 · prod · kkb-hi-in-signals · 3f521174-574d-43ca-a9be-081849373c18 · KKB/KKB Placeholder Inbound Signals.md · sha256:b71865e2 · snapshot:pre-deploy-kkb-hi-in-signals-2026-08-12_131751 · deployed
+2026-08-12 13:17:52 · prod · kkb-kn-in-signals · f38da775-c572-4a50-9340-fe1f42c43901 · KKB/KKB Placeholder Inbound Kannada Signals.md · sha256:179f8c07 · snapshot:pre-deploy-kkb-kn-in-signals-2026-08-12_131752 · deployed
+2026-08-12 13:17:53 · prod · maya-hi-in · df99f501-e636-4f3d-80dc-e06e82240082 · Maya/Maya Inbound.md · sha256:5eddfab4 · snapshot:pre-deploy-maya-hi-in-2026-08-12_131752 · deployed
+2026-08-12 13:17:54 · prod · maya-hi-in-signals · 1c24feda-a584-4012-a865-fa8f950089df · Maya/Maya Inbound Signals.md · sha256:f7c78d28 · snapshot:pre-deploy-maya-hi-in-signals-2026-08-12_131753 · deployed
+2026-08-12 13:17:55 · prod · maya-hi-out · 47fdffe6-0cb0-4fcf-8762-135ddadfb194 · Maya/Maya Hindi.md · sha256:ace511ed · snapshot:pre-deploy-maya-hi-out-2026-08-12_131754 · deployed
+2026-08-12 13:17:55 · prod · maya-hi-signals · 904f333f-1919-4523-a51d-b22ba382dd22 · Maya/Maya Hindi Signals.md · sha256:fc1b60fc · snapshot:pre-deploy-maya-hi-signals-2026-08-12_131755 · deployed
+2026-08-12 13:44:15 · prod · kkb-hi-signals · 115b38a5-42ef-4082-be69-84a871bb226a · KKB/KKB Placeholder Hindi Signals.md · sha256:43ebee75 · snapshot:pre-deploy-kkb-hi-signals-2026-08-12_134415 · deployed
+2026-08-12 13:44:16 · prod · kkb-kn-signals · 33037201-78ce-405d-b509-a3b6934e20f1 · KKB/KKB Placeholder Kannada Signals.md · sha256:34325ed5 · snapshot:pre-deploy-kkb-kn-signals-2026-08-12_134416 · deployed
+2026-08-12 13:44:17 · prod · kkb-hi-out · da612923-1927-45d7-9ad0-b1c7cbb15294 · KKB/KKB Placeholder Hindi.md · sha256:5f93d046 · snapshot:pre-deploy-kkb-hi-out-2026-08-12_134416 · deployed
+2026-08-12 13:44:17 · prod · kkb-kn-out · 87ab9108-5d66-4a13-a20a-575eaa9aae36 · KKB/KKB Placeholder Kannada.md · sha256:97ed1749 · snapshot:pre-deploy-kkb-kn-out-2026-08-12_134417 · deployed
+2026-08-12 13:44:18 · prod · kkb-hi-in-signals · 3f521174-574d-43ca-a9be-081849373c18 · KKB/KKB Placeholder Inbound Signals.md · sha256:9cf4c299 · snapshot:pre-deploy-kkb-hi-in-signals-2026-08-12_134418 · deployed
+2026-08-12 13:44:19 · prod · kkb-kn-in-signals · f38da775-c572-4a50-9340-fe1f42c43901 · KKB/KKB Placeholder Inbound Kannada Signals.md · sha256:45cef811 · snapshot:pre-deploy-kkb-kn-in-signals-2026-08-12_134419 · deployed
+2026-08-12 13:44:19 · prod · maya-hi-in · df99f501-e636-4f3d-80dc-e06e82240082 · Maya/Maya Inbound.md · sha256:03ed5ef9 · snapshot:pre-deploy-maya-hi-in-2026-08-12_134419 · deployed
+2026-08-12 13:44:20 · prod · maya-hi-in-signals · 1c24feda-a584-4012-a865-fa8f950089df · Maya/Maya Inbound Signals.md · sha256:f1b3f576 · snapshot:pre-deploy-maya-hi-in-signals-2026-08-12_134420 · deployed
+2026-08-12 13:44:21 · prod · maya-hi-out · 47fdffe6-0cb0-4fcf-8762-135ddadfb194 · Maya/Maya Hindi.md · sha256:af8ddbb0 · snapshot:pre-deploy-maya-hi-out-2026-08-12_134420 · deployed
+2026-08-12 13:44:21 · prod · maya-hi-signals · 904f333f-1919-4523-a51d-b22ba382dd22 · Maya/Maya Hindi Signals.md · sha256:fe86be46 · snapshot:pre-deploy-maya-hi-signals-2026-08-12_134421 · deployed
+2026-08-12 13:55:36 · prod · trrain-hi-out · cf39a59a-3b24-4842-ba03-4248ec245aa1 · TRRAIN/TRRAIN Hindi.md · sha256:6e2a9318 · snapshot:pre-deploy-trrain-hi-out-2026-08-12_135536 · deployed
+2026-08-12 13:55:37 · prod · trrain-kn-out · dfeda883-3d2d-4a74-a0b5-1a47fdde2282 · TRRAIN/TRRAIN Kannada.md · sha256:9723fb22 · snapshot:pre-deploy-trrain-kn-out-2026-08-12_135537 · deployed
+2026-08-12 13:55:37 · prod · trrain-hi-output · cf39a59a-3b24-4842-ba03-4248ec245aa1 · TRRAIN/TRRAIN Output.md · sha256:2f14669d · snapshot:pre-deploy-trrain-hi-output-2026-08-12_135537 · deployed
+2026-08-12 13:55:38 · prod · trrain-kn-output · dfeda883-3d2d-4a74-a0b5-1a47fdde2282 · TRRAIN/TRRAIN Output.md · sha256:2f14669d · snapshot:pre-deploy-trrain-kn-output-2026-08-12_135538 · deployed
+2026-08-12 13:55:38 · prod · maya-hi-out · 47fdffe6-0cb0-4fcf-8762-135ddadfb194 · Maya/Maya Hindi.md · sha256:bfa0b7b7 · snapshot:pre-deploy-maya-hi-out-2026-08-12_135538 · deployed
+2026-08-12 13:55:39 · prod · maya-hi-signals · 904f333f-1919-4523-a51d-b22ba382dd22 · Maya/Maya Hindi Signals.md · sha256:10a17503 · snapshot:pre-deploy-maya-hi-signals-2026-08-12_135539 · deployed
+2026-08-12 13:55:40 · prod · maya-hi-in · df99f501-e636-4f3d-80dc-e06e82240082 · Maya/Maya Inbound.md · sha256:fb6ee5a8 · snapshot:pre-deploy-maya-hi-in-2026-08-12_135540 · deployed
+2026-08-12 13:55:41 · prod · maya-hi-in-signals · 1c24feda-a584-4012-a865-fa8f950089df · Maya/Maya Inbound Signals.md · sha256:4ac104d1 · snapshot:pre-deploy-maya-hi-in-signals-2026-08-12_135540 · deployed
+2026-08-12 14:02:23 · prod · trrain-kn-out · dfeda883-3d2d-4a74-a0b5-1a47fdde2282 · TRRAIN/TRRAIN Kannada.md · sha256:63cb42b9 · snapshot:pre-deploy-trrain-kn-out-2026-08-12_140223 · deployed
+2026-08-12 14:10:06 · prod · kkb-hi-signals · 115b38a5-42ef-4082-be69-84a871bb226a · KKB/KKB Placeholder Hindi Signals.md · sha256:26797caa · snapshot:pre-deploy-kkb-hi-signals-2026-08-12_141006 · deployed
+2026-08-12 14:10:07 · prod · kkb-kn-signals · 33037201-78ce-405d-b509-a3b6934e20f1 · KKB/KKB Placeholder Kannada Signals.md · sha256:c169b283 · snapshot:pre-deploy-kkb-kn-signals-2026-08-12_141006 · deployed
+2026-08-12 14:10:07 · prod · kkb-hi-out · da612923-1927-45d7-9ad0-b1c7cbb15294 · KKB/KKB Placeholder Hindi.md · sha256:61c00568 · snapshot:pre-deploy-kkb-hi-out-2026-08-12_141007 · deployed
+2026-08-12 14:10:08 · prod · kkb-kn-out · 87ab9108-5d66-4a13-a20a-575eaa9aae36 · KKB/KKB Placeholder Kannada.md · sha256:f0066673 · snapshot:pre-deploy-kkb-kn-out-2026-08-12_141008 · deployed
+2026-08-12 14:10:09 · prod · maya-hi-out · 47fdffe6-0cb0-4fcf-8762-135ddadfb194 · Maya/Maya Hindi.md · sha256:3032a71e · snapshot:pre-deploy-maya-hi-out-2026-08-12_141009 · deployed
+2026-08-12 14:10:10 · prod · maya-hi-signals · 904f333f-1919-4523-a51d-b22ba382dd22 · Maya/Maya Hindi Signals.md · sha256:1965eaf3 · snapshot:pre-deploy-maya-hi-signals-2026-08-12_141009 · deployed
+2026-08-12 14:10:10 · prod · kkb-hi-in · b6222233-8a8d-49a6-9950-d07e9d159757 · KKB/KKB Placeholder Inbound.md · sha256:37c02041 · snapshot:pre-deploy-kkb-hi-in-2026-08-12_141010 · deployed
+2026-08-12 14:10:11 · prod · kkb-kn-in · 4ac90bf1-a740-4b1c-92b0-45bda099e53f · KKB/KKB Placeholder Inbound Kannada.md · sha256:3ac4e478 · snapshot:pre-deploy-kkb-kn-in-2026-08-12_141011 · deployed
+2026-08-12 14:44:21 · prod · kkb-hi-in-signals · 3f521174-574d-43ca-a9be-081849373c18 · KKB/KKB Placeholder Inbound Signals.md · sha256:d9be32d4 · snapshot:- · skip-in-sync
+2026-08-12 14:44:23 · prod · kkb-kn-in-signals · f38da775-c572-4a50-9340-fe1f42c43901 · KKB/KKB Placeholder Inbound Kannada Signals.md · sha256:39167bd4 · snapshot:pre-deploy-kkb-kn-in-signals-2026-08-12_144422 · deployed
+2026-08-12 14:44:24 · prod · maya-hi-in · df99f501-e636-4f3d-80dc-e06e82240082 · Maya/Maya Inbound.md · sha256:0d65a979 · snapshot:pre-deploy-maya-hi-in-2026-08-12_144423 · deployed
+2026-08-12 14:44:26 · prod · maya-hi-in-signals · 1c24feda-a584-4012-a865-fa8f950089df · Maya/Maya Inbound Signals.md · sha256:934cd00f · snapshot:pre-deploy-maya-hi-in-signals-2026-08-12_144425 · deployed
+2026-08-24 18:43:37 · prod · kkb-hi-out · da612923-1927-45d7-9ad0-b1c7cbb15294 · KKB/KKB Placeholder Hindi.md · sha256:cf9dd519 · snapshot:pre-deploy-kkb-hi-out-2026-08-24_184336 · deployed
+2026-08-24 18:43:37 · prod · kkb-kn-out · 87ab9108-5d66-4a13-a20a-575eaa9aae36 · KKB/KKB Placeholder Kannada.md · sha256:38ceb10e · snapshot:pre-deploy-kkb-kn-out-2026-08-24_184337 · deployed
+2026-08-24 18:43:38 · prod · kkb-hi-signals · 115b38a5-42ef-4082-be69-84a871bb226a · KKB/KKB Placeholder Hindi Signals.md · sha256:c77bca02 · snapshot:pre-deploy-kkb-hi-signals-2026-08-24_184338 · deployed
+2026-08-24 18:43:39 · prod · kkb-kn-signals · 33037201-78ce-405d-b509-a3b6934e20f1 · KKB/KKB Placeholder Kannada Signals.md · sha256:a4728527 · snapshot:pre-deploy-kkb-kn-signals-2026-08-24_184339 · deployed
+2026-08-24 18:43:40 · prod · kkb-hi-in · b6222233-8a8d-49a6-9950-d07e9d159757 · KKB/KKB Placeholder Inbound.md · sha256:98bf8fa7 · snapshot:pre-deploy-kkb-hi-in-2026-08-24_184340 · deployed
+2026-08-24 18:43:41 · prod · kkb-kn-in · 4ac90bf1-a740-4b1c-92b0-45bda099e53f · KKB/KKB Placeholder Inbound Kannada.md · sha256:71a40e3e · snapshot:pre-deploy-kkb-kn-in-2026-08-24_184341 · deployed
+2026-08-24 18:43:42 · prod · kkb-hi-in-signals · 3f521174-574d-43ca-a9be-081849373c18 · KKB/KKB Placeholder Inbound Signals.md · sha256:82b366e5 · snapshot:pre-deploy-kkb-hi-in-signals-2026-08-24_184342 · deployed
+2026-08-24 18:43:43 · prod · kkb-kn-in-signals · f38da775-c572-4a50-9340-fe1f42c43901 · KKB/KKB Placeholder Inbound Kannada Signals.md · sha256:395886d0 · snapshot:pre-deploy-kkb-kn-in-signals-2026-08-24_184343 · deployed
+2026-08-24 18:43:44 · prod · maya-hi-out · 47fdffe6-0cb0-4fcf-8762-135ddadfb194 · Maya/Maya Hindi.md · sha256:3c3242a4 · snapshot:pre-deploy-maya-hi-out-2026-08-24_184344 · deployed
+2026-08-24 18:43:45 · prod · maya-hi-signals · 904f333f-1919-4523-a51d-b22ba382dd22 · Maya/Maya Hindi Signals.md · sha256:2c509d01 · snapshot:pre-deploy-maya-hi-signals-2026-08-24_184345 · deployed
+2026-08-24 18:43:46 · prod · maya-hi-in · df99f501-e636-4f3d-80dc-e06e82240082 · Maya/Maya Inbound.md · sha256:fc7aff82 · snapshot:pre-deploy-maya-hi-in-2026-08-24_184346 · deployed
+2026-08-24 18:43:47 · prod · maya-hi-in-signals · 1c24feda-a584-4012-a865-fa8f950089df · Maya/Maya Inbound Signals.md · sha256:6447148b · snapshot:pre-deploy-maya-hi-in-signals-2026-08-24_184346 · deployed
+2026-08-24 18:43:48 · prod · trrain-kn-out · dfeda883-3d2d-4a74-a0b5-1a47fdde2282 · TRRAIN/TRRAIN Kannada.md · sha256:4d98a606 · snapshot:pre-deploy-trrain-kn-out-2026-08-24_184347 · deployed
+2026-08-24 19:03:54 · prod · kkb-hi-out · da612923-1927-45d7-9ad0-b1c7cbb15294 · KKB/KKB Placeholder Hindi.md · sha256:e887029a · snapshot:pre-deploy-kkb-hi-out-2026-08-24_190354 · deployed
+2026-08-24 19:03:55 · prod · kkb-kn-out · 87ab9108-5d66-4a13-a20a-575eaa9aae36 · KKB/KKB Placeholder Kannada.md · sha256:8555bb0b · snapshot:pre-deploy-kkb-kn-out-2026-08-24_190355 · deployed
+2026-08-24 19:03:56 · prod · kkb-hi-in · b6222233-8a8d-49a6-9950-d07e9d159757 · KKB/KKB Placeholder Inbound.md · sha256:5af723c7 · snapshot:pre-deploy-kkb-hi-in-2026-08-24_190356 · deployed
+2026-08-24 19:03:57 · prod · kkb-kn-in · 4ac90bf1-a740-4b1c-92b0-45bda099e53f · KKB/KKB Placeholder Inbound Kannada.md · sha256:768567c8 · snapshot:pre-deploy-kkb-kn-in-2026-08-24_190357 · deployed
+2026-08-24 19:03:58 · prod · maya-hi-out · 47fdffe6-0cb0-4fcf-8762-135ddadfb194 · Maya/Maya Hindi.md · sha256:106e04eb · snapshot:pre-deploy-maya-hi-out-2026-08-24_190358 · deployed
+2026-08-24 19:03:59 · prod · maya-hi-in · df99f501-e636-4f3d-80dc-e06e82240082 · Maya/Maya Inbound.md · sha256:3a163625 · snapshot:pre-deploy-maya-hi-in-2026-08-24_190358 · deployed

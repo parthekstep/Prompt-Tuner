@@ -752,6 +752,34 @@ Things a newcomer otherwise learns by wasting a day.
 
 ### 8.x Platform facts learned by experiment (2026-08-10) — don't re-derive these
 
+**Two job-source families — establish which one a bot is before you grade it (2026-08-12).** The
+fleet's prompts split into two families that share the same flow but get their jobs from different
+places, and confusing them produces both bad fixes and bad verdicts:
+
+| Family | Job source | Real `agent_args` on a production call |
+|---|---|---|
+| Outbound / Signals (`kkb-hi-signals`, `kkb-kn-out`, `maya-hi-out`, …) | `${recommendations}` from the campaign | `recommendations`, `contact_name`, `contact_phone`, `country_code`, `contact_memory`, … |
+| **Inbound** (`kkb-hi-in`, `kkb-kn-in`, `*-in-signals`, `maya-hi-in*`) | a **hardcoded Job Inventory in the prompt body** (real `job_id` uuids, 16+ jobs) | **only** `contact_memory`, `contact_phone`, `country_code` (+`college_name` on Maya) |
+
+Consequences, both learned the hard way:
+- **Never write a guard that references `${recommendations}` in an inbound prompt.** It has no such
+  variable — the prompt says so itself — and the token makes Raya derive a phantom `agent_arg`, so
+  whatever a caller or harness supplies gets interpolated into the middle of that section (see
+  analyser **G6**, **G2**).
+- **Never grade an inbound bot for hallucination by comparing its spoken jobs to the call's args.**
+  It does not read them. Compare against the inventory in its prompt. Doing otherwise produced four
+  false CRITICAL/FAIL verdicts in one sweep, including calling a `job_id` "fabricated" when it was
+  line 262 of the bot's own prompt.
+- A harness call to an inbound agent therefore does **not** reproduce production input. Send only the
+  args production sends; extra args are ignored at best and misleading at worst.
+
+**One tester DID means one shared profile history.** `get_profile` on 7946350285 returns MULTIPLE
+records (Ramesh, ಪ್ರಕಾಶ್, Aryan, ಸುಜಾತಾ, Parth Bansal, Prakash) because every persona has called
+from it. A bot greeting the caller by a name the current persona never gave is usually **correct
+behaviour reading a real profile record** — not a memory leak. Confirm against the tool result in the
+transcript before calling it a defect.
+
+
 **Creating an agent via the API works, but in two steps.** `POST /api/agent` requires only `name`;
 everything else defaults (and the defaults are not what you want — `max_call_duration_mins` 60,
 English `language_id`, `allow_interruption` false, `say_hello` true). It **rejects** three keys that
