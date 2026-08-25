@@ -133,3 +133,8 @@
 - **2026-08-24_184347** — `pre-deploy-maya-hi-in-signals-2026-08-24_184346` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
 - **2026-08-24_190358** — `pre-deploy-maya-hi-out-2026-08-24_190358` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
 - **2026-08-24_190358** — `pre-deploy-maya-hi-in-2026-08-24_190358` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_
+- **2026-08-25_200403** — `pre-apply-failure-reason` — Branch Apply Failure Handling on failure reason: ACTION_LIMIT_REACHED must not be spoken as a technical fault _(6 files)_
+- **2026-08-25_201048** — `pre-deploy-maya-hi-out-2026-08-25_201048` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-08-25_201049** — `pre-deploy-maya-hi-signals-2026-08-25_201049` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-08-25_201050** — `pre-deploy-maya-hi-in-2026-08-25_201050` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_
+- **2026-08-25_201051** — `pre-deploy-maya-hi-in-signals-2026-08-25_201051` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_

@@ -878,6 +878,13 @@ Speak this ONLY after `apply_job` has actually been called AND returned an error
 
 **Begin the failure message DIRECTLY with the base failure line below.** Do NOT re-speak the apply bridge ("...आपकी तरफ़ से अप्लाई कर देती हूँ" / "अप्लाई कर देती हूँ") before it or inside it — that was already said once before the tool call, and repeating it on the failure turn is a bug. The caller must not hear "अप्लाई कर देती हूँ" again on a turn where the apply just failed.
 
+**FIRST, read WHY the apply failed — the reason comes back in the tool result, and the caller must never be told something untrue about it. Decide between Case A and Case B BEFORE you speak.**
+
+**Case A — the application ALREADY EXISTS.** The error is `ACTION_LIMIT_REACHED`, or its message says that an active or duplicate request already exists between the two profiles. This is **not** a technical fault and **not** a failure on our side: the caller's application for this job is already in place. Say that truthfully, then go to the next-step rules below. Do **NOT** speak the base failure line, do **NOT** say "तकनीकी दिक्कत", do **NOT** apologise, and do **NOT** promise a callback or say the problem will be fixed — there is nothing to fix. If no other job remains, close per Graceful Exit; the "we will call you back once this is sorted" line belongs to Case B only.
+Say once: "इस जॉब के लिए आपकी एप्लीकेशन पहले से लगी हुई है — दोबारा अप्लाई करने की ज़रूरत नहीं।"
+
+**Case B — a genuine technical failure.** Any other error: the job does not exist, a 4xx/5xx, a timeout, or no response at all. Use the base failure line below.
+
 **Base failure line (say once):**
 "अभी हमारी तरफ़ से apply complete नहीं हो पाया — कोई तकनीकी दिक्कत है। आपकी दिलचस्पी नोट कर ली है।"
 
