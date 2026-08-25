@@ -10,6 +10,23 @@ Every prompt edit to KKB is logged here. Entry format:
 - **Ported from:** <source agent> (only for cross-agent ports)
 ```
 
+### 2026-08-25 (later) — D47 follow-up: the reason branch does NOT hold at runtime (VERIFY-PENDING)
+- **Status:** the Case A / Case B branch is deployed on all 12 prompts but is **NOT verified working** — it was
+  ignored on two consecutive live calls. Do not treat this defect as fixed.
+- **v2 change:** moved the condition onto the base-failure-line label (`**Base failure line — CASE B ONLY (say
+  once):** …`) and added a matching failure-turn hard ban, on the theory that the model reads that label and
+  skipped the block above it. Deployed to all 12; live agents re-verified as carrying it.
+- **Result:** live call `3be8d3fb` (v1) and a second maya-hi-signals call (v2) both hit
+  `ACTION_LIMIT_REACHED` on job `b7513680` and both spoke "कोई तकनीकी दिक्कत है" anyway.
+- **Open question (platform, not prompt):** whether the model receives the error reason at all. The tool result
+  is `[Error: apply_job request failed (HTTP 422).]` plus a `__RAYA_TOOL_DEBUG__` block; if that block is not fed
+  back, `ACTION_LIMIT_REACHED` and `TARGET_ITEM_NOT_FOUND` are both just "HTTP 422" to the model and no wording
+  can branch on them. Needs one diagnostic call, then a LitWiz ask — not a third prose attempt (analyser D25).
+- **Files:** the same 12 KKB/Maya conversation prompts; analyser **D47** updated with the failure evidence
+- **New tooling:** `raya/regression/apply_outcomes.py` — runtime check over real calls that caught both failures
+  automatically. Also surfaced that `HTTP 404 — Invalid or missing profile_id` is 16 of 23 fleet apply failures
+  in two days (tracker row 84).
+
 ## 2026-08-25 — Apply failure messages now branch on the actual failure reason
 - **Feedback/bug:** tracker r100 (KKB Hindi Signals, 25/08, P1) reported as "apply failed, no details collected or reiterated", plus a same-day retest reported as "API still failed" after a Signals API-key incident had been fixed. Root-caused against calls `bc7ef5b5` (10:26 IST) and `1e2fd2a2` (14:41 IST): neither was a technical failure. Both were `422 ACTION_LIMIT_REACHED` — "An active request already exists between these two profiles" — i.e. the seeker had **already applied** to that job (in `1e2fd2a2`, to the very job that applied successfully in `bc7ef5b5` four hours earlier). The bot spoke both as "कोई तकनीकी दिक्कत है" and promised to fix the problem and call back, so a correctly-refused duplicate was indistinguishable from an outage and was escalated as a P1 against the wrong team. r100/r101 were closed as *Rejected / Not an Issue*; this line is the one genuine defect they surfaced.
 - **Change:** `Apply Failure Handling` now requires the reason to be read **before** anything is spoken, and splits into two cases. **Case A — the application already exists** (`ACTION_LIMIT_REACHED`, or any message saying an active/duplicate request already exists between the two profiles): say so truthfully, suppress the base failure line, no "तकनीकी दिक्कत", no apology, and no callback promise — close per Graceful Exit if no other job remains. **Case B — a genuine technical failure** (job does not exist, 4xx/5xx, timeout, no response): unchanged, uses the existing base failure line and next-step rules. Purely additive: 7 lines per file, nothing removed or reworded. The Case A spoken line is phrased to agree with the feminine noun एप्लीकेशन / ಅಪ್ಲಿಕೇಶನ್ rather than with the caller, so it is safe on a caller of any gender (analyser D44).

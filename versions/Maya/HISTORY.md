@@ -138,3 +138,8 @@
 - **2026-08-25_201049** — `pre-deploy-maya-hi-signals-2026-08-25_201049` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
 - **2026-08-25_201050** — `pre-deploy-maya-hi-in-2026-08-25_201050` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_
 - **2026-08-25_201051** — `pre-deploy-maya-hi-in-signals-2026-08-25_201051` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-08-25_202754** — `pre-d47-v2` — Case A branch skipped at runtime; move guard onto the base-failure-line label _(6 files)_
+- **2026-08-25_202834** — `pre-deploy-maya-hi-out-2026-08-25_202834` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-08-25_202835** — `pre-deploy-maya-hi-signals-2026-08-25_202835` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-08-25_202836** — `pre-deploy-maya-hi-in-2026-08-25_202836` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_
+- **2026-08-25_202837** — `pre-deploy-maya-hi-in-signals-2026-08-25_202837` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
