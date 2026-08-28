@@ -240,3 +240,6 @@
 - **2026-08-25_202831** — `pre-deploy-kkb-kn-in-2026-08-25_202831` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(10 files)_
 - **2026-08-25_202832** — `pre-deploy-kkb-hi-in-signals-2026-08-25_202832` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Signals.md _(10 files)_
 - **2026-08-25_202833** — `pre-deploy-kkb-kn-in-signals-2026-08-25_202833` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada Signals.md _(10 files)_
+- **2026-08-28_123131** — `pre-signals-inventory` — Repoint inbound hardcoded Job Inventory to gzb/dharwad live job_ids _(10 files)_
+- **2026-08-28_123329** — `pre-deploy-kkb-hi-in-signals-2026-08-28_123329` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Signals.md _(10 files)_
+- **2026-08-28_123330** — `pre-deploy-kkb-kn-in-signals-2026-08-28_123330` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada Signals.md _(10 files)_

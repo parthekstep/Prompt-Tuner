@@ -99,46 +99,46 @@ benefits      — (optional) non-monetary perks such as PF, insurance, incentive
 ```json
 [
   {
-    "job_id": "b7513680-6b2f-4223-bba5-893143c949b9",
-    "role": "Data Entry Operator",
-    "company": "Kashi Infotech",
+    "job_id": "9766a30e-e4b9-4b28-a943-394972f1a985",
+    "role": "HR Admin Executive",
+    "company": "Saarthi Staffing Solutions",
+    "qualification": "बारहवीं पास",
+    "salary": "14000-20000",
+    "vacancy": "3",
+    "location": "Vasundhara Sector 10",
+    "hr_contact": "",
+    "benefits": ""
+  },
+  {
+    "job_id": "41ed5fd5-fc28-43d1-9ba9-314f235e8f07",
+    "role": "Production Worker",
+    "company": "Lava International Ltd",
+    "qualification": "बारहवीं पास",
+    "salary": "10000-14000",
+    "vacancy": "35",
+    "location": "Surajpur Industrial Area",
+    "hr_contact": "",
+    "benefits": ""
+  },
+  {
+    "job_id": "d55db597-2f72-4d44-b347-5d60270b7dd2",
+    "role": "Computer Operator / Data Entry",
+    "company": "NIIT Ltd",
+    "qualification": "बारहवीं पास",
+    "salary": "12000-16000",
+    "vacancy": "10",
+    "location": "Raj Nagar District Centre",
+    "hr_contact": "",
+    "benefits": ""
+  },
+  {
+    "job_id": "d479bfbc-308d-4655-8ba1-19d94f3b37d0",
+    "role": "Vocational Trainer – Tailoring",
+    "company": "Udyogini",
     "qualification": "बारहवीं पास",
     "salary": "12000-16000",
     "vacancy": "2",
-    "location": "Bengaluru",
-    "hr_contact": "",
-    "benefits": ""
-  },
-  {
-    "job_id": "7dc7f10b-a42b-4132-ae58-4455f518a37f",
-    "role": "Remote Customer Support Executive",
-    "company": "Rampur Technologies",
-    "qualification": "बारहवीं पास",
-    "salary": "14000-20000",
-    "vacancy": "18",
-    "location": "Remote",
-    "hr_contact": "",
-    "benefits": ""
-  },
-  {
-    "job_id": "da32f92e-3611-44fc-8ed2-d70b20235422",
-    "role": "EV Charging Technician",
-    "company": "Yamuna Solar Energy",
-    "qualification": "बारहवीं पास",
-    "salary": "18000-26000",
-    "vacancy": "5",
-    "location": "Bengaluru",
-    "hr_contact": "",
-    "benefits": ""
-  },
-  {
-    "job_id": "362b0ad9-fa21-4261-be1f-9582c0cc03a9",
-    "role": "AC Technician",
-    "company": "Krishna Enterprises",
-    "qualification": "बारहवीं पास",
-    "salary": "15000-20000",
-    "vacancy": "3",
-    "location": "Bengaluru",
+    "location": "Govindpuram",
     "hr_contact": "",
     "benefits": ""
   }

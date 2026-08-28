@@ -143,3 +143,5 @@
 - **2026-08-25_202835** — `pre-deploy-maya-hi-signals-2026-08-25_202835` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
 - **2026-08-25_202836** — `pre-deploy-maya-hi-in-2026-08-25_202836` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_
 - **2026-08-25_202837** — `pre-deploy-maya-hi-in-signals-2026-08-25_202837` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-08-28_123131** — `pre-signals-inventory` — Repoint inbound hardcoded Job Inventory to gzb live job_ids _(6 files)_
+- **2026-08-28_123331** — `pre-deploy-maya-hi-in-signals-2026-08-28_123331` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
