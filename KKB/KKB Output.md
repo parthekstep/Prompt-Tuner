@@ -70,6 +70,21 @@ If a value is not present, use "NA" for strings, [] for arrays, or 0 for counts.
 15. consent_status — On the new-caller path (new_seeker="yes"), did the caller give the consent needed to create their profile and apply?
    Values: "Given" if the caller agreed at the consent gate and create_profile was called; "Declined" if the caller refused consent (no create_profile, no apply_job — call ended at the consent gate); "NA" for a returning caller (already consented) or if the consent gate was never reached. Default "NA".
 
+15a. preferred_location — Did the caller state a place they want to work, when the jobs
+    on offer did not suit them (the mismatch preference capture), or when they corrected
+    the location the call opened with? Extract the place in the caller's own terms, in
+    English/Latin script — a city, a locality, or a station/landmark if that is all they
+    gave (e.g. "Vasundhara, Ghaziabad", "Noida", "near Sahibabad station").
+    This is where they want to WORK. It is NOT their residence and must never be copied
+    from the profile's stored location, from a job's location, or from the call's input
+    location. "NA" if the caller never stated a preferred work location.
+
+15b. preference_mismatch_reason — Why the caller rejected the jobs, when they did.
+    Values: "Location" if they turned them down because of distance/area/city;
+    "Role" if they turned them down because it was not the kind of work they want;
+    "NA" if they did not reject the jobs, or applied, or gave no reason.
+    Exactly one value — if they objected on both, use the one the bot actually acted on.
+
 16. service_provider_pitched — Was the Need Capture service-provider offer actually 
     spoken to the caller on this call? 
     Values: "Yes" if the offer was made (either path), "No" if the call ended before 
@@ -149,6 +164,8 @@ If a value is not present, use "NA" for strings, [] for arrays, or 0 for counts.
   ],
   "ready_for_interview": "Yes",
   "consent_status": "NA",
+  "preferred_location": "Vasundhara, Ghaziabad",
+  "preference_mismatch_reason": "Location",
   "service_provider_pitched": "Yes",
   "service_provider_interest": "Yes",
   "drop_reason": "NA",
@@ -168,6 +185,11 @@ Rules:
   failed but the seeker stayed engaged, drop_reason = "NA".
 - ready_for_interview is "NA" when the interview-readiness question was never asked 
   or the seeker did not give a clear Yes/No/Conditional answer.
+- preferred_location and preference_mismatch_reason describe the caller's STATED
+  preference only. Never infer them: if the caller did not say where they want to work,
+  preferred_location is "NA" even when the call's input location or their profile carries
+  a place. preference_mismatch_reason is "NA" whenever the caller applied to a job or never
+  rejected the options. A preferred work location is never written to the caller's profile.
 - service_provider_interest is "NA" whenever service_provider_pitched is "No" — a 
   response cannot exist for an offer that was never made. Never infer interest from 
   anything other than the caller's answer to that specific offer.
