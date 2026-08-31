@@ -75,6 +75,20 @@ a real job inventory with placeholders). `deploy` also refuses any prompt still 
 10. **Report.** Summarize what changed in each file, the classification used, and a
    structural-parity note (confirm Hindi/Kannada section skeletons still align). For MIXED
    changes, show the Hindi line and its Kannada adaptation side by side.
+11. **Verify by CALL, then report — per fix, with a call id.** A change is not fixed until a live
+   call proves it. Before writing "fixed"/"done"/"working" anywhere — changelog, commit message, or
+   message to the user — name the call uuid AND the exact transcript line or tool argument that
+   demonstrates the new behaviour. Deploy + read-back proves the prompt shipped, never that the bot
+   behaves. If you shipped N behaviour changes you owe N call ids: one passing call does not verify
+   the others. Untested changes are labelled **DEPLOYED, NOT VERIFIED** in all three places.
+   See root `CLAUDE.md` → "The word 'fixed' requires a call id".
+12. **If the tested behaviour is inconsistent, the fix is NOT finished.** Never close out a change
+   as "works sometimes", "flaky", or "runtime adherence". Walk the ladder in root `CLAUDE.md` →
+   "'Intermittent' is not a result": grep the wrong output verbatim against the prompt (analyser
+   D50 — a hit in a sample conversation IS the cause), delete the competing instruction, then
+   **remove the wrong option rather than forbidding it** — a default that asserts something false
+   will be chosen for the cases it is false about however firmly it is banned, so make the worst
+   case truthful instead. Never write a third wording of a guard that has already failed twice.
 
 ## Procedure (create — new prompt or new language variant)
 
