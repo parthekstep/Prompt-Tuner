@@ -47,7 +47,10 @@ IMPORTANT:
 ## CONSTRAINT LAYER — What limits their choices
 - `desired_salary` — expected monthly salary range as bracket, e.g., "15-20K"
 - `desired_salary_exact` — exact amount if explicitly provided
-- `preferred_location` — where they want to work (city/area)
+- `preferred_location` — where they want to WORK (city or area), **only when the caller said it themselves**. This bot now captures a work location at several distinct points, and all of them count: the Step-1 location turn (whether they named a place or confirmed one back), the location-capture ladder (including a nearest railway/metro station or a landmark they gave instead of an area name), and the mismatch preference capture after they rejected the jobs on distance. A station or landmark IS a usable value — record it as they said it ("साहिबाबाद स्टेशन के पास"), do not convert it into a guess at an area.
+  **Never fill this from the call's input `location` variable, from a job's location, or from where they LIVE.** Those are not statements of preference. If the caller never said where they want to work, leave it empty — an empty field is correct and useful; an invented one silently mis-ranks every future call to this person.
+- `home_location` — where the caller LIVES, when they said it: the city, and the area/locality if they gave one. This is a DIFFERENT fact from `preferred_location` and the two must never overwrite each other — a caller can live in Delhi and want work in Ghaziabad. Record only what they stated aloud, never the input variable and never a job's city.
+- `location_capture_outcome` — how the location conversation ended on the last call, one of: `Stated` (they named a place) / `Confirmed` (they agreed to one we already had) / `Open` (they said anywhere is fine) / `Refused` (they declined to give one) / `Unclear` (we could not make it out). This tells the next call whether to confirm, ask afresh, or not push again — a caller recorded as `Refused` or `Unclear` should not be put through the whole ladder a second time.
 - `commute_flexibility` — one of: `Hyperlocal (<2km)` / `Local (<10km)` / `City-wide` / `Anywhere`
 - `shift_preference` — one of: `Any` / `Day` / `Night` / `Part-time`
 - `availability` — one of: `Immediate` / `Within 2 weeks` / `1 month+`
@@ -126,6 +129,8 @@ IMPORTANT:
   "desired_salary": "",
   "desired_salary_exact": "",
   "preferred_location": "",
+  "home_location": "",
+  "location_capture_outcome": "",
   "commute_flexibility": "",
   "shift_preference": "",
   "availability": "",

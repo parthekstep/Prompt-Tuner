@@ -78,6 +78,14 @@ If a value is not present, use "NA" for strings, [] for arrays, or 0 for counts.
     This is where they want to WORK. It is NOT their residence and must never be copied
     from the profile's stored location, from a job's location, or from the call's input
     location. "NA" if the caller never stated a preferred work location.
+    **The test is whether the words came out of the CALLER's mouth.** If the bot named a place
+    and the caller merely agreed ("हाँ", "सही"), that counts — they confirmed it aloud. If the
+    place appears only in the call's input variables, only in their stored profile, or only in a
+    job's details, it is "NA" no matter how obviously it looks like their location. A value that
+    equals the call's input `location` and was never spoken by the caller is the single most
+    common way this field goes wrong: check the caller's turns before filling it.
+    A station or landmark the caller offered instead of an area is a valid value — record it as
+    they said it.
 
 15b. preference_mismatch_reason — Why the caller rejected the jobs, when they did.
     Values: "Location" if they turned them down because of distance/area/city;

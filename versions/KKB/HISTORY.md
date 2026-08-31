@@ -250,3 +250,5 @@
 - **2026-08-28_235239** — `pre-deploy-kkb-hi-signals-2026-08-28_235239` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
 - **2026-08-31_150712** — `pre-twobug-fix` — Bug A location-from-job-city + Bug B Need Capture never fired (call 924e611f) _(10 files)_
 - **2026-08-31_150745** — `pre-deploy-kkb-hi-signals-2026-08-31_150745` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
+- **2026-08-31_172659** — `pre-fused-line-fix` — Fused technical-issue line after service-provider yes; location turn skipped on role-change path _(10 files)_
+- **2026-08-31_172805** — `pre-deploy-kkb-hi-signals-2026-08-31_172805` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
