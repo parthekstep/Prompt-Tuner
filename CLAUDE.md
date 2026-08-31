@@ -238,7 +238,54 @@ Anything outside these four is hand-editing a prompt file, which is never allowe
 **Testing is not optional — a change is not DONE until tested.** A change is NOT done when the
 files are edited/deployed — only when it has been TESTED and confirmed working, with overall
 sanity intact. Never report a prompt/agent change as "done", "fixed", or "confirmed" until you
-have actually tested it. Where a bot cannot be harness-tested (inbound bots — the tester can only
+have actually tested it.
+
+### The word "fixed" requires a call id. No exceptions.
+**You may not write "fixed", "done", "resolved", "working", or "confirmed" about any behaviour
+change unless you can name the live call that proves it** — a uuid, and the specific line or tool
+argument in that transcript which demonstrates the new behaviour. Deploying is not fixing.
+Read-back verification proves the prompt SHIPPED, never that the bot BEHAVES. Static checks,
+diffs, `agent_args` audits and "verified present in the live instructions" are all necessary and
+none of them is evidence of behaviour.
+
+If you have not called it, the only permitted words are **DEPLOYED, NOT VERIFIED** or
+**VERIFY-PENDING**, and they must appear in the same breath as the change — in the changelog entry,
+in the commit message, and in what you tell the user. Writing "fixed" for four untested edits and
+then discovering it later is worse than saying "untested" at the time, because the user has already
+acted on the claim. **When several fixes ship together, each one needs its own call id.** One
+passing call does not verify the other three; say which are proven and which are not, per fix.
+
+### "Intermittent" is not a result. It is an unfinished fix.
+**Never report a behaviour as "works sometimes", "flaky", "intermittent", or "runtime adherence" and
+stop there.** That is a description of a defect, not an outcome. If the same prompt, on the same
+error, with byte-identical tool results, produces the right line on one call and the wrong line on
+the next, the fix is not good enough yet — and the reason is almost always that **the wrong output
+is still available to the model.**
+
+The escalation ladder, in order. Do not stop before the end of it:
+
+1. **Grep the bot's wrong output verbatim against the whole prompt** (analyser D50). A hit inside a
+   sample conversation is the cause, and it is proof, not a theory. Fix the demonstration.
+2. **Find the competing instruction and delete or scope it.** A prohibition sitting next to a
+   requirement licenses the model to obey the prohibition. Two rules that can both be "followed"
+   means the model picks — and it will not always pick yours.
+3. **Remove the wrong option instead of forbidding it.** This is the one that actually works. A
+   generic fallback line that makes a factual claim ("कोई तकनीकी दिक्कत है") will be chosen for
+   cases it is false about, however loudly you forbid it. Either give every case its own mandatory
+   line with NO general default, or rewrite the default so it asserts nothing that can be false.
+   **Make the worst case truthful rather than trying to make the wrong case unreachable.**
+4. **Move the decision out of prose.** Tool parameter descriptions, `required` fields, enums, and
+   payload templates are read at the moment of use and are far stickier than rules paragraphs. A
+   constraint expressible in the tool schema belongs in the tool schema.
+5. **Only if 1-4 are genuinely exhausted** may you escalate to the platform — and then you must
+   state exactly what you tried, what the evidence is, and what change you are asking for. "The
+   model ignores it" is not an escalation; "the same tool result yields two different lines and here
+   are both call ids" is.
+
+**Never add a third wording of a guard that has already failed twice.** Two failures of the same
+prohibition is the signal to change mechanism, not volume. Adding emphasis to a rule the model has
+already ignored twice makes the prompt longer, more contradictory, and no more correct (analyser
+D25, D47, D49, D50). Where a bot cannot be harness-tested (inbound bots — the tester can only
 receive, not dial in; or telephony is down), do the best available verification (post-deploy
 transcript review + static sanity) and explicitly mark the residual **VERIFY-PENDING** — never
 claim done/confirmed on an untested change. Revert on any regression (see `/prompt-version`).
