@@ -1,7 +1,80 @@
 {
- "updated": "2026-08-10",
+ "updated": "2026-09-01",
  "note": "Curated list of known open work per bot. The automated static check reads the scripts and cannot see these — they come from live call testing and from features we know are unfinished. Keep this file current; the daily digest reads it verbatim. Remove an item the day it is genuinely closed.",
  "items": [
+  {
+   "id": "kkb-hi-signals-mismatch-unverified",
+   "bots": [
+    "KKB Hindi · outbound · Signals"
+   ],
+   "title": "The \"we have no jobs in your city\" line has never been heard on a real call",
+   "what": "When the campaign dials someone for a city we hold no jobs in (Khushboo's calls were sent 'Delhi' while every job was in Ghaziabad), the bot is supposed to say so plainly and offer the city the jobs ARE in. Until today it never did — first because the whole location section sat inside a branch her calls never entered, then because the bot was reading the location off her stored profile instead of the value the campaign sent. Both are fixed and deployed. The line itself has still not been observed.",
+   "why": "This is the difference between a caller being told the truth about where we have work and being quietly asked to name an area from scratch. It is also the only signal that a campaign is dialling a city we have no inventory for.",
+   "next": "One live call with location='Delhi' and the Ghaziabad job set: raya/regression/pending-verifications.sh mismatch. Telephony to the tester number failed 8 dials in a row from 17:37 IST on 2026-09-01, which is why it is still open.",
+   "priority": "high",
+   "since": "2026-09-01"
+  },
+  {
+   "id": "kkb-hi-signals-memory-gated-unverifiable",
+   "bots": [
+    "KKB Hindi · outbound · Signals"
+   ],
+   "title": "Two rules depend on stored memory, and stored memory can be neither set nor read",
+   "what": "The bot is meant to ask a caller for their nearest bus stop ONCE ever, and to recognise a job they have already applied to before trying again. Both read the caller's stored memory. But a memory value passed into a test call is ignored by the platform (proven on call c2ffe9fb, which carried invented facts the bot never voiced), and there is no way to read back what the platform actually holds — the contact endpoints 404 or 500. So when the bot asks a second time we cannot tell whether it ignored the rule or whether memory was empty.",
+   "why": "A rule we cannot observe is a rule we cannot maintain. It also means the duplicate-application fix may simply never fire in production, if memory arrives empty there too.",
+   "next": "Ask LitWiz for a read-only endpoint for a contact's stored memory. Until then treat both rules as VERIFY-PENDING and do not report either as fixed. See analyser D54.",
+   "priority": "high",
+   "since": "2026-09-01"
+  },
+  {
+   "id": "raya-tool-error-body-not-visible",
+   "bots": [
+    "KKB Hindi · outbound · Signals",
+    "KKB Kannada · outbound · Signals",
+    "KKB Kannada · inbound · Signals",
+    "Maya Hindi · outbound · Signals"
+   ],
+   "title": "The bot is never told WHY an application failed, so it cannot say \"you have already applied\"",
+   "what": "When someone applies to a job they already applied to, the backend says so precisely (ACTION_LIMIT_REACHED, \"an active request already exists\"). The bot only receives \"apply_job request failed (HTTP 422)\". Across 9 real calls on 4 bots in 2 languages it has never once said the specific thing, including calls where the instruction was written into the tool's own description. Three rounds of rewording could not have worked.",
+   "why": "Callers are told a vague \"this did not go through\" for something that in fact already succeeded, and QA cannot tell a duplicate from an outage.",
+   "next": "Ask LitWiz to pass the tool error's error/message fields to the model, or return a distinct tool result per reason. Evidence: 90da81db, 21c428dc, dc3168ec, 18b5e1b8, d824912c, 96e72c85, 9d82ac2c, 3be8d3fb, 14f90f64. See analyser D52.",
+   "priority": "high",
+   "since": "2026-09-01"
+  },
+  {
+   "id": "kkb-maya-propagation-untested",
+   "bots": [
+    "KKB Hindi · outbound",
+    "KKB Kannada · outbound",
+    "KKB Hindi · inbound",
+    "KKB Kannada · inbound",
+    "KKB Hindi · inbound · Signals",
+    "KKB Kannada · inbound · Signals",
+    "KKB Kannada · outbound · Signals",
+    "Maya Hindi · outbound",
+    "Maya Hindi · outbound · Signals",
+    "Maya Hindi · inbound",
+    "Maya Hindi · inbound · Signals"
+   ],
+   "title": "Eleven prompts got the apply-failure rewrite and none has been voice-tested",
+   "what": "The false \"there is a technical problem\" line was removed fleet-wide on 2026-09-01 and replaced with wording that claims nothing, along with the duplicate pre-check. All eleven deployed with read-back confirmed. Not one has been called.",
+   "why": "A change verified on one bot is not verified on its twins — runtime adherence, ASR and TTS differ per language, and a mirrored edit can land differently.",
+   "next": "Eleven separate live calls, one per variant. Inbound bots cannot be dialled by the tester, so those need post-deploy transcript review instead.",
+   "priority": "medium",
+   "since": "2026-09-01"
+  },
+  {
+   "id": "tester-did-fixture-pollution",
+   "bots": [
+    "all seeker bots on Ghaziabad"
+   ],
+   "title": "The test number now has five live seeker records and active applications on most test jobs",
+   "what": "Repeated testing has left five live profiles on the tester number, and the bot picks the most COMPLETE one rather than the first — so a precondition prepared against one record is usually not the record the call uses. It also already holds applications on most of the handover job set, so ordinary apply tests now return \"already applied\".",
+   "why": "It silently produces both false passes and false failures. One prepared duplicate test on 2026-09-01 passed while testing nothing at all.",
+   "next": "Have Sanketika retire four of the five records, leaving the one with a complete name/age/gender/location. Then re-establish which record the bot picks and pin it in the test manifest.",
+   "priority": "medium",
+   "since": "2026-09-01"
+  },
   {
    "id": "kkb-kn-in-apply-unverified",
    "bots": [
