@@ -16,6 +16,14 @@ Two failures, both found by testing rather than by a report (2026-09-01):
   Z. SUCCESS CLAIMED WITH NO SUCCESSFUL TOOL RESULT — "अप्लाई हो गया है" on a call where apply_job
      never returned success (already a hard failure in the prompt; asserted here on real traffic).
 
+  W. DUPLICATE CHECK ASSERTED FALSELY — `apply_job` now carries a REQUIRED `duplicate_check`
+     parameter (see scripts/raya_toolparam.py): the model must send 'not-applied-before' or
+     'caller-asked-again-anyway'. That gives a machine-readable audit trail of a decision that used
+     to be invisible. A call that asserted 'not-applied-before' and then got ACTION_LIMIT_REACHED
+     means the check was NOT actually run against the caller context — which is exactly the failure
+     the parameter exists to make visible. Absent parameter on a call = the schema has not reached
+     that agent yet (only kkb-hi-signals carries it as of 2026-09-01); reported, not failed.
+
 Exit 1 on any finding.
 
 Usage: python3 raya/regression/apply_result_integrity.py [--since YYYY-MM-DD] [--agent <id|uuid>]
@@ -69,6 +77,23 @@ def check(bot, uuid):
     if o and not apply_ok:
         out.append(dict(base, kind="Z SUCCESS WITH NO SUCCESS RESULT",
                         detail="spoke the apply-success line with no successful apply_job result in the transcript"))
+    # W — what the model ASSERTED about duplication vs what the API then said
+    for m in turns:
+        for tc in (m.get("tool_calls") or []):
+            fn = tc.get("function") or {}
+            if fn.get("name") != "apply_job":
+                continue
+            try:
+                args = json.loads(fn.get("arguments") or "{}")
+            except Exception:
+                continue
+            dc = args.get("duplicate_check")
+            if dc is None:
+                continue
+            if dc == "not-applied-before" and re.search(r"ACTION_LIMIT_REACHED", tool_out):
+                out.append(dict(base, kind="W FALSE DUPLICATE-CHECK ASSERTION",
+                                detail=f"sent duplicate_check='not-applied-before' for job {args.get('job_id')} "
+                                       f"and the API returned ACTION_LIMIT_REACHED — the caller context was not checked"))
     if WROTE.search(said) and not ({"update_profile", "create_profile"} & set(tools_called)):
         out.append(dict(base, kind="Y NARRATED WRITE",
                         detail=f"claimed a field was saved/updated; tools actually called: {sorted(set(filter(None, tools_called))) or 'none'}"))
