@@ -16,13 +16,23 @@ Two failures, both found by testing rather than by a report (2026-09-01):
   Z. SUCCESS CLAIMED WITH NO SUCCESSFUL TOOL RESULT — "अप्लाई हो गया है" on a call where apply_job
      never returned success (already a hard failure in the prompt; asserted here on real traffic).
 
-  W. DUPLICATE CHECK ASSERTED FALSELY — `apply_job` now carries a REQUIRED `duplicate_check`
-     parameter (see scripts/raya_toolparam.py): the model must send 'not-applied-before' or
-     'caller-asked-again-anyway'. That gives a machine-readable audit trail of a decision that used
-     to be invisible. A call that asserted 'not-applied-before' and then got ACTION_LIMIT_REACHED
-     means the check was NOT actually run against the caller context — which is exactly the failure
-     the parameter exists to make visible. Absent parameter on a call = the schema has not reached
-     that agent yet (only kkb-hi-signals carries it as of 2026-09-01); reported, not failed.
+  W. DUPLICATE CHECK ASSERTED FALSELY — `apply_job` carries a REQUIRED `duplicate_check` parameter
+     (see scripts/raya_toolparam.py): the model must send 'not-applied-before' or
+     'caller-asked-again-anyway'. That is a machine-readable audit trail of a decision that used to be
+     invisible. **A 'not-applied-before' followed by ACTION_LIMIT_REACHED has TWO very different
+     causes and only one of them is a bot bug** — conflating them would make this detector cry wolf
+     on ordinary traffic:
+       W  (FAILED)   the call's own `contact_memory.jobs_applied` DID list that job (same role at the
+                     same company) and the model still asserted 'not-applied-before'. The check was
+                     available and was not run. This is the bug the parameter exists to catch.
+       W? (INFO)     memory did NOT list it, so the model asserted correctly on what it could see and
+                     the duplicate existed only in the backend. Nothing the prompt can fix: it is a
+                     MEMORY-COVERAGE gap (an application made outside our calls, or before memory
+                     was enabled). Reported, never failed — it is the standing argument for asking
+                     the platform to surface the tool error body, which is the only way the bot could
+                     have known.
+     Absent parameter = the schema has not reached that agent yet (only kkb-hi-signals carries it as
+     of 2026-09-01); reported, not failed.
 
 Exit 1 on any finding.
 
@@ -44,6 +54,45 @@ KEY = _env["RAYA_API_TOKEN"]
 FAIL_LINE = re.compile(r"अप्लाई पूरा नहीं हो|apply complete नहीं|ಅಪ್ಲೈ ಇನ್ನೂ ಪೂರ್ತಿ ಆಗಿಲ್ಲ|apply complete ಆಗಿಲ್ಲ")
 OK_LINE   = re.compile(r"अप्लाई हो गया|ಅಪ್ಲೈ ಆಗಿದೆ")
 WROTE     = re.compile(r"(अपडेट कर दी|अपडेट कर दिया|सेव कर दिया|सेव कर दी|ಅಪ್‌ಡೇಟ್ ಮಾಡಿದ್ದೀನಿ|ಸೇವ್ ಮಾಡಿದ್ದೀನಿ)")
+
+
+def _job_in_memory(aa, job_id):
+    """Return the matching jobs_applied entry if this call's memory already listed the job.
+
+    Matching is on ROLE + COMPANY, not on job_id: memory is written in prose by the memory prompt
+    ("2026-08-31: Computer Operator / Data Entry, NIIT Ltd, Ghaziabad") and carries no uuid. Resolve
+    the job_id to its role/company through the call's own `recommendations`, then look for both in a
+    memory entry, ignoring Ltd/Limited/Pvt Ltd suffixes and case.
+    """
+    rec = aa.get("recommendations")
+    if isinstance(rec, str):
+        try:
+            rec = json.loads(rec)
+        except Exception:
+            return ""
+    job = next((j for j in (rec or []) if isinstance(j, dict) and j.get("job_id") == job_id), None)
+    if not job:
+        return ""
+    cm = aa.get("contact_memory")
+    if isinstance(cm, str):
+        try:
+            cm = json.loads(cm)
+        except Exception:
+            return ""
+    entries = (cm or {}).get("jobs_applied") if isinstance(cm, dict) else None
+    if not isinstance(entries, list):
+        return ""
+    def norm(x):
+        x = str(x or "").lower()
+        for junk in (" pvt ltd", " pvt. ltd", " private limited", " limited", " ltd", ".", ","):
+            x = x.replace(junk, " ")
+        return " ".join(x.split())
+    role, comp = norm(job.get("role")), norm(job.get("company"))
+    for e in entries:
+        ne = norm(e)
+        if role and comp and role in ne and comp in ne:
+            return str(e)
+    return ""
 
 
 def get(path, tries=4):
@@ -90,10 +139,20 @@ def check(bot, uuid):
             dc = args.get("duplicate_check")
             if dc is None:
                 continue
-            if dc == "not-applied-before" and re.search(r"ACTION_LIMIT_REACHED", tool_out):
+            if dc != "not-applied-before" or not re.search(r"ACTION_LIMIT_REACHED", tool_out):
+                continue
+            jid = args.get("job_id")
+            in_mem = _job_in_memory(d.get("agent_args") or {}, jid)
+            if in_mem:
                 out.append(dict(base, kind="W FALSE DUPLICATE-CHECK ASSERTION",
-                                detail=f"sent duplicate_check='not-applied-before' for job {args.get('job_id')} "
-                                       f"and the API returned ACTION_LIMIT_REACHED — the caller context was not checked"))
+                                detail=f"sent duplicate_check='not-applied-before' for job {jid}, but the call's own "
+                                       f"contact_memory.jobs_applied already listed it ({in_mem!r}) — the check was "
+                                       f"available and was not run"))
+            else:
+                out.append(dict(base, kind="W? MEMORY-COVERAGE GAP (info)",
+                                detail=f"job {jid} was already applied in the backend but is NOT in this call's "
+                                       f"contact_memory.jobs_applied, so the bot could not have known. Not a prompt "
+                                       f"bug — the fix is either richer memory or the platform surfacing the error body"))
     if WROTE.search(said) and not ({"update_profile", "create_profile"} & set(tools_called)):
         out.append(dict(base, kind="Y NARRATED WRITE",
                         detail=f"claimed a field was saved/updated; tools actually called: {sorted(set(filter(None, tools_called))) or 'none'}"))
