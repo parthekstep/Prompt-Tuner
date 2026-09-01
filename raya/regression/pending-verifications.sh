@@ -7,8 +7,10 @@
 # which is why they are still owed.
 #
 #   ./pending-verifications.sh mismatch   location='Delhi' + Ghaziabad jobs
-#                                         EXPECT: "आपके लीए दिल्ली में अभी कोई जॉब नहीं है — जो जॉब्स हैं वो
-#                                         गाज़ियाबाद में हैं। गाज़ियाबाद में देखना चलेगा?"  (Turn A sentence 2)
+#                                         EXPECT Turn A sentence 2, with [जगह]=दिल्ली and [शहर]=गाज़ियाबाद:
+#                                         "आपके लिए दिल्ली में अभी कोई जॉब नहीं है — जो जॉब्स हैं वो गाज़ियाबाद में हैं।
+#                                          गाज़ियाबाद में देखना चलेगा?"   (template lives in the prompt as
+#                                          "आपके लिए [जगह] में अभी कोई जॉब नहीं है" — grep that, not the filled form)
 #   ./pending-verifications.sh chain      location='Ghaziabad' + Ghaziabad jobs
 #                                         EXPECT: confirm -> yes -> ONE bus-stop question -> jobs
 #                                         (already verified once on 6620c025; this is the regression)
