@@ -6,11 +6,23 @@ The prompt's Apply Failure Handling is a single slot with a two-row lookup:
   row 2  anything else                            -> "अभी इस जॉब में अप्लाई पूरा नहीं हो पाया …"
 and NO line may diagnose a cause ("तकनीकी दिक्कत" and friends are banned outright).
 
-Row 1 cannot be verified on the voice harness. `contact_phone` is overridden by the dialled number,
-so every harness call uses the tester DID, and that number now carries FIVE live profiles on
-Ghaziabad — the bot picks a different one per call, so a repeat apply is a new (profile, job) pair
-and never returns ACTION_LIMIT_REACHED. Four attempts to force it failed for that reason. This
-detector closes the loop on production traffic instead, where real callers have one profile each.
+UPDATE 2026-09-01 — "ROW 1 MISSED" was, until today, unfixable by any prompt wording. Across 9 real
+`ACTION_LIMIT_REACHED` calls (3 bots, 2 languages, 2 directions, 3 successive prompt structures, and
+one with the mapping written into the `apply_job` tool description itself) the explicit line was
+spoken **zero** times. The conversation model does not receive the HTTP error body: the tool message
+is `[Error: apply_job request failed (HTTP 422).]` and the `ACTION_LIMIT_REACHED` string lives in a
+`__RAYA_TOOL_DEBUG__` block that is not fed back. So row 1 is now reached WITHOUT the error string —
+from this call's own apply history and from `jobs_applied` in `${contact_memory}`, checked BEFORE the
+tool fires (see "Already applied — check BEFORE you call the tool" in the prompts). A ROW 1 MISSED
+finding here therefore now means the *memory pre-check* did not fire, which is a real prompt bug —
+it is no longer the expected state.
+
+Forcing the condition on the harness: do NOT pre-apply a (profile, job) pair through the backend. The
+tester DID carries five live Ghaziabad profiles and the bot picks the most COMPLETE one, not
+`items[0]`, so the pair you prepared is usually not the pair it uses (this silently produced a
+meaningless pass). Instead pass the precondition through `agent_args`:
+`contact_memory: {"jobs_applied": ["<date>: <role>, <company>, <city>"]}` with that job present in
+`recommendations` — per-call, deterministic, and it leaves no residue on the shared DID.
 
 Exit 1 if any call spoke the wrong row, or diagnosed a cause.
 
