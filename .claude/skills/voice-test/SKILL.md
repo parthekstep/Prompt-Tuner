@@ -348,23 +348,37 @@ Both have happened. State the facts is not enough; this is a procedure.
    id. Where a DID carries several live records, expect the choice to follow completeness, and record
    the observed `profile_id` in the manifest case so the next run does not have to rediscover it.
 
-6c. **An `agent_args` precondition is easier than a backend one — but `contact_memory` is NOT proven
-   authoritative, so do not treat it as a controlled variable.** Expressing the duplicate-application
-   precondition as `contact_memory: {"jobs_applied": [...]}` in the args fixture is far cheaper than
-   arranging a real prior application on a shared record, it is per-call, and it leaves no residue on
-   the DID. Prefer it. **But the value you send is recorded in `agent_args` and is not necessarily what
-   the model reads.** On 2026-09-01, call `6620c025` was sent
-   `contact_memory: {"session_count": 1, "last_conversation_summary": "First contact. No location
-   details captured yet."}` and the bot nonetheless opened with an accurate callback clause about a
-   previous conversation; `9cb137ed` was sent `"No Old Memory…"` and did the same. Two readings fit and
-   they have different fixes: either the platform's own stored memory reaches the model alongside or
-   instead of the arg (the `contact_phone` pattern), or the bot inferred "we spoke before" from the
-   FETCHED PROFILE, which its own rules forbid. **Discriminate before you rely on either:** send a
-   fixture containing a fact the platform memory cannot possibly hold — a fabricated role or company
-   the DID has never discussed — and see whether the bot voices it. Until that is settled, a test whose
-   verdict depends on memory content must say which reading it assumed, and a memory-gated SKIP is
-   better proven by the production shape (omit `contact_memory` entirely and let the platform inject)
-   than by a fixture.
+6c. **SETTLED 2026-09-01: `contact_memory` sent in `agent_args` does NOT reach the model. The
+   platform substitutes its own stored memory.** This is the `contact_phone` pattern — the value you
+   send is faithfully recorded in `agent_args` and is not what `${contact_memory}` resolves to.
+   **Proof (call `c2ffe9fb`):** the fixture carried `last_conversation_summary` = "Seeker asked about
+   WELDING jobs in Meerut on the previous call and gave Chand Tara Cinema as the nearest landmark",
+   `nearest_landmark` = "चाँद तारा सिनेमा", `home_location` = "Meerut" — facts the tester DID has never
+   discussed. The bot opened with "पिछली बार हमारी बात **कंप्यूटर ऑपरेटर या डेटा एंट्री** के काम के बारे में हुई थी"
+   and then asked the landmark question anyway. Nothing from the fixture was voiced. Two earlier calls
+   (`9cb137ed` sent "No Old Memory…", `a111ed52` sent a Sahibabad summary) point the same way.
+
+   **What this forbids.** Do NOT express any precondition the prompt reads out of `${contact_memory}`
+   as an args fixture: a returning-caller state, `jobs_applied` for a duplicate-application test, a
+   stored `nearest_landmark` for a "never ask twice" test. Such a case is `fixture_blocked`, not a
+   pass or a fail — and a test that reports FAIL on one is reporting a fiction. Two real tests were
+   almost miscounted this way on 2026-09-01 before the discriminator was run.
+
+   **What is left.** (a) The **production shape**: build the state through a real call (apply to a job,
+   or give a landmark), let the memory prompt write it, then place a second call and observe. This is
+   inference, not verification — you are reading behaviour, not the precondition. (b) `call_output`,
+   which IS readable and is the honest place to assert what a call extracted.
+
+   **Run the discriminator before trusting any memory-gated verdict on a bot you have not checked.**
+   Put facts in the fixture that the stored memory cannot possibly hold and see whether the bot voices
+   them. It costs one call and it is the difference between a verdict and a guess.
+
+6d. **You cannot read the platform's stored contact memory.** There is no endpoint: `/api/contact`,
+   `/api/contact/{phone}` and `/api/memory` all 404 or 500. So for a memory-gated rule you can observe
+   neither the precondition going in nor the value coming out — only the behaviour in between. **Say
+   so in the report** rather than implying the precondition was confirmed. The standing ask is a
+   read-only endpoint for a contact's stored memory; without it, "the bot should skip this because
+   memory already has it" is permanently one inference away from being testable.
 
 7. **Standing escalation.** One DID means one shared history. The ask is **additional tester DIDs,
    one per fixture class** (never-recorded, live-recorded, draft-recorded). Until then, state in
