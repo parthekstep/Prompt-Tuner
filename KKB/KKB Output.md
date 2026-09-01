@@ -99,6 +99,14 @@ If a value is not present, use "NA" for strings, [] for arrays, or 0 for counts.
     call otherwise went perfectly. Judge it from the input location and the job list only
     — never from what the caller said they wanted.
 
+15d. nearest_landmark — Did the caller name a nearest bus stop, railway/metro station, or
+    well-known landmark near where they live? This is the Location step's Turn B answer.
+    Extract it in the caller's own terms, transliterated to English/Latin script
+    (e.g. "Nashik Road station", "near Sabzi Mandi", "Sahibabad station").
+    "NA" if they were never asked (because it was already known from a previous call) or
+    gave no usable answer. Never fill it from the input location, a job's location, or the
+    stored profile — only from what the caller said on THIS call.
+
 15b. preference_mismatch_reason — Why the caller rejected the jobs, when they did.
     Values: "Location" if they turned them down because of distance/area/city;
     "Role" if they turned them down because it was not the kind of work they want;
@@ -187,6 +195,7 @@ If a value is not present, use "NA" for strings, [] for arrays, or 0 for counts.
   "preferred_location": "Vasundhara, Ghaziabad",
   "preference_mismatch_reason": "Location",
   "input_location_had_jobs": "No",
+  "nearest_landmark": "Sahibabad station",
   "service_provider_pitched": "Yes",
   "service_provider_interest": "Yes",
   "drop_reason": "NA",

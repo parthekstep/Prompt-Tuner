@@ -30,6 +30,7 @@ reads **real call transcripts** rather than prompt text:
 
 | Detector | What it catches |
 |---|---|
+| `location_chain.py` | the Location step as a CHAIN: confirm the supplied location (C1/C2), ask the bus-stop/station/landmark question exactly once per caller — required when `nearest_landmark` is absent from memory (C3), forbidden when it is present (C4) — never bundled with another question (C5), and never after the job list (C6). This is the owner-specified flow of 2026-09-01 made checkable instead of judged. |
 | `location_reconfirm.py` | the campaign sent a `location` and the bot asked openly anyway (A), claimed jobs exist in a place holding none (B), or never told the caller their place has no jobs (C). Also reports the campaign-targeting signal: how many callers were dialled for a city we hold no inventory in. |
 | `apply_result_integrity.py` | one call saying both "the apply didn't go through" and "the apply is done" (X); a narrated write with no `update_profile`/`create_profile` call (Y); the success line with no successful tool result (Z). |
 | `apply_failure_wording.py` | the failure line not matching the error, and any line that diagnoses a cause. |
