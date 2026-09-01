@@ -348,12 +348,23 @@ Both have happened. State the facts is not enough; this is a procedure.
    id. Where a DID carries several live records, expect the choice to follow completeness, and record
    the observed `profile_id` in the manifest case so the next run does not have to rediscover it.
 
-6c. **A precondition you can set through `agent_args` beats one you must set in the backend.** The same
-   duplicate-application test became deterministic the moment it was expressed as
-   `contact_memory: {"jobs_applied": ["<date>: <role>, <company>, <city>"]}` in the args fixture rather
-   than as a real prior application on a shared record. Prefer the args route for any precondition the
-   prompt reads from an input variable — it is per-call, leaves no residue on the shared DID, and
-   cannot be invalidated by another wave.
+6c. **An `agent_args` precondition is easier than a backend one — but `contact_memory` is NOT proven
+   authoritative, so do not treat it as a controlled variable.** Expressing the duplicate-application
+   precondition as `contact_memory: {"jobs_applied": [...]}` in the args fixture is far cheaper than
+   arranging a real prior application on a shared record, it is per-call, and it leaves no residue on
+   the DID. Prefer it. **But the value you send is recorded in `agent_args` and is not necessarily what
+   the model reads.** On 2026-09-01, call `6620c025` was sent
+   `contact_memory: {"session_count": 1, "last_conversation_summary": "First contact. No location
+   details captured yet."}` and the bot nonetheless opened with an accurate callback clause about a
+   previous conversation; `9cb137ed` was sent `"No Old Memory…"` and did the same. Two readings fit and
+   they have different fixes: either the platform's own stored memory reaches the model alongside or
+   instead of the arg (the `contact_phone` pattern), or the bot inferred "we spoke before" from the
+   FETCHED PROFILE, which its own rules forbid. **Discriminate before you rely on either:** send a
+   fixture containing a fact the platform memory cannot possibly hold — a fabricated role or company
+   the DID has never discussed — and see whether the bot voices it. Until that is settled, a test whose
+   verdict depends on memory content must say which reading it assumed, and a memory-gated SKIP is
+   better proven by the production shape (omit `contact_memory` entirely and let the platform inject)
+   than by a fixture.
 
 7. **Standing escalation.** One DID means one shared history. The ask is **additional tester DIDs,
    one per fixture class** (never-recorded, live-recorded, draft-recorded). Until then, state in

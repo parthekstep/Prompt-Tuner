@@ -94,6 +94,12 @@ If a value is not present, use "NA" for strings, [] for arrays, or 0 for counts.
     location was a real place and NOT ONE job was there (e.g. the call opened on "Delhi"
     and every job was in Ghaziabad); "NA" if the input location was empty or a sentinel
     ("Any", "NA", "-", a pincode, campaign metadata).
+    **Compare the INPUT location string to the job list. Do NOT follow what the bot talked
+    about.** On call d3521a89 the input was "Delhi", every job was in Ghaziabad, and the bot
+    confirmed "गाज़ियाबाद" to the caller — the correct value is "No", because the question is
+    whether the place the caller was DIALLED for had any job, not which place got discussed.
+    Reading it off the conversation hides exactly the targeting problem this field exists to
+    surface.
     This is a CAMPAIGN-TARGETING signal, not a bot verdict: "No" means the caller was
     dialled for a city we hold no inventory in, which is worth surfacing even when the
     call otherwise went perfectly. Judge it from the input location and the job list only
@@ -106,6 +112,11 @@ If a value is not present, use "NA" for strings, [] for arrays, or 0 for counts.
     "NA" if they were never asked (because it was already known from a previous call) or
     gave no usable answer. Never fill it from the input location, a job's location, or the
     stored profile — only from what the caller said on THIS call.
+    **If the BOT supplied the landmark rather than the caller, this is "NA".** That has happened:
+    on call d3521a89 the bot asked for the nearest station, the caller answered "जी बताइए"
+    (a non-answer), and the bot said "साहिबाबाद स्टेशन है।" itself. Nothing was learned on that
+    call, so the correct value is "NA" — recording it as though the caller gave it launders a
+    bot fabrication into a stored caller fact.
 
 15b. preference_mismatch_reason — Why the caller rejected the jobs, when they did.
     Values: "Location" if they turned them down because of distance/area/city;
