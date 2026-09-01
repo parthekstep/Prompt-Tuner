@@ -337,6 +337,24 @@ Both have happened. State the facts is not enough; this is a procedure.
    route** — a production detector, a human call, or a platform ask. List blocked cases explicitly in
    the report. Silently dropping them is how "cannot test Fix A" became "Fix A untested and
    unmentioned".
+6b. **Which record the bot picks is NOT `items[0]` — it is the most COMPLETE live one.** Learned the
+   hard way on 2026-09-01: to force an `ACTION_LIMIT_REACHED` I pre-applied (via the backend API) the
+   pair `(items[0], job)` on the tester DID, on the strength of the prompt's own rule ("the first item
+   whose `lifecycle_status` is `live`"). The call then applied as `items[1]` — the profile carrying a
+   real name, age and role — the duplicate never occurred, and the apply SUCCEEDED. The test proved
+   nothing and looked like a pass. **Before any fixture precondition that names a specific record,
+   determine empirically which record the bot actually selects** (fire one throwaway call and read the
+   `profile_id` out of its `apply_job`/`update_profile` arguments), and pin the precondition to THAT
+   id. Where a DID carries several live records, expect the choice to follow completeness, and record
+   the observed `profile_id` in the manifest case so the next run does not have to rediscover it.
+
+6c. **A precondition you can set through `agent_args` beats one you must set in the backend.** The same
+   duplicate-application test became deterministic the moment it was expressed as
+   `contact_memory: {"jobs_applied": ["<date>: <role>, <company>, <city>"]}` in the args fixture rather
+   than as a real prior application on a shared record. Prefer the args route for any precondition the
+   prompt reads from an input variable — it is per-call, leaves no residue on the shared DID, and
+   cannot be invalidated by another wave.
+
 7. **Standing escalation.** One DID means one shared history. The ask is **additional tester DIDs,
    one per fixture class** (never-recorded, live-recorded, draft-recorded). Until then, state in
    **every** report that new-caller assertions are permanently unreachable on the shared DID.

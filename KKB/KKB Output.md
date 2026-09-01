@@ -87,6 +87,18 @@ If a value is not present, use "NA" for strings, [] for arrays, or 0 for counts.
     A station or landmark the caller offered instead of an area is a valid value — record it as
     they said it.
 
+15c. input_location_had_jobs — Did the call's input `location` actually have any job in
+    the list the bot was given? Compare the call's input location against the `location`
+    field of the jobs offered.
+    Values: "Yes" if at least one job sat in that place or its city; "No" if the input
+    location was a real place and NOT ONE job was there (e.g. the call opened on "Delhi"
+    and every job was in Ghaziabad); "NA" if the input location was empty or a sentinel
+    ("Any", "NA", "-", a pincode, campaign metadata).
+    This is a CAMPAIGN-TARGETING signal, not a bot verdict: "No" means the caller was
+    dialled for a city we hold no inventory in, which is worth surfacing even when the
+    call otherwise went perfectly. Judge it from the input location and the job list only
+    — never from what the caller said they wanted.
+
 15b. preference_mismatch_reason — Why the caller rejected the jobs, when they did.
     Values: "Location" if they turned them down because of distance/area/city;
     "Role" if they turned them down because it was not the kind of work they want;
@@ -174,6 +186,7 @@ If a value is not present, use "NA" for strings, [] for arrays, or 0 for counts.
   "consent_status": "NA",
   "preferred_location": "Vasundhara, Ghaziabad",
   "preference_mismatch_reason": "Location",
+  "input_location_had_jobs": "No",
   "service_provider_pitched": "Yes",
   "service_provider_interest": "Yes",
   "drop_reason": "NA",

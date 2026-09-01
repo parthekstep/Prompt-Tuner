@@ -119,14 +119,15 @@
     {
      "section": "Step 1 → Location state / Location capture ladder / Location fillers",
      "kind": "flow",
-     "what": "The bounded three-turn location escalation ladder (reconfirm → finer probe / slow-repeat → station or landmark), its filler clauses, and the Location state branch that decides the WORDING of the single existing area turn.",
+     "what": "The bounded three-turn location escalation ladder (reconfirm → finer probe / slow-repeat → station or landmark), its filler clauses, and the Location state branch that decides the WORDING of the single existing area turn. 2026-09-01: the block was PROMOTED out of Case A to a sibling `###` section so both the known-role (Case A) and unknown-role (Case B) paths reach it — a Case-B call was using the open UNKNOWN lines quoted inline in Case B and never speaking the reconfirmation (calls 5c67bd19, 90da81db, 14f90f64, 0decf61a; analyser D51/D53). A third state was added: KNOWN-but-no-job-in-that-place gets its own mandatory truthful line naming both places.",
      "contains": [
-      "#### Location state — decides the WORDING of the ONE area turn",
+      "### Location state — the ONE area turn, and it governs BOTH Case A and Case B",
       "### Location capture ladder — bounded escalation",
       "आपको ${location} के आसपास जॉब चाहिए",
       "माफ़ कीजिए, नाम ठीक से समझ नहीं पाई",
       "कौन सा रेलवे या मेट्रो स्टेशन है?",
-      "कोई जानी-पहचानी जगह है"
+      "कोई जानी-पहचानी जगह है",
+      "आपके लिए [जगह] में अभी कोई जॉब नहीं है"
      ]
     },
     {
@@ -153,10 +154,11 @@
     {
      "section": "KKB Output.md (output_instructions on kkb-hi-signals ONLY)",
      "kind": "output-field",
-     "what": "preferred_location and preference_mismatch_reason are deployed to the kkb-hi-signals agent's output_instructions only. Other KKB agents keep the previous output prompt because only this bot can produce those values.",
+     "what": "preferred_location and preference_mismatch_reason are deployed to the kkb-hi-signals agent's output_instructions only. Other KKB agents keep the previous output prompt because only this bot can produce those values. 2026-09-01: added `input_location_had_jobs` (Yes/No/NA) so a campaign dialling a city we hold no inventory in shows up in reporting.",
      "contains": [
       "15a. preferred_location",
-      "15b. preference_mismatch_reason"
+      "15b. preference_mismatch_reason",
+      "15c. input_location_had_jobs"
      ]
     }
    ],
@@ -174,7 +176,8 @@
    "approved_by": "Parth Bansal (product owner), 2026-08-28",
    "changelog_ref": "KKB/CHANGELOG.md — 2026-08-28 — KKB Signals Hindi: location capture (R1-R4)",
    "expires": "On explicit approval to port. Port via /port-feature with re-authored Kannada spoken lines, Kannada canonical spellings, an inbound-safe closing clause (no outbound callback promise), and an independent live test per variant.",
-   "registered": "2026-08-28"
+   "registered": "2026-08-28",
+   "last_reviewed": "2026-09-01"
   }
  ]
 }

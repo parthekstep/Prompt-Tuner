@@ -10,6 +10,113 @@ Every prompt edit to KKB is logged here. Entry format:
 - **Ported from:** <source agent> (only for cross-agent ports)
 ```
 
+### 2026-09-01 — Khushboo r3: the location reconfirm was structurally unreachable; the already-applied line is NOT prose-fixable (proven); Muradnagar canonical
+
+**Reported (WhatsApp, call ref 4989329 → live calls `5c67bd19` 07:16 and `90da81db` 07:50, both to XXXXXX6073):**
+(1) "Location is not been confirmed — it asked where do you want to work despite giving proper input variable",
+and no nearest-station/landmark probe was heard. (2) "It is still resorting to same fallback for already applied
+jobs — technical issue, noted etc." (3) "Murad nagar pronunciation is wrong (add in the canonical section)."
+(4) Kannada test jobs needed.
+
+**Root cause 1 — the location reconfirmation could not be reached on the path both her calls took (analyser D51/D53).**
+`#### Location state`, which holds the reconfirmation, the mismatch handling and the ladder, was nested INSIDE
+`### Case A — you already know the target role`. Both of her calls went down **Case B** (the fetched profile's role
+was the placeholder `Any` → treated as UNKNOWN), and Case B held only a *pointer* to "the Location reconfirmation
+from Case A" while quoting the open UNKNOWN area lines inline. Standing in Case B, the model took the line that was
+in front of it. Second contributor: the KNOWN branch had no state for **"known, but no job is in that place"** —
+her input was `Delhi` and all 8 jobs were Ghaziabad — so the reconfirmation collided with the Hallucination Guard
+(never name a place we hold no job in) and lost. That produced two *different* wrong behaviours on identical args:
+`5c67bd19` asserted "आपके लिए दिल्ली में कुछ जॉब्स हैं" (false — no Delhi jobs), `90da81db` ignored the input and asked
+openly. Third contributor: `Location precedence` ranked the fetched profile's `item_state.location` (a stale
+`Bengaluru, Karnataka, India`) ABOVE the per-call campaign input, so the closing read-back told her "एरिया बेंगलुरु".
+The station/landmark rungs correctly did NOT fire — they are rung 3 of a bounded ladder, reached only when the word
+itself is unusable, and her city resolved fine.
+
+**Root cause 2 — the "already applied" line is NOT reachable from the tool error, and now proven so (analyser D52).**
+Scanned every `ACTION_LIMIT_REACHED` call across the fleet: **8 of 8** spoke the generic line, **0** spoke the
+explicit one — `kkb-hi-signals` (`90da81db`, `21c428dc`, `dc3168ec`), `kkb-kn-signals` (`18b5e1b8`),
+`kkb-kn-in-signals` (`d824912c`), `maya-hi-signals` (`96e72c85`, `9d82ac2c`, `3be8d3fb`) — including three calls
+made AFTER the branch had been restructured into an explicit lookup table. Then the decisive test: the error→line
+mapping was also put into the `apply_job` **tool description** (read at the moment of use, `scripts/raya_tooldesc.py`)
+and live call `14f90f64` hit `ACTION_LIMIT_REACHED` and STILL spoke the generic line — **9 of 9**. This closes the
+open question from 2026-08-25: the conversation model does **not** receive the HTTP error body; the
+`__RAYA_TOOL_DEBUG__` block carrying `ACTION_LIMIT_REACHED` is not visible to it. Every prose iteration was
+branching on a string that never arrives.
+
+**Change — location (kkb-hi-signals only, registered divergence `kkb-hi-signals-location-capture`):**
+- **Promoted** `Location state` out of Case A to a sibling `###` section that both paths must pass through, retitled
+  "the ONE area turn, and it governs BOTH Case A and Case B". Case A and Case B now each hand off to it and hold no
+  area wording of their own.
+- **Removed the competing option:** Case B's inline open-ask bullets are gone; the block states that when the
+  location is KNOWN the open UNKNOWN lines are **not available**, and that the turn is ONE question, its own turn,
+  never appended to the pool-overview question with a "साथ ही…" clause (observed on `0decf61a`).
+- **New third location state — LOCATION MISMATCH,** with its own mandatory truthful line naming both places:
+  "आपके लिए [जगह] में अभी कोई जॉब नहीं है — जो जॉब्स हैं वो [शहर] में हैं। [शहर] में देखना चलेगा?" — plus the explicit note that
+  this branch is what the Hallucination Guard REQUIRES, and that the plain reconfirmation is not an inventory claim.
+- **Location precedence reordered:** caller's own words → **the location input** → the fetched profile's
+  `item_state.location` → UNKNOWN, with the reason stated (the profile field is where they LIVE and goes stale).
+- **`KKB Output.md`:** new `15c. input_location_had_jobs` (Yes/No/NA) so a campaign dialling a city we hold no
+  inventory in shows up in reporting instead of in a QA message. Deployed to `kkb-hi-signals`'s `output_instructions`.
+
+**Change — already applied (all 12 KKB/Maya conversation prompts):**
+- **New `## Already applied — check BEFORE you call the tool`** in `apply_job Tool Call Rules`: derive the duplicate
+  from what the bot actually HAS — this call's own `apply_job` history, and `jobs_applied` in `${contact_memory}`
+  (matched on role + company, suffixes ignored) — say the explicit line, and do not call the tool at all. This is
+  the only route to the line that does not depend on the invisible error string.
+- **Restructured `Apply Failure Handling`** in the 11 prompts that had not yet had it: the two labelled cases become
+  a two-row lookup keyed on *what you know*; the **false cause-claim is deleted entirely** in both languages
+  (`"अभी हमारी तरफ़ से apply complete नहीं हो पाया — कोई तकनीकी दिक्कत है…"` and
+  `"ಇನ್ನೂ ನಮ್ಮ ಕಡೆಯಿಂದ apply complete ಆಗಿಲ್ಲ — ಸ್ವಲ್ಪ technical ತೊಂದರೆ ಇದೆ…"`), replaced by lines that assert nothing
+  (`"अभी इस जॉब में अप्लाई पूरा नहीं हो पाया…"` / `"ಈ ಜಾಬ್‌ಗೆ ಅಪ್ಲೈ ಇನ್ನೂ ಪೂರ್ತಿ ಆಗಿಲ್ಲ…"`). The
+  second-consecutive-failure acknowledgement lost its cause-claim too.
+- **Fixed two dangling labels** (analyser D51): the failure section's hard ban said "say the **Case A** line" and the
+  turn-composition rule said "(Case A or Case B)" — labels that no longer existed there and that mean something
+  ELSE in Step 1. The ban was inert, which is why the section's default line won every time.
+
+**Change — found by testing, not reported:**
+- **`Apply Success Handling`:** the success line is now forbidden on any call where `apply_job` did not succeed, in
+  the turn that answers the Need Capture offer, and anywhere later. Call `14f90f64` told the caller
+  "अभी इस जॉब में अप्लाई पूरा नहीं हो पाया" and then, two turns later, "अप्लाई हो गया है" — a direct contradiction.
+- **`update_profile` rules:** never narrate an update that was not made. Call `0decf61a` said
+  "मैंने उम्र 26 साल अपडेट कर दी है" with no `update_profile` call in the transcript — a hallucinated write.
+- **Canonical Location Spellings:** `Muradnagar → मुराद नगर` (the space is deliberate — as one word the द+न cluster
+  slurs), plus `Surajpur`, `Raj Nagar` (+ District Centre / RDC), `Govindpuram`, `Kavi Nagar`, `Shipra Mall`, `NH-9`,
+  all classified as Ghaziabad localities; and a rule that a `"Locality, City"` job value is spoken as the locality
+  alone, with campaign junk ("/ WFH – serving Ghaziabad") never read aloud.
+
+**Verified by live call (Tier 1):**
+- **Muradnagar** — `0decf61a` (10:25 UTC): bot spoke "मुराद नगर", `call_output.company_location: "मुराद नगर"`, and the
+  tester's ASR heard it back as "मुरादनगर" — i.e. the audio resolves to the right town. **Parth/Khushboo should still
+  confirm by ear; a TTS pronunciation cannot be verified from a transcript.**
+- **The false cause-claim is gone on kkb-hi-signals** — `14f90f64` hit `ACTION_LIMIT_REACHED` and said the
+  assertion-free line, not "तकनीकी दिक्कत".
+- **Gender is asked once and persisted** — `5c67bd19`: `update_profile` sent `gender: "Female"`, API returned it on
+  the item. (Khushboo's "is it auto detecting?" — no; nothing is inferred.)
+
+**DEPLOYED, NOT VERIFIED (each needs its own call id before anyone writes "fixed"):**
+- the promoted `Location state` block and the LOCATION MISMATCH line — deployed 10:33 UTC, after every test call
+  above; round-2 calls were still running when this entry was written
+- the duplicate pre-check from `${contact_memory}` — the mechanism that has to carry item 2
+- the Apply-Success suppression and the no-hallucinated-write rule
+- **all 11 propagated prompts** (kkb-hi-out, kkb-kn-out, kkb-hi-in, kkb-kn-in, kkb-hi-in-signals,
+  kkb-kn-in-signals, kkb-kn-signals, maya-hi-out, maya-hi-signals, maya-hi-in, maya-hi-in-signals) — deployed with
+  read-back OK, **none voice-tested**. Per the recipe-for-disaster rule these are 11 separate verifications.
+
+**Escalation to LitWiz (now justified — ladder steps 1-4 exhausted):** ask that the tool error's `error`/`message`
+fields be surfaced to the conversation model, or that a distinct tool result be returned per reason. Evidence: 9/9
+`ACTION_LIMIT_REACHED` calls listed above, across 3 bots / 2 languages / 2 directions / 3 prompt structures, plus
+`14f90f64` with the mapping in the tool description itself.
+
+**Files:** `KKB/KKB Placeholder Hindi Signals.md`, `KKB/KKB Output.md`, and the 11 propagated prompts listed above;
+`raya/divergences.json`; `raya/tooldesc/apply_job-already-applied.txt`
+**New tooling:** `scripts/raya_tooldesc.py` (patch a tool's description only, verified by read-back),
+`scripts/raya_side_prompt.py` (deploy memory/output instructions, which `raya_deploy.py` cannot),
+`raya/testcases/args/handover/dharwad-test-recommendations{,-8}.json` (15 / 8 live Dharwad job ids for Kannada
+testing — the 4 ids in `kkb-kn-signals-4jobs.json` are from the old instance and fail `SOURCE_ITEM_NOT_FOUND`,
+call `03272636`), `raya/personas/hi-loc-then-apply.md`, `raya/personas/hi-pick-data-entry-apply.md`
+**Analyser:** new **D51** (dangling branch label after a restructure), **D52** (a rule branching on a tool-error
+string the model never receives), **D53** (an input echo-back suppressed by a guard about something else)
+
 ### 2026-08-25 (later) — D47 follow-up: the reason branch does NOT hold at runtime (VERIFY-PENDING)
 - **Status:** the Case A / Case B branch is deployed on all 12 prompts but is **NOT verified working** — it was
   ignored on two consecutive live calls. Do not treat this defect as fixed.

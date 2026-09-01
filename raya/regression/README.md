@@ -23,6 +23,38 @@ Checks (tuned for precision — a noisy daily email is worse than none):
 - **missing sections** — Graceful Exit; seeker bots need `get_profile`; DKB needs `create_job`.
 - **Hindi↔Kannada sync-drift** — header-skeleton parity per pair.
 
+## Runtime (behaviour) checks — `run_runtime_checks.sh`
+
+`raya/regression/run_runtime_checks.sh [--since YYYY-MM-DD] [--agent <id>]` runs every detector that
+reads **real call transcripts** rather than prompt text:
+
+| Detector | What it catches |
+|---|---|
+| `location_reconfirm.py` | the campaign sent a `location` and the bot asked openly anyway (A), claimed jobs exist in a place holding none (B), or never told the caller their place has no jobs (C). Also reports the campaign-targeting signal: how many callers were dialled for a city we hold no inventory in. |
+| `apply_result_integrity.py` | one call saying both "the apply didn't go through" and "the apply is done" (X); a narrated write with no `update_profile`/`create_profile` call (Y); the success line with no successful tool result (Z). |
+| `apply_failure_wording.py` | the failure line not matching the error, and any line that diagnoses a cause. |
+| `location_integrity.py` | a profile written with a location the caller never gave. |
+| `apply_outcomes.py` | which caller-facing line was spoken for each real backend failure reason. |
+
+### Runtime checks are NOT in the daily digest yet — this is the gap that hid the 2026-09-01 bugs
+The daily GitHub Actions job runs **`static_regression.py` only**, by design: it runs on GitHub's infra
+with **zero secrets**, and every detector above needs `RAYA_API_TOKEN` to read call transcripts. So no
+*behaviour* check runs unattended. That is why "the location input was ignored" and "already-applied
+said the generic line" reached us through a QA WhatsApp message instead of the daily email — there was
+nothing looking, not a broken digest.
+
+**Two ways to close it, and the choice is Parth's:**
+1. **Put `RAYA_BASE_URL` + `RAYA_API_TOKEN` in GitHub Actions secrets** and add a second daily job that
+   runs `run_runtime_checks.sh`. This is the only option that survives the dev machine being off.
+   Note the repo is **public**: Actions secrets are not exposed to fork PRs, but a token in a public
+   repo's CI is still a deliberate decision, not a default.
+2. **Run it locally on a schedule** (launchd / `scheduled-tasks` MCP). No secret leaves the machine, but
+   it only runs while the machine is on — which is the requirement that ruled local schedulers out in
+   the first place.
+
+Until one is chosen, run it by hand after every behaviour change; the `/bug-fix` and `/voice-test`
+skills both call for it.
+
 ## Weekly — live voice regression (sampled)
 A fuller live pass over more bots via the tester agent + the `/voice-test` checklists (generic + bot-specific).
 Not daily (one tester = serial calls; 100+ live calls/day isn't feasible). The weekly routine picks a rotating

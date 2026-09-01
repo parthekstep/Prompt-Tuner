@@ -264,6 +264,14 @@ is still available to the model.**
 
 The escalation ladder, in order. Do not stop before the end of it:
 
+0. **Count how many times the right branch has EVER been taken.** Before you touch a word, pull every
+   call where the condition actually occurred and count. A **mixed** ratio is an adherence problem and
+   the rungs below apply. **`0/N` is not flakiness — it is unreachability**, and no sentence will fix
+   it: either the branch's trigger never arrives (a tool-error string the model is not given), or a
+   dangling label means the rule cannot bind to it, or a nearer competing line always wins. On
+   2026-09-01 this single count turned "the already-applied line is intermittent" into "the model has
+   never once received the error name" — 8/8, then 9/9 with the mapping in the tool description
+   itself (analyser D52, D51). Do this first; it costs one script and it decides everything below.
 1. **Grep the bot's wrong output verbatim against the whole prompt** (analyser D50). A hit inside a
    sample conversation is the cause, and it is proof, not a theory. Fix the demonstration.
 2. **Find the competing instruction and delete or scope it.** A prohibition sitting next to a
