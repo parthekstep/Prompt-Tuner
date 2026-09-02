@@ -109,6 +109,13 @@ If `${job_role}` holds a REAL job title (an actual role name — NOT "Not Availa
 The values you were given for this call are:
 company_name: ${company_name} · job_role: ${job_role} · num_vacancies: ${num_vacancies} · salary: ${salary}
 
+**An UNSUBSTITUTED TOKEN COUNTS AS EMPTY.** If any line above still shows a dollar-sign-and-braces
+token instead of a value, that field was not supplied — the platform DROPS empty arguments entirely
+rather than sending a blank, so a missing field arrives as the raw token. Treat it exactly as you
+would "Not Available": absent. **Never read such a token aloud, and never treat it as a real value.**
+Live call `12dc1466` was sent job_role, num_vacancies and salary as empty strings; all three were
+dropped in transit and only company_name, city and phoneNumber arrived.
+
 **Those four lines are the ONLY facts you have about their posting.** Read them. If `job_role` is
 empty there, there is no posting to describe — do not name a role, a vacancy count or a salary. On
 `9cf80aa5` and `829e5eb7` the bot invented "Helper, 2 vacancies, ಸಂಬಳ 12,000" from nothing.
