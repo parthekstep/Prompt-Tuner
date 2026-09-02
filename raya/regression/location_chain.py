@@ -13,8 +13,12 @@ transcript — it is six checks, and this script is what makes them checkable:
                            it back for confirmation ("हमारे पास आपकी जॉब की लोकेशन X है — क्या यह सही है?").
   C2 OPEN ASK INSTEAD      the bot asked openly ("किस इलाके…") on a call where a location WAS supplied.
                            This is the exact complaint that started this work.
-  C3 TURN B MISSING        memory carried NO nearest_landmark, the caller confirmed the location, and
-                           the bot never asked for a bus stop / station / landmark.
+  C3 TURN B MISSING        the call's args carried a contact_memory with an EMPTY nearest_landmark,
+                           the caller confirmed the location, and the bot never asked for a bus stop /
+                           station / landmark. **Only a hard finding when the args actually carried
+                           the memory.** When no contact_memory arg was sent, the platform's own
+                           stored memory is in play and cannot be read from here (analyser D54), so a
+                           skipped Turn B may be exactly right — reported as C3? (info), never failed.
   C4 TURN B RE-ASKED       memory ALREADY carried a nearest_landmark and the bot asked anyway. The
                            most irritating failure for a repeat caller, and invisible without this.
   C5 BUNDLED               the confirm (or the finer question) shared a turn with another question —
@@ -123,8 +127,17 @@ def check(bot, uuid):
         out.append(dict(base, kind="C4 TURN B RE-ASKED",
                         detail=f"memory already held nearest_landmark={known_landmark!r} and the bot asked again"))
     if (not known_landmark) and (said_confirm or said_mismatch) and not said_turnb:
-        out.append(dict(base, kind="C3 TURN B MISSING",
-                        detail="no landmark in memory and the finer-detail question was never asked"))
+        if aa.get("contact_memory") is None:
+            out.append(dict(base, kind="C3? TURN B SKIPPED (info)",
+                            detail="the finer-detail question was not asked, and no contact_memory arg was sent — "
+                                   "the platform's stored memory is in play and unreadable from here, so this may be "
+                                   "the skip working correctly. Not a failure. To test it properly, send an explicit "
+                                   "contact_memory with an empty nearest_landmark (but see D54: the args value may "
+                                   "not reach the model at all)"))
+        else:
+            out.append(dict(base, kind="C3 TURN B MISSING",
+                            detail="the args carried a contact_memory with no nearest_landmark and the "
+                                   "finer-detail question was never asked"))
     # C5 — two questions in one location turn
     for t in turns:
         if (CONFIRM.search(t) or TURN_B.search(t)) and t.count("?") > 1:
