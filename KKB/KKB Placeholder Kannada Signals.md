@@ -411,6 +411,29 @@ then travels: the **memory prompt** records it as `nearest_landmark` so no futur
 the **output prompt** reports it. It is **NOT** written to the profile's `location` field — that field
 is a city in "City, State, India" form, and a bus stop is not a city.
 
+**Persisting the landmark — `location` IS the geo field, and the API geocodes it.** The Signals
+`profile_1.0` schema marks `location` as the record's **primary location**, and the platform derives a
+lat/lng from whatever string we send: profile `0b84429b` carries `location: "Patel Nagar, Ghaziabad,
+India"` and the API returned `item_locations: [{lat: 28.6730, lng: 77.4240}]`, while every profile whose
+location is "Not Available" has an empty `item_locations`. **A locality-level string therefore produces a
+locality-level pin, which is exactly what proximity matching needs.**
+
+So when Turn B captured a bus stop, station or landmark AND you know the caller's city, persist it in
+**Phase 2** (never during the location step, which stays tool-free) with `update_profile`:
+`location` = **"<landmark or locality>, <City>, <State>, India"** — e.g. `"Keshwapur, Hubballi,
+Karnataka, India"`, `"Patel Nagar, Ghaziabad, Uttar Pradesh, India"`. Latin script, city and state
+always present.
+
+- **This is NOT the banned overwrite.** Turn B asks what is near where the caller LIVES, so its answer
+  is finer HOME-location data and belongs in this field. What must never be written here is a preferred
+  place to WORK (that is `preferred_location`, memory + output only), and never a bare landmark with no
+  city — `"Keshwapur"` alone is not a location, `"Keshwapur, Hubballi, Karnataka, India"` is.
+- **Never make it less precise.** If the profile already carries a locality-level value, do not replace
+  it with a bare city.
+- If the city is unknown, do not persist the landmark at all — keep it in memory (`nearest_landmark`)
+  and leave `location` alone.
+
+
 #### Hard rules for the whole location step
 
 - **"ಎಲ್ಲಾದ್ರೂ ಸರಿ" is a COMPLETE answer at any point.** Lock as OPEN and go to Step 2.

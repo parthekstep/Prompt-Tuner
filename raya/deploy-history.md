@@ -528,3 +528,5 @@ to the same number — the first writing the memory, the second consuming it.
 2026-09-02 18:08:38 · prod · kkb-hi-in · b6222233-8a8d-49a6-9950-d07e9d159757 · KKB/KKB Placeholder Inbound.md · sha256:a437b267 · snapshot:pre-deploy-kkb-hi-in-2026-09-02_180838 · deployed
 2026-09-02 18:08:39 · prod · kkb-kn-in · 4ac90bf1-a740-4b1c-92b0-45bda099e53f · KKB/KKB Placeholder Inbound Kannada.md · sha256:72e42299 · snapshot:pre-deploy-kkb-kn-in-2026-09-02_180839 · deployed
 2026-09-02 18:08:40 · prod · maya-hi-in · df99f501-e636-4f3d-80dc-e06e82240082 · Maya/Maya Inbound.md · sha256:9d804992 · snapshot:pre-deploy-maya-hi-in-2026-09-02_180840 · deployed
+2026-09-02 18:09:31 · prod · kkb-hi-signals · 115b38a5-42ef-4082-be69-84a871bb226a · KKB/KKB Placeholder Hindi Signals.md · sha256:af9d5310 · snapshot:pre-deploy-kkb-hi-signals-2026-09-02_180930 · deployed
+2026-09-02 18:09:32 · prod · kkb-kn-signals · 33037201-78ce-405d-b509-a3b6934e20f1 · KKB/KKB Placeholder Kannada Signals.md · sha256:e2e5a5bd · snapshot:pre-deploy-kkb-kn-signals-2026-09-02_180931 · deployed
