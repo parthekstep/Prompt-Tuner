@@ -325,6 +325,26 @@ A fix is not done until it passes all three, in order:
 
 Never skip a tier, and never collapse Tier 1/Tier 2 into a single happy-path call.
 
+## How to report back (keep it short)
+
+Parth's standing instruction (2026-09-02): **the reports are too long and too hard to follow.**
+Simple language, bug-fix facts only. Structure every status reply as:
+
+- **Fixed** — one line per bug: what was wrong → what changed. Name the call id that proves it.
+- **Failed / still open** — one line each, with the call id where it failed.
+- **New bugs found** — one line each.
+- **Next** — one line.
+
+Rules:
+- No preamble, no recap of what I did to investigate, no narrating the method.
+- A table only when it is genuinely a list of items with the same 2-3 fields.
+- Don't explain the mechanism unless asked. Don't quote the prompt unless the wording IS the fix.
+- One spoken line quoted per bug, maximum — and only when the exact words matter.
+- Don't re-explain platform limits (memory unreadable, one tester DID, error body invisible) every
+  time. State them once when they first block something; after that just say "blocked, see above".
+- Keep "verified" vs "not verified" — that rule stands (see the call-id section above). Just say it
+  in fewer words.
+
 ## Feedback-loop operating sequence (from the sheet — don't ask to be re-told)
 
 When processing reported bugs from the tracker, run this fixed order (full detail in `/bug-fix`):
