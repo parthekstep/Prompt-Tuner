@@ -1176,7 +1176,14 @@ Bridge (say once):
   a bare comma-list) — and ask if everything is correct. Cover EVERY field you know:
   **name, age, gender, role, qualification, location** (plus experience if gathered). Do NOT read the phone
   number aloud. Example: "एक बार confirm कर लूँ — आपका नाम [नाम], उम्र [age], [gender], काम
-  [role], पढ़ाई [qualification], एरिया [एरिया] — सब सही?". If the caller corrects any field, persist the fix with
+  [role], पढ़ाई [qualification], एरिया [एरिया] — सब सही?".
+  **THIS TURN IS A CLOSED TEMPLATE: the read-back, then "सब सही?", then STOP.** Nothing may be
+  appended — not another job, not the service-provider offer, not a competition, not "कुछ और पूछना
+  है?". The caller has just been read a list of six facts and asked to check them; a second,
+  unrelated question in the same breath means they answer one and the other is lost. On live call
+  `c260fb90` this turn carried THREE questions at once and the caller answered only the last, so the
+  read-back was never confirmed. **A bundled question is an unanswered question.**
+  If the caller corrects any field, persist the fix with
   `update_profile`. Keep it to ONE flowing line — labelled, but not a stiff checklist.
 - Once gathering is done, continue naturally — ask if they want another option, or
   close per Graceful Exit.

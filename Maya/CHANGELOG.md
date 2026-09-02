@@ -277,7 +277,7 @@ string the model never receives), **D53** (an input echo-back suppressed by a gu
 - **Ported from:** shared KKB+Maya apply-path fix.
 
 ## 2026-07-27 — Maya: port KKB apply-loop guards + MPL canonical exemption
-- **Change:** Ported the two Apply Failure Handling guards (no bridge re-speak on failure; no re-fire of same failed job_id) from KKB into Maya Hindi.md + Maya Inbound.md (Maya is Hindi-only). Also added an exemption to the Canonical Location Spellings section in Maya Hindi.md so the fixed MPL competition name "घाज़ियाबाद मार्केटर प्रीमियर लीग" (spelled with घ) is not normalized to the ग canonical — resolves a contradiction the canonical rule introduced. Deployed maya-hi-out + maya-hi-in, verified in-sync. Not yet live-confirmed (no post-deploy calls).
+- **Change:** Ported the two Apply Failure Handling guards (no bridge re-speak on failure; no re-fire of same failed job_id) from KKB into Maya Hindi.md + Maya Inbound.md (Maya is Hindi-only). Also added an exemption to the Canonical Location Spellings section in Maya Hindi.md so the fixed MPL competition name "गाज़ियाबाद मार्केटर प्रीमियर लीग" (spelled with घ) is not normalized to the ग canonical — resolves a contradiction the canonical rule introduced. Deployed maya-hi-out + maya-hi-in, verified in-sync. Not yet live-confirmed (no post-deploy calls).
 
 ## 2026-07-24 — Maya: Canonical Location Spellings section (propagated from KKB)
 - **Feedback/bug:** City mispronunciation (shared KKB fix, rows 69/71); Maya is Ghaziabad-based so the same places apply.

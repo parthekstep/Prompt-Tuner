@@ -154,3 +154,8 @@
 - **2026-09-01_161714** — `pre-deploy-maya-hi-signals-2026-09-01_161714` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
 - **2026-09-01_161715** — `pre-deploy-maya-hi-in-2026-09-01_161715` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_
 - **2026-09-01_161716** — `pre-deploy-maya-hi-in-signals-2026-09-01_161716` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-09-02_095901** — `pre-khushboo-r4` — greeting ends on the question; no fetch in the intro turn _(6 files)_
+- **2026-09-02_100155** — `pre-deploy-maya-hi-signals-2026-09-02_100155` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-09-02_100156** — `pre-deploy-maya-hi-out-2026-09-02_100156` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-09-02_100157** — `pre-deploy-maya-hi-in-signals-2026-09-02_100157` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-09-02_100158** — `pre-deploy-maya-hi-in-2026-09-02_100158` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_
