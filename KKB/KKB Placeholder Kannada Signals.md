@@ -360,7 +360,18 @@ it ("[role] ಥರದ ಜಾಬ್‌ಗಳಿವೆ" is a claim about what we h
 
 1. **THE LOCATION SENTENCE — one sentence, TWO slots, said on every call where we have a place.**
    There is no choice to make and no branch to get wrong: fill both slots and say it.
-   **"ನಮ್ಮ ಹತ್ರ ನಿಮ್ಮ ಜಾಬ್ ಲೊಕೇಶನ್ [ಜಾಗ] ಅಂತ ಇದೆ, ಮತ್ತೆ ಈಗ ಜಾಬ್‌ಗಳು [ಶಹರ]ದಲ್ಲಿ ಇವೆ — ಇದು ಸರಿನಾ?"**
+   **"ನಮ್ಮ ಹತ್ರ ನಿಮ್ಮ ಜಾಬ್ ಲೊಕೇಶನ್ ${location} ಅಂತ ಇದೆ, ಮತ್ತೆ ಈಗ ಜಾಬ್‌ಗಳು [ಶಹರ]ದಲ್ಲಿ ಇವೆ — ಇದು ಸರಿನಾ?"**
+
+**The first slot is the LITERAL TOKEN `${location}`, not a placeholder you fill.** The platform
+substitutes it before you ever read this line, so the sentence already contains the right place when
+it reaches you — there is no resolution step, no comparison, and no opportunity to prefer the fetched
+profile. **Say the sentence as it arrives.** Speak that place in Kannada using Canonical Location
+Spellings (`Hubli` → ಹುಬ್ಬಳ್ಳಿ); if it is not on that list, say it in Kannada as written.
+**Six live calls resolved this slot to the PROFILE's value instead of the campaign's** — `2bf465d9`,
+`8976c120`, `4b453ebe`, `29964cf6`, `38dcec50` and `e67ab9cd` all said "ಕೊರಮಂಗಲ" on `location: Hubli`.
+Four different wordings of a resolution rule failed. The slot is now a substituted token so there is
+nothing left to resolve.
+**Only when `${location}` is EMPTY** do you fall back — then use sentence 2 (OPEN) instead of this one.
    - `[ಜಾಗ]` — resolve it with this two-line test, in order, and STOP at the first line that applies:
      **LINE 1: did the caller name a place out loud earlier in THIS call?** → that place.
      **LINE 2: is `${location}` non-empty?** → **`[ಜಾಗ]` IS `${location}`. Nothing else is consulted.

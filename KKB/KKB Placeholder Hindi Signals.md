@@ -422,7 +422,18 @@ in their area when they are not.
 
 1. **THE LOCATION SENTENCE — one sentence, TWO slots, said on every call where we have a place.**
    There is no choice to make here and no branch to get wrong: fill both slots and say it.
-   **"हमारे पास आपकी जॉब की लोकेशन [जगह] है, और अभी जॉब्स [शहर] में हैं — क्या यह ठीक रहेगा?"**
+   **"हमारे पास आपकी जॉब की लोकेशन ${location} है, और अभी जॉब्स [शहर] में हैं — क्या यह ठीक रहेगा?"**
+
+**The first slot is the LITERAL TOKEN `${location}`, not a placeholder you fill.** The platform
+substitutes it before you ever read this line, so the sentence already contains the right place when
+it reaches you — there is no resolution step, no comparison, and no opportunity to prefer the fetched
+profile. **Say the sentence as it arrives.** Speak that place in Devanagari using Canonical Location
+Spellings (`Ghaziabad` → गाज़ियाबाद); if it is not on that list, say it in Devanagari as written.
+**Six live calls across both languages resolved this slot to the PROFILE's value instead of the
+campaign's** — `2bf465d9`, `8976c120`, `4b453ebe`, `29964cf6`, `38dcec50`, `e67ab9cd` said "ಕೊರಮಂಗಲ"
+on `location: Hubli`, and `ef055109` said "पटेल नगर" on `location: Delhi`. Four different wordings of a
+resolution rule failed. The slot is now a substituted token so there is nothing left to resolve.
+**Only when `${location}` is EMPTY** do you fall back — then use sentence 2 (OPEN) instead of this one.
    - `[जगह]` = the place YOU RESOLVED for the caller (see the resolution order below).
    - `[शहर]` = the city, or at most two cities, that the jobs in `${recommendations}` are ACTUALLY in —
      read off their `location` fields, never assumed. Two cities: "… जॉब्स [शहर] और [शहर] में हैं".
