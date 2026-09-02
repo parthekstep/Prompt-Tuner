@@ -337,6 +337,17 @@ Both have happened. State the facts is not enough; this is a procedure.
    route** — a production detector, a human call, or a platform ask. List blocked cases explicitly in
    the report. Silently dropping them is how "cannot test Fix A" became "Fix A untested and
    unmentioned".
+6a. **INBOUND BOTS ARE TESTABLE — give the agent an `out_did` and dial the tester.** Do not record an
+   inbound fix as unverifiable. `POST /api/call` with an inbound agent 500s only because the agent has
+   no outbound route; PATCH `{"out_did": <number>}` onto it first and the same harness works exactly as
+   it does for an outbound bot. **`out_did` is an INTEGER** — sending it as a string returns
+   400 `invalid_type, expected number, received string`, which is what made this look impossible on
+   2026-09-02. Set on that date: `kkb-hi-in-signals` 911204404274, `kkb-kn-in-signals` 918037006352,
+   `maya-hi-in-signals` 911204413383 — each its own `in_did`, so one number serves both directions.
+   `kkb-hi-in` already had one, which is why inbound calls `029783e9` / `64123c15` (2026-08-28) carry
+   `to=+917946350285`. **Check the call history for a counter-example before declaring any harness
+   limit structural.**
+
 6b. **Which record the bot picks is NOT `items[0]` — it is the most COMPLETE live one.** Learned the
    hard way on 2026-09-01: to force an `ACTION_LIMIT_REACHED` I pre-applied (via the backend API) the
    pair `(items[0], job)` on the tester DID, on the strength of the prompt's own rule ("the first item
