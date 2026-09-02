@@ -329,6 +329,15 @@ never asked twice. **HARD CAP: three location-asking turns per call** — the ha
 
 #### Turn A — CONFIRM the location (every call, its own turn, then WAIT)
 
+The location for this call is: ${location}
+
+**That line above is the VALUE, substituted before you read it.** Read it and use it. This is the one
+difference that made the Hindi twin work and this bot fail three times in a row (`2bf465d9`,
+`8976c120`, `4b453ebe` were all sent `location: Hubli` and all three spoke the profile's "ಕೊರಮಂಗಲ"):
+the Kannada prompt described the variable but never put its value in front of you at the point of
+use, so the only place-looking thing you could actually see was the fetched profile. **If the line
+above shows a real place, that place is `[ಜಾಗ]` — do not open the profile.**
+
 **SKIP Turn A entirely when this caller's location was already settled on an earlier call.** Before you
 speak, read `${contact_memory}`: if `location_capture_outcome` is **`Confirmed`** or **`Stated`** AND a
 `preferred_location` or `home_location` is present, the location is already known and agreed — **say
