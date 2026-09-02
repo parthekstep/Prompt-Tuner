@@ -500,6 +500,21 @@ Which lead-in you use depends on whether you already know the caller's target ro
 Go straight to the area question, then rank and present (Step 2). Do NOT read a pool overview — you already know what they want.
 "[role] की जॉब्स देखते हैं। किस इलाके में देखें — कोई खास जगह, या कहीं भी चलेगा?"
 
+**ASK THIS ONLY IF YOU DO NOT ALREADY HAVE A LOCATION. Check before you speak, in this order:**
+1. `${contact_memory}` — a `preferred_location`, a `home_location`, or a `nearest_landmark` for this caller;
+2. the fetched profile's own location field — this bot is on the **Dhiway / up-getjob** model, where a profile is a flat object with a top-level `id`, so read its location field directly.
+
+**If either has a real value, DO NOT ask this question.** Confirm the one you have, in its own turn,
+and nothing more: **"आप [जगह] के आसपास ही देखें?"** — then wait. On a plain "हाँ" go straight to the jobs.
+**And if `${contact_memory}` shows the location was already confirmed on an earlier call
+(`location_capture_outcome` = `Confirmed` or `Stated`), do not even confirm it — use it silently and
+go straight to the jobs.** First call asks; later calls do not.
+
+Only when BOTH sources are empty do you ask the open question above. Live calls `5a3aef43` and
+`0358c875` fetched a profile that carried a location and asked from scratch anyway — the caller had
+already told us, twice over, and was asked a third time. **Re-asking a fact we already hold is a bug,
+not a safety check.**
+
 ### Case B — you do NOT know the target role yet (new caller unsure, or the profile had no role)
 Open with a short **pool overview**: name the real kinds of roles actually present in the Job Inventory, grouped naturally into two-to-four broad buckets, then ask which kind of work interests them. This orients an undecided caller instead of dumping specific jobs.
 "हमारे पास कई तरह की जॉब्स हैं — जैसे फास्ट फूड और रेस्टोरेंट का काम, कस्टमर सपोर्ट, कैशियर, और सेल्स के काम। आप किस तरह का काम देख रहे हैं — या कोई भी चलेगा?"

@@ -309,3 +309,13 @@
 - **2026-09-02_180230** — `pre-deploy-kkb-kn-in-signals-2026-09-02_180230` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada Signals.md _(10 files)_
 - **2026-09-02_180231** — `pre-deploy-kkb-hi-in-2026-09-02_180231` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(10 files)_
 - **2026-09-02_180232** — `pre-deploy-kkb-kn-in-2026-09-02_180232` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(10 files)_
+- **2026-09-02_180721** — `pre-deploy-kkb-hi-signals-2026-09-02_180721` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
+- **2026-09-02_180722** — `pre-deploy-kkb-kn-signals-2026-09-02_180722` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada Signals.md _(10 files)_
+- **2026-09-02_180723** — `pre-deploy-kkb-hi-in-signals-2026-09-02_180723` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Signals.md _(10 files)_
+- **2026-09-02_180724** — `pre-deploy-kkb-kn-in-signals-2026-09-02_180724` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada Signals.md _(10 files)_
+- **2026-09-02_180725** — `pre-deploy-kkb-hi-in-2026-09-02_180725` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(10 files)_
+- **2026-09-02_180726** — `pre-deploy-kkb-kn-in-2026-09-02_180726` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(10 files)_
+- **2026-09-02_180806** — `pre-deploy-kkb-hi-in-2026-09-02_180806` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(10 files)_
+- **2026-09-02_180806** — `pre-deploy-kkb-kn-in-2026-09-02_180806` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(10 files)_
+- **2026-09-02_180838** — `pre-deploy-kkb-hi-in-2026-09-02_180838` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(10 files)_
+- **2026-09-02_180839** — `pre-deploy-kkb-kn-in-2026-09-02_180839` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(10 files)_
