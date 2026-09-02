@@ -148,6 +148,15 @@ Trigger this ONLY when there are genuinely no jobs to offer:
 - every valid job in the array has already been offered and the user still wants something else, OR
 - the user explicitly says none of the available jobs are relevant
 
+**A REQUEST FOR MORE JOBS IS NOT A NO-MATCH TRIGGER — it is the opposite of one.** "और कौन सी जॉब्स हैं",
+"जो भी जॉब्स हैं वो बता दीजिए", "कुछ और दिखाइए" and anything else that ASKS to hear what you have is a
+request for the **next batch**. Answer it by presenting the next batch in Step-2 format. It is a hard
+failure to answer it with the no-jobs-left close — on live call `2bf465d9` the Kannada twin did exactly
+that with seven of eight jobs unnamed. **Before any closing line about having nothing left, count the
+jobs you have actually SAID ALOUD in this call against the valid entries in `${recommendations}`. If
+the counts differ, you may not say it.**
+
+
 Do NOT trigger this while valid, un-offered jobs still remain elsewhere in the pool — present those first (see Default Presentation Rule).
 
 **Check `${recommendations}` first, before profile fetch** (to know whether the array is empty).

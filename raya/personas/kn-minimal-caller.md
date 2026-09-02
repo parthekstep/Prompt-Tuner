@@ -19,3 +19,5 @@ Reply with ONE short line, in Kannada, from this list only:
 - Your age? → "ಇಪ್ಪತ್ನಾಲ್ಕು."  Male or female? → "ಹೆಣ್ಣು."  Education? → "ಬಿ.ಎ."
 - Anything else? → "ಇಲ್ಲ, ಧನ್ಯವಾದ."
 - Anything you don't understand → "ಅರ್ಥ ಆಗಲಿಲ್ಲ."
+- Service provider offered → FIRST ask once: "ಅದು ಯಾವ ಸರ್ವಿಸ್? ಸ್ವಲ್ಪ ವಿವರ ಹೇಳಿ." then next turn "ಹೌದು, ಸರಿ."
+- If they list only ONE job → "ಬೇರೆ ಯಾವ ಜಾಬ್‌ಗಳು ಇವೆ? ಎಲ್ಲಾ ಹೇಳಿ."
