@@ -31,7 +31,16 @@ for _l in open(os.path.join(REPO, "raya/.env")):
         k, v = _l.split("=", 1); _env[k.strip()] = v.strip()
 BASE = _env["RAYA_BASE_URL"].rstrip("/"); KEY = _env["RAYA_API_TOKEN"]
 CONNECT_TRIES = 4
-CONNECT_BACKOFF = 45   # seconds between connect attempts (tight retries all fail)
+# Measured 2026-09-02 over 115 harness dials: bridging is NOT random telephony flakiness, it is
+# contention on the single tester DID. Bridge rate against how long the line had been free:
+#     0-30s after the previous call ended   4/15   27%
+#     30-90s                               15/80   19%   <- the old 45s backoff lived here
+#     90s-10min                             3/7    43%
+#     >10min (line idle)                    8/13   62%
+# Real numbers, which have no such contention, bridge at 11/16 (69%). Redialling a line that has not
+# finished releasing just burns the attempt, so give it real time. This costs wall-clock and buys back
+# far more of it than it spends.
+CONNECT_BACKOFF = 200  # seconds between connect attempts
 
 
 def req(method, path, body=None, tries=4):
@@ -73,9 +82,14 @@ def main():
         return None
 
     def poll(uuid):
+        # Poll fast at first, then slow down. A dial that is never going to bridge resolves to
+        # Failure within a couple of seconds, but the old fixed 18s sleep BEFORE the first check
+        # meant every dead dial still cost 18s -- and at a 27% bridge rate most dials are dead ones.
+        # A live call then only needs coarse polling, since it runs 90-180s.
         c = {}
-        for i in range(22):
-            time.sleep(18)
+        waits = [3, 3, 4, 5] + [15] * 24
+        for i, w in enumerate(waits):
+            time.sleep(w)
             _, c = req("GET", f"/api/call/{uuid}")
             oc = c.get("outcome"); turns = len(c.get("call_transcript") or [])
             print(f"[{label}] poll {i}: outcome={oc!r} dur={c.get('call_duration')} turns={turns}")
@@ -94,7 +108,7 @@ def main():
         if c.get("outcome") == "Completed" and len(c.get("call_transcript") or []) > 0:
             final = c; break
         print(f"[{label}] connect attempt {attempt + 1} did not bridge "
-              f"(outcome={c.get('outcome')}); retrying in {CONNECT_BACKOFF}s")
+              f"(outcome={c.get('outcome')}); letting the tester line settle for {CONNECT_BACKOFF}s")
         time.sleep(CONNECT_BACKOFF)
 
     if final is None:
