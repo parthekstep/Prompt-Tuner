@@ -40,7 +40,7 @@ CONNECT_TRIES = 4
 # Real numbers, which have no such contention, bridge at 11/16 (69%). Redialling a line that has not
 # finished releasing just burns the attempt, so give it real time. This costs wall-clock and buys back
 # far more of it than it spends.
-CONNECT_BACKOFF = 200  # seconds between connect attempts
+CONNECT_BACKOFF = 90   # measured sweet spot: >90s idle recovers most of the bridge rate without burning 13 min per failed pass
 
 
 def req(method, path, body=None, tries=4):
