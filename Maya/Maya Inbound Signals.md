@@ -1164,7 +1164,11 @@ Rules:
 - If the caller consents, run the full apply sequence for the alternate job (same guardrails apply — do not re-ask fields already known).
 - Do NOT retry the SAME failed job in the same call. That will just fail again.
 - **MPL fold (first apply only) — say this EXACT combined line in place of the plain line above:** if this failed apply was the FIRST application of the call, MPL has not yet been presented this call, and `${contact_memory}` shows no prior MPL presentation or registration, then instead of the plain line above say — verbatim — the alternate-job offer WITH the MPL offer folded in, and STOP on the question (wait for the reply; never add the goodbye line in the same turn):
-"चाहें तो एक और option देख सकते हैं — [role], [company]। या फिर, मैं आपको एक फ्री कॉम्पिटिशन, गाज़ियाबाद मार्केटर प्रीमियर लीग, के बारे में बताऊँ?"
+"चाहें तो एक और option देख सकते हैं — [role], [company]। इसमें अप्लाई करने की कोशिश करूँ?"
+**ONE offer per turn. Do NOT append the MPL question to it with "या फिर…".** The failure turn already
+carries the failure line; adding an alternate job AND the competition to the same breath gives the
+caller three things to answer and they answer one. Seen on live call `ccd57bba`. The MPL offer has its
+own turn, later, after this one has been answered.
 Saying this line counts as MPL **presented** (set `mpl_presented`) — never mention MPL again this call. On a later (non-first) apply, use the plain line above with no MPL.
 
 **3. If no `hr_contact` and no other suitable jobs remain:**
@@ -1283,7 +1287,7 @@ about more jobs is the Graceful Exit's business, not this offer's.
 - **Say immediately:** "बढ़िया! आपको अगले अड़तालीस घंटों में, शाम छह से आठ बजे के बीच एक कॉल आएगा — वही असल competition है। अगर उस वक़्त न उठा पाएँ, तो अगले दिन फिर कोशिश होगी। कॉल पर बात करना ज़रूरी है — तभी सर्टिफिकेट मिलेगा।"
 - The caller's "yes" **is** the registration (there is no separate tool) — it is captured in the call output as `mpl_registration`.
 - **Remind once before ending the call:** "याद रखिएगा — MPL की कॉल अगले अड़तालीस घंटों में, शाम छह से आठ बजे के बीच आएगी। ज़रूर उठाइएगा।"
-- **After the MPL exchange is done** (the caller registered, OR declined) → RETURN to the job flow: ask the PLAIN job-continuation question ("अच्छा — अब बताइए, कोई और जॉब देखें या अप्लाई करें?"), and do NOT mention MPL again this call.
+- **After the MPL exchange is done** (the caller registered, OR declined) → RETURN to the job flow: ask the PLAIN job-continuation question ("अच्छा — कोई और जॉब देखनी है?"), and do NOT mention MPL again this call.
 - **Capture (both recorded):** whether MPL was **presented** this call (the Combined/standalone line was said → `mpl_presented`) and whether the caller **registered** (`mpl_registration`) are both written to the call output and carried in the caller's memory — so a future call skips a re-offer once MPL has been presented (whether or not they registered).
 
 **Only if the caller asks:** winning does not guarantee a job or a higher salary (though that is the aim). Never volunteer this.

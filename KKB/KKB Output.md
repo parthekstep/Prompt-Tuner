@@ -99,7 +99,10 @@ If a value is not present, use "NA" for strings, [] for arrays, or 0 for counts.
     confirmed "गाज़ियाबाद" to the caller — the correct value is "No", because the question is
     whether the place the caller was DIALLED for had any job, not which place got discussed.
     Reading it off the conversation hides exactly the targeting problem this field exists to
-    surface.
+    surface. It went wrong the other way on call 2bf465d9: the input was "Hubli", SIX of the
+    eight jobs were in Hubli, the bot happened to talk about Dharwad, and this field was
+    recorded as "No". Match the input string against every job's `location` field — a job
+    listed as "Keshwapur, Hubli" IS in Hubli — and ignore which city got discussed.
     This is a CAMPAIGN-TARGETING signal, not a bot verdict: "No" means the caller was
     dialled for a city we hold no inventory in, which is worth surfacing even when the
     call otherwise went perfectly. Judge it from the input location and the job list only

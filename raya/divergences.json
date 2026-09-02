@@ -96,16 +96,19 @@
    "bot": "KKB",
    "sync_family": "KKB · outbound · signals (Hindi/Kannada Signals pair)",
    "targets": [
-    "kkb-hi-signals"
+    "kkb-hi-signals",
+    "kkb-kn-signals"
    ],
    "files": [
-    "KKB/KKB Placeholder Hindi Signals.md"
+    "KKB/KKB Placeholder Hindi Signals.md",
+    "KKB/KKB Placeholder Kannada Signals.md"
    ],
    "master_language": "hi",
    "languages_affected": [
-    "hi"
+    "hi",
+    "kn"
    ],
-   "direction": "master-only (pilot)",
+   "direction": "master + kn mirror (no longer a pilot)",
    "scope": [
     {
      "section": "Input Variables → Contact Variables",
@@ -177,7 +180,8 @@
    "changelog_ref": "KKB/CHANGELOG.md — 2026-08-28 — KKB Signals Hindi: location capture (R1-R4)",
    "expires": "On explicit approval to port. Port via /port-feature with re-authored Kannada spoken lines, Kannada canonical spellings, an inbound-safe closing clause (no outbound callback promise), and an independent live test per variant.",
    "registered": "2026-08-28",
-   "last_reviewed": "2026-09-01"
+   "last_reviewed": "2026-09-02",
+   "_note_2026_09_02": "Ported to Kannada Signals on 2026-09-02 at Parth's request. The Kannada twin now carries the same Location step (Turn A two-slot sentence, Turn B asked once ever, nearest_landmark skip, never-answer-your-own-question) with Kannada spoken lines and its OWN canonical spellings for the Dharwad/Hubballi inventory. Raya has derived `location` into kkb-kn-signals' agent_args; the campaign must actually SEND it, otherwise the input is EMPTY and the step degrades to the open area lines (analyser G3) — that is the pre-existing behaviour, so no regression, but the reconfirm stays inert until the campaign passes it. The INBOUND Signals twins still do NOT have this step."
   }
  ]
 }

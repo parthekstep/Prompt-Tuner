@@ -300,3 +300,6 @@
 - **2026-09-02_153819** — `pre-deploy-kkb-hi-signals-2026-09-02_153819` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
 - **2026-09-02_153821** — `pre-deploy-kkb-hi-out-2026-09-02_153821` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi.md _(10 files)_
 - **2026-09-02_153822** — `pre-deploy-kkb-hi-in-signals-2026-09-02_153822` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Signals.md _(10 files)_
+- **2026-09-02_163758** — `pre-kn-location-port` — port the Hindi location chain to Kannada Signals _(10 files)_
+- **2026-09-02_163936** — `pre-deploy-kkb-kn-signals-2026-09-02_163936` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada Signals.md _(10 files)_
+- **2026-09-02_173550** — `pre-deploy-kkb-kn-signals-2026-09-02_173549` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada Signals.md _(10 files)_
