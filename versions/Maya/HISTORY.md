@@ -191,3 +191,5 @@
 - **2026-09-03_103354** — `pre-deploy-maya-hi-out-2026-09-03_103354` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
 - **2026-09-03_103357** — `pre-deploy-maya-hi-in-signals-2026-09-03_103357` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
 - **2026-09-03_103400** — `pre-deploy-maya-hi-in-2026-09-03_103400` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_
+- **2026-09-03_123828** — `pre-deploy-maya-hi-signals-2026-09-03_123828` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-09-03_123831** — `pre-deploy-maya-hi-in-signals-2026-09-03_123831` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_

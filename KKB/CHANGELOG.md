@@ -733,3 +733,23 @@ Three requested changes, piloted together on **KKB Hindi Signals outbound** (`kk
 - **Feedback/bug:** Maintenance system bootstrap; KKB had no memory prompt.
 - **Change:** Created `KKB Memory.md` (language-agnostic seeker memory, English output), modeled on `DKB Memory.md` and re-domained to the seeker/job-search context. Backs the conversation prompt's "Introduction Priority Rule" via `last_action` / `last_options_presented` / `jobs_applied`.
 - **Files:** `KKB/KKB Memory.md`
+
+## 2026-09-03 — Job-count anchor: the all-told line gets a numeric guard the model can check
+- **Feedback/bug:** On `22d80263` the bot presented 7 of 8 supplied jobs to a caller who repeatedly
+  asked for the full list, then said "जो जॉब्स अभी हमारे पास हैं, वो सब मैंने बता दीं" with
+  इलेक्ट्रिकल इंजीनियर never spoken. `cb9a4938` — same prompt, same fixture — presented 8 of 8.
+  A mixed ratio, so per CLAUDE.md rung 0 this is an adherence gap, not unreachability.
+- **Root cause:** the existing guard told the model to count what it had said aloud against
+  `${recommendations}`. That count is not verifiable at the moment the closing line is chosen. The
+  prompt already carried FOUR wordings of that same guard, so a fifth was forbidden (never add a
+  third wording of a guard that has failed twice) — the mechanism had to change.
+- **Change:** (1) new `### Job count anchor` in Step 2 — the first batch of every call now announces
+  the total, "आपके इलाके में कुल [N] जॉब्स हैं — [तीन] अभी बताती हूँ।", said once per call;
+  (2) ordinals now run continuously across batches and never restart; (3) both all-told closing lines
+  gained a NUMERIC CHECK permitting them only when the highest ordinal spoken equals the announced
+  total. The model compares two numbers already in its own output instead of re-counting an array.
+- **Files:** `KKB/KKB Placeholder Hindi Signals.md`, `KKB/KKB Placeholder Kannada Signals.md`
+  (mirrored: agnostic rule verbatim, spoken lines adapted — Kannada number-words, ಒಂದು…ಎಂಟು).
+- **Analyser:** added pattern **D56** (completeness claim gated on an unverifiable count).
+- **Status:** deployed to `kkb-hi-signals` (227049 bytes) and `kkb-kn-signals`. **VERIFY-PENDING** —
+  live calls running; not to be called fixed without a call id showing 8 of 8 plus the anchor line.

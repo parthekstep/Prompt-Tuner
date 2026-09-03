@@ -1,0 +1,124 @@
+#!/usr/bin/env python3
+"""jobs_presented.py — count jobs actually READ ALOUD, script-independently.
+
+Why this exists: twice now I have graded "how many jobs did it name?" with a Latin-vs-Devanagari
+substring match and got 0 when the real answer was 3. The job array is Latin ("Sales executive",
+"Alien Energy"); the bot speaks Devanagari ("सेल्स एग्जीक्यूटिव", "एलियन एनर्जी"). Any matcher built on
+the array's own strings is a false-negative machine — it is written up as D49 in the analyser and I
+walked into it again.
+
+The reliable signal is script-native and language-native: the ORDINAL MARKERS the presentation format
+mandates. Hindi "पहला:/दूसरा:/तीसरा:/चौथा:…", Kannada "ಒಂದು:/ಎರಡು:/ಮೂರು:…", plus the "one option"
+singular forms. Counting those counts presented jobs without ever touching the array.
+
+Reports, per call: jobs supplied, distinct jobs presented, whether the caller asked for more, and
+whether a "that is all we have" line was spoken while any job was still unnamed (the real defect).
+Exit 1 only on that last one.
+
+Usage: python3 raya/regression/jobs_presented.py [--since ...] [--agent <id>]
+"""
+import argparse, json, os, re, sys, time, urllib.request
+from concurrent.futures import ThreadPoolExecutor
+
+REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+_env = {}
+for _l in open(os.path.join(REPO, "raya/.env")):
+    _l = _l.strip()
+    if "=" in _l and not _l.startswith("#"):
+        k, v = _l.split("=", 1); _env[k.strip()] = v.strip().strip('"').strip("'")
+BASE = _env["RAYA_BASE_URL"].rstrip("/"); KEY = _env["RAYA_API_TOKEN"]
+
+ORDINALS = [
+    (u"पहला", 1), (u"दूसरा", 2), (u"तीसरा", 3), (u"चौथा", 4), (u"पाँचवाँ", 5), (u"पांचवां", 5),
+    (u"छठा", 6), (u"सातवाँ", 7), (u"आठवाँ", 8),
+    (u"ಒಂದು", 1), (u"ಎರಡು", 2), (u"ಮೂರು", 3), (u"ನಾಲ್ಕು", 4), (u"ಐದು", 5), (u"ಆರು", 6),
+]
+ONE_OPTION = re.compile(u"एक ऑप्शन है|ಒಂದು ಆಪ್ಷನ್ ಇದೆ")
+ASK_MORE = re.compile(u"और कौन|और क्या|बाकी|जो भी जॉब|सारी जॉब|ಬೇರೆ ಯಾವ|ಎಲ್ಲಾ ಹೇಳಿ|ಇನ್ನೇನು")
+ALL_TOLD = re.compile(u"सब मैंने बता दीं|इतने ही|इवಿಷ್ಟೇ|ಇವಿಷ್ಟೇ|ಎಲ್ಲಾ ಜಾಬ್‌ಗಳನ್ನ ನಾನು ಹೇಳಿದ್ದೀನಿ|और कोई जॉब नहीं")
+
+
+def get(path, tries=4):
+    for i in range(tries):
+        try:
+            r = urllib.request.Request(BASE + path, headers={
+                "X-API-Key": KEY, "User-Agent": "Mozilla/5.0", "Accept": "application/json"})
+            with urllib.request.urlopen(r, timeout=120) as resp:
+                return json.loads(resp.read())
+        except Exception:
+            if i == tries - 1: raise
+            time.sleep(1.5 * (i + 1))
+
+
+def check(bot, uuid):
+    d = get("/api/call/" + uuid)
+    aa = d.get("agent_args") or {}
+    rec = aa.get("recommendations")
+    if isinstance(rec, str):
+        try: rec = json.loads(rec)
+        except Exception: rec = None
+    supplied = len(rec) if isinstance(rec, list) else 0
+    if not supplied:
+        return []
+    turns = [str(t.get("content") or "") for t in (d.get("call_transcript") or [])
+             if t.get("role") == "assistant" and t.get("content")]
+    user = " ".join(str(t.get("content") or "") for t in (d.get("call_transcript") or [])
+                    if t.get("role") == "user")
+    said = " ".join(turns)
+    highest = 0
+    for word, n in ORDINALS:
+        if word in said:
+            highest = max(highest, n)
+    if highest == 0 and ONE_OPTION.search(said):
+        highest = 1
+    asked = bool(ASK_MORE.search(user))
+    all_told = bool(ALL_TOLD.search(said))
+    created = str(d.get("created_at"))[:19]
+    base = dict(bot=bot, call=uuid, at=created, supplied=supplied, presented=highest, asked=asked)
+    if all_told and highest < supplied:
+        return [dict(base, kind="ALL-TOLD WHILE JOBS UNNAMED",
+                     detail=f"said it had told the caller everything after presenting {highest} of {supplied}")]
+    if asked and highest < supplied:
+        return [dict(base, kind="ASKED FOR MORE, NOT ALL SHOWN (info)",
+                     detail=f"caller asked to hear more; {highest} of {supplied} were presented")]
+    return []
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--since", default=time.strftime("%Y-%m-%d", time.gmtime(time.time() - 86400)))
+    ap.add_argument("--agent", default=None)
+    ap.add_argument("--workers", type=int, default=3)
+    a = ap.parse_args()
+    targets = [t for t in json.load(open(os.path.join(REPO, "raya/agents.json")))["targets"]
+               if t.get("kind") == "conversation" and t["raya_agent_id"].get("prod")]
+    if a.agent:
+        targets = [t for t in targets if a.agent in (t["id"], t["raya_agent_id"]["prod"])]
+    work = []
+    for t in targets:
+        for c in (get(f"/api/call?agent_id={t['raya_agent_id']['prod']}&limit=100").get("calls") or []):
+            if str(c.get("created_at"))[:19] < a.since: continue
+            if (c.get("call_duration") or 0) >= 40: work.append((t["id"], c["uuid"]))
+    print(f"jobs-presented check | since {a.since} | {len(work)} calls", flush=True)
+    bad, errs = [], 0
+    with ThreadPoolExecutor(max_workers=a.workers) as ex:
+        for res in ex.map(lambda i: _safe(check, i), work):
+            if res is None: errs += 1
+            else: bad.extend(res)
+    print(f"fetch errors: {errs}\n")
+    hard = [f for f in bad if "info" not in f["kind"]]
+    if not bad:
+        print("  clean — no call claimed to be out of jobs while any remained unnamed")
+    for f in bad:
+        print(f"  {f['kind']:36} {f['at']}  {f['bot']:18} {f['call']}")
+        print(f"        supplied={f['supplied']} presented={f['presented']} asked_for_more={f['asked']} — {f['detail']}")
+    return 1 if hard else 0
+
+
+def _safe(fn, arg):
+    try: return fn(*arg)
+    except Exception: return None
+
+
+if __name__ == "__main__":
+    sys.exit(main())

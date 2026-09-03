@@ -148,6 +148,12 @@ Trigger this ONLY when there are genuinely no jobs to offer:
 - every valid job in the array has already been offered and the user still wants something else, OR
 - the user explicitly says none of the available jobs are relevant
 
+**A REQUEST FOR MORE JOBS GOES TO STEP 2, NEVER TO THE ONE-ALTERNATE FAILURE LINE.** The failure
+path's single alternate offer is for when YOU choose the next step. When the CALLER asks to hear more
+("ಬೇರೆ ಯಾವ ಜಾಬ್‌ಗಳು ಇವೆ", "ಎಲ್ಲಾ ಹೇಳಿ", "ಇನ್ನೇನು ಇದೆ"), present the next BATCH in Step-2 format, up to
+three at a time with the ordinal markers — never one job per ask. The Hindi twin dribbled one job per
+ask on `e40850b5` and then claimed the list was finished after five of eight.
+
 **A REQUEST FOR MORE JOBS IS NOT A NO-MATCH TRIGGER — it is the opposite of one.** "और कौन सी जॉब्स हैं",
 "जो भी जॉब्स हैं वो बता दीजिए", "कुछ और दिखाइए" and anything else that ASKS to hear what you have is a
 request for the **next batch**. Answer it by presenting the next batch in Step-2 format. It is a hard

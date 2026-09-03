@@ -721,3 +721,40 @@ against the twin."
 - **Detection:** for every `[slot]` in a spoken line, ask **can the model actually see the value that belongs there, at the moment it speaks?** Grep the prompt for the corresponding `${arg}`: if the value is never printed near the point of use, this pattern is latent. Second check: compare what the bot said against what it COULD see — a wrong value that exactly matches a fetched-profile field, or an invented one where the arg was dropped, is this, not disobedience. Third: any rule that fails **intermittently** across otherwise identical calls is a gap, not a weak instruction — the model fills it when nothing better is visible and gets it right when something is.
 - **Fix direction:** **show the value or quote the line — never both describe and leave a slot.** Substitute the token directly into the spoken template (`${location}`, `${company_name}`) so there is no resolution step; print the supplied values above the branch that tests them; quote every branch of a template verbatim so there is nothing to compose; and state explicitly that an unsubstituted `${...}` token counts as EMPTY, because a dropped arg arrives that way. **Do not reword a rule that has failed twice — go and find what the model cannot see.**
 - **Seen in:** 2026-09-02/03 across kkb-hi-signals, kkb-kn-signals, dkb-hi-signals, dkb-kn-signals. Location: `2bf465d9`, `8976c120`, `4b453ebe`, `29964cf6`, `38dcec50`, `e67ab9cd`, `ef055109` → fixed and verified `2a6ccc0b`, `62dc3ee7`, `1119c329`, `af1c6e2a`. DKB: `e2ce642a`, `9cf80aa5`, `0eb3fc72` → verified `2c197514`, `b1b71d68`, `9e2e0056`, `3f996a3d`. Filter: `8976c120`, `4b453ebe` → verified `d9bf1f43`, `4b0ea64d`. Template slot: `a111ed52`, `0178c996`, `503440a3`, `4b0ea64d` → verified `c00e7ba5`, `fd464bc0`, `03cf4435`. **Lesson: when a rule fails and rewording does not help, stop editing the rule and go find the value the model cannot see.**
+
+### D56 — A completeness claim gated on a count the model cannot verify at the moment it speaks
+
+**Symptom.** The bot asserts it has finished something ("those are all the jobs we had") while part of
+the set is genuinely unspoken. Two calls on the SAME prompt and the SAME fixture split: one presents
+8 of 8, the next presents 7 of 8 and then claims completeness. Looks like flakiness; it is not.
+
+**Root cause.** The guard was written as *"count what you have said aloud against `${recommendations}`
+before claiming the list is done."* That instruction asks the model to reconstruct its own spoken
+history and diff it against an array — a stateful count with no external anchor. Nothing in the
+context makes the answer checkable at the instant the closing line is chosen, so the model estimates,
+and an estimate is right most of the time and wrong the rest. Re-wording the guard cannot fix this:
+KKB Hindi Signals carried **four** separate paragraphs all saying count-before-you-close, and the
+eighth job still went unnamed on `22d80263`.
+
+**Detection heuristic.** Grep the prompt for guards phrased as *count / compare / check … against
+`${array}`* or *"every X must already have been Y"*. For each, ask: **at the moment the model must
+obey this, is the quantity a literal token in its context, or must it be derived from what it
+remembers saying?** If derived, the guard is decorative — mark it a gap regardless of how forcefully
+it is worded. Two independent signals that you are here: (a) the same guard has been re-worded 3+
+times, and (b) the failure ratio is mixed (7/8, then 8/8) rather than 0/N.
+
+**Fix direction.** Give the model a number it has *already spoken*, then make the guard a comparison
+of two spoken numbers. On KKB the total is announced once on the first batch ("आपके इलाके में कुल आठ
+जॉब्स हैं"), ordinals then run continuously and never restart, and the closing line is permitted only
+when the highest ordinal spoken equals the announced total. The model no longer counts — it compares
+"आठवाँ" with "आठ", both of which are verbatim in its own recent output. Same shape as the apply
+success-line positional constraint (D47 fix): **convert an unverifiable internal count into a
+positional or numeric fact the model can read off its own transcript.**
+
+**Corollary — announcing the total also fixes the silent omission**, not just the false claim. A bot
+that has committed out loud to eight has a reason to reach eight; one that never named a total can
+drop a row and never notice.
+
+**Source.** KKB Hindi Signals, 2026-09-03. Bug call `22d80263` (7 of 8, then claimed complete);
+control `cb9a4938` (8 of 8, same prompt, same fixture). Predecessor bug `e40850b5` (3 of 8, one job
+per ask) was a different cause — see D55.
