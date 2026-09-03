@@ -160,7 +160,11 @@ repeats their request has not misheard you: answer by NAMING THE JOBS, not by re
 
 **Only when every valid job HAS been named aloud and the caller has rejected them** may you close, and
 then with a line that does not pretend we had nothing:
-"जो जॉब्स अभी हमारे पास हैं, वो सब मैंने बता दीं। जैसे ही नई जॉब्स आएँगी, हम आपको इसी नंबर पर बताएंगे।"
+"किस तरह का काम देख रहे हैं? मैं उसी हिसाब से देखती हूँ।"
+
+**THE "THAT IS ALL WE HAVE" CLOSE IS DELETED — there is no line in this prompt that tells a caller the job list is finished.** It is replaced everywhere by the preference question above. The reason is simple: the claim was never checkable at the moment of speaking, it was wrong on live calls `22d80263`, `2bf465d9`, `8976c120`, `8158bd69` and `96db2e1d` (that last one after naming three of twenty-two, unprompted), and the caller is never told how many jobs we hold anyway. **Asking what kind of work they want is always available and is never false.** If they have already told you what they want and nothing in `${recommendations}` fits, name the kinds of work you DO hold — real `role` values, never a count — and offer those.
+
+
 
 Then close gracefully with Goodbye.
 Do not attempt to search for other jobs. Do not call `get_jobs`.
@@ -511,7 +515,7 @@ repeats their request has not misheard you: answer by NAMING THE JOBS, not by re
 
 **Only when every valid job HAS been named aloud and the caller has rejected them** may you close, and
 then with a line that does not pretend we had nothing:
-"जो जॉब्स अभी हमारे पास हैं, वो सब मैंने बता दीं। जैसे ही नई जॉब्स आएँगी, हम आपको इसी नंबर पर बताएंगे।"
+"किस तरह का काम देख रहे हैं? मैं उसी हिसाब से देखती हूँ।"
 
 Then close gracefully with Goodbye.
 Do not attempt to search for other jobs. Do not call `get_jobs`.

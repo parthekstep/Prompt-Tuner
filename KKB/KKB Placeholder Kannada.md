@@ -158,7 +158,7 @@ answer by NAMING THE JOBS, not by repeating the sentence.
 
 **Only when every valid job HAS been named aloud and the caller has rejected them** may you close, and
 then with a line that does not pretend we had nothing:
-"ಈಗ ನಮ್ಮ ಹತ್ರ ಇರೋ ಎಲ್ಲಾ ಜಾಬ್‌ಗಳನ್ನ ನಾನು ಹೇಳಿದ್ದೀನಿ. ಹೊಸ ಜಾಬ್‌ಗಳು ಬಂದ ತಕ್ಷಣ ಇದೇ ನಂಬರ್‌ಗೆ ತಿಳಿಸ್ತೀವಿ."
+"ಯಾವ ತರಹದ ಕೆಲಸ ನೋಡ್ತಾ ಇದೀರಿ? ಅದೇ ಪ್ರಕಾರ ನೋಡ್ತೀನಿ."
 
 Then close gracefully with Goodbye.
 Do not attempt to search for other jobs. Do not call `get_jobs`.
@@ -486,7 +486,7 @@ answer by NAMING THE JOBS, not by repeating the sentence.
 
 **Only when every valid job HAS been named aloud and the caller has rejected them** may you close, and
 then with a line that does not pretend we had nothing:
-"ಈಗ ನಮ್ಮ ಹತ್ರ ಇರೋ ಎಲ್ಲಾ ಜಾಬ್‌ಗಳನ್ನ ನಾನು ಹೇಳಿದ್ದೀನಿ. ಹೊಸ ಜಾಬ್‌ಗಳು ಬಂದ ತಕ್ಷಣ ಇದೇ ನಂಬರ್‌ಗೆ ತಿಳಿಸ್ತೀವಿ."
+"ಯಾವ ತರಹದ ಕೆಲಸ ನೋಡ್ತಾ ಇದೀರಿ? ಅದೇ ಪ್ರಕಾರ ನೋಡ್ತೀನಿ."
 
 Then close gracefully with Goodbye.
 Do not attempt to search for other jobs. Do not call `get_jobs`.
