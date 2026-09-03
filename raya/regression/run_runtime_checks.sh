@@ -21,7 +21,7 @@ echo ""
 echo "================================================================ toolschema_parity"
 python3 scripts/toolschema_parity.py || FAIL=1
 
-for chk in jobs_presented consent_before_apply location_chain location_reconfirm apply_result_integrity apply_failure_wording location_integrity apply_outcomes; do
+for chk in dkb_employer_integrity jobs_presented consent_before_apply location_chain location_reconfirm apply_result_integrity apply_failure_wording location_integrity apply_outcomes; do
   echo ""
   echo "================================================================ $chk"
   python3 "raya/regression/$chk.py" "${ARGS[@]}" || FAIL=1

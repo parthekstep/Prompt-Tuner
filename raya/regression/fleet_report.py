@@ -36,9 +36,11 @@ REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 # pairs -- five McDonald's Crew Member posts, two CY FUTURE Customer Support posts. Read it as a
 # prompt to go look, not a failure.
 BLOCKING = ["ALL-TOLD WHILE JOBS UNNAMED",
+            "P POSTED WITH NO WRITE RESULT", "N NARRATED A WRITE", "C POSTED WITHOUT CONSENT",
             "Z SUCCESS WITH NO SUCCESS RESULT", "X CONTRADICTORY APPLY RESULT",
             "APPLY WITHOUT THE DATA-SHARING LINE"]
-DETECTORS = ["jobs_presented", "consent_before_apply", "apply_result_integrity",
+DETECTORS = ["dkb_employer_integrity",
+             "jobs_presented", "consent_before_apply", "apply_result_integrity",
              "apply_failure_wording", "location_reconfirm", "location_chain",
              "location_integrity", "apply_outcomes"]
 
@@ -73,15 +75,33 @@ def main():
     for det in DETECTORS:
         out[det] = run(["python3", "raya/regression/%s.py" % det, "--since", a.since])
 
+    # Count each bot's calls from the API, NOT from detector output. Inferring coverage from
+    # findings means a bot that behaved perfectly looks untested -- which is how DKB read 0 calls
+    # immediately after its own detector had graded eleven of them.
+    import urllib.request
+    _env = {}
+    for _l in open(os.path.join(REPO, "raya/.env")):
+        _l = _l.strip()
+        if "=" in _l and not _l.startswith("#"):
+            k, v = _l.split("=", 1); _env[k.strip()] = v.strip().strip('"').strip("'")
+
+    def call_count(uuid):
+        req = urllib.request.Request(
+            _env["RAYA_BASE_URL"].rstrip("/") + "/api/call?agent_id=%s&limit=100" % uuid,
+            headers={"X-API-Key": _env["RAYA_API_TOKEN"], "User-Agent": "Mozilla/5.0"})
+        try:
+            with urllib.request.urlopen(req, timeout=90) as r:
+                cs = json.loads(r.read() or b"{}").get("calls") or []
+        except Exception:
+            return -1
+        return sum(1 for c in cs
+                   if str(c.get("created_at"))[:19] >= a.since and (c.get("call_duration") or 0) >= 40)
+
     print("\n  %-22s %-7s %-9s %s" % ("bot", "calls", "verdict", "blocking findings"))
     worst = 0
     for t in sorted(sig, key=lambda x: x["id"]):
         bid = t["id"]
-        calls = 0
-        for det, text in out.items():
-            mm = re.search(re.escape(det.replace("_", "-")) + r".*?\| (\d+) calls", text)
-            if mm:
-                calls = max(calls, int(mm.group(1)))
+        calls = call_count(t["raya_agent_id"]["prod"])
         hits = []
         for det, text in out.items():
             for line in text.splitlines():
@@ -89,20 +109,16 @@ def main():
                     tag = next(b for b in BLOCKING if b in line)
                     hits.append(tag)
         mine = sum(1 for det, text in out.items() for line in text.splitlines() if bid in line)
-        # A bot none of the detectors mentions is not "tested and clean" -- every runtime detector
-        # is seeker-side (jobs presented, apply outcomes, location chain, consent-before-apply), so
-        # DKB's employer flow has NO behavioural coverage at all. Say which of the two it is.
-        seeker_side = not bid.startswith("dkb")
-        if mine == 0:
-            verdict = "UNTESTED" if seeker_side else "NO-DETECTORS"
-        else:
-            verdict = "FAIL" if hits else "PASS"
+        # Every bot now has at least one behavioural detector: the seeker rail has eight, and the
+        # employer rail got dkb_employer_integrity on 2026-09-03 (before that DKB had none, and this
+        # report said NO-DETECTORS rather than pretending a silent bot was a passing one).
+        verdict = "UNTESTED" if calls <= 0 else ("FAIL" if hits else "PASS")
         if verdict == "FAIL":
             worst = 2
-        elif verdict in ("UNTESTED","NO-DETECTORS") and worst < 1:
+        elif verdict == "UNTESTED" and worst < 1:
             worst = 1
-        print("  %-22s %-7s %-9s %s" % (bid, mine if mine else "0", verdict,
-              ", ".join(sorted(set(hits))) if hits else ("no calls in window" if verdict == "UNTESTED" else ("employer flow has no runtime detectors" if verdict == "NO-DETECTORS" else "none"))))
+        print("  %-22s %-7s %-9s %s" % (bid, calls if calls > 0 else "0", verdict,
+              ", ".join(sorted(set(hits))) if hits else ("no calls in window" if verdict == "UNTESTED" else "none")))
 
     print("\n  NOTE: a bot with no calls in the window is UNTESTED, not passing.")
     print("  %s" % ("FLEET PASS" if worst == 0 and crit == 0 and maj == 0 and sch_ok else
