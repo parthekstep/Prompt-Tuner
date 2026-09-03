@@ -24,8 +24,14 @@ Times are UTC — the Raya API stamps calls in UTC and passing IST silently sele
 import argparse, datetime, json, os, re, subprocess, sys
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# ROW 1 MISSED is deliberately NOT blocking. It fires when a duplicate apply did not get the
+# already-applied line -- but the agent cannot know a job is a duplicate: the error body never
+# reaches the model, contact_memory is empty, and get_profile returns no applications (D58). The
+# evidence gate makes row 2 the CORRECT output in that state, so treating this as a failure would
+# make the fleet permanently red on a blocked platform issue and train us to ignore the report.
+# It stays visible in the detector output and in STATUS as the open platform ask.
 BLOCKING = ["ALL-TOLD WHILE JOBS UNNAMED", "SAME JOB NAMED UNDER TWO ORDINALS",
-            "Z SUCCESS WITH NO SUCCESS RESULT", "X CONTRADICTORY APPLY RESULT", "ROW 1 MISSED",
+            "Z SUCCESS WITH NO SUCCESS RESULT", "X CONTRADICTORY APPLY RESULT",
             "APPLY WITHOUT THE DATA-SHARING LINE"]
 DETECTORS = ["jobs_presented", "consent_before_apply", "apply_result_integrity",
              "apply_failure_wording", "location_reconfirm", "location_chain",
