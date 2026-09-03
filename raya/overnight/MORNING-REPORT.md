@@ -51,3 +51,32 @@ Wording was never the problem in any of them.
 - The platform DROPS empty-string args; a missing field arrives as an unsubstituted token.
 - `contact_memory` sent via agent_args does not reach the model; stored memory cannot be read.
 - One tester DID = one call at a time. Keep `caffeinate` running or the machine sleeps mid-sweep.
+
+
+## After the report — Khushboo's 03 Sep reports (5015866 / 5016050)
+
+**Reported:** on a failed apply the bot said "हो सकता है आपकी एप्लीकेशन पहले से लगी हो" for all three
+jobs she tried, so a real duplicate was indistinguishable from a broken apply. That hedge was mine,
+added a few hours earlier, and she was right that it is worse than naming the failure.
+
+**Worth knowing:** all three applies actually returned `ACTION_LIMIT_REACHED` — they WERE duplicates
+from her 02 Sep test calls (`29d76039`, `d55db597`, `1df89679`). The hedge was factually correct every
+time and still unusable. Correctness is not the same as being useful to the person listening.
+
+**Fixed — three distinct outcomes, decided by the bot's own `duplicate_check` assertion:**
+| what the bot did | what it says |
+|---|---|
+| pre-check matched, tool not called | "इस जॉब के लिए आपकी एप्लीकेशन पहले से लगी हुई है।" |
+| sent `not-applied-before`, tool errored | "इस नौकरी के लिए अप्लाई अभी आगे नहीं बढ़ा है, technical issue है। हमने आपकी रुचि नोट कर ली है।" |
+| tool succeeded | "अप्लाई हो गया है।" |
+Verified `22781eb6`. No new information needed — the bot already knows which case it is in.
+
+**And a second bug that surfaced on the same call:** the service-provider acknowledgement turn said
+"अप्लाई हो गया है" seconds after the failure line. Fixed twice tonight, regressed twice, because every
+version asked the model to REMEMBER across turns. Now positional and checkable against the turn in
+front of it: the success line may only appear in a turn that also contains a fresh `apply_job` result.
+Verified 4/4 — `778cbb8f`, `57e3716b`, `c86fca56` (hi) and `af228ce3` (kn), all clean on the detector.
+
+**Trade-off she should know about:** the bot will now say "technical issue" for a real duplicate its
+memory has not recorded, because it never receives the tool error body. That is the direction she
+chose, and it is why the LitWiz ask matters.
