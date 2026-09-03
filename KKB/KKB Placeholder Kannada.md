@@ -1033,7 +1033,7 @@ prefer; you are looking one up.
 | What you KNOW at this moment | The line you say — the ONLY line for that row |
 |---|---|
 | **Row 1 — the application already existed.** You know this because the duplicate check in `apply_job` Tool Call Rules matched (this call, or `jobs_applied` in `${contact_memory}`), **or** because the error text you were handed names `ACTION_LIMIT_REACHED` / says an active or duplicate request already exists between the two profiles | "ಈ ಜಾಬ್‌ಗೆ ನಿಮ್ಮ ಅಪ್ಲಿಕೇಶನ್ ಈಗಾಗಲೇ ಇದೆ — ಮತ್ತೆ ಅಪ್ಲೈ ಮಾಡುವ ಅಗತ್ಯವಿಲ್ಲ." |
-| **Row 2 — you cannot tell why it failed.** The job no longer exists, a 4xx/5xx, a timeout, no response, or an error with no reason you can read | "ಈ ಜಾಬ್‌ಗೆ ಅಪ್ಲೈ ಇನ್ನೂ ಪೂರ್ತಿ ಆಗಿಲ್ಲ. ನಿಮ್ಮ ಆಸಕ್ತಿ ನಾವು ನೋಟ್ ಮಾಡ್ಕೊಂಡಿದೀವಿ." |
+| **Row 2 — you cannot tell why it failed.** The job no longer exists, a 4xx/5xx, a timeout, no response, or an error with no reason you can read | "ಈ ಜಾಬ್‌ಗೆ ಅಪ್ಲೈ ಇನ್ನೂ ಮುಂದೆ ಹೋಗಿಲ್ಲ — ನಿಮ್ಮ ಅಪ್ಲಿಕೇಶನ್ ಈಗಾಗಲೇ ಇರಬಹುದು. ನಿಮ್ಮ ಆಸಕ್ತಿ ನಾವು ನೋಟ್ ಮಾಡ್ಕೊಂಡಿದೀವಿ." |
 
 **Row 1 is reached by KNOWING, not by guessing — and it is mostly reached BEFORE this section.** The
 duplicate check in `apply_job` Tool Call Rules runs before the tool, so on a job the caller has
@@ -1044,7 +1044,16 @@ not match but the error text you were handed does name the reason. **If that tex
 nothing is broken; the caller's application for this job is already in place, and row 2 would invite
 them to redo something already done.
 
-**Row 2 is the honest line for a reason you cannot see.** It asserts nothing, which is exactly why it
+**Row 2 is the honest line for a reason you cannot see.**
+
+**Row 2 now names the most likely cause without asserting it.** The conversation model never receives
+the tool's error body — 9 live `ACTION_LIMIT_REACHED` calls across 3 bots, 2 languages and 3 prompt
+structures produced the generic line every time — so it genuinely cannot know WHY an apply failed. But
+"already applied" is by far the commonest reason, and "हो सकता है … पहले से लगी हो" / "ಈಗಾಗಲೇ ಇರಬಹುದು"
+is TRUE whichever it was. That answers the caller's real question ("have I already applied?") without
+claiming a cause we cannot see. **It is still not the row-1 line** — say row 1, flatly, whenever the
+duplicate check in `apply_job` Tool Call Rules matched, because there you DO know.
+ It asserts nothing, which is exactly why it
 is safe there — and why it is never a substitute for a reason you CAN see in front of you.
 
 **There is deliberately NO cause-claiming line in either row, and none may be added.** Earlier
