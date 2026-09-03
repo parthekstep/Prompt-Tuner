@@ -806,3 +806,44 @@ Three requested changes, piloted together on **KKB Hindi Signals outbound** (`kk
 - **Files:** all 12 job-presenting conversation prompts (8 KKB + 4 Maya).
 - **Ported from:** TRRAIN Hindi ("Turn 2 is said ONCE per call and is NEVER repeated").
 - **Status:** VERIFY-PENDING.
+
+## 2026-09-03 — The already-applied branch cannot be satisfied honestly; gate it on evidence
+- **Feedback/bug:** the three-outcome apply spec asked the bot to distinguish already-applied from a
+  technical failure. Both halves are now failing in opposite directions: `d6e545d4` and `d401d6cf`
+  (Kannada) called a REAL duplicate a technical issue, and `c5a10922` (Hindi) called a job the bot had
+  never attempted "already applied" — with empty memory and no apply_job call for it.
+- **Root cause:** the branch is keyed on a fact the agent cannot obtain. The error body is not given
+  to the model (`[Error: apply_job request failed (HTTP 422).]`; the reason sits in a debug block for
+  the transcript only), `contact_memory` is empty on these calls, and — newly established on
+  `d6e545d4` — **`get_profile` does not return the caller's applications**; the only non-profile item
+  it returned was an unrelated draft job posting the test number owns as a provider. Putting the
+  ACTION_LIMIT mapping in the tool description (which was itself missing on 5 of 6 bots until today)
+  cannot help, because the string it tests for never reaches the model.
+- **Change:** row 1 now requires evidence the model can point at — either an `apply_job` result for
+  that same `job_id` earlier in the SAME call, or a `jobs_applied` entry naming role and company.
+  Absent both it must use row 2. This does not make the distinction work; it stops the bot inventing
+  it, which is the half we control.
+- **Files:** all 12 conversation prompts. Tool descriptions also brought to parity — the
+  ACTION_LIMIT mapping existed only on `kkb-hi-signals` and is now on all six job-applying Signals
+  bots (see the tool-schema note below).
+- **Analyser:** D58 (a rule that cannot be satisfied honestly gets satisfied dishonestly).
+- **Platform ask (nothing else unblocks this):** surface the tool error's `error`/`message` fields to
+  the model, OR return distinct HTTP statuses per cause, OR add an applications list to
+  `get_profile`. Any one makes the three-outcome spec achievable. Call ids: `d6e545d4`, `d401d6cf`,
+  `c5a10922`, plus the ten from 2026-09-02.
+- **Status:** evidence gate DEPLOYED to all 12, **VERIFY-PENDING**. The distinction itself is
+  **BLOCKED** on the platform and must not be reported as fixed.
+
+## 2026-09-03 — Tool schemas were never mirrored, only prompts
+- **Feedback/bug:** two separate bugs today traced to the same thing — a fix that lived in the tool
+  schema was applied to `kkb-hi-signals` and nowhere else, while the prompt text was mirrored to all
+  twelve.
+- **What was missing:** (1) the required `duplicate_check` parameter — present on 1 of 12 bots, so on
+  the other 11 the prompt keyed its logic on a parameter the model was never given; (2) the
+  `ACTION_LIMIT_REACHED` → already-applied mapping in the `apply_job` description — present on 1 of 6
+  Signals bots.
+- **Change:** `duplicate_check` added to all 12 (identical enum and description); the working
+  `apply_job` description copied verbatim to the other five Signals bots (980 chars — note Raya caps
+  tool descriptions at 1024 and answers a longer one with `PATCH 400`).
+- **Standing gap to close:** `/sync-check` audits prompt text only. A bot's tool schemas — parameters,
+  `required`, enums, descriptions — need the same per-language matrix, or this recurs.

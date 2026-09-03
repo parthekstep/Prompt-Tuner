@@ -829,3 +829,47 @@ apply failures — a caller who hears "अप्लाई हो गया ह�
 **Source.** KKB Hindi Signals, 2026-09-03. Bug calls `29c4f152`, `4b0ea64d`, plus two more the same
 day. Related: D50 (grep the wrong output — clean here, the format was copied, not the words),
 D47/D55 (the model fills what the prompt leaves open).
+
+### D58 — A rule that cannot be satisfied honestly gets satisfied dishonestly
+
+**Symptom.** The owner asked for three distinct apply outcomes: already-applied, technical failure,
+success. The bot duly produced the already-applied line on `c5a10922` — for a job it had never
+attempted, with empty `contact_memory`. The line looked like the fix working. It was a guess.
+
+**Root cause.** The already-applied branch is keyed on knowledge the agent does not have. All three
+possible sources are closed:
+- **The error body is invisible.** The model receives `[Error: apply_job request failed (HTTP 422).]`;
+  `ACTION_LIMIT_REACHED` lives in a `__RAYA_TOOL_DEBUG__` block written for the transcript only
+  (proven 10/10, see D52). Putting the mapping in the tool description does not help — the condition
+  it tests never becomes visible.
+- **`contact_memory` is empty or unreadable** on most calls (D54).
+- **`get_profile` does not return applications.** Verified on `d6e545d4`: the only non-profile item
+  it returned was an unrelated *draft job posting the test number owns as a provider*, and the job
+  that actually 422'd was absent.
+
+So the branch is unreachable by evidence — and a branch the model is told to take, but cannot verify,
+gets taken on vibes. **Both failure modes are now live: Kannada `d6e545d4` called a real duplicate a
+technical issue, and Hindi `c5a10922` called a never-attempted job already-applied.**
+
+**Detection heuristic.** For any branch whose condition names a fact, ask *which tool result carries
+that fact, in this call, in a field the model can read?* If the answer is "the error text" and the
+error text is not surfaced, or "memory" and memory is empty, the branch is decoration. Then check the
+transcripts for the branch being taken anyway — a branch taken without its evidence present is the
+signature, and it is more dangerous than the branch never firing.
+
+**Fix direction.** Two parts, and the first is not optional:
+1. **Gate the branch on citable evidence.** The already-applied line now requires either an
+   `apply_job` result for that same `job_id` earlier in the same call, or an explicit `jobs_applied`
+   entry naming role and company. Absent both, the model must not claim it. This does not make the
+   feature work — it stops the fabrication, which is the part we control.
+2. **Escalate the rest with evidence, not adjectives.** The ask is narrow: surface the tool error's
+   `error`/`message` fields to the model, or return distinct HTTP statuses, or add an applications
+   list to `get_profile`. Any one of the three makes the owner's three-outcome spec achievable; none
+   of them is a prompt change.
+
+**Lesson.** When a requested behaviour needs a fact the runtime does not provide, say so at the time
+rather than shipping a branch that will look right on some calls. A guessed branch reads as a working
+fix in a transcript, which is how this survived a "verified" claim.
+
+**Source.** KKB Hindi/Kannada Signals, 2026-09-03. `c5a10922` (fabricated already-applied),
+`d6e545d4` (real duplicate reported as technical), `d401d6cf` (same). Related: D52, D54, D57.
