@@ -65,23 +65,36 @@ def check(bot, uuid):
     user = " ".join(str(t.get("content") or "") for t in (d.get("call_transcript") or [])
                     if t.get("role") == "user")
     said = " ".join(turns)
+    # Highest ordinal spoken is NOT the presented count: on live call 54a0daa8 the bot reached
+    # आठवाँ by naming Solar Energy Consultant twice, under तीसरा AND सातवाँ, leaving the eighth
+    # job unspoken. Count DISTINCT job identities instead, read off the words after each ordinal.
     highest = 0
+    slots = {}
     for word, n in ORDINALS:
         if word in said:
             highest = max(highest, n)
+            m = re.search(re.escape(word) + u"\\s*[:\u2014-]*\\s*([^,\u0964\\n]{2,44})", said)
+            if m:
+                slots[n] = re.sub(u"\\s+", u" ", m.group(1)).strip().lower()
+    distinct = len(set(slots.values())) if slots else highest
+    dupes = sorted(v for v in set(slots.values()) if list(slots.values()).count(v) > 1)
     if highest == 0 and ONE_OPTION.search(said):
-        highest = 1
+        highest = distinct = 1
     asked = bool(ASK_MORE.search(user))
     all_told = bool(ALL_TOLD.search(said))
     created = str(d.get("created_at"))[:19]
-    base = dict(bot=bot, call=uuid, at=created, supplied=supplied, presented=highest, asked=asked)
-    if all_told and highest < supplied:
-        return [dict(base, kind="ALL-TOLD WHILE JOBS UNNAMED",
-                     detail=f"said it had told the caller everything after presenting {highest} of {supplied}")]
-    if asked and highest < supplied:
-        return [dict(base, kind="ASKED FOR MORE, NOT ALL SHOWN (info)",
-                     detail=f"caller asked to hear more; {highest} of {supplied} were presented")]
-    return []
+    base = dict(bot=bot, call=uuid, at=created, supplied=supplied, presented=distinct, asked=asked)
+    out = []
+    if dupes:
+        out.append(dict(base, kind="SAME JOB NAMED UNDER TWO ORDINALS",
+                        detail=f"ordinals reached {highest} but only {distinct} distinct jobs; repeated: {'; '.join(dupes)}"))
+    if all_told and distinct < supplied:
+        out.append(dict(base, kind="ALL-TOLD WHILE JOBS UNNAMED",
+                        detail=f"said it had told the caller everything after presenting {distinct} of {supplied}"))
+    elif asked and distinct < supplied:
+        out.append(dict(base, kind="ASKED FOR MORE, NOT ALL SHOWN (info)",
+                        detail=f"caller asked to hear more; {distinct} of {supplied} were presented"))
+    return out
 
 
 def main():

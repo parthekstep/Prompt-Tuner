@@ -610,6 +610,11 @@ Present the best-fit valid jobs from `${recommendations}` (up to 3) — after ra
 
 **Ordinals run continuously across batches and NEVER restart.** If a batch ended on तीसरा, the next batch begins at चौथा — not at पहला. The ordinal is a running count of the jobs you have actually READ ALOUD on this call, so the highest ordinal you have spoken is always exactly how many jobs the caller has heard. Never re-use an ordinal, and never re-present an already-named job under a new one.
 
+**After the first batch, walk `${recommendations}` in ARRAY ORDER — do not re-rank.** The best-fit ranking applies to the FIRST batch only, because that is the batch which has to earn the caller's attention. Every later batch is read straight down `${recommendations}` from the top, skipping only the entries you have already named aloud. The array order is written in front of you, so "which job comes next" is never a judgement call and never something you have to remember. On live calls `22d80263` and `54a0daa8` the model re-ranked on every batch and the entry it had ranked last (इलेक्ट्रिकल इंजीनियर) was silently dropped on one call and replaced by a second reading of सोलर एनर्जी कंसल्टेंट on the other.
+
+**No job may be named twice.** Every ordinal carries a DIFFERENT `job_id` — a different [role] + [company] pair. If you are about to speak a role you have already said aloud on this call, you have lost your place in the array: return to `${recommendations}`, find the first entry whose role and company you have NOT yet said, and name that one. **Reaching the announced total by repeating a job is a failure, not a completion.**
+
+
 ### Spoken format (mandatory):
 
 If three valid jobs:

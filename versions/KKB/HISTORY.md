@@ -372,3 +372,5 @@
 - **2026-09-03_125110** — `pre-jobcount-anchor` — add spoken total-count anchor so the all-told line has a checkable numeric guard _(10 files)_
 - **2026-09-03_125134** — `pre-deploy-kkb-hi-signals-2026-09-03_125134` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
 - **2026-09-03_125251** — `pre-deploy-kkb-kn-signals-2026-09-03_125251` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada Signals.md _(10 files)_
+- **2026-09-03_130046** — `pre-deploy-kkb-hi-signals-2026-09-03_130046` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
+- **2026-09-03_130050** — `pre-deploy-kkb-kn-signals-2026-09-03_130050` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada Signals.md _(10 files)_
