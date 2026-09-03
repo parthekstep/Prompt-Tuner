@@ -786,3 +786,46 @@ prompts were sitting in plain text. Corollaries:
   while the example still shows the banned line is the D25/D47/D49 treadmill.
 - **Never scope such a fix to the reporting language.** The report named Kannada; Hindi, Maya and
   both legacy pairs had it too. Check the twins before believing a single-language bug.
+
+### D57 — The samples depict a tool call as narration, so the model narrates it instead of calling it
+
+**Symptom.** The bot speaks a stage direction aloud and then asserts the outcome of a tool it never
+invoked. On live call `29c4f152` a KKB caller heard: *"ठीक है, आपकी तरफ़ से अप्लाई कर देती हूँ.
+**\*(Silent tool call: apply_job)\*** अप्लाई हो गया है…"* — `apply_job` was never called on that call.
+She rang off believing she had applied. Four calls on 2026-09-03 spoke the apply-success line with no
+successful apply result behind it.
+
+**Root cause.** Two prompt properties combine:
+1. Sample conversations put stage directions **in the same stream as spoken lines** —
+   `> *(persist location — update_profile SILENTLY with …)*` sits between two `> **Agent:**` turns —
+   and nothing anywhere says a parenthetical is not speech. The model learns the *shape*
+   "say line → parenthetical about a tool → say result line" as one continuous turn of text.
+2. Reproducing that shape as text is indistinguishable, from the model's side, from doing it. The
+   tool call becomes a token sequence it can emit rather than an action it must take.
+   Note the invented string was NOT in any prompt — grep confirmed zero hits. It is the *format*
+   that was learned, not the words, so a D50 verbatim grep comes back clean and the cause still lies
+   in the demonstrations.
+
+**Detection heuristic.** Two cheap checks:
+- Count `^> \*\(` stage directions in the prompt, then grep for any rule saying a parenthetical is
+  never spoken. 31 annotations and zero such rules is the signature.
+- In transcripts, flag any apply/write-success line with **no corresponding successful tool result in
+  the same call** (`apply_result_integrity.py` check Z). A positional rule alone does not stop this:
+  KKB Hindi Signals already carried "this line may ONLY appear in the same turn as the `apply_job`
+  tool result" and still failed four times, because the model believed the result was there — it had
+  just written one.
+
+**Fix direction.** Do not add another wording of the positional rule; it has already failed. Instead:
+(a) state explicitly that `*( )*` content is a stage direction, never spoken, never invented;
+(b) state that **emitting a description of a tool call does not call the tool** — only an actual
+result licenses the outcome sentence; and (c) mark every tool-mentioning annotation in the samples
+`*(NOT SPOKEN — …)*` so the demonstration itself stops modelling narration-as-action. Fix the
+demonstration, not the prohibition.
+
+**Why it is the worst class here.** Every other bug in this family degrades the call; this one hands
+the caller a false belief that they have applied for a job. Rank it above cosmetic and even above
+apply failures — a caller who hears "अप्लाई हो गया है" stops looking.
+
+**Source.** KKB Hindi Signals, 2026-09-03. Bug calls `29c4f152`, `4b0ea64d`, plus two more the same
+day. Related: D50 (grep the wrong output — clean here, the format was copied, not the words),
+D47/D55 (the model fills what the prompt leaves open).
