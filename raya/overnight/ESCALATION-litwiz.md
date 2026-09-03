@@ -73,3 +73,22 @@ achievable, and the prompt is deliberately gated to say the neutral technical li
   (`e654b215`, `a5a68701`: three failing applies, no false duplicate claim).
 - `raya/regression/apply_result_integrity.py` check Z detects every fabricated success, and
   `fleet_report.py` treats it as blocking — the fleet reads FAIL while ask 1 is open, by design.
+
+---
+
+## A fourth prompt attempt we considered and rejected
+
+The obvious next move is to **invert the default**: instruct that unless a successful `apply_job`
+result is visible in this turn, the line the agent says is the technical-issue line. That is
+mechanically different from the three attempts above — it changes which output is the fallback rather
+than forbidding the wrong one — so it is not merely a fourth wording.
+
+We are not doing it, because **its downside is symmetric with the bug it fixes.** If the model fails
+to "see" a result that did arrive, it tells a caller their application failed when it actually
+succeeded. That caller re-applies (and hits `ACTION_LIMIT_REACHED`, which we cannot explain to them
+either) or gives up on a job they already hold a live application for. Trading a false success for a
+false failure is not an improvement; it just moves who gets hurt.
+
+This is why the ask is a runtime one. The runtime is the only place that knows, with certainty,
+whether the write happened — and a confirmation spoken from that knowledge cannot be wrong in either
+direction. Everything a prompt can do here is a guess about what the model can see.
