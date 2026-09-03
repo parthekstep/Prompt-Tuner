@@ -356,3 +356,5 @@
 - **2026-09-03_103338** — `pre-deploy-kkb-kn-in-signals-2026-09-03_103338` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada Signals.md _(10 files)_
 - **2026-09-03_103341** — `pre-deploy-kkb-hi-out-2026-09-03_103341` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi.md _(10 files)_
 - **2026-09-03_103345** — `pre-deploy-kkb-hi-in-2026-09-03_103345` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(10 files)_
+- **2026-09-03_110722** — `pre-deploy-kkb-hi-signals-2026-09-03_110722` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
+- **2026-09-03_111217** — `pre-deploy-kkb-hi-signals-2026-09-03_111217` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
