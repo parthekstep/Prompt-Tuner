@@ -569,3 +569,7 @@ to the same number — the first writing the memory, the second consuming it.
 2026-09-03 06:26:18 · prod · kkb-hi-out · da612923-1927-45d7-9ad0-b1c7cbb15294 · KKB/KKB Placeholder Hindi.md · sha256:8758b3fe · snapshot:pre-deploy-kkb-hi-out-2026-09-03_062617 · deployed
 2026-09-03 06:26:19 · prod · kkb-hi-in-signals · 3f521174-574d-43ca-a9be-081849373c18 · KKB/KKB Placeholder Inbound Signals.md · sha256:f741dd49 · snapshot:pre-deploy-kkb-hi-in-signals-2026-09-03_062618 · deployed
 2026-09-03 06:26:20 · prod · kkb-hi-in · b6222233-8a8d-49a6-9950-d07e9d159757 · KKB/KKB Placeholder Inbound.md · sha256:447bc842 · snapshot:pre-deploy-kkb-hi-in-2026-09-03_062620 · deployed
+2026-09-03 06:26:46 · prod · kkb-kn-signals · 33037201-78ce-405d-b509-a3b6934e20f1 · KKB/KKB Placeholder Kannada Signals.md · sha256:34aedc40 · snapshot:pre-deploy-kkb-kn-signals-2026-09-03_062645 · deployed
+2026-09-03 06:26:46 · prod · kkb-kn-in-signals · f38da775-c572-4a50-9340-fe1f42c43901 · KKB/KKB Placeholder Inbound Kannada Signals.md · sha256:3d8a87fa · snapshot:- · skip-in-sync
+2026-09-03 06:26:47 · prod · kkb-kn-out · 87ab9108-5d66-4a13-a20a-575eaa9aae36 · KKB/KKB Placeholder Kannada.md · sha256:96043383 · snapshot:- · skip-in-sync
+2026-09-03 06:26:47 · prod · kkb-kn-in · 4ac90bf1-a740-4b1c-92b0-45bda099e53f · KKB/KKB Placeholder Inbound Kannada.md · sha256:de85457d · snapshot:- · skip-in-sync
