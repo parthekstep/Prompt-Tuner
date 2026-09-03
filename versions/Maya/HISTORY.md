@@ -197,3 +197,4 @@
 - **2026-09-03_132336** — `pre-deploy-maya-hi-in-signals-2026-09-03_132336` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
 - **2026-09-03_132340** — `pre-deploy-maya-hi-out-2026-09-03_132340` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
 - **2026-09-03_132341** — `pre-deploy-maya-hi-in-2026-09-03_132341` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_
+- **2026-09-03_133151** — `pre-fetch-leak` — same fetch-leak fix on Maya _(6 files)_

@@ -380,3 +380,4 @@
 - **2026-09-03_132337** — `pre-deploy-kkb-kn-out-2026-09-03_132337` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(10 files)_
 - **2026-09-03_132339** — `pre-deploy-kkb-hi-in-2026-09-03_132339` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(10 files)_
 - **2026-09-03_132339** — `pre-deploy-kkb-kn-in-2026-09-03_132339` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(10 files)_
+- **2026-09-03_133151** — `pre-fetch-leak` — remove prompt-mandated lookup narration (D50: prompt demonstrates the leak it forbids) _(10 files)_

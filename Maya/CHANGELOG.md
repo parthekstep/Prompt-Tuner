@@ -597,3 +597,18 @@ string the model never receives), **D53** (an input echo-back suppressed by a gu
 - **Analyser:** D56.
 - **Status:** **DEPLOYED, NOT VERIFIED** — verified on KKB Hindi/Kannada Signals only; Maya's own
   variants have no call id yet.
+
+## 2026-09-03 — Lookup-leak lines removed; introduction spoken once per call
+- **Feedback/bug:** the KKB lookup-leak investigation (open item `fetch-leak-kn-signals`) found the
+  leak was mandated by the prompt, not a model-adherence miss — and Maya's four prompts carried the
+  same mandated line, "मैं देख रही हूँ कि आप अभी [role] का काम कर रहे हैं", plus sample conversations
+  demonstrating it. Separately, the intro-twice item (1 call in 9) applies to Maya's shared opening.
+- **Change:** (1) the role reflect-back no longer narrates the fetch — "आप अभी [role] का काम कर रहे
+  हैं — क्या आप अभी भी [role] की जॉब देख रहे हैं?"; (2) ported TRRAIN's rule that the introduction is
+  spoken once per call and never repeated, with an unclear reply treated as an acknowledgement.
+- **Files:** `Maya Hindi.md`, `Maya Hindi Signals.md`, `Maya Inbound.md`, `Maya Inbound Signals.md`.
+  Maya's divergences untouched (college identity, `${college_name}`, `hr_contact`/`benefits`,
+  Experience Capture, HR-number sharing, MPL, feminine voice).
+- **Ported from:** KKB / TRRAIN (2026-09-03).
+- **Analyser:** D50 addendum.
+- **Status:** VERIFY-PENDING.

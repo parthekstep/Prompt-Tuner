@@ -773,3 +773,36 @@ Three requested changes, piloted together on **KKB Hindi Signals outbound** (`kk
   distinct, इलेक्ट्रिकल इंजीनियर named); Kannada `be837379`, `33187441` (8 of 8, ಒಟ್ಟು ಎಂಟು announced,
   array order). The other 8 prompts are **DEPLOYED, NOT VERIFIED** — live read-back confirms the text
   shipped to all 12, which proves nothing about behaviour.
+
+## 2026-09-03 — The lookup leak was mandated by the prompt, not a model-adherence miss
+- **Feedback/bug:** open item `fetch-leak-kn-signals` (since 2026-08-04) — the bot hints out loud
+  that it looked the caller up. The item recorded the cause as model adherence and advised against
+  prose changes.
+- **Root cause:** that was wrong. Grepping the leaked phrases against the prompts (D50) found them
+  **required**: the role-confirmation step instructed the bot to say "मैं देख रही हूँ कि आप अभी [role]
+  का काम कर रहे हैं" (Hindi) / "ನಾನು ನೋಡ್ತಿದ್ದೀನಿ, ನೀವು ಈಗ [role] ಕೆಲಸ ಮಾಡ್ತಾ ಇದೀರಿ" (Kannada), the
+  inbound twins "आपकी जानकारी में [role] दिख रहा है" / "ನಿಮ್ಮ ಮಾಹಿತಿಯಲ್ಲಿ [role] ಕಾಣ್ತಿದೆ", and sample
+  conversations demonstrated all four — while a different section of the same file banned the phrase
+  by name. 19 mandated occurrences across 12 prompts. Not Kannada-only: Hindi, Maya and both legacy
+  pairs carried it.
+- **Change:** every mandated line and sample now reflects the role back WITHOUT narrating a lookup —
+  "आप अभी [role] का काम कर रहे हैं — क्या आप अभी भी [role] की जॉब देख रहे हैं?" and
+  "ನೀವು ಈಗ [role] ಕೆಲಸ ಮಾಡ್ತಾ ಇದೀರಿ ಅಲ್ವಾ — ನಿಮಗೆ ಇನ್ನೂ [role] ಥರದ ಜಾಬ್ ಬೇಕಾ?". The ban stays; the
+  lines that contradicted it are gone. Reflecting a known fact was always the intent — narrating the
+  fetch never was.
+- **Files:** all 8 KKB conversation prompts + Maya's 4 (see `Maya/CHANGELOG.md`).
+- **Analyser:** D50 addendum — an adherence diagnosis is invalid until the bot's exact words have been
+  grepped against every prompt file for that bot and found absent.
+- **Status:** VERIFY-PENDING — deploying after the standing sanity sweep finishes.
+
+## 2026-09-03 — Introduction is spoken once per call (ported from TRRAIN)
+- **Feedback/bug:** open item `intro-spoken-twice-once-in-nine-calls` — on 1 of 9 live calls the bot
+  greeted, fetched the profile, then said the whole introduction again.
+- **Root cause:** the heading said "said only once" but no rule decided the ambiguous case, so an
+  unclear reply left re-greeting available. A 1-in-9 rate is a gap, not flakiness.
+- **Change:** ported TRRAIN's proven rule — the introduction is spoken once and never repeated, not
+  even after a tool call, and **an unclear reply is treated as an acknowledgement so the call moves
+  on**. That decision is the part that was missing.
+- **Files:** all 12 job-presenting conversation prompts (8 KKB + 4 Maya).
+- **Ported from:** TRRAIN Hindi ("Turn 2 is said ONCE per call and is NEVER repeated").
+- **Status:** VERIFY-PENDING.

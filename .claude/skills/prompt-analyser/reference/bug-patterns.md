@@ -758,3 +758,31 @@ drop a row and never notice.
 **Source.** KKB Hindi Signals, 2026-09-03. Bug call `22d80263` (7 of 8, then claimed complete);
 control `cb9a4938` (8 of 8, same prompt, same fixture). Predecessor bug `e40850b5` (3 of 8, one job
 per ask) was a different cause — see D55.
+
+
+#### D50 addendum (2026-09-03) — "it's model adherence, don't add prose" is a triage claim that must be GREPPED before it is believed
+
+The KKB Kannada Signals bots were reported on 2026-08-04 for hinting out loud that they had looked the
+caller up ("ನಾನು ನೋಡ್ತಿದ್ದೀನಿ", "ನಿಮ್ಮ ಮಾಹಿತಿಯಲ್ಲಿ … ಕಾಣ್ತಿದೆ"). The open item filed the cause as
+*"the prose already forbids this clearly, so it is a model-adherence miss rather than a missing
+instruction; adding more wording tends to make it worse."* That diagnosis was **wrong**, and it sat
+unchallenged for a month because nobody ran the one-line check.
+
+Grepping the leaked phrases against the prompts found them **mandated**: the role-confirmation
+instruction told the bot to say exactly `"ನಾನು ನೋಡ್ತಿದ್ದೀನಿ, ನೀವು ಈಗ [role] ಕೆಲಸ ಮಾಡ್ತಾ ಇದೀರಿ …"`, the
+inbound twin told it to say `"ನಿಮ್ಮ ಮಾಹಿತಿಯಲ್ಲಿ [role] ಕಾಣ್ತಿದೆ …"`, sample conversations demonstrated
+both, and the **Hindi twins carried the same thing** (`"मैं देख रही हूँ कि आप अभी [role] का काम कर रहे
+हैं"`) — so the bug was fleet-wide, not Kannada-only. Meanwhile a *different* section of the same file
+forbade the phrase by name ("no status narration, no 'मैं देख रही हूँ'"). The model was not disobeying;
+it was picking one of two instructions the prompt gave it, and the item had been closed to prose
+changes on the strength of a guess.
+
+**The rule.** An adherence diagnosis is only valid AFTER the bot's exact words have been grepped
+against every one of that bot's prompt files and found absent. 19 mandated occurrences across 12
+prompts were sitting in plain text. Corollaries:
+- **A prohibition and a requirement for the same phrase means the requirement wins somewhere.** Grep
+  the phrase, count the hits, and check whether any of them is an instruction or an example.
+- **Fix the mandate and the demonstration, never just the prohibition.** Adding force to the ban
+  while the example still shows the banned line is the D25/D47/D49 treadmill.
+- **Never scope such a fix to the reporting language.** The report named Kannada; Hindi, Maya and
+  both legacy pairs had it too. Check the twins before believing a single-language bug.

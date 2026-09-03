@@ -1,0 +1,2 @@
+san-kkb-hi USABLE 94s 6 d70aa00a-0eef-470c-b95e-2f79b09c6b4a
+san-kkb-kn USABLE 185s 10 0a5ec09d-cc6d-4e61-b0c4-2b13099803cc
