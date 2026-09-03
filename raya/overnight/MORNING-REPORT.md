@@ -19,13 +19,25 @@ Earlier the same day: greeting waits (67058058, 7f3aa27d) · role changed withou
 question (0178c996, 503440a3) · apply-success not spoken after a failed apply (9cb7e453) ·
 Muradnagar / गाज़ियाबाद spellings (0decf61a, 7f3aa27d).
 
-## Open
+## Closed after the first draft of this report
 
-1. **DKB says "गवर्नमेंट एम्प्लॉयमेंट प्रोग्राम की तरफ से" in 4 places.** Sheet rows 4/56 asked for
-   that removal on KKB; it is absent from KKB and Maya but was never checked on DKB. Changing a
-   bot's stated identity is a product decision — not touched.
-2. **"Already applied" still says the generic line.** Not prompt-fixable: the conversation model
-   never receives the tool error body (9 call ids). Needs LitWiz to surface it.
+- **DKB no longer claims to be the government.** Rows 4/56 had already decided this; it was applied
+  to KKB and Maya and DKB was missed. Now the city administration's employment initiative in all
+  five spoken lines, both languages. Verified: `dc200be7` (hi), `def744e0` (kn).
+- **"Already applied" now names the likely cause truthfully.** The model still never receives the
+  tool error body, so it cannot KNOW — but the caller's question is answerable anyway: "इस जॉब में
+  अभी अप्लाई आगे नहीं बढ़ा — हो सकता है आपकी एप्लीकेशन पहले से लगी हो" / "ನಿಮ್ಮ ಅಪ್ಲಿಕೇಶನ್ ಈಗಾಗಲೇ ಇರಬಹುದು".
+  True whichever the reason, and it names the commonest one. Verified: `87427928`.
+
+## Still owed to the platform (not prompt-fixable)
+
+- **LitWiz: surface the tool error body to the conversation model.** 9 `ACTION_LIMIT_REACHED` calls
+  across 3 bots, 2 languages and 3 prompt structures never once produced the explicit line. Until
+  that lands, the bot hedges rather than states.
+- **LitWiz: a read-only endpoint for a contact's stored memory.** Without it, memory-gated rules
+  (never-ask-twice, the duplicate pre-check) cannot be verified from the harness at all.
+- **A second tester DID.** One line means one call at a time; it is also why fixture state is shared
+  and polluted.
 
 ## The pattern worth keeping
 
