@@ -381,3 +381,36 @@
 - **2026-09-03_132339** — `pre-deploy-kkb-hi-in-2026-09-03_132339` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(10 files)_
 - **2026-09-03_132339** — `pre-deploy-kkb-kn-in-2026-09-03_132339` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(10 files)_
 - **2026-09-03_133151** — `pre-fetch-leak` — remove prompt-mandated lookup narration (D50: prompt demonstrates the leak it forbids) _(10 files)_
+- **2026-09-03_135223** — `pre-deploy-kkb-hi-signals-2026-09-03_135223` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
+- **2026-09-03_135224** — `pre-deploy-kkb-kn-signals-2026-09-03_135224` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada Signals.md _(10 files)_
+- **2026-09-03_135225** — `pre-deploy-kkb-hi-in-signals-2026-09-03_135225` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Signals.md _(10 files)_
+- **2026-09-03_135226** — `pre-deploy-kkb-kn-in-signals-2026-09-03_135226` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada Signals.md _(10 files)_
+- **2026-09-03_135229** — `pre-deploy-kkb-hi-out-2026-09-03_135229` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi.md _(10 files)_
+- **2026-09-03_135229** — `pre-deploy-kkb-kn-out-2026-09-03_135229` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(10 files)_
+- **2026-09-03_135231** — `pre-deploy-kkb-hi-in-2026-09-03_135230` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(10 files)_
+- **2026-09-03_135231** — `pre-deploy-kkb-kn-in-2026-09-03_135231` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(10 files)_
+- **2026-09-03_140028** — `pre-deploy-kkb-hi-signals-2026-09-03_140028` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
+- **2026-09-03_140030** — `pre-deploy-kkb-kn-signals-2026-09-03_140030` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada Signals.md _(10 files)_
+- **2026-09-03_140033** — `pre-deploy-kkb-hi-in-signals-2026-09-03_140032` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Signals.md _(10 files)_
+- **2026-09-03_140037** — `pre-deploy-kkb-kn-in-signals-2026-09-03_140037` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada Signals.md _(10 files)_
+- **2026-09-03_140052** — `pre-deploy-kkb-hi-out-2026-09-03_140052` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi.md _(10 files)_
+- **2026-09-03_140056** — `pre-deploy-kkb-kn-out-2026-09-03_140056` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(10 files)_
+- **2026-09-03_140100** — `pre-deploy-kkb-hi-in-2026-09-03_140100` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(10 files)_
+- **2026-09-03_140105** — `pre-deploy-kkb-kn-in-2026-09-03_140105` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(10 files)_
+- **2026-09-03_141132** — `pre-deploy-kkb-hi-signals-2026-09-03_141132` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
+- **2026-09-03_142026** — `pre-deploy-kkb-hi-signals-2026-09-03_142026` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
+- **2026-09-03_142028** — `pre-deploy-kkb-kn-signals-2026-09-03_142028` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada Signals.md _(10 files)_
+- **2026-09-03_142032** — `pre-deploy-kkb-hi-in-signals-2026-09-03_142032` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Signals.md _(10 files)_
+- **2026-09-03_142033** — `pre-deploy-kkb-kn-in-signals-2026-09-03_142033` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada Signals.md _(10 files)_
+- **2026-09-03_142040** — `pre-deploy-kkb-hi-out-2026-09-03_142040` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi.md _(10 files)_
+- **2026-09-03_142043** — `pre-deploy-kkb-kn-out-2026-09-03_142043` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(10 files)_
+- **2026-09-03_142046** — `pre-deploy-kkb-hi-in-2026-09-03_142046` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(10 files)_
+- **2026-09-03_142048** — `pre-deploy-kkb-kn-in-2026-09-03_142048` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(10 files)_
+- **2026-09-03_143236** — `pre-deploy-kkb-hi-signals-2026-09-03_143236` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
+- **2026-09-03_143237** — `pre-deploy-kkb-kn-signals-2026-09-03_143237` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada Signals.md _(10 files)_
+- **2026-09-03_143238** — `pre-deploy-kkb-hi-in-signals-2026-09-03_143238` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Signals.md _(10 files)_
+- **2026-09-03_143239** — `pre-deploy-kkb-kn-in-signals-2026-09-03_143239` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada Signals.md _(10 files)_
+- **2026-09-03_143242** — `pre-deploy-kkb-hi-out-2026-09-03_143242` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi.md _(10 files)_
+- **2026-09-03_143243** — `pre-deploy-kkb-kn-out-2026-09-03_143243` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(10 files)_
+- **2026-09-03_143244** — `pre-deploy-kkb-hi-in-2026-09-03_143244` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(10 files)_
+- **2026-09-03_143245** — `pre-deploy-kkb-kn-in-2026-09-03_143245` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(10 files)_

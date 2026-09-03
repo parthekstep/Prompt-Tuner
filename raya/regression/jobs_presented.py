@@ -37,6 +37,14 @@ ORDINALS = [
     (u"ಒಂದು", 1), (u"ಎರಡು", 2), (u"ಮೂರು", 3), (u"ನಾಲ್ಕು", 4),
     (u"ಐದು", 5), (u"ಆರು", 6), (u"ಏಳು", 7), (u"ಎಂಟು", 8),
     (u"ಒಂಬತ್ತು", 9), (u"ಹತ್ತು", 10),
+    # The prompts now hand the model ordinals to twenty-two (a real campaign sent 22 jobs on
+    # c472f2c8). A detector that stops at ten under-counts and turns a good call into a finding.
+    (u"ग्यारहवाँ", 11), (u"बारहवाँ", 12), (u"तेरहवाँ", 13), (u"चौदहवाँ", 14), (u"पंद्रहवाँ", 15),
+    (u"सोलहवाँ", 16), (u"सत्रहवाँ", 17), (u"अठारहवाँ", 18), (u"उन्नीसवाँ", 19), (u"बीसवाँ", 20),
+    (u"इक्कीसवाँ", 21), (u"बाईसवाँ", 22),
+    (u"ಹನ್ನೊಂದು", 11), (u"ಹನ್ನೆರಡು", 12), (u"ಹದಿಮೂರು", 13), (u"ಹದಿನಾಲ್ಕು", 14), (u"ಹದಿನೈದು", 15),
+    (u"ಹದಿನಾರು", 16), (u"ಹದಿನೇಳು", 17), (u"ಹದಿನೆಂಟು", 18), (u"ಹತ್ತೊಂಬತ್ತು", 19), (u"ಇಪ್ಪತ್ತು", 20),
+    (u"ಇಪ್ಪತ್ತೊಂದು", 21), (u"ಇಪ್ಪತ್ತೆರಡು", 22),
 ]
 ONE_OPTION = re.compile(u"एक ऑप्शन है|ಒಂದು ಆಪ್ಷನ್ ಇದೆ")
 ASK_MORE = re.compile(u"और कौन|और क्या|बाकी|जो भी जॉब|सारी जॉब|ಬೇರೆ ಯಾವ|ಎಲ್ಲಾ ಹೇಳಿ|ಇನ್ನೇನು")
@@ -81,9 +89,12 @@ def check(bot, uuid):
         # eighth job -- a bogus duplicate on 15f6d453 and d9bf1f43.
         if re.search(re.escape(word) + u"\\s*:", said):
             highest = max(highest, n)
-            m = re.search(u"(?:^|[\\s\u2014\\-*(])" + re.escape(word) + u"\\s*:\\s*([^,\u0964\\n]{2,44})", said)
+            m = re.search(u"(?:^|[\\s\u2014\\-*(])" + re.escape(word) + u"\\s*:\\s*([^।\\n]{2,90})", said)
             if m:
-                slots[n] = re.sub(u"\\s+", u" ", m.group(1)).strip().lower()
+                # key on role AND company: two different jobs can share a role ("Data Entry
+                # Operator" at two firms) and keying on the role alone called that a duplicate.
+                seg = re.sub(u"\\s+", u" ", m.group(1)).strip().lower()
+                slots[n] = u", ".join(seg.split(u",")[:2]).strip()
     distinct = len(set(slots.values())) if slots else highest
     dupes = sorted(v for v in set(slots.values()) if list(slots.values()).count(v) > 1)
     if highest == 0 and ONE_OPTION.search(said):
