@@ -753,3 +753,23 @@ Three requested changes, piloted together on **KKB Hindi Signals outbound** (`kk
 - **Analyser:** added pattern **D56** (completeness claim gated on an unverifiable count).
 - **Status:** deployed to `kkb-hi-signals` (227049 bytes) and `kkb-kn-signals`. **VERIFY-PENDING** —
   live calls running; not to be called fixed without a call id showing 8 of 8 plus the anchor line.
+
+## 2026-09-03 — Array-order walk after batch one; count anchor propagated to all job-presenting bots
+- **Feedback/bug:** with the count anchor live, `54a0daa8` reached आठवाँ by naming सोलर एनर्जी
+  कंसल्टेंट twice (तीसरा AND सातवाँ) and never spoke इलेक्ट्रिकल इंजीनियर; `22d80263` dropped the same
+  entry outright. Two of four calls, always the entry the model had ranked LAST.
+- **Root cause:** the prompt had the model re-rank `${recommendations}` on every batch, so "which job
+  comes next" was a fresh judgement call each time; the tail of the ranking is where it failed.
+- **Change:** best-fit ranking now applies to the FIRST batch only; later batches walk the list in
+  array order, skipping entries already named. Added an explicit no-job-twice rule — reaching the
+  announced total by repeating a job is a failure, not a completion.
+- **Files:** all 12 job-presenting conversation prompts — `KKB Placeholder Hindi/Kannada Signals`,
+  `KKB Placeholder Inbound Signals`, `KKB Placeholder Inbound Kannada Signals`, `KKB Placeholder
+  Hindi/Kannada`, `KKB Placeholder Inbound`, `KKB Placeholder Inbound Kannada`, plus Maya's four
+  (see `Maya/CHANGELOG.md`). Inbound variants reference the list `get_jobs`/the fetch returned rather
+  than `${recommendations}`, which they do not receive.
+- **Analyser:** D56.
+- **Status:** VERIFIED on the two outbound Signals bots — Hindi `4da7af15`, `85e51aac` (8 of 8, all
+  distinct, इलेक्ट्रिकल इंजीनियर named); Kannada `be837379`, `33187441` (8 of 8, ಒಟ್ಟು ಎಂಟು announced,
+  array order). The other 8 prompts are **DEPLOYED, NOT VERIFIED** — live read-back confirms the text
+  shipped to all 12, which proves nothing about behaviour.

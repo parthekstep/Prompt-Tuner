@@ -583,3 +583,17 @@ string the model never receives), **D53** (an input echo-back suppressed by a gu
 - **Feedback/bug:** Maintenance system bootstrap; Maya had no memory or output prompt.
 - **Change:** Created `Maya Memory.md` (seeker memory + campus fields: `college_name`, `hr_contact_shared`, `mml_offered`, `mml_registered`) and `Maya Output.md` (KKB-style extraction + `college_confirmed`, `experience_captured`, `hr_contact_shared`, `benefits_mentioned`, `mml_offered`, `mml_registered`).
 - **Files:** `Maya/Maya Memory.md`, `Maya/Maya Output.md`
+
+## 2026-09-03 — Job count anchor + array-order walk (ported from KKB)
+- **Feedback/bug:** KKB presented 7 of 8 jobs and claimed it had listed everything (`22d80263`), or
+  reached the total by repeating a job (`54a0daa8`). Maya shares the same presentation logic.
+- **Change:** first batch announces the total out loud; ordinals run continuously and never restart;
+  later batches walk the list in array order; no job may be named twice; the finished-list claim
+  requires the highest ordinal spoken to equal the announced total.
+- **Files:** `Maya/Maya Hindi.md`, `Maya/Maya Hindi Signals.md`, `Maya/Maya Inbound.md`,
+  `Maya/Maya Inbound Signals.md`. Maya's divergences untouched (college identity, `${college_name}`,
+  `hr_contact`/`benefits`, Experience Capture, HR-number sharing, MPL, feminine voice).
+- **Ported from:** KKB (2026-09-03).
+- **Analyser:** D56.
+- **Status:** **DEPLOYED, NOT VERIFIED** — verified on KKB Hindi/Kannada Signals only; Maya's own
+  variants have no call id yet.

@@ -28,10 +28,15 @@ for _l in open(os.path.join(REPO, "raya/.env")):
         k, v = _l.split("=", 1); _env[k.strip()] = v.strip().strip('"').strip("'")
 BASE = _env["RAYA_BASE_URL"].rstrip("/"); KEY = _env["RAYA_API_TOKEN"]
 
+# Kannada ran only to 6 here, so a Kannada bot could never score above 6 however many jobs it named
+# -- arr-kn-1 read out all EIGHT and this list could not see the last two. Both languages run to ten.
 ORDINALS = [
-    (u"पहला", 1), (u"दूसरा", 2), (u"तीसरा", 3), (u"चौथा", 4), (u"पाँचवाँ", 5), (u"पांचवां", 5),
-    (u"छठा", 6), (u"सातवाँ", 7), (u"आठवाँ", 8),
-    (u"ಒಂದು", 1), (u"ಎರಡು", 2), (u"ಮೂರು", 3), (u"ನಾಲ್ಕು", 4), (u"ಐದು", 5), (u"ಆರು", 6),
+    (u"पहला", 1), (u"दूसरा", 2), (u"तीसरा", 3), (u"चौथा", 4),
+    (u"पाँचवाँ", 5), (u"पांचवां", 5), (u"छठा", 6),
+    (u"सातवाँ", 7), (u"आठवाँ", 8), (u"नौवाँ", 9), (u"नौवां", 9), (u"दसवाँ", 10),
+    (u"ಒಂದು", 1), (u"ಎರಡು", 2), (u"ಮೂರು", 3), (u"ನಾಲ್ಕು", 4),
+    (u"ಐದು", 5), (u"ಆರು", 6), (u"ಏಳು", 7), (u"ಎಂಟು", 8),
+    (u"ಒಂಬತ್ತು", 9), (u"ಹತ್ತು", 10),
 ]
 ONE_OPTION = re.compile(u"एक ऑप्शन है|ಒಂದು ಆಪ್ಷನ್ ಇದೆ")
 ASK_MORE = re.compile(u"और कौन|और क्या|बाकी|जो भी जॉब|सारी जॉब|ಬೇರೆ ಯಾವ|ಎಲ್ಲಾ ಹೇಳಿ|ಇನ್ನೇನು")
@@ -71,9 +76,12 @@ def check(bot, uuid):
     highest = 0
     slots = {}
     for word, n in ORDINALS:
-        if word in said:
+        # Anchor on the mandated "<ordinal>:" -- Kannada number-words nest, so ಹದಿನೆಂಟು ("eighteen",
+        # inside a salary) contains ಎಂಟು ("eight") and a bare substring test read a salary as the
+        # eighth job -- a bogus duplicate on 15f6d453 and d9bf1f43.
+        if re.search(re.escape(word) + u"\\s*:", said):
             highest = max(highest, n)
-            m = re.search(re.escape(word) + u"\\s*[:\u2014-]*\\s*([^,\u0964\\n]{2,44})", said)
+            m = re.search(u"(?:^|[\\s\u2014\\-*(])" + re.escape(word) + u"\\s*:\\s*([^,\u0964\\n]{2,44})", said)
             if m:
                 slots[n] = re.sub(u"\\s+", u" ", m.group(1)).strip().lower()
     distinct = len(set(slots.values())) if slots else highest
@@ -102,14 +110,20 @@ def main():
     ap.add_argument("--since", default=time.strftime("%Y-%m-%d", time.gmtime(time.time() - 86400)))
     ap.add_argument("--agent", default=None)
     ap.add_argument("--workers", type=int, default=3)
+    ap.add_argument("--call", action="append", default=[],
+                    help="grade only these call uuids (repeatable) -- the list API lags a few minutes")
     a = ap.parse_args()
     targets = [t for t in json.load(open(os.path.join(REPO, "raya/agents.json")))["targets"]
                if t.get("kind") == "conversation" and t["raya_agent_id"].get("prod")]
     if a.agent:
         targets = [t for t in targets if a.agent in (t["id"], t["raya_agent_id"]["prod"])]
     work = []
-    for t in targets:
-        for c in (get(f"/api/call?agent_id={t['raya_agent_id']['prod']}&limit=100").get("calls") or []):
+    if a.call:
+        bot = targets[0]["id"] if targets else "?"
+        work = [(bot, c) for c in a.call]
+    else:
+     for t in targets:
+      for c in (get(f"/api/call?agent_id={t['raya_agent_id']['prod']}&limit=100").get("calls") or []):
             if str(c.get("created_at"))[:19] < a.since: continue
             if (c.get("call_duration") or 0) >= 40: work.append((t["id"], c["uuid"]))
     print(f"jobs-presented check | since {a.since} | {len(work)} calls", flush=True)
