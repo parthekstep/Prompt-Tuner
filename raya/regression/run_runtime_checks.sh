@@ -12,6 +12,15 @@ set -uo pipefail
 cd "$(dirname "$0")/../.."
 ARGS=("$@")
 FAIL=0
+
+# Tool SCHEMA parity, not just prompt text. Two live bugs on 2026-09-03 came from a fix that lived
+# in a tool schema and was applied to one bot only -- duplicate_check on 1 of 12, and the
+# ACTION_LIMIT_REACHED mapping on 1 of 6 -- while the prompt text was mirrored everywhere. Replayed
+# against that state this check flags it and exits 1.
+echo ""
+echo "================================================================ toolschema_parity"
+python3 scripts/toolschema_parity.py || FAIL=1
+
 for chk in jobs_presented consent_before_apply location_chain location_reconfirm apply_result_integrity apply_failure_wording location_integrity apply_outcomes; do
   echo ""
   echo "================================================================ $chk"

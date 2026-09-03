@@ -261,3 +261,30 @@ claim done. Revert on any regression (`/prompt-version`).
   it as **uncertain** and ask the user rather than guessing. With N languages, one wrong guess
   fans out N times.
 - Never git commit or push as part of an audit.
+
+
+## Tool schemas are half the contract — audit them too
+
+`/sync-check` compares prompt TEXT. That is not the whole sync surface: a prompt and the tool schemas
+it drives are one contract, and mirroring only the prose lets a family drift where it matters most.
+
+On 2026-09-03 two live bugs came from exactly this:
+
+- **`duplicate_check`** — the parameter the three-outcome apply logic keys on — was defined on
+  `kkb-hi-signals` and on no other bot. Eleven prompts instructed the model to send a parameter its
+  tool schema did not define, so the logic could not run and every duplicate apply was reported to
+  the caller as a technical fault. Prompt text was in perfect sync throughout.
+- **The `ACTION_LIMIT_REACHED` → already-applied mapping** in the `apply_job` description was on
+  1 of 6 Signals bots.
+
+**Run `scripts/toolschema_parity.py` as part of every sync audit** (it is also wired into
+`raya/regression/run_runtime_checks.sh`). It groups bots by agent **and backend** — Signals and
+legacy legitimately differ (`phone_number` vs `phoneNumber`, `acting_as_user_id`, different
+`create_profile` field sets), so comparing across them reports architecture as drift — then flags any
+bot whose parameter set, `required` list or enums differ from its family, and reports description
+drift as info. It is read-only and exits 1 on a real difference.
+
+Two platform facts worth knowing before you fix a finding: a tool description is capped at **1024
+characters** (a longer one returns `PATCH 400` naming the limit), and `scripts/raya_toolparam.py` /
+`scripts/raya_tooldesc.py` are the sanctioned ways to change a parameter or a description, both
+verified by read-back.
