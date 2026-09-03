@@ -95,3 +95,22 @@ Every prompt edit to DKB is logged here. Entry format:
 - **Feedback/bug:** Maintenance system bootstrap.
 - **Change:** No prompt changes. DKB already has the complete set (Hindi, Kannada, Memory, Output) and serves as the reference implementation for the new skills' anatomy docs.
 - **Files:** none
+
+## 2026-09-03 — Signals tool contract documented identically in both languages
+- **Feedback/bug:** the static suite reports a section-count gap between DKB Hindi Signals and DKB
+  Kannada Signals every run. Token-by-token comparison of the "Signals backend — what changed" block
+  showed the Kannada file documenting three things the Hindi file never stated: the literal endpoint
+  path, and that the old ONEST fixed params are gone.
+- **Change:** additively documented both in Hindi — `POST /api/v1/admin/participant` on the
+  `create_job` bullet, and a bullet recording that `sourceService`, `eventType`, `app_instance` and
+  `orgName` are GONE and must never be sent (the API 400s on unknown properties). No spoken line, no
+  flow logic and no payload template touched; `sourceService`/`eventType`/`app_instance` are now 1:1
+  across the pair.
+- **Files:** `DKB/DKB Hindi Signals.md`
+- **Remaining (NOT a bug, flagged for a decision):** the two files still organise that block
+  differently — Hindi uses six headed sections, Kannada one numbered block. Content parity holds on
+  every checked token, so this is formatting, not missing rules. Aligning it means restructuring a
+  live prompt's layout for a cosmetic reason, and self-approving a divergence-registry entry is not
+  mine to do — so it is left as-is and reported.
+- **Status:** deployed. Documentation-only; nothing spoken changed, so there is nothing to verify by
+  call beyond DKB Hindi Signals' standing sanity run.
