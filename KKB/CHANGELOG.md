@@ -847,3 +847,26 @@ Three requested changes, piloted together on **KKB Hindi Signals outbound** (`kk
   tool descriptions at 1024 and answers a longer one with `PATCH 400`).
 - **Standing gap to close:** `/sync-check` audits prompt text only. A bot's tool schemas — parameters,
   `required`, enums, descriptions — need the same per-language matrix, or this recurs.
+
+## 2026-09-03 — profile_id was read positionally, so providers could never apply
+- **Feedback/bug:** Santosh, KKB Kannada Signals: two applications failed. Both were
+  `SOURCE_ITEM_NOT_FOUND` (`0d63dc50`) — NOT already-applied and NOT a stale job id; both job ids
+  (`19e3da1f`, `bc2ac8de`) are live on Dharwad.
+- **Root cause:** his `get_profile` returned exactly one item, of type `job_posting_1.0` — he is
+  registered as a provider and has no seeker profile. The `apply_job` tool description said the
+  profile id is "items[0].item_id from get_profile", and the prompts say `items[0]` 10–11 times, so
+  the bot sent a JOB POSTING's id as `profile_id`. The source item of an apply is the profile, so the
+  API was right. He had no profile and one was never created.
+- **Why no test caught it:** the tester number's `get_profile` returns its `profile_1.0` first, so
+  `items[0]` is correct there and every harness call passed. The rule was right by luck on the one
+  account we test with.
+- **Change:** `profile_id` must be the item whose `item_type` is `profile_1.0` AND `item_domain` is
+  `seeker` — never `items[0]`. If no such item exists the caller is NEW: consent, then
+  `create_profile`, then use the returned id. Applied to the `apply_job` and `update_profile`
+  parameter descriptions on all six Signals bots, and as a rule in the six Signals prompts.
+- **Files:** `KKB Placeholder Hindi/Kannada Signals.md`, `KKB Placeholder Inbound Signals.md`,
+  `KKB Placeholder Inbound Kannada Signals.md`, plus Maya's two Signals prompts.
+- **Analyser:** D59 (positional access into a tool result).
+- **Status:** DEPLOYED, **VERIFY-PENDING** — the tester line cannot reproduce this (its profile is
+  first). Confirming needs a provider-only number; Santosh's reproduces it directly. Any recurrence
+  shows up as `SOURCE_ITEM_NOT_FOUND` in `apply_result_integrity`.

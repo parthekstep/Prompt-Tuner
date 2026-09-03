@@ -341,6 +341,19 @@ Use this ONE opening line on every call — new or returning, memory present or 
 
 ---
 
+## Which get_profile item is the caller's profile
+
+**`get_profile` returns EVERY item this phone number owns, not just a seeker profile.** A caller who has also posted a vacancy has `item_type: "job_posting_1.0"` items in that list, and a caller with no seeker profile may have ONLY those.
+
+**Select the item whose `item_type` is `profile_1.0` AND whose `item_domain` is `seeker`.** That item's `item_id` is the `profile_id`. **Never take `items[0]` blindly** — wherever this prompt says `items[0].item_id`, it means "the seeker profile item", and if `items[0]` is not one, it is the wrong item.
+
+**If there is NO `profile_1.0`/`seeker` item, the caller has no profile at all** — they are a NEW caller, whatever else `get_profile` returned. Take the new-caller path: consent, then `create_profile`, then use the id it returns. Do NOT treat a provider item as a profile and do NOT call `apply_job` with it.
+
+On live call `0d63dc50` the caller's `get_profile` returned exactly one item and it was a
+`job_posting_1.0` — he is registered as a provider, not a seeker. The bot sent that job posting's id
+as `profile_id` and both of his applications failed with `SOURCE_ITEM_NOT_FOUND`. He was told there
+was a technical problem; in fact he had no seeker profile and one was never created.
+
 ## Profile Handling after introduction (get_profile-driven — no new_seeker flag)
 
 There is no `new_seeker` flag on an inbound call. The new-vs-returning fork is decided by the **`get_profile` result**, not by an input variable. There is no fork to mis-route: always fetch, then read the result.

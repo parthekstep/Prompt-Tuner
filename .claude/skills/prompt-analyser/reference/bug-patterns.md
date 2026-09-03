@@ -873,3 +873,44 @@ fix in a transcript, which is how this survived a "verified" claim.
 
 **Source.** KKB Hindi/Kannada Signals, 2026-09-03. `c5a10922` (fabricated already-applied),
 `d6e545d4` (real duplicate reported as technical), `d401d6cf` (same). Related: D52, D54, D57.
+
+### D59 — "items[0]" works until the caller's first item isn't the one you meant
+
+**Symptom.** Two applications on one call both fail with `SOURCE_ITEM_NOT_FOUND` while the job ids are
+valid and live. The caller is told there is a technical problem. Reported as an apply bug; it is not.
+
+**Root cause.** `get_profile` returns EVERY item the phone number owns, in no guaranteed order and
+across domains — a seeker `profile_1.0`, and for anyone who has ever posted a vacancy, one or more
+provider `job_posting_1.0` items. The `apply_job` tool description said the profile id is
+*"items[0].item_id from get_profile"*, and the prompts referred to `items[0]` ten or eleven times
+each. On live call `0d63dc50` the caller's `get_profile` returned exactly ONE item and it was a
+`job_posting_1.0` — he is registered as a provider, not a seeker. The bot sent that job posting's id
+as `profile_id`; the *source* item of an apply is the profile, so the API correctly reported the
+source item did not exist. He had no seeker profile and none was ever created.
+
+**Why it survived every test.** The tester number's `get_profile` happens to return its
+`profile_1.0` FIRST, so `items[0]` is the right item and every harness call passed. The instruction
+was not "wrong sometimes" — it was right by luck on exactly the account we test with. **A rule that
+indexes into a collection is only ever tested against the orderings your fixtures happen to have.**
+
+**Detection heuristic.** Grep the prompts and every tool description for positional access into a
+tool result — `items[0]`, `results[0]`, "the first", "the top one". For each, ask what else that
+collection can contain and whether ordering is guaranteed anywhere. Then check transcripts for a
+`*_NOT_FOUND` on an id that came out of a tool result rather than from input args: that pairing —
+valid-looking id, not-found error — is the signature. `SOURCE_ITEM_NOT_FOUND` specifically means the
+PROFILE side, never the job side; do not read it as a bad job id.
+
+**Fix direction.** Select by type, not by position: the item whose `item_type` is `profile_1.0` AND
+`item_domain` is `seeker`. And decide the empty case explicitly — no such item means the caller has
+NO profile and is a NEW caller (consent, then `create_profile`), regardless of what else came back.
+Put it in the tool parameter description as well as the prompt, since that is read at the moment of
+use.
+
+**Corollary for test design.** Our one tester number cannot reproduce this, and a green harness run
+says nothing about it. Verifying it needs an account whose first item is not a seeker profile — a
+provider-only number, which is precisely the kind of caller the employer rail creates.
+
+**Source.** KKB Kannada Signals, 2026-09-03, reported by Santosh. Bug call `0d63dc50` (two
+`SOURCE_ITEM_NOT_FOUND`, job ids `19e3da1f` and `bc2ac8de`, both confirmed live). Control: tester on
+`0a5ec09d`/`d6e545d4`, profile first in the list, applies succeed. Related: D55 (the model fills what
+the prompt leaves open), D58 (a branch keyed on something unavailable).

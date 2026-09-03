@@ -742,3 +742,9 @@ to the same number — the first writing the memory, the second consuming it.
 2026-09-03 17:52:28 · prod · kkb-kn-out · 87ab9108-5d66-4a13-a20a-575eaa9aae36 · KKB/KKB Placeholder Kannada.md · sha256:2f7e3f9e · snapshot:pre-deploy-kkb-kn-out-2026-09-03_175228 · deployed
 2026-09-03 17:52:30 · prod · kkb-hi-in · b6222233-8a8d-49a6-9950-d07e9d159757 · KKB/KKB Placeholder Inbound.md · sha256:0f8deda0 · snapshot:pre-deploy-kkb-hi-in-2026-09-03_175229 · deployed
 2026-09-03 17:52:31 · prod · kkb-kn-in · 4ac90bf1-a740-4b1c-92b0-45bda099e53f · KKB/KKB Placeholder Inbound Kannada.md · sha256:3c5e9137 · snapshot:pre-deploy-kkb-kn-in-2026-09-03_175230 · deployed
+2026-09-03 18:56:24 · prod · kkb-hi-signals · 115b38a5-42ef-4082-be69-84a871bb226a · KKB/KKB Placeholder Hindi Signals.md · sha256:7392bdba · snapshot:pre-deploy-kkb-hi-signals-2026-09-03_185622 · deployed
+2026-09-03 18:56:25 · prod · kkb-kn-signals · 33037201-78ce-405d-b509-a3b6934e20f1 · KKB/KKB Placeholder Kannada Signals.md · sha256:61325c79 · snapshot:pre-deploy-kkb-kn-signals-2026-09-03_185624 · deployed
+2026-09-03 18:56:28 · prod · kkb-hi-in-signals · 3f521174-574d-43ca-a9be-081849373c18 · KKB/KKB Placeholder Inbound Signals.md · sha256:8976599e · snapshot:pre-deploy-kkb-hi-in-signals-2026-09-03_185626 · deployed
+2026-09-03 18:56:29 · prod · kkb-kn-in-signals · f38da775-c572-4a50-9340-fe1f42c43901 · KKB/KKB Placeholder Inbound Kannada Signals.md · sha256:c48f89ed · snapshot:pre-deploy-kkb-kn-in-signals-2026-09-03_185629 · deployed
+2026-09-03 18:56:33 · prod · maya-hi-signals · 904f333f-1919-4523-a51d-b22ba382dd22 · Maya/Maya Hindi Signals.md · sha256:4e3e7fb9 · snapshot:pre-deploy-maya-hi-signals-2026-09-03_185631 · deployed
+2026-09-03 18:56:36 · prod · maya-hi-in-signals · 1c24feda-a584-4012-a865-fa8f950089df · Maya/Maya Inbound Signals.md · sha256:782f7788 · snapshot:pre-deploy-maya-hi-in-signals-2026-09-03_185634 · deployed
