@@ -337,6 +337,15 @@ Both have happened. State the facts is not enough; this is a procedure.
    route** — a production detector, a human call, or a platform ask. List blocked cases explicitly in
    the report. Silently dropping them is how "cannot test Fix A" became "Fix A untested and
    unmentioned".
+0. **A REAL USER'S NUMBER AND PROFILE ARE READ-ONLY. ALWAYS.** No calls, no `apply_job`, no
+   `update_profile`, no direct API writes against them — and no "read-only" diagnostic that turns out
+   to write. On 2026-09-03 I probed which of the 8 handover jobs were still free on QA's own number;
+   the Signals API only answers that by ATTEMPTING an apply, so the probe applied her profile to the
+   3 remaining jobs and exhausted her whole fixture. **If a question can only be answered by a write,
+   do not answer it that way** — read it off `call_output.jobs_applied` /
+   `jobs_failed_to_apply` in past transcripts, or reproduce it on the tester DID. When a fixture is
+   exhausted, generate fresh job ids instead of probing which ones are free.
+
 6a. **INBOUND BOTS ARE TESTABLE — give the agent an `out_did` and dial the tester.** Do not record an
    inbound fix as unverifiable. `POST /api/call` with an inbound agent 500s only because the agent has
    no outbound route; PATCH `{"out_did": <number>}` onto it first and the same harness works exactly as
