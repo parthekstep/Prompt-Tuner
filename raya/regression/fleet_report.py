@@ -30,7 +30,12 @@ REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 # evidence gate makes row 2 the CORRECT output in that state, so treating this as a failure would
 # make the fleet permanently red on a blocked platform issue and train us to ignore the report.
 # It stays visible in the detector output and in STATUS as the open platform ask.
-BLOCKING = ["ALL-TOLD WHILE JOBS UNNAMED", "SAME JOB NAMED UNDER TWO ORDINALS",
+# SAME JOB NAMED UNDER TWO ORDINALS is informational, not blocking: job identity is the job_id and
+# the bot never speaks it, so the detector compares role+company and cannot distinguish "named the
+# same job twice" from "named two posts that share a role and company". Real payloads contain such
+# pairs -- five McDonald's Crew Member posts, two CY FUTURE Customer Support posts. Read it as a
+# prompt to go look, not a failure.
+BLOCKING = ["ALL-TOLD WHILE JOBS UNNAMED",
             "Z SUCCESS WITH NO SUCCESS RESULT", "X CONTRADICTORY APPLY RESULT",
             "APPLY WITHOUT THE DATA-SHARING LINE"]
 DETECTORS = ["jobs_presented", "consent_before_apply", "apply_result_integrity",
@@ -84,13 +89,20 @@ def main():
                     tag = next(b for b in BLOCKING if b in line)
                     hits.append(tag)
         mine = sum(1 for det, text in out.items() for line in text.splitlines() if bid in line)
-        verdict = "UNTESTED" if mine == 0 else ("FAIL" if hits else "PASS")
+        # A bot none of the detectors mentions is not "tested and clean" -- every runtime detector
+        # is seeker-side (jobs presented, apply outcomes, location chain, consent-before-apply), so
+        # DKB's employer flow has NO behavioural coverage at all. Say which of the two it is.
+        seeker_side = not bid.startswith("dkb")
+        if mine == 0:
+            verdict = "UNTESTED" if seeker_side else "NO-DETECTORS"
+        else:
+            verdict = "FAIL" if hits else "PASS"
         if verdict == "FAIL":
             worst = 2
-        elif verdict == "UNTESTED" and worst < 1:
+        elif verdict in ("UNTESTED","NO-DETECTORS") and worst < 1:
             worst = 1
         print("  %-22s %-7s %-9s %s" % (bid, mine if mine else "0", verdict,
-              ", ".join(sorted(set(hits))) if hits else ("no coverage in window" if verdict == "UNTESTED" else "none")))
+              ", ".join(sorted(set(hits))) if hits else ("no calls in window" if verdict == "UNTESTED" else ("employer flow has no runtime detectors" if verdict == "NO-DETECTORS" else "none"))))
 
     print("\n  NOTE: a bot with no calls in the window is UNTESTED, not passing.")
     print("  %s" % ("FLEET PASS" if worst == 0 and crit == 0 and maj == 0 and sch_ok else

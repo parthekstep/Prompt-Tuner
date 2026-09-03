@@ -94,6 +94,13 @@ def check(bot, uuid):
                 # key on role AND company: two different jobs can share a role ("Data Entry
                 # Operator" at two firms) and keying on the role alone called that a duplicate.
                 seg = re.sub(u"\\s+", u" ", m.group(1)).strip().lower()
+                # Job identity is the job_id and the bot never says it, so this key is the best
+                # available proxy: role + company. It cannot be made exact. Two fields raise a false
+                # positive on payloads holding posts that differ only by location (a5443b59: two CY
+                # FUTURE Customer Support posts, five McDonald's Crew Member posts); three fields
+                # raise a false NEGATIVE when one job is described slightly differently on its two
+                # mentions, which lost the confirmed duplicate on 54a0daa8. Two fields, erring toward
+                # flagging, and the finding is INFORMATIONAL in fleet_report for exactly this reason.
                 slots[n] = u", ".join(seg.split(u",")[:2]).strip()
     distinct = len(set(slots.values())) if slots else highest
     dupes = sorted(v for v in set(slots.values()) if list(slots.values()).count(v) > 1)
