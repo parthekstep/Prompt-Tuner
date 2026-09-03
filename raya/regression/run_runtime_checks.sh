@@ -12,7 +12,7 @@ set -uo pipefail
 cd "$(dirname "$0")/../.."
 ARGS=("$@")
 FAIL=0
-for chk in location_chain location_reconfirm apply_result_integrity apply_failure_wording location_integrity apply_outcomes; do
+for chk in consent_before_apply location_chain location_reconfirm apply_result_integrity apply_failure_wording location_integrity apply_outcomes; do
   echo ""
   echo "================================================================ $chk"
   python3 "raya/regression/$chk.py" "${ARGS[@]}" || FAIL=1
