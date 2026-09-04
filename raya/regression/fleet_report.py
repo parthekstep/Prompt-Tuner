@@ -35,11 +35,23 @@ REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 # same job twice" from "named two posts that share a role and company". Real payloads contain such
 # pairs -- five McDonald's Crew Member posts, two CY FUTURE Customer Support posts. Read it as a
 # prompt to go look, not a failure.
-BLOCKING = ["ALL-TOLD WHILE JOBS UNNAMED",
-            "P POSTED WITH NO WRITE RESULT", "N NARRATED A WRITE", "C POSTED WITHOUT CONSENT",
-            "Z SUCCESS WITH NO SUCCESS RESULT", "X CONTRADICTORY APPLY RESULT",
-            "APPLY WITHOUT THE DATA-SHARING LINE"]
-DETECTORS = ["dkb_employer_integrity",
+BLOCKING = [
+    # Seeker rail
+    "ALL-TOLD WHILE JOBS UNNAMED",          # jobs_presented
+    "Z SUCCESS WITH NO SUCCESS RESULT",     # apply_result_integrity — told a caller they applied
+    "X CONTRADICTORY APPLY RESULT",         # apply_result_integrity
+    "Y NARRATED WRITE",                     # apply_result_integrity — spoke a tool call instead of making it
+    "W FALSE DUPLICATE-CHECK ASSERTION",    # apply_result_integrity
+    "NO CONSENT BEFORE APPLY",              # consent_before_apply
+    "CONSENT AFTER APPLY",                  # consent_before_apply — spoken too late is still not consent
+    "ROW 1 WRONGLY USED",                   # apply_failure_wording — claimed already-applied without evidence
+    # Employer rail
+    "P POSTED WITH NO WRITE RESULT", "N NARRATED A WRITE", "C POSTED WITHOUT CONSENT",
+    # Inbound rail (location comes from the profile, not from a campaign arg)
+    "K CONSENT DISCLOSURE DROPPED", "L OPEN ASK ON KNOWN PROFILE LOCATION",
+    "M JOBS IN ANOTHER CITY, MISMATCH NOT NAMED",
+]
+DETECTORS = ["dkb_employer_integrity", "inbound_location_consent",
              "jobs_presented", "consent_before_apply", "apply_result_integrity",
              "apply_failure_wording", "location_reconfirm", "location_chain",
              "location_integrity", "apply_outcomes"]
@@ -48,6 +60,28 @@ DETECTORS = ["dkb_employer_integrity",
 def run(cmd):
     p = subprocess.run(cmd, cwd=REPO, capture_output=True, text=True)
     return p.stdout + p.stderr
+
+
+def _verify_blocking_tokens():
+    """Every BLOCKING token must be a string some detector actually prints.
+
+    On 2026-09-04 this list contained "APPLY WITHOUT THE DATA-SHARING LINE", which NO detector
+    emits — consent_before_apply prints "NO CONSENT BEFORE APPLY". So a real consent violation on
+    kkb-hi-in-signals (bbdb6eaf, a caller applied with no data-sharing line) was printed by the
+    detector, listed under Blocking in the nightly narrative, and STILL showed the bot as PASS in
+    the per-bot table. A hand-typed token list silently degrades to "nothing is blocking".
+    """
+    import glob as _glob
+    src = ""
+    for p in _glob.glob(os.path.join(REPO, "raya/regression/*.py")):
+        if p.endswith("fleet_report.py"):
+            continue
+        src += open(p, encoding="utf-8").read()
+    missing = [t for t in BLOCKING if ('"%s"' % t) not in src and ("'%s'" % t) not in src]
+    if missing:
+        print("  *** BLOCKING tokens no detector emits — these can never fire: %s" % missing)
+        return False
+    return True
 
 
 def main():
@@ -62,6 +96,7 @@ def main():
 
     print("FLEET REPORT — window from %s (UTC), min %d usable calls per bot\n" % (a.since, a.min_calls))
 
+    tokens_ok = _verify_blocking_tokens()
     static = run(["python3", "raya/regression/static_regression.py"])
     m = re.search(r"(\d+) critical, (\d+) major", static)
     crit, maj = (int(m.group(1)), int(m.group(2))) if m else (-1, -1)
@@ -70,6 +105,7 @@ def main():
     schema = run(["python3", "scripts/toolschema_parity.py"])
     sch_ok = "SCHEMA PARITY CLEAN" in schema
     print("  tool schemas : %s" % ("PASS — every family identical" if sch_ok else "FAIL — see toolschema_parity"))
+    print("  blocking-token self-check : %s" % ("PASS" if tokens_ok else "FAIL — list is out of sync with the detectors"))
 
     out = {}
     for det in DETECTORS:
@@ -123,7 +159,7 @@ def main():
     print("\n  NOTE: a bot with no calls in the window is UNTESTED, not passing.")
     print("  %s" % ("FLEET PASS" if worst == 0 and crit == 0 and maj == 0 and sch_ok else
                     ("FLEET FAIL" if worst == 2 or crit or maj or not sch_ok else "FLEET PASS WITH GAPS")))
-    sys.exit(0 if worst == 0 and crit == 0 and maj == 0 and sch_ok else 1)
+    sys.exit(0 if worst == 0 and crit == 0 and maj == 0 and sch_ok and tokens_ok else 1)
 
 
 if __name__ == "__main__":

@@ -870,3 +870,25 @@ Three requested changes, piloted together on **KKB Hindi Signals outbound** (`kk
 - **Status:** DEPLOYED, **VERIFY-PENDING** — the tester line cannot reproduce this (its profile is
   first). Confirming needs a provider-only number; Santosh's reproduces it directly. Any recurrence
   shows up as `SOURCE_ITEM_NOT_FOUND` in `apply_result_integrity`.
+
+## 2026-09-04 — Khushboo, KKB Inbound Signals: consent dropped and location re-asked
+- **Feedback/bug:** (1) consent missing; (2) bot fetched the profile but did not ask or confirm
+  location. Call `bbdb6eaf`.
+- **Root cause 1 (consent):** the mandated line is a disclosure plus a question. The caller asked to
+  apply, the bot paraphrased only the question — "क्या मैं आपकी तरफ़ से अप्लाई कर दूँ?" — and dropped
+  "आपकी personal details company के साथ share होंगी". The model keeps the half that advances the call.
+  The prompt already forbade `apply_job` without the line, and that had failed before, so the guard
+  moved into the `apply_job` tool description rather than gaining a third wording.
+- **Root cause 2 (location):** NOT "already confirmed earlier". Her profile carried `Delhi, India`.
+  The prompt printed the OPEN area question as the Case A script and put "ASK THIS ONLY IF YOU DO NOT
+  ALREADY HAVE A LOCATION" underneath it, so the wrong line was the default and the guard was a
+  caveat. Restructured: check first, then confirm / stay silent / ask, with the open ask as the LAST
+  branch. Same fault was live on `5a3aef43`, `0358c875`, `452874bb`, `4ed09650`, `7b81a27a` — all
+  three inbound bots, not just Hindi.
+- **Files:** `KKB Placeholder Inbound Signals.md`, `KKB Placeholder Inbound Kannada Signals.md`,
+  `KKB Placeholder Inbound.md`, `KKB Placeholder Inbound Kannada.md`, plus Maya's two inbound prompts;
+  `apply_job` description on all six Signals bots.
+- **Analyser:** D60 (disclosure dropped from a bundled line), D61 (suppression rule with no
+  replacement).
+- **Status:** **VERIFIED** — `334fc8f3` (location confirmed, disclosure before all three applies) and
+  `a82cd401` (location confirmed, full consent line). Detector clean on both.

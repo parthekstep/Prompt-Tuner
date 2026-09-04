@@ -914,3 +914,61 @@ provider-only number, which is precisely the kind of caller the employer rail cr
 `SOURCE_ITEM_NOT_FOUND`, job ids `19e3da1f` and `bc2ac8de`, both confirmed live). Control: tester on
 `0a5ec09d`/`d6e545d4`, profile first in the list, applies succeed. Related: D55 (the model fills what
 the prompt leaves open), D58 (a branch keyed on something unavailable).
+
+### D60 — A mandated line that bundles a disclosure with a question loses the disclosure
+
+**Symptom.** Consent "goes missing" even though the prompt mandates it in bold and forbids the tool
+call without it. On `bbdb6eaf` the caller asked to apply, the bot replied *"क्या मैं आपकी तरफ़ से
+अप्लाई कर दूँ?"* and called `apply_job`. The data-sharing sentence was never spoken. Reported by QA
+as "consent is missing"; the prompt looks like it says otherwise.
+
+**Root cause.** The mandated line is two sentences doing two different jobs:
+
+> "अप्लाई करने पर आपकी personal details company के साथ share होंगी। **इस जॉब के लिए अप्लाई कर दूँ?**"
+
+Sentence 1 discloses; sentence 2 advances the call. **The model keeps the half that advances the call
+and drops the half that does not** — and because it paraphrased the question rather than quoting the
+line, no verbatim-match guard fired. Same shape as the apply-failure turn earlier the same day, where
+the offer of another job was the TAIL of a three-sentence line and got dropped: whichever half is not
+load-bearing for the conversation is the half that disappears.
+
+**Detection heuristic.** For every mandated multi-sentence line, ask which sentence the conversation
+would still work without — that is the one that will go missing. Then check transcripts for the
+surviving half in isolation: an apply question with no disclosure, a failure line with no offer, a
+success line with no caveat. A detector keyed on the WHOLE line reports "line absent" and reads like
+the model ignored the rule; a detector keyed on each half separately tells you which half died.
+`inbound_location_consent.py` check K does this — it fires only when the apply QUESTION is present
+and the DISCLOSURE is missing, which is the actual failure.
+
+**Fix direction.** Do not re-bold the sentence; it was already mandatory and forbidding the tool call
+"until this line has been spoken" had already failed. Put the requirement where it is read at the
+moment of the action — the tool description: *"never invoke this unless you have just TOLD the caller
+their personal details will be shared with the company — the apply question on its own is not
+consent."* Verified on `334fc8f3` (three applies, disclosure before each) and `a82cd401`.
+
+**Source.** KKB Hindi Inbound Signals, 2026-09-04, reported by Khushboo. Bug `bbdb6eaf`. Related:
+D57 (tool-schema guards beat prose), D55.
+
+### D61 — A suppression rule with no replacement line falls back to the thing it suppressed
+
+**Symptom.** The bot re-asks something it already knows. `bbdb6eaf` fetched a profile carrying
+"Delhi, India" and still asked *"किस इलाके में देखें — कोई खास जगह, या कहीं भी चलेगा?"*, then read out
+Ghaziabad jobs. Reported as "could fetch profile but didn't ask or confirm location".
+
+**Root cause.** Structural, not semantic. The prompt printed the OPEN question first, as the Case A
+script line, and put the guard underneath it: *"ASK THIS ONLY IF YOU DO NOT ALREADY HAVE A LOCATION."*
+So the wrong output was the default and the condition was a caveat read afterwards. The confirm line
+existed further down but was never the thing the model reached first.
+
+**Detection heuristic.** Look for any script line immediately followed by a rule that restricts when
+to say it. That ordering is the bug: the model reads the line, then the exception. Grep for
+`ASK THIS ONLY IF`, `say this unless`, `only when`, `do not say this if` appearing AFTER a quoted
+spoken line rather than before the branch.
+
+**Fix direction.** Invert the structure so the check comes first and each branch names its own line —
+have one, confirm it; already confirmed earlier, say nothing; both empty, then and only then ask
+openly. The open ask becomes the last branch instead of the default. Verified on `334fc8f3` and
+`a82cd401`, both of which confirmed the held location instead of asking.
+
+**Source.** KKB/Maya inbound prompts, 2026-09-04. Bug `bbdb6eaf`; same fault on `5a3aef43`,
+`0358c875`, `452874bb`, `4ed09650`, `7b81a27a` across all three inbound bots.
