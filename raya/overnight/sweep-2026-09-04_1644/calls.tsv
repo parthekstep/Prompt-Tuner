@@ -5,3 +5,4 @@ trrain-kn-out	kn	kn-trrain-accept-then-asks	trrain-kn	CALL	d4e42fca-7431-4ff6-be
 kkb-hi-signals	hi	hi-asks-for-all-jobs	morejobs-22	CALL	4982c225-390e-4731-9c66-15fa14417db8	the job_recommendations alias fix: 22 jobs must NOT produce the no-jobs line (8d3453b1)
 kkb-kn-signals	kn	kn-asks-for-all-jobs	morejobs-kn	NO-BRIDGE	88590e46-d8b0-4a10-86b5-906dfc6335bd	same on Kannada
 maya-hi-out	hi	hi-force-apply	maya-college-gzb	CALL	78ef362f-9da0-4795-a977-5eca424e2ecb	Maya legacy outbound: opener branch A
+kkb-hi-signals	hi	hi-force-apply	already-applied-muradnagar	CALL	8b0e6866-dfec-4d89-8910-73dde6cd2c98	apply on a job already applied to -> row1/row2 wording
