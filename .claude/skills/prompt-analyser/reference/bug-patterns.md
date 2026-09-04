@@ -972,3 +972,68 @@ openly. The open ask becomes the last branch instead of the default. Verified on
 
 **Source.** KKB/Maya inbound prompts, 2026-09-04. Bug `bbdb6eaf`; same fault on `5a3aef43`,
 `0358c875`, `452874bb`, `4ed09650`, `7b81a27a` across all three inbound bots.
+
+### D62 — An evidence whitelist added to stop a branch being GUESSED also blocks the one case where it is KNOWN
+
+**Symptom.** A branch that used to fire (sometimes wrongly) stops firing at all, and the generic
+fallback is spoken instead. Tracker row 103, "bot is saying technical issue instead of already
+applied": across 09-03/09-04 production traffic, of 60 `apply_job` calls that returned
+`ACTION_LIMIT_REACHED`, **45 spoke the technical-issue line and 5 spoke the already-applied line**;
+after 2026-09-03 11:10 UTC the already-applied line was spoken **0 times in 11 opportunities**.
+
+**Root cause.** On 2026-09-03 a fix ("gate the already-applied line on evidence; it was being
+guessed") added a closed two-item list — apply ran earlier in this call, or `contact_memory`'s
+`jobs_applied` names the job — followed by *"**Nothing else counts** … a 422 with no readable reason
+does NOT mean already applied. If neither 1 nor 2 holds, row 1 is FORBIDDEN — use row 2."* The
+paragraph immediately below it said the opposite: *"If that text contains `ACTION_LIMIT_REACHED` …
+row 1 is the only correct output."* The error-text condition — the entire mechanism the fix for the
+original bug depended on — was **missing from the list that claimed to be exhaustive.** Given a
+closed FORBIDDEN list and a permission a paragraph later, the model obeys the prohibition (D25, D47).
+The gate had a real cause (`c5a10922`, a fabricated already-applied) so it must stay; it was simply
+incomplete.
+
+**Detection heuristic.** Two checks, both cheap:
+1. **Whitelist completeness.** For every branch gated by an enumerated evidence list ("ONE of these
+   must be true", "Nothing else counts", "if neither 1 nor 2"), grep the rest of the prompt for other
+   sentences that license the *same* branch. Every such condition must appear as a numbered item in
+   the list. A condition that licenses a branch from outside its own whitelist is dead.
+2. **Before/after the gate.** When a gate is added to stop over-firing, count how often the branch
+   fired in the window before and the window after. A drop to `0/N` is not "the guessing stopped" —
+   it is the branch becoming unreachable (see the CLAUDE.md escalation ladder, rung 0).
+
+**Fix direction.** COMPLETE the list — add the missing condition as a numbered item and fix the
+"neither 1 nor 2" arithmetic — rather than restating the permission a fourth time below it. Applied
+2026-09-04 to all 12 KKB/Maya conversation prompts as item 3 (`ACTION_LIMIT_REACHED` / "an active or
+duplicate request already exists").
+
+**Source.** All KKB + Maya conversation prompts, 2026-09-04, from tracker row 103. Regression of
+commit `feb9405`. Related: D25, D47, D51, D52.
+
+### D63 — A sample conversation whose CONTEXT omits the field a branch keys on demonstrates the wrong branch
+
+**Symptom.** A branch rule is correct and stated twice, and the bot still takes the other branch on
+live traffic. Inbound calls `b48f70fb` (profile location `VILL-MURARI TAND KAKO, …JEHANABAD…`) and
+`2d8b7cb1` (`BHOJPUR`) both asked the open area question hours AFTER the confirm-first fix (D61)
+shipped and was verified on two harness calls.
+
+**Root cause.** The prompt's *Example 2* is titled "Returning caller, LIVE profile found" and its
+context line lists what the profile carries — name, role, age, gender — but **not** location. So the
+sample is, strictly, a profile with no location, where the open ask is correct. To the model it reads
+as the demonstration of what to do on a returning-caller call, and the open ask is what it shows. A
+rule stated twice loses to a worked example shown once (D50).
+
+**Detection heuristic.** For every rule of the form "if X is present say A, otherwise say B", list
+the samples that exercise that step and check each one's stated context for X. A sample whose context
+is *silent* about X is the bug — it will be read as the default branch. Every branch of a decision
+needs a sample that names the deciding field explicitly, and a sample must never demonstrate the
+fallback on a case the rule reserves for the primary branch.
+
+**Fix direction.** Give the sample's fetched profile the field, show the primary branch, and add a
+stage direction naming why (*"the fetched profile carries a location, so it is CONFIRMED, never asked
+openly; the open question belongs to a caller with NO location on file — see Example 1"*). Keep the
+fallback demonstrated in the sample that genuinely lacks the field. Also add the guard the live data
+demands: a stored location may be a full postal address, so confirm the town/city inside it and never
+read the address aloud.
+
+**Source.** All six KKB/Maya inbound prompts, 2026-09-04. Bugs `b48f70fb`, `2d8b7cb1`. Related: D50,
+D57, D61.

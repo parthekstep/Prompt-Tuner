@@ -10,6 +10,81 @@ Every prompt edit to KKB is logged here. Entry format:
 - **Ported from:** <source agent> (only for cross-agent ports)
 ```
 
+### 2026-09-04 — Tracker sweep: row-1 already-applied was UNREACHABLE (row 103); inbound Example 2 demonstrated the open area ask (rows 106/108)
+
+- **Feedback/bug:** Tracker `All Issues` review. Row 103 (KKB Hindi Signals, P1) "bot is saying
+  technical issue instead of already applied". Rows 106/107 (KKB Inbound Signals, P1) location and
+  consent — the location half recurred on live traffic AFTER the 2026-09-04 fix was called verified
+  (`b48f70fb`, `2d8b7cb1`, both post-deploy).
+- **Root cause (row 103) — two competing instructions, both added by earlier fixes.** Counted first
+  (CLAUDE.md ladder rung 0): of 60 `apply_job` calls returning `ACTION_LIMIT_REACHED` across
+  2026-09-03/04, **45 spoke the technical-issue line, 5 spoke an already-applied line, 10 spoke
+  neither** — and after 2026-09-03 11:10 UTC it was **0 for 11**. Two causes:
+  (a) commit `feb9405`'s evidence gate listed only two admissible kinds of evidence and then said
+  "**Nothing else counts** … If neither 1 nor 2 holds, row 1 is FORBIDDEN" — omitting the error-text
+  condition that the whole mapping depends on (analyser **D62**);
+  (b) the THREE-DISTINCT-OUTCOMES table routed `duplicate_check: "not-applied-before"` + any error
+  to row 2 unconditionally, "never by guessing at the error" — which also stopped it READING an
+  error that names its own reason.
+- **Change (row 103): ATTEMPTED, TESTED, AND REVERTED — the prompt is unchanged.** Both edits were
+  made (item 3 added to the evidence list with the "neither 1 nor 2" arithmetic corrected; the table's
+  error row split so a named `ACTION_LIMIT_REACHED` routed to row 1), deployed to all 12 bots, and
+  tested. **They did not work and one of them regressed.** Harness call `row103-hi-postfix` (tester leg
+  `ae2481e6`): `apply_job` returned `ACTION_LIMIT_REACHED` with the message "An active request already
+  exists between these two profiles" and the bot still spoke the technical line. Then, on Kannada
+  inbound `5f0d3671`, the error was `USER_NOT_FOUND` — nothing to do with duplicates — and the bot
+  said **"your application for this job already exists"**: making row 1 reachable via a condition the
+  model cannot evaluate simply moved the failure from "technical issue on a real duplicate" to
+  "already applied on an unrelated error", which is the `c5a10922` harm the evidence gate exists to
+  prevent. Both edits were reverted and all 12 bots redeployed to the pre-edit text; live read-back
+  confirms the reverted content.
+- **Row 103 is not prose-fixable — measured, not inferred.** Across all six Signals bots,
+  2026-09-01→04, **133 tool errors carried a named `error` field and not one produced a line that
+  distinguishes one error class from another**: `ACTION_LIMIT_REACHED` (95), `TARGET_ITEM_NOT_FOUND`
+  (20), `MINOR_ACTION_CHANNEL_BLOCKED` (13), `SOURCE_ITEM_NOT_FOUND` (2), `INVALID_ITEM_STATE` (2),
+  `PROFILE_LIMIT_REACHED` (1) — all the same generic failure line. Over the same window the model
+  demonstrably reads *successful* tool results (it speaks names, roles and locations out of
+  `get_profile` on every call), so the reason is not being ignored: it is not in what the model
+  receives. Row 2's own definition — "an error with no reason you can read" — is therefore the correct
+  branch on every failure, and the already-applied branch is unreachable by construction. Escalated in
+  `raya/overnight/ESCALATION-litwiz.md` §2 with the table and the call ids; the only in-product path is
+  richer `contact_memory.jobs_applied` (or an applications list on `get_profile`) so the PRE-tool
+  duplicate check can match, which is the only route that has ever produced the line correctly.
+- **Root cause (rows 106/108) — the sample outvoted the rule (analyser D63).** Every inbound prompt's
+  *Example 2* is a returning caller whose fetched profile is described as carrying name, role, age and
+  gender but **not** location, and its area turn shows the OPEN ask. The confirm-first rule (D61) is
+  stated twice above it; the worked example is the thing the model followed.
+- **Change (rows 106/108):** gave Example 2's fetched profile a location in all six inbound prompts and
+  changed its area turn to the confirm line, with a stage direction naming the branch; mirrored the
+  Hindi three-branch Case A structure to the two Kannada and two Maya inbound prompts (they still
+  printed the open ask as a standalone script line under the rule — the exact shape D61 fixed); and
+  added, to the confirm branch, that only the town/city part of a stored location is spoken — never a
+  full postal address (`b48f70fb` carried `VILL-MURARI TAND KAKO, PO-BHADSARA,…PIN-804418`).
+- **Files:** all 8 KKB conversation prompts (row-103 fix) and the 4 KKB inbound prompts (Example 2 +
+  Case A + postal-address clause). `raya/regression/consent_before_apply.py` (the Kannada consent
+  wording `ಪರ್ಸನಲ್ ಡೀಟೇಲ್ಸ್ ಕಂಪನಿ ಜೊತೆ ಶೇರ್` was missing from `SHARE`, producing a false CONSENT AFTER
+  APPLY on `a5547492`; also now checks the earliest apply rather than comparing the first apply to a
+  later consent line). Analyser: **D62**, **D63**.
+- **Also fixed (found by this testing, not reported): `apply_job` sent `acting_as_user_id` equal to
+  `profile_id`.** On `5f0d3671` the mandatory silent `get_profile` did not run — remembered context
+  supplied the caller's name and profile id — and the model filled `acting_as_user_id` with the
+  profile id, giving `USER_NOT_FOUND` and a lost application. The prose already said the two ids are
+  distinct in eight places, so this went into the **tool schema** instead (escalation ladder rung 4):
+  `apply_job`'s `acting_as_user_id` description on all six Signals bots now states that the value is
+  the response's TOP-LEVEL `user_id`, is NEVER equal to `profile_id`, must be checked against it
+  before the call is emitted, and does not exist at all unless a `get_profile`/`create_profile` result
+  was seen in THIS call. `toolschema_parity.py` clean across all 12 bots.
+  **Verified:** `537549c6` — `get_profile` ran, and `apply_job` sent `acting_as_user_id c3fc8471…`
+  against `profile_id ffce36d8…`; no `USER_NOT_FOUND`.
+- **Verification (per fix, with call ids):**
+  - inbound location confirm, Hindi — `8235309e` ("आप गाज़ियाबाद के आसपास ही देखें?" on a Case-B call
+    whose profile held `Vasundhara, Ghaziabad, India`; no open ask anywhere in the call).
+  - inbound location confirm, Kannada — `537549c6` (confirmed Koramangala from the profile).
+  - `acting_as_user_id` — `537549c6` (see above).
+  - row 103 — **NOT FIXED, reverted, escalated.** `ae2481e6`/`row103-hi-postfix` and `5f0d3671`.
+  - still open on the same platform gap: `537549c6`'s SECOND apply guessed the already-applied line on
+    a different job's `ACTION_LIMIT_REACHED` with no evidence for it. Same root cause, both directions.
+
 ### 2026-09-01 — Khushboo r3: the location reconfirm was structurally unreachable; the already-applied line is NOT prose-fixable (proven); Muradnagar canonical
 
 **Reported (WhatsApp, call ref 4989329 → live calls `5c67bd19` 07:16 and `90da81db` 07:50, both to XXXXXX6073):**

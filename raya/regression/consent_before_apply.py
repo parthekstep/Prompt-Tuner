@@ -27,7 +27,7 @@ BASE = _env["RAYA_BASE_URL"].rstrip("/"); KEY = _env["RAYA_API_TOKEN"]
 # Hindi and Kannada wordings of the data-sharing disclosure, plus the older create-consent phrasings.
 SHARE = re.compile(
     r"personal details company के साथ share|जानकारी कंपनी के साथ शेयर|जानकारी .{0,12}कंपनी के साथ"
-    r"|ಮಾಹಿತಿ ಕಂಪನಿ ಜೊತೆ ಶೇರ್|ಮಾಹಿತಿಯನ್ನು ಕಂಪನಿ ಜೊತೆ"
+    r"|ಮಾಹಿತಿ ಕಂಪನಿ ಜೊತೆ ಶೇರ್|ಮಾಹಿತಿಯನ್ನು ಕಂಪನಿ ಜೊತೆ|ಡೀಟೇಲ್ಸ್ ಕಂಪನಿ ಜೊತೆ ಶೇರ್"
     r"|details .{0,15}share होंगी|शेयर करनी होगी|ಶೇರ್ ಮಾಡ್ಬೇಕಾಗುತ್ತೆ")
 
 
@@ -52,16 +52,16 @@ def check(bot, uuid):
         if t.get("role") == "assistant" and t.get("content") and SHARE.search(str(t["content"])):
             said_share_at = i
             break
-    apply_at = None
-    for i, t in enumerate(turns):
-        for tc in (t.get("tool_calls") or []):
-            if ((tc.get("function") or {}).get("name")) == "apply_job":
-                apply_at = i
-                break
-        if apply_at is not None:
-            break
-    if apply_at is None:
+    # EVERY apply_job needs a consent line before IT, not just the first. Call a5547492 spoke the
+    # consent line twice, before each of its two applies; a check that compared the first apply with
+    # the LAST-matched consent line reported a violation that had not happened. Take the earliest
+    # apply that has no consent line before it.
+    applies = [i for i, t in enumerate(turns)
+               for tc in (t.get("tool_calls") or [])
+               if ((tc.get("function") or {}).get("name")) == "apply_job"]
+    if not applies:
         return []
+    apply_at = applies[0]
     created = str(d.get("created_at"))[:19]
     if said_share_at is None:
         return [dict(bot=bot, call=uuid, at=created, kind="NO CONSENT BEFORE APPLY",

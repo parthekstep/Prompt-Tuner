@@ -10,6 +10,52 @@ Every prompt edit to Maya is logged here. Maya is Hindi-only (KKB spinoff). Entr
 - **Ported from:** <source agent> (only for cross-agent ports)
 ```
 
+### 2026-09-04 — Tracker sweep (mirrored from KKB): row-1 already-applied unreachable; inbound Example 2 demonstrated the open area ask
+
+- **Feedback/bug:** Tracker `All Issues` review. Row 103 (KKB Hindi Signals, P1) "bot is saying
+  technical issue instead of already applied". Rows 106/107 (KKB Inbound Signals, P1) location and
+  consent — the location half recurred on live traffic AFTER the 2026-09-04 fix was called verified
+  (`b48f70fb`, `2d8b7cb1`, both post-deploy).
+- **Root cause (row 103) — two competing instructions, both added by earlier fixes.** Counted first
+  (CLAUDE.md ladder rung 0): of 60 `apply_job` calls returning `ACTION_LIMIT_REACHED` across
+  2026-09-03/04, **45 spoke the technical-issue line, 5 spoke an already-applied line, 10 spoke
+  neither** — and after 2026-09-03 11:10 UTC it was **0 for 11**. Two causes:
+  (a) commit `feb9405`'s evidence gate listed only two admissible kinds of evidence and then said
+  "**Nothing else counts** … If neither 1 nor 2 holds, row 1 is FORBIDDEN" — omitting the error-text
+  condition that the whole mapping depends on (analyser **D62**);
+  (b) the THREE-DISTINCT-OUTCOMES table routed `duplicate_check: "not-applied-before"` + any error
+  to row 2 unconditionally, "never by guessing at the error" — which also stopped it READING an
+  error that names its own reason.
+- **Change (row 103): ATTEMPTED, TESTED, AND REVERTED — the Maya prompts are unchanged.** The same two
+  edits were mirrored to all four Maya prompts, deployed, tested on the KKB twin, found not to work
+  (and to regress into a false already-applied on an unrelated error — `5f0d3671`), and reverted.
+  Row 103 is not prose-fixable: across 133 named tool errors on 2026-09-01→04 no error class ever
+  produced a distinguishing line, because the model does not receive the error body. See
+  `KKB/CHANGELOG.md` for the full table and `raya/overnight/ESCALATION-litwiz.md` §2.
+- **Root cause (rows 106/108) — the sample outvoted the rule (analyser D63).** Every inbound prompt's
+  *Example 2* is a returning caller whose fetched profile is described as carrying name, role, age and
+  gender but **not** location, and its area turn shows the OPEN ask. The confirm-first rule (D61) is
+  stated twice above it; the worked example is the thing the model followed.
+- **Change (rows 106/108):** gave Example 2's fetched profile a location in all six inbound prompts and
+  changed its area turn to the confirm line, with a stage direction naming the branch; mirrored the
+  Hindi three-branch Case A structure to the two Kannada and two Maya inbound prompts (they still
+  printed the open ask as a standalone script line under the rule — the exact shape D61 fixed); and
+  added, to the confirm branch, that only the town/city part of a stored location is spoken — never a
+  full postal address (`b48f70fb` carried `VILL-MURARI TAND KAKO, PO-BHADSARA,…PIN-804418`).
+- **Files:** all 4 Maya conversation prompts (row-103 fix) and the 2 Maya inbound prompts (Example 2 +
+  Case A + postal-address clause). Maya carries the same agnostic apply-outcome block as KKB, so both
+  fixes are mirrored verbatim; no Maya divergence (college identity, MPL, feminine voice) was touched. `raya/regression/consent_before_apply.py` (the Kannada consent
+  wording `ಪರ್ಸನಲ್ ಡೀಟೇಲ್ಸ್ ಕಂಪನಿ ಜೊತೆ ಶೇರ್` was missing from `SHARE`, producing a false CONSENT AFTER
+  APPLY on `a5547492`; also now checks the earliest apply rather than comparing the first apply to a
+  later consent line). Analyser: **D62**, **D63**.
+- **Verification:** the Maya inbound location fix is **DEPLOYED, NOT VERIFIED** — the harness has one
+  tester DID and it was used for the KKB Hindi (`8235309e`) and KKB Kannada (`537549c6`) inbound
+  variants, which are the twins that carry the identical agnostic block. Per the test-every-variant
+  rule this is NOT a claim about Maya: `maya-hi-in-signals` and `maya-hi-in` need their own call.
+  The `acting_as_user_id` tool-schema tightening WAS applied to `maya-hi-signals` and
+  `maya-hi-in-signals` (parity clean) and is likewise unverified on Maya.
+- **Ported from:** KKB (agnostic apply-outcome and inbound location blocks).
+
 ### 2026-09-01 — Khushboo r3: the location reconfirm was structurally unreachable; the already-applied line is NOT prose-fixable (proven); Muradnagar canonical
 
 **Reported (WhatsApp, call ref 4989329 → live calls `5c67bd19` 07:16 and `90da81db` 07:50, both to XXXXXX6073):**

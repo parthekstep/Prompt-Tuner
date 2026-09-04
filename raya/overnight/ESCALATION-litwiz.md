@@ -65,6 +65,48 @@ its only non-profile item was an unrelated draft job posting the test number own
 Until one lands, the owner's three-outcome spec (already-applied / technical / success) is not
 achievable, and the prompt is deliberately gated to say the neutral technical line rather than guess.
 
+### 2026-09-04 — this is now measured, not inferred (tracker row 103)
+
+Row 103 ("bot is saying technical issue instead of already applied") was re-opened. The proof that no
+prompt change can close it:
+
+**Every named error class produces the same spoken line.** Across all six Signals bots, 2026-09-01 to
+2026-09-04, 133 tool errors carrying a named `error` field in the response body:
+
+| error in the response body | events | what the bot said next |
+|---|---|---|
+| `ACTION_LIMIT_REACHED` | 95 | the generic failure line ("technical issue है") |
+| `TARGET_ITEM_NOT_FOUND` | 20 | the same generic failure line |
+| `MINOR_ACTION_CHANNEL_BLOCKED` | 13 | the same generic failure line |
+| `SOURCE_ITEM_NOT_FOUND` | 2 | the same generic failure line |
+| `INVALID_ITEM_STATE` | 2 | no failure line at all (the write was narrated as done) |
+| `PROFILE_LIMIT_REACHED` | 1 | the same generic failure line |
+
+**Not one call in 133 produced a line that distinguishes one error class from another**, while the
+prompt names `ACTION_LIMIT_REACHED` in five separate places and the `apply_job` tool description
+carries the mapping. Over the same window the model demonstrably reads *successful* tool results — it
+speaks names, roles, ages and locations out of `get_profile` on every call. So it is not that the
+model ignores the reason; it is that the reason is not in what it receives.
+
+Confirmed again by harness call `row103-hi-postfix` (tester leg `ae2481e6`), run after two prompt
+fixes that removed the last two internal contradictions blocking the branch: `apply_job` returned
+`ACTION_LIMIT_REACHED` with the message "An active request already exists between these two profiles"
+and the bot still spoke the technical line. Row 2's own definition — *"an error with no reason you can
+read"* — is the correct branch on every failure while the body is withheld, so the already-applied
+branch is **unreachable by construction**, not intermittent.
+
+**Add to the ask, in priority order:** an applications list on `get_profile` would also close it
+(and would let the pre-tool duplicate check work, which is the only path that has ever produced the
+line correctly), but passing `error`/`message` through with the tool result is the smallest change
+and fixes all six classes at once.
+
+**One of the six is a data problem, not yours:** `MINOR_ACTION_CHANNEL_BLOCKED` ("This participant is
+a minor; actions for minors must be completed in the app") fired 13 times, on profiles whose stored
+`age` is 18 — a value that looks like a default rather than a real age (`a5547492` age 18, caller
+said 28 on `af52d37c`). Any caller carrying that default can never apply by phone, and today they are
+told "technical issue" and then offered more jobs that fail identically. That one is for the data
+team.
+
 ---
 
 ## What we did on our side
