@@ -54,6 +54,13 @@ KEY = _env["RAYA_API_TOKEN"]
 FAIL_LINE = re.compile(r"अप्लाई पूरा नहीं हो|apply complete नहीं|ಅಪ್ಲೈ ಇನ್ನೂ ಪೂರ್ತಿ ಆಗಿಲ್ಲ|apply complete ಆಗಿಲ್ಲ")
 OK_LINE   = re.compile(r"अप्लाई हो गया|ಅಪ್ಲೈ ಆಗಿದೆ")
 WROTE     = re.compile(r"(अपडेट कर दी|अपडेट कर दिया|सेव कर दिया|सेव कर दी|ಅಪ್‌ಡೇಟ್ ಮಾಡಿದ್ದೀನಿ|ಸೇವ್ ಮಾಡಿದ್ದೀನಿ)")
+# The already-applied (row 1) line. Row 1 is only permissible on evidence: apply_job ran earlier in
+# THIS call for THIS job, or contact_memory.jobs_applied names it. The model cannot read the tool
+# error body (133 named errors on 2026-09-01..04 all produced the same generic line), so whenever it
+# speaks row 1 off a bare 422 it is guessing -- and it guesses in BOTH directions: "technical issue"
+# on real duplicates (tracker row 103) and "already applied" on unrelated errors (c5a10922,
+# 5f0d3671 on USER_NOT_FOUND, 72112c10).
+ROW1_LINE = re.compile(r"एप्लीकेशन पहले से लगी|पहले से लगी हुई|ಅಪ್ಲಿಕೇಶನ್ ಈಗಾಗಲೇ ಇದೆ|ಈಗಾಗಲೇ ಅಪ್ಲೈ")
 
 
 def _job_in_memory(aa, job_id):
@@ -153,6 +160,32 @@ def check(bot, uuid):
                                 detail=f"job {jid} was already applied in the backend but is NOT in this call's "
                                        f"contact_memory.jobs_applied, so the bot could not have known. Not a prompt "
                                        f"bug — the fix is either richer memory or the platform surfacing the error body"))
+    # V — the already-applied line spoken with no evidence for it. Distinct from W: W is about what the
+    # model asserted BEFORE the call; this is about what it told the CALLER after an error it cannot
+    # read. Telling someone their application is already in place when it is not stops them applying.
+    if ROW1_LINE.search(said):
+        applied_jobs, ran_twice = [], False
+        seen_jobs = []
+        for m in turns:
+            for tc in (m.get("tool_calls") or []):
+                fn = tc.get("function") or {}
+                if fn.get("name") != "apply_job":
+                    continue
+                try:
+                    args = json.loads(fn.get("arguments") or "{}")
+                except Exception:
+                    continue
+                jid = args.get("job_id")
+                if jid in seen_jobs:
+                    ran_twice = True            # same job attempted twice in this call = real evidence
+                seen_jobs.append(jid)
+                if _job_in_memory(d.get("agent_args") or {}, jid):
+                    applied_jobs.append(jid)
+        if not applied_jobs and not ran_twice:
+            out.append(dict(base, kind="V UNEVIDENCED ALREADY-APPLIED",
+                            detail="spoke the already-applied line, but no apply_job ran twice for the same job "
+                                   "in this call and contact_memory.jobs_applied names none of the jobs attempted — "
+                                   "the evidence gate allows neither, so the cause was guessed off an unreadable 422"))
     if WROTE.search(said) and not ({"update_profile", "create_profile"} & set(tools_called)):
         out.append(dict(base, kind="Y NARRATED WRITE",
                         detail=f"claimed a field was saved/updated; tools actually called: {sorted(set(filter(None, tools_called))) or 'none'}"))

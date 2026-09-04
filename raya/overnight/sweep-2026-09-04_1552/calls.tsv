@@ -2,3 +2,7 @@ kkb-hi-signals	hi	hi-force-apply	already-applied-muradnagar	CALL	6e45947a-2c2d-4
 kkb-hi-signals	hi	hi-asks-for-all-jobs	morejobs-22	CALL	8d3453b1-aae2-4aaf-aa85-71cdb6e44f95	exhaust a 22-job list, no spoken counts
 kkb-hi-signals	hi	hi-loc-confirm-then-landmark	loc-reconfirm-gzb	CALL	a0999f10-5228-43f6-aa8a-18e506a1b5e2	supplied location is confirmed, not re-asked
 kkb-kn-signals	kn	kn-force-apply	dharwad-validated-12	CALL	e853e2c0-f468-4052-8ffe-a033e8623312	Kannada apply path end to end
+kkb-kn-signals	kn	kn-asks-for-all-jobs	morejobs-kn	CALL	0e204ad1-5b79-4a21-9d4c-c16314ba8004	Kannada more-jobs, ordinals + no counts
+kkb-kn-signals	kn	kn-seeker-cooperative	kn-signals-repro	CALL	b9629043-c316-455f-a527-65588f14d81e	Kannada location + free-service detail on request
+kkb-hi-in-signals	hi	hi-loc-confirm-then-landmark	inbound-probe	CALL	72112c10-d11c-4e2f-bb26-b5ec1513b768	inbound: confirm the profile location (Case B)
+kkb-hi-in-signals	hi	hi-force-apply	inbound-probe	CALL	84724178-9bb1-4f7f-aae4-76e5a530d379	inbound: consent before apply, no fabricated success
