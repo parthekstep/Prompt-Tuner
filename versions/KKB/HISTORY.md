@@ -467,3 +467,8 @@
 - **2026-09-04_115125** — `pre-deploy-kkb-kn-in-signals-2026-09-04_115125` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada Signals.md _(10 files)_
 - **2026-09-04_115127** — `pre-deploy-kkb-hi-in-2026-09-04_115127` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(10 files)_
 - **2026-09-04_115128** — `pre-deploy-kkb-kn-in-2026-09-04_115128` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(10 files)_
+- **2026-09-04_120626** — `pre-availability-cut` — reduce apply-success line availability: de-quote guards, collapse variants _(10 files)_
+- **2026-09-04_120706** — `pre-deploy-kkb-hi-signals-2026-09-04_120706` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
+- **2026-09-04_120707** — `pre-deploy-kkb-kn-signals-2026-09-04_120707` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada Signals.md _(10 files)_
+- **2026-09-04_120708** — `pre-deploy-kkb-hi-in-signals-2026-09-04_120708` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Signals.md _(10 files)_
+- **2026-09-04_120709** — `pre-deploy-kkb-kn-in-signals-2026-09-04_120709` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada Signals.md _(10 files)_
