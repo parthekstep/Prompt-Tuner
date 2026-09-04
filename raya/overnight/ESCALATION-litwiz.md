@@ -95,6 +95,31 @@ and the bot still spoke the technical line. Row 2's own definition — *"an erro
 read"* — is the correct branch on every failure while the body is withheld, so the already-applied
 branch is **unreachable by construction**, not intermittent.
 
+### It fails in BOTH directions, which is the part that makes it unfixable in prose
+
+Without the reason, the model is choosing between two lines with no information, and it gets both
+wrong:
+
+| direction | measurement |
+|---|---|
+| says **"technical issue"** when the application really was already in place | **45 of 60** `apply_job` calls that returned `ACTION_LIMIT_REACHED`, 2026-09-03/04 (tracker row 103) |
+| says **"your application is already in place"** with no evidence for it | **8 calls** in 668, 2026-09-03/04 — `c5a10922`, `49938255`, `fd464bc0`, `c00e7ba5`, `87427928`, `72112c10`, `537549c6`, and `5f0d3671` where the error was `USER_NOT_FOUND` |
+
+The prompt already gates the second direction: row 1 requires either an `apply_job` retry for the
+same job inside the call, or `contact_memory.jobs_applied` naming it. Those eight calls satisfied
+neither. Every prose tightening we can make on one direction pushes the failure into the other, which
+is what happened when we tried it: the fix that made row 1 reachable off the error name produced
+`5f0d3671`, and reverting it restored the 45-of-60. There is no wording that resolves a distinction
+the model cannot observe.
+
+**One extra thing you should know about inbound:** inbound calls arrive with **empty `agent_args`**,
+so `contact_memory` is never present on them. On an inbound bot the evidence gate can therefore only
+ever be satisfied by a same-job retry inside the call — memory evidence is structurally unavailable.
+Three of the eight are inbound for exactly that reason.
+
+Standing check: `raya/regression/apply_result_integrity.py`, findings `V` (guessed row 1) and
+`W`/`W?` (what the model asserted vs what the API said).
+
 **Add to the ask, in priority order:** an applications list on `get_profile` would also close it
 (and would let the pre-tool duplicate check work, which is the only path that has ever produced the
 line correctly), but passing `error`/`message` through with the tool result is the smallest change
