@@ -37,32 +37,35 @@ PERSONA_DIR = "raya/personas"
 # (bot_id, language, persona, args fixture, what this case is for)
 # Every conversation target in raya/agents.json that has a prod uuid. The fixture/persona pair is
 # chosen to walk the part of the flow that has actually broken before, not a happy path.
+# ORDER MATTERS. The queue is front-loaded with the cases that verify a fix shipped tonight and not
+# yet confirmed by a call, because a sweep that is interrupted should have settled those first. The
+# broader coverage follows.
 QUEUE = [
+    ("maya-hi-signals",   "hi", "hi-student-cooperative",       "gzb-validated-12",           "Maya opener branch B: no college_name supplied -> name NO institution, never read the token (718aa8ab)"),
+    ("maya-hi-signals",   "hi", "hi-force-apply",               "maya-college-gzb",           "Maya opener branch A: college_name supplied -> speak the college, not the token"),
+    ("maya-hi-in-signals","hi", "hi-loc-confirm-then-landmark", "inbound-probe",              "Maya inbound: confirm the profile location (closed-set fix, 0baf8765)"),
+    ("trrain-kn-out",     "kn", "kn-trrain-accept-then-asks",   "trrain-kn",                  "TRRAIN Kannada: names TRRAIN Trust, ported from Hindi tonight"),
+    ("kkb-hi-signals",    "hi", "hi-asks-for-all-jobs",         "morejobs-22",                "the job_recommendations alias fix: 22 jobs must NOT produce the no-jobs line (8d3453b1)"),
+    ("kkb-kn-signals",    "kn", "kn-asks-for-all-jobs",         "morejobs-kn",                "same on Kannada"),
+    ("maya-hi-out",       "hi", "hi-force-apply",               "maya-college-gzb",           "Maya legacy outbound: opener branch A"),
     ("kkb-hi-signals",    "hi", "hi-force-apply",              "already-applied-muradnagar", "apply on a job already applied to -> row1/row2 wording"),
-    ("kkb-hi-signals",    "hi", "hi-asks-for-all-jobs",         "morejobs-22",                "exhaust a 22-job list, no spoken counts"),
     ("kkb-hi-signals",    "hi", "hi-loc-confirm-then-landmark", "loc-reconfirm-gzb",          "supplied location is confirmed, not re-asked"),
     ("kkb-kn-signals",    "kn", "kn-force-apply",               "dharwad-validated-12",       "Kannada apply path end to end"),
-    ("kkb-kn-signals",    "kn", "kn-asks-for-all-jobs",         "morejobs-kn",                "Kannada more-jobs, ordinals + no counts"),
     ("kkb-kn-signals",    "kn", "kn-seeker-cooperative",        "kn-signals-repro",           "Kannada location + free-service detail on request"),
     ("kkb-hi-in-signals", "hi", "hi-loc-confirm-then-landmark", "inbound-probe",              "inbound: confirm the profile location (Case B)"),
     ("kkb-hi-in-signals", "hi", "hi-force-apply",               "inbound-probe",              "inbound: consent before apply, no fabricated success"),
     ("kkb-kn-in-signals", "kn", "kn-seeker-cooperative",        "inbound-probe",              "Kannada inbound: location + acting_as_user_id"),
     ("kkb-kn-in-signals", "kn", "kn-force-apply",               "inbound-probe",              "Kannada inbound: apply path"),
-    ("maya-hi-signals",   "hi", "hi-force-apply",               "gzb-validated-12",           "Maya outbound apply + MPL offer before goodbye"),
-    ("maya-hi-signals",   "hi", "hi-student-cooperative",       "gzb-validated-12",           "Maya: experience capture, campus identity"),
-    ("maya-hi-in-signals","hi", "hi-loc-confirm-then-landmark", "inbound-probe",              "Maya inbound: confirm the profile location"),
     ("maya-hi-in-signals","hi", "hi-force-apply",               "inbound-probe",              "Maya inbound: apply + MPL"),
     ("dkb-hi-signals",    "hi", "hi-employer-cooperative",      "dkb-new-provider",           "DKB new provider: no expiry claim, nothing invented"),
     ("dkb-hi-signals",    "hi", "hi-employer-probe",            "dkb-new-provider",           "DKB: identity probing, never government"),
     ("dkb-kn-signals",    "kn", "kn-employer-cooperative",      "dkb-kn-new-provider",        "DKB Kannada new provider"),
     ("trrain-hi-out",     "hi", "hi-trrain-accepts",            "trrain-hi",                  "TRRAIN Hindi on Signals get_profile"),
     ("trrain-hi-out",     "hi", "hi-trrain-wrong-person",       "trrain-hi",                  "TRRAIN Hindi: no offer to the wrong person"),
-    ("trrain-kn-out",     "kn", "kn-trrain-accept-then-asks",   "trrain-kn",                  "TRRAIN Kannada on Signals get_profile"),
     ("kkb-hi-out",        "hi", "hi-force-apply",               "gzb-validated-12",           "legacy Hindi outbound still healthy"),
     ("kkb-kn-out",        "kn", "kn-force-apply",               "dharwad-validated-12",       "legacy Kannada outbound still healthy"),
     ("kkb-hi-in",         "hi", "hi-loc-confirm-then-landmark", "inbound-probe",              "legacy Hindi inbound location"),
     ("kkb-kn-in",         "kn", "kn-seeker-cooperative",        "inbound-probe",              "legacy Kannada inbound"),
-    ("maya-hi-out",       "hi", "hi-force-apply",               "gzb-validated-12",           "Maya legacy outbound"),
     ("maya-hi-in",        "hi", "hi-loc-confirm-then-landmark", "inbound-probe",              "Maya legacy inbound location"),
     ("dkb-hi-out",        "hi", "hi-employer-cooperative",      "dkb-new-provider",           "DKB legacy Hindi"),
     ("dkb-kn-out",        "kn", "kn-employer-cooperative",      "dkb-kn-new-provider",        "DKB legacy Kannada"),
@@ -165,6 +168,10 @@ def main():
     ap.add_argument("--hours", type=float, default=6.0)
     ap.add_argument("--passes", type=int, default=99)
     ap.add_argument("--only", default="")
+    ap.add_argument("--since", default="",
+                    help="UTC ISO start for phase B's --since. Defaults to this run's start; pass an\n"
+                         "earlier value to keep continuity across a restart, so traffic the previous\n"
+                         "run already generated is still graded.")
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
     queue = QUEUE
@@ -178,7 +185,7 @@ def main():
         for b in dict.fromkeys(c[0] for c in queue):
             print("  %-22s %s" % (b, uuid_for(b) or "MISSING"))
         return
-    since = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime())
+    since = a.since or time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime())
     outdir = os.path.join(REPO, "raya/overnight", "sweep-" + time.strftime("%Y-%m-%d_%H%M", time.gmtime()))
     os.makedirs(outdir, exist_ok=True)
     deadline = time.time() + a.hours * 3600
