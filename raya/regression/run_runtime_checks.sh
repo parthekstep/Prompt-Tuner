@@ -29,6 +29,13 @@ echo ""
 echo "================================================================ fix_presence"
 python3 raya/regression/fix_presence.py || FAIL=1
 
+# Is the bot USING what the campaign sends it? Maya was sent `location` on every call and named it
+# nowhere, so its area question could only ever be asked from scratch (D68). Nothing in the prompt
+# was wrong -- something was absent, which no amount of reading the prompt finds.
+echo ""
+echo "================================================================ input_coverage"
+python3 raya/regression/input_coverage.py || FAIL=1
+
 for chk in dkb_employer_integrity inbound_location_consent nojobs_integrity jobs_presented consent_before_apply location_chain location_reconfirm apply_result_integrity apply_failure_wording location_integrity apply_outcomes; do
   echo ""
   echo "================================================================ $chk"
