@@ -164,13 +164,19 @@ def main():
     ap.add_argument("--since", default=time.strftime("%Y-%m-%d", time.gmtime(time.time() - 86400)))
     ap.add_argument("--agent", default=None)
     ap.add_argument("--workers", type=int, default=4)
+    ap.add_argument("--call", action="append", default=[],
+                    help="grade only these call uuids (repeatable) — the list API lags a few minutes")
     a = ap.parse_args()
     targets = [t for t in json.load(open(os.path.join(REPO, "raya/agents.json")))["targets"]
                if t.get("kind") == "conversation" and t["raya_agent_id"].get("prod")]
     if a.agent:
         targets = [t for t in targets if a.agent in (t["id"], t["raya_agent_id"]["prod"])]
     work = []
-    for t in targets:
+    if a.call:
+        _bot = targets[0]["id"] if targets else "?"
+        work = [(_bot, c) for c in a.call]
+    if not a.call:
+     for t in targets:
         off = 0
         while True:
             d = get(f"/api/call?agent_id={t['raya_agent_id']['prod']}&limit=100&offset={off}")
