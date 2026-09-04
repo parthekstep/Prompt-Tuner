@@ -27,3 +27,6 @@
 - **2026-09-03_061136** — `pre-deploy-dkb-hi-signals-2026-09-03_061136` — auto snapshot before Raya deploy of DKB/DKB Hindi Signals.md _(8 files)_
 - **2026-09-03_061137** — `pre-deploy-dkb-kn-signals-2026-09-03_061137` — auto snapshot before Raya deploy of DKB/DKB Kannada Signals.md _(8 files)_
 - **2026-09-03_132825** — `pre-deploy-dkb-hi-signals-2026-09-03_132825` — auto snapshot before Raya deploy of DKB/DKB Hindi Signals.md _(8 files)_
+- **2026-09-04_230309** — `pre-declare-contact-name` — contact_name is sent on campaign traffic and named nowhere (D68) _(8 files)_
+- **2026-09-04_230310** — `pre-deploy-dkb-hi-out-2026-09-04_230310` — auto snapshot before Raya deploy of DKB/DKB Hindi.md _(8 files)_
+- **2026-09-04_230335** — `pre-deploy-dkb-kn-out-2026-09-04_230335` — auto snapshot before Raya deploy of DKB/DKB Kannada.md _(8 files)_
