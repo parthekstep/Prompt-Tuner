@@ -120,6 +120,33 @@ Three of the eight are inbound for exactly that reason.
 Standing check: `raya/regression/apply_result_integrity.py`, findings `V` (guessed row 1) and
 `W`/`W?` (what the model asserted vs what the API said).
 
+### The endpoint we need ALREADY EXISTS — it is a scoping problem, not a build (2026-09-04, probed)
+
+This part is for the **Signals / Blue Dots API owners**, not LitWiz. Read-only probing of both
+production instances found:
+
+- **`GET /api/v1/action/fetch` exists and works.** It returns `{"meta":{"total":…,"limit":20,"offset":0,
+  "applied":{"sort":"recent","statuses":[],"types":[],"facets":[]}},"actions":[…]}` and validates
+  query params (`types`, `statuses`, `limit`, `offset`, `sort`, `facets`) — a 400 names the bad one.
+- **But the acting org cannot see the actions it created itself.** On call `e853e2c0` our apply
+  succeeded and returned `action_id: 4fbb97ec-5e2e-4df8-b878-1c0c9262cfaf`. Fetching it back from the
+  same instance with the same credentials returns `total: 0` for every filter we tried — no params,
+  `acting_as_user_id`, `source_item_id`, `types=apply` — and there is no by-id route
+  (`/api/v1/action/{id}` → 404).
+- `?item_id=<the seeker profile>` returns **403 `FORBIDDEN_ITEM` — "item_id is not owned by the
+  caller"**, which is the scoping rule: `action/fetch` is limited to items the calling org owns, and
+  the caller org owns neither side of a seeker→employer application. `admin/participant` has no such
+  restriction, which is why profile reads work and action reads do not.
+
+**So the concrete ask is small:** let the org that PERFORMED an apply read that apply back — either by
+scoping `action/fetch` on the actor as well as the item owner, or by accepting
+`acting_as_user_id` / `source_item_id` as an admin-style filter the way `/api/v1/admin/participant`
+already accepts `phone_number`. With that, the **pre-tool** duplicate check runs against real data
+instead of `contact_memory`, and both directions of this bug close at once: no "technical issue" on a
+real duplicate, and no guessed "already applied", because `apply_job` is simply never called for a job
+the caller already applied to. It also removes the need for the error body to be surfaced at all for
+this particular case.
+
 **Add to the ask, in priority order:** an applications list on `get_profile` would also close it
 (and would let the pre-tool duplicate check work, which is the only path that has ever produced the
 line correctly), but passing `error`/`message` through with the tool result is the smallest change

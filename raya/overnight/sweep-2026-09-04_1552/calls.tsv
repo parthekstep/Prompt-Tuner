@@ -8,3 +8,4 @@ kkb-hi-in-signals	hi	hi-loc-confirm-then-landmark	inbound-probe	CALL	72112c10-d1
 kkb-hi-in-signals	hi	hi-force-apply	inbound-probe	CALL	84724178-9bb1-4f7f-aae4-76e5a530d379	inbound: consent before apply, no fabricated success
 kkb-kn-in-signals	kn	kn-seeker-cooperative	inbound-probe	CALL	2d0c771b-1bdf-4856-b42a-459751d45509	Kannada inbound: location + acting_as_user_id
 kkb-kn-in-signals	kn	kn-force-apply	inbound-probe	NO-BRIDGE	aaca940a-e7e5-4877-8689-294f10983bff	Kannada inbound: apply path
+maya-hi-signals	hi	hi-force-apply	gzb-validated-12	CALL	718aa8ab-2c64-40b8-8328-2e9af3978d66	Maya outbound apply + MPL offer before goodbye
