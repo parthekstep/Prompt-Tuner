@@ -271,3 +271,6 @@
 - **2026-09-04_213150** — `pre-drop-jobrecs-alias` — same alias _(6 files)_
 - **2026-09-04_213220** — `pre-deploy-maya-hi-signals-2026-09-04_213220` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
 - **2026-09-04_213221** — `pre-deploy-maya-hi-out-2026-09-04_213221` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-09-04_220846** — `pre-college-token-branch` — the opener template embeds ${college_name}, so an unsupplied value is read aloud _(6 files)_
+- **2026-09-04_220901** — `pre-deploy-maya-hi-signals-2026-09-04_220901` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-09-04_220902** — `pre-deploy-maya-hi-out-2026-09-04_220902` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_

@@ -1131,3 +1131,36 @@ need a glossary, it needs the condition to name something that exists.
 **Source.** KKB Hindi/Kannada (both Signals and legacy) and Maya Hindi (both), 2026-09-04 — 65
 references. Found by `raya/overnight/overnight_sweep.py` on its second call, not by a report.
 Related: D59 (reading the wrong field), D62 (a condition that can never be satisfied).
+
+### D67 — A spoken template with the slot INSIDE it makes the raw variable token the default utterance
+
+**Symptom.** The bot reads a variable token aloud. Harness call `718aa8ab` on Maya outbound opened
+with *"नमस्ते। मैं माया, **${college_name}** की ओर से बात कर रही हूँ"* — the caller heard the literal
+dollar-brace token.
+
+**Root cause.** The prompt had **three** separate rules against it, all correct and all ignored:
+*"Never read the raw variable token aloud"*, *"`${college_name}` IS A SLOT, NOT WORDS TO SAY … NEVER
+say the token"*, and a parenthetical *"(If college_name is empty/missing, use the name-only
+fallback…)"*. But the **script** was a single quoted sentence with `${college_name}` embedded twice,
+introduced as *"Use this ONE opening line on every call"*. So the token was the default utterance and
+every guard was a caveat applied afterwards. The platform drops empty arguments rather than sending a
+blank, so an unsupplied field arrives AS the token — meaning the one case the guards existed for is
+also the case where the model cannot see that anything is missing.
+
+**Detection heuristic.** Grep every quoted spoken line for `${`. A `${...}` inside quoted speech is a
+latent utterance of that token, and the number of rules forbidding it is irrelevant. Then check
+whether the prompt gives the model any way to SEE that the value is absent: if the only signal is the
+token itself appearing in the script, there is nothing to check against.
+
+**Fix direction.** Two things together, both mechanism rather than wording:
+1. **Print the value back to the model** — *"The value you were given for this call is: college_name:
+   ${college_name}"* — plus *"AN UNSUBSTITUTED TOKEN COUNTS AS EMPTY: if that line still shows a
+   dollar-brace token, the field was not supplied."* Now emptiness is observable instead of asserted.
+2. **Two quoted openers, chosen by looking** — one that uses the value (with a `[college]` slot, not a
+   `${...}` token) and one that names no institution — and say which is safe by default. DKB fixed the
+   identical fault the identical way in Turn 2 (`e2ce642a`, `12dc1466`); Maya had inherited the
+   one-template shape.
+
+**Source.** Maya Hindi and Maya Hindi Signals, 2026-09-04. Bug `718aa8ab`, found by the overnight
+sweep. Maya's INBOUND prompts were already safe — their opener names no institution in the quoted
+line at all. Related: D61 (script first, condition after), D64, D25.

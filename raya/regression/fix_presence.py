@@ -94,6 +94,12 @@ FIXES = [
      TRRAIN_CONV, ["TRRAIN Trust is the ONLY partner you may name"],
      ["Never name TRRAIN or any other partner organisation aloud"]),
 
+    ("maya-college-two-openers", "the opener is TWO lines chosen by looking at the value, not one "
+                                 "template with ${college_name} inside it (harness call 718aa8ab read "
+                                 "the raw token aloud despite three rules forbidding it)",
+     [f for f in MAYA_CONV if "Inbound" not in os.path.basename(f)],
+     ["AN UNSUBSTITUTED TOKEN COUNTS AS EMPTY"], []),
+
     ("no-item-state-in-dhiway", "the Dhiway prompts must never mention item_state — it is a Signals-only "
                                 "contract token and leaked twice",
      [f for f in seeker_conv() if "Signals" not in os.path.basename(f)], [], ["item_state"]),
