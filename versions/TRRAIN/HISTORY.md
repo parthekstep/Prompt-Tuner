@@ -12,3 +12,6 @@
 - **2026-08-24_184347** — `pre-deploy-trrain-kn-out-2026-08-24_184347` — auto snapshot before Raya deploy of TRRAIN/TRRAIN Kannada.md _(4 files)_
 - **2026-09-04_212049** — `pre-kn-name-trrain-trust` — Kannada mirror never names TRRAIN Trust; Hindi master does (unregistered drift) _(4 files)_
 - **2026-09-04_212055** — `pre-deploy-trrain-kn-out-2026-09-04_212055` — auto snapshot before Raya deploy of TRRAIN/TRRAIN Kannada.md _(4 files)_
+- **2026-09-04_221235** — `pre-token-empty-clause` — same for applied_job_role _(4 files)_
+- **2026-09-04_221256** — `pre-deploy-trrain-hi-out-2026-09-04_221256` — auto snapshot before Raya deploy of TRRAIN/TRRAIN Hindi.md _(4 files)_
+- **2026-09-04_221257** — `pre-deploy-trrain-kn-out-2026-09-04_221257` — auto snapshot before Raya deploy of TRRAIN/TRRAIN Kannada.md _(4 files)_

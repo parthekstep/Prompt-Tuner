@@ -100,6 +100,16 @@ FIXES = [
      [f for f in MAYA_CONV if "Inbound" not in os.path.basename(f)],
      ["AN UNSUBSTITUTED TOKEN COUNTS AS EMPTY"], []),
 
+    ("token-counts-as-empty", "every prompt with a ${token} inside a QUOTED SPOKEN line says that an "
+                              "unsubstituted token counts as EMPTY — the platform drops empty args, so "
+                              "an unsupplied field arrives as the raw token and is read aloud (D67, 718aa8ab)",
+     [os.path.join(REPO, "KKB", "KKB Placeholder Hindi Signals.md"),
+      os.path.join(REPO, "KKB", "KKB Placeholder Kannada Signals.md"),
+      os.path.join(REPO, "TRRAIN", "TRRAIN Hindi.md"),
+      os.path.join(REPO, "TRRAIN", "TRRAIN Kannada.md")] + DKB_SIGNALS
+     + [f for f in MAYA_CONV if "Inbound" not in os.path.basename(f)],
+     ["UNSUBSTITUTED TOKEN COUNTS AS EMPTY"], []),
+
     ("no-item-state-in-dhiway", "the Dhiway prompts must never mention item_state — it is a Signals-only "
                                 "contract token and leaked twice",
      [f for f in seeker_conv() if "Signals" not in os.path.basename(f)], [], ["item_state"]),

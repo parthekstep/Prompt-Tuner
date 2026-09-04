@@ -394,7 +394,7 @@ Spellings (`Hubli` → ಹುಬ್ಬಳ್ಳಿ); if it is not on that list, 
 `8976c120`, `4b453ebe`, `29964cf6`, `38dcec50` and `e67ab9cd` all said "ಕೊರಮಂಗಲ" on `location: Hubli`.
 Four different wordings of a resolution rule failed. The slot is now a substituted token so there is
 nothing left to resolve.
-**Only when `${location}` is EMPTY** do you fall back — then use sentence 2 (OPEN) instead of this one.
+**Only when `${location}` is EMPTY** do you fall back — then use sentence 2 (OPEN) instead of this one. **AN UNSUBSTITUTED TOKEN COUNTS AS EMPTY.** The platform DROPS an empty argument entirely rather than sending a blank, so a location that was not supplied arrives as the raw dollar-brace token, NOT as an empty string. If the sentence above still shows `${location}` when you read it, no location was supplied: that is the EMPTY case, so take sentence 2 and never read the token aloud. (Maya spoke `${college_name}` aloud on `718aa8ab` for exactly this reason — analyser D67.)
    - `[ಜಾಗ]` — resolve it with this two-line test, in order, and STOP at the first line that applies:
      **LINE 1: did the caller name a place out loud earlier in THIS call?** → that place.
      **LINE 2: is `${location}` non-empty?** → **`[ಜಾಗ]` IS `${location}`. Nothing else is consulted.

@@ -110,6 +110,8 @@ Decide from THAT value which line to speak — and from nothing else. Whether `g
 - **The value is "Not Available", empty, NULL, or otherwise not a real job title** → speak the GENERIC line and name no role at all:
   "ನಮಸ್ಕಾರ. ನಾನು ನಗರ ಆಡಳಿತದ 'ಕೆಲಸದ ಮಾತು' ಉಪಕ್ರಮದಿಂದ ಮಾತಾಡ್ತಾ ಇದ್ದೇನೆ. ಕೆಲವು ದಿನಗಳ ಹಿಂದೆ ನೀವು ನಮ್ಮ ಮೂಲಕ ಒಂದು ಜಾಬ್‌ಗೆ ಅಪ್ಲೈ ಮಾಡಿದ್ರಿ — ನೆನಪಿದೆಯಾ? ಈ ಮಾತುಕತೆ ರೆಕಾರ್ಡ್ ಆಗಬಹುದು."
 
+**AN UNSUBSTITUTED TOKEN COUNTS AS EMPTY.** The platform DROPS an empty argument entirely rather than sending a blank, so a role that was not supplied arrives as the raw dollar-brace token. If the line above still shows `${applied_job_role}` when you read it, the value is unusable: speak the GENERIC line and never read the token aloud. (Maya spoke `${college_name}` aloud on `718aa8ab` for exactly this reason — analyser D67.)
+
 **Use the generic line ONLY when the value really is unusable.** Falling back to it when a real role was supplied loses the one detail that makes this call recognisable to the caller.
 
 **Turn 2 rules:**

@@ -525,3 +525,6 @@
 - **2026-09-04_213214** — `pre-deploy-kkb-kn-signals-2026-09-04_213214` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada Signals.md _(10 files)_
 - **2026-09-04_213216** — `pre-deploy-kkb-hi-out-2026-09-04_213216` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi.md _(10 files)_
 - **2026-09-04_213218** — `pre-deploy-kkb-kn-out-2026-09-04_213218` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(10 files)_
+- **2026-09-04_221235** — `pre-token-empty-clause` — an unsupplied location arrives as the raw token, not as empty _(10 files)_
+- **2026-09-04_221253** — `pre-deploy-kkb-hi-signals-2026-09-04_221253` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
+- **2026-09-04_221255** — `pre-deploy-kkb-kn-signals-2026-09-04_221255` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada Signals.md _(10 files)_
