@@ -58,3 +58,33 @@ exists, say so and we will do the reduction on our side deliberately rather than
 `TARGET_ITEM_NOT_FOUND` fired 20 times in the same window. Those are `job_id`s that were live when the
 campaign was built and are not live now. `${recommendations}` should be built from current job ids at
 send time; a caller who agrees to apply to a job that no longer exists is told the apply failed.
+
+---
+
+## 4. The recommendation array carries duplicate postings
+
+`morejobs-22` — a real campaign payload captured as a fixture — holds **22 entries with only 18
+distinct role+company pairs**. "Crew Member - McDonald's / MacDonalds" appears **five** times:
+
+| job_id | location | salary |
+|---|---|---|
+| `b256308a` | Main, Grand Trunk Road, Nehru Nagar, 201001, Ghaziabad | 13000 - 15000 |
+| `af81c643` | Raj Nagar Extension, 201003, Ghaziabad | 13000 - 15000 |
+| `c9857e06` | Padmana Naidu Marg, Indirapuram, 201014, Ghaziabad | 13000 - 15000 |
+| `d0864e33` | 9, PVR, Indirapuram, 201014, Ghaziabad | 13000 - 15000 |
+| `699304e1` | 9, PVR, Indirapuram, 201014, Ghaziabad | 13000 - 15000 |
+
+Four of the five are genuinely different branches, which is fine — but the **last two are identical in
+company, role, location and salary** and differ only by `job_id`. The same pattern appears on
+"Customer Support Executive / CY FUTURE" (two Noida entries).
+
+The bot is instructed to walk the array in order and never skip, so on call `4982c225` the caller
+heard "क्रू मेंबर - मैकडॉनल्ड्स, तेरह हज़ार से पंद्रह हज़ार" up to five times, twice with nothing to
+tell the two apart. **The ask:** de-duplicate exact role+company+location+salary matches before
+building `${recommendations}`. Distinct branches are worth listing separately; two rows for the same
+vacancy are not.
+
+Also note the company name is spelled **three different ways** across those five rows —
+`MacDonalds`, `McDonald's` — which the bot has to speak, so it says the brand differently depending on
+which row it is reading.
+

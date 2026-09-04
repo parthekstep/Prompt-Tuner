@@ -103,6 +103,26 @@ def grade(bot, uuid):
     return out
 
 
+def _bot_for_call(uuid, targets):
+    """Label a --call finding with the bot that call ACTUALLY belongs to.
+
+    This used to be `targets[0]["id"]` — the first target in the manifest, checked against nothing.
+    On 2026-09-04 a real finding on call 4982c225 (agent 115b38a5 = kkb-hi-signals) printed against
+    `kkb-hi-out`, a different prompt file on a different backend. A report that names the wrong bot
+    sends whoever reads it to the wrong prompt.
+    """
+    try:
+        aid = (get("/api/call/" + uuid) or {}).get("agent_id")
+    except Exception:
+        aid = None
+    if aid:
+        for t in targets:
+            if (t.get("raya_agent_id") or {}).get("prod") == aid:
+                return t["id"]
+        return "agent:" + str(aid)[:8]
+    return "?"
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--since", default=time.strftime("%Y-%m-%d", time.gmtime(time.time() - 86400)))
@@ -116,7 +136,7 @@ def main():
         targets = [t for t in targets if t["id"] == a.agent]
     work = []
     if a.call:
-        work = [((targets[0]["id"] if targets else "?"), c) for c in a.call]
+        work = [(_bot_for_call(c, targets), c) for c in a.call]
     else:
         for t in targets:
             for c in (get("/api/call?agent_id=%s&limit=60" % t["raya_agent_id"]["prod"]).get("calls") or []):

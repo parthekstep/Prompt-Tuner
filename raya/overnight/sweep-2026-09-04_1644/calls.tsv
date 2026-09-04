@@ -2,3 +2,6 @@ maya-hi-signals	hi	hi-student-cooperative	gzb-validated-12	CALL	d57b9ff6-e37c-4f
 maya-hi-signals	hi	hi-force-apply	maya-college-gzb	CALL	24293fbe-5b8f-4e86-8681-a2f3dc9c8a4d	Maya opener branch A: college_name supplied -> speak the college, not the token
 maya-hi-in-signals	hi	hi-loc-confirm-then-landmark	inbound-probe	CALL	ed9435d5-c493-4c26-9a2a-551eb36b34fb	Maya inbound: confirm the profile location (closed-set fix, 0baf8765)
 trrain-kn-out	kn	kn-trrain-accept-then-asks	trrain-kn	CALL	d4e42fca-7431-4ff6-be94-f2e83f733d9e	TRRAIN Kannada: names TRRAIN Trust, ported from Hindi tonight
+kkb-hi-signals	hi	hi-asks-for-all-jobs	morejobs-22	CALL	4982c225-390e-4731-9c66-15fa14417db8	the job_recommendations alias fix: 22 jobs must NOT produce the no-jobs line (8d3453b1)
+kkb-kn-signals	kn	kn-asks-for-all-jobs	morejobs-kn	NO-BRIDGE	88590e46-d8b0-4a10-86b5-906dfc6335bd	same on Kannada
+maya-hi-out	hi	hi-force-apply	maya-college-gzb	CALL	78ef362f-9da0-4795-a977-5eca424e2ecb	Maya legacy outbound: opener branch A
