@@ -56,6 +56,43 @@ nothing looking, not a broken digest.
 Until one is chosen, run it by hand after every behaviour change; the `/bug-fix` and `/voice-test`
 skills both call for it.
 
+### The deeper half of the same gap: the detectors need TRAFFIC, and nothing was generating it
+
+Even run by hand, every detector above is a reader. It can only find a fault on a bot that somebody
+happened to call. Production traffic is uneven — on 2026-09-04 the Kannada outbound bot took 500 calls
+and DKB took three — so a bot with no campaign that day is effectively unchecked however often the
+detectors run. That is the other reason this week's regressions were found by hand: not only was
+nothing looking unattended, nothing was *dialling*.
+
+**`raya/overnight/overnight_sweep.py` closes that half.** It generates the traffic and then hands it
+to these same detectors:
+
+```bash
+python3 raya/overnight/overnight_sweep.py --hours 6     # run it overnight
+python3 raya/overnight/overnight_sweep.py --dry-run     # print the queue, dial nothing
+```
+
+- **Phase A** — 28 cases covering **all 18 testable bots** (every conversation target with a prod
+  uuid). Per case it PATCHes the tester agent's persona and language, triggers the bot to dial the
+  tester DID, and records the bot-leg uuid. The persona/fixture pair for each case is chosen to walk
+  the part of the flow that has actually broken before, not a happy path.
+- **Phase B** — the static suite, `toolschema_parity.py`, every detector in this directory with
+  `--since <sweep start>`, and `fab_rate.py --append`. The detectors grade the traffic phase A just
+  made, so a rule still only has to be written once, here.
+- **Loop** — repeat until the deadline. Re-testing the same bot across passes is what turns "one
+  lucky clean call" into a rate, which is the only honest way to read an intermittent fault.
+
+Output lands in `raya/overnight/sweep-<date>/`: `calls.tsv` (one row per attempt), `pass-<n>.txt`
+(detector output), and `REPORT.md`, rewritten after every pass so a partial night is still readable.
+
+**Known limits.** One tester DID means phase A is strictly serial: ~4-5 minutes per case, and the
+bridge rate depends on how long the line has been idle (19% at 30-90s, 62% after 10 minutes idle —
+measured over 115 dials, see `raya_testrun.CONNECT_BACKOFF`). Budget ~2 hours per pass and expect
+some cases to report `NO-BRIDGE` rather than a finding. `dkb-hi-in` / `dkb-kn-in` have no prod uuid
+and are skipped. It needs `raya/.env`, so like the detectors it cannot run in the zero-secrets CI
+job — it is the thing you start before going to bed, not a substitute for choosing option 1 or 2
+above.
+
 ## Weekly — live voice regression (sampled)
 A fuller live pass over more bots via the tester agent + the `/voice-test` checklists (generic + bot-specific).
 Not daily (one tester = serial calls; 100+ live calls/day isn't feasible). The weekly routine picks a rotating

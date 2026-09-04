@@ -595,6 +595,30 @@ have actually been burned by, tuned for precision because a noisy daily email is
 
 Runtime ~6 s. **No run ever places a phone call.**
 
+**And that is the limit of it: Tier 3 has been static-only, so no *behaviour* is checked unattended.**
+Every regression in the 2026-09-01→04 window — the inbound location ask, the already-applied branch
+going silent, the fabricated apply success — reached us through a QA WhatsApp message, because the
+daily job reads prompt TEXT and none of those faults are visible in the text. Two things were missing:
+nothing ran the behaviour detectors unattended (see `raya/regression/README.md`, "Runtime checks are
+NOT in the daily digest yet"), and **nothing generated the traffic they need to read.** A detector is
+a reader; on a day when a bot takes no calls, it is unchecked however often the detector runs.
+
+**`raya/overnight/overnight_sweep.py` is the behaviour half of Tier 3** — the thing you start before
+going to bed:
+
+```bash
+python3 raya/overnight/overnight_sweep.py --hours 6     # dial, then grade, in a loop
+python3 raya/overnight/overnight_sweep.py --dry-run     # print the 28-case queue, dial nothing
+```
+
+Phase A dials **all 18 testable bots** (28 cases, persona + fixture chosen per case to walk a part of
+the flow that has actually broken); phase B then runs the static suite, `toolschema_parity.py`, every
+runtime detector `--since` the sweep start, and `fab_rate.py --append` over exactly that traffic; then
+it loops, so an intermittent fault reads as a rate instead of one lucky call. Output:
+`raya/overnight/sweep-<date>/{calls.tsv, pass-N.txt, REPORT.md}`, with `REPORT.md` rewritten after
+every pass so a night that ends early is still readable. It is serial on one tester DID (~2 h/pass)
+and needs `raya/.env`, so it cannot move into the zero-secrets CI job.
+
 **Where the output lives.** `raya/regression/latest-report.md` (human) and `latest-report.json`
 (machine — its `critical` array drives the digest). Curated known issues live in
 `raya/regression/open-items.json`, joined to bots by the exact label string
