@@ -29,7 +29,7 @@ echo ""
 echo "================================================================ fix_presence"
 python3 raya/regression/fix_presence.py || FAIL=1
 
-for chk in dkb_employer_integrity inbound_location_consent jobs_presented consent_before_apply location_chain location_reconfirm apply_result_integrity apply_failure_wording location_integrity apply_outcomes; do
+for chk in dkb_employer_integrity inbound_location_consent nojobs_integrity jobs_presented consent_before_apply location_chain location_reconfirm apply_result_integrity apply_failure_wording location_integrity apply_outcomes; do
   echo ""
   echo "================================================================ $chk"
   python3 "raya/regression/$chk.py" "${ARGS[@]}" || FAIL=1

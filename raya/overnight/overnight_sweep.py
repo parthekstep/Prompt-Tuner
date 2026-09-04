@@ -68,7 +68,7 @@ QUEUE = [
     ("dkb-kn-out",        "kn", "kn-employer-cooperative",      "dkb-kn-new-provider",        "DKB legacy Kannada"),
 ]
 
-DETECTORS = ["dkb_employer_integrity", "inbound_location_consent", "jobs_presented",
+DETECTORS = ["dkb_employer_integrity", "inbound_location_consent", "nojobs_integrity", "jobs_presented",
              "consent_before_apply", "location_chain", "location_reconfirm",
              "apply_result_integrity", "apply_failure_wording", "location_integrity",
              "apply_outcomes"]

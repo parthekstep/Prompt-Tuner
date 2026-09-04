@@ -100,3 +100,25 @@ Tick each; flag misses. (Each ties to a pattern in `bug-patterns.md`.)
 
 **Cross-language (pointer)**
 - [ ] Any change that looks AGNOSTIC is noted for a `/sync-check` against the twin (F).
+
+## Seeker bots — the missing-job-data fallback (added 2026-09-04, D66)
+
+Any seeker prompt that carries a "no jobs were supplied to this call" fallback line must satisfy all
+four of these. The line is the most damaging thing the bot can say to a job-seeker short of a fake
+application, and on 2026-09-04 it was spoken on five calls that had been sent 3, 22, 28, 29 and 29
+jobs — three of them real production callers.
+
+1. **Its condition names a REAL input variable.** Grep the condition for identifier-shaped tokens and
+   check each against the `${...}` variables the prompt actually declares. An alias ("`${recommendations}`
+   as job_recommendations") is the usual killer: the test then names something that does not exist and
+   reads as empty on every call.
+2. **The empty case and the wrong-role case have DIFFERENT lines.** "No jobs were supplied" and "none
+   of these fit what you asked for" are different facts. One line for both guarantees the wrong one
+   gets spoken.
+3. **The wrong-role line names what IS available.** It has two mandatory slots (the role asked for,
+   and the kinds of work we do have); there is no version of it that names nothing.
+4. **A count guard sits in front of any "nothing left" claim** — the jobs actually said aloud on this
+   call, against the valid entries in the recommendations array. Without it the bot claims the list is
+   exhausted with most of it unnamed.
+
+Standing check: `raya/regression/nojobs_integrity.py`.
