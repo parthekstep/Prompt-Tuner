@@ -6,3 +6,4 @@ kkb-hi-signals	hi	hi-asks-for-all-jobs	morejobs-22	CALL	4982c225-390e-4731-9c66-
 kkb-kn-signals	kn	kn-asks-for-all-jobs	morejobs-kn	NO-BRIDGE	88590e46-d8b0-4a10-86b5-906dfc6335bd	same on Kannada
 maya-hi-out	hi	hi-force-apply	maya-college-gzb	CALL	78ef362f-9da0-4795-a977-5eca424e2ecb	Maya legacy outbound: opener branch A
 kkb-hi-signals	hi	hi-force-apply	already-applied-muradnagar	CALL	8b0e6866-dfec-4d89-8910-73dde6cd2c98	apply on a job already applied to -> row1/row2 wording
+kkb-hi-signals	hi	hi-loc-confirm-then-landmark	loc-reconfirm-gzb	CALL	f8ab149e-5145-47b7-8d72-14ac6f0d51a6	supplied location is confirmed, not re-asked

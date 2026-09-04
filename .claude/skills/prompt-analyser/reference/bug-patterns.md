@@ -1164,3 +1164,40 @@ token itself appearing in the script, there is nothing to check against.
 **Source.** Maya Hindi and Maya Hindi Signals, 2026-09-04. Bug `718aa8ab`, found by the overnight
 sweep. Maya's INBOUND prompts were already safe — their opener names no institution in the quoted
 line at all. Related: D61 (script first, condition after), D64, D25.
+
+### D68 — An input the campaign SENDS that the prompt never names is an input the bot cannot use
+
+**Symptom.** A bot asks for something it was already told. Maya outbound asked the area from scratch on
+every call — `24293fbe`, `d57b9ff6`, `78ef362f` — each of which was dialled with
+`location: "Ghaziabad"` in `agent_args`. Three detectors flagged it independently
+(`location_chain` C1/C2, `location_reconfirm` A) and it survived a fix to the confirm branch and a fix
+to the closed set, because neither was the cause.
+
+**Root cause.** `${location}` appears **9 times** in the KKB Signals master and **zero times** in any
+Maya prompt. The campaign has always sent it; Maya was never told the variable exists. So the location
+decision could only ever consult `contact_memory` and the fetched profile, and on a first call to a
+seeker with no stored location both are empty — the open ask was not a mis-ranked branch, it was the
+only reachable one.
+
+This is D66 inverted. D66 was a condition naming a variable that does not exist; this is a variable
+that exists and is named nowhere. Both make a branch unreachable and neither is visible in the
+prompt's own text, because nothing in the prompt is wrong — something is *absent*.
+
+**Detection heuristic.** Diff the `${...}` variables a prompt declares against the `agent_args` keys
+its live calls actually carry:
+
+```bash
+python3 scripts/raya_call.py <agent_uuid> 5 | grep -A20 '^agent_args'   # keys really sent
+grep -oE '\$\{[a-z_]+\}' "<prompt>.md" | sort -u                        # keys the prompt knows
+```
+
+Anything in the first list and not the second is being paid for and thrown away. Run it per bot, not
+per family: a variable declared in the master says nothing about the mirror or the spin-off.
+
+**Fix direction.** Declare the variable, and place it in the decision at the priority the master gives
+it — for a caller's location that is FIRST, ahead of memory and the fetched profile, because it is the
+value the campaign selected this caller on. Add the unsubstituted-token clause at the same time (D67):
+an unsupplied argument arrives as the raw token, so "empty" has to include "still a token".
+
+**Source.** Maya Hindi and Maya Hindi Signals, 2026-09-04, found by the overnight sweep after two
+earlier fixes to the same symptom missed. Related: D66, D67, D61.
