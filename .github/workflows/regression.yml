@@ -60,6 +60,13 @@ jobs:
         id: run
         run: |
           python3 raya/regression/static_regression.py || true
+          # fix_presence is static and needs no secrets, so it belongs in the unattended job: it is
+          # the only check that knows what we FIXED, and half-landed mirrors are the failure mode this
+          # fleet keeps hitting. Non-fatal here for the same reason the suite above is -- the digest
+          # reports, the job does not gate.
+          echo "::group::fix_presence"
+          python3 raya/regression/fix_presence.py || echo "FIX PRESENCE FAILURES (see log)"
+          echo "::endgroup::"
           python3 - <<'PY' >> "$GITHUB_OUTPUT"
           import json
           r = json.load(open("raya/regression/latest-report.json"))

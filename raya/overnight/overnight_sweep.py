@@ -121,6 +121,7 @@ def phase_b(since, outdir, n):
     path = os.path.join(outdir, "pass-%d.txt" % n)
     with open(path, "w", encoding="utf-8") as fh:
         for name, cmd in [("static_regression", ["python3", "raya/regression/static_regression.py"]),
+                          ("fix_presence", ["python3", "raya/regression/fix_presence.py"]),
                           ("toolschema_parity", ["python3", "scripts/toolschema_parity.py"])]:
             rc, out = sh(cmd, timeout=900)
             fh.write("\n==== %s (rc=%d)\n%s" % (name, rc, out)); fh.flush()

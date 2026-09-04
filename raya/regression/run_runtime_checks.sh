@@ -21,6 +21,14 @@ echo ""
 echo "================================================================ toolschema_parity"
 python3 scripts/toolschema_parity.py || FAIL=1
 
+# Every shipped fix, on every bot that needs it. Three fixes have half-landed on their mirrors
+# (duplicate_check 1/12, the ACTION_LIMIT mapping 1/6, the TRRAIN naming Hindi-only) and none of
+# the other checks knows what we FIXED. Static and secret-free, so it also belongs in the daily
+# cloud job.
+echo ""
+echo "================================================================ fix_presence"
+python3 raya/regression/fix_presence.py || FAIL=1
+
 for chk in dkb_employer_integrity inbound_location_consent jobs_presented consent_before_apply location_chain location_reconfirm apply_result_integrity apply_failure_wording location_integrity apply_outcomes; do
   echo ""
   echo "================================================================ $chk"
