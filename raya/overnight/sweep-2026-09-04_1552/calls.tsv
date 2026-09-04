@@ -1,2 +1,3 @@
 kkb-hi-signals	hi	hi-force-apply	already-applied-muradnagar	CALL	6e45947a-2c2d-41c3-81b5-549ebe99748f	apply on a job already applied to -> row1/row2 wording
 kkb-hi-signals	hi	hi-asks-for-all-jobs	morejobs-22	CALL	8d3453b1-aae2-4aaf-aa85-71cdb6e44f95	exhaust a 22-job list, no spoken counts
+kkb-hi-signals	hi	hi-loc-confirm-then-landmark	loc-reconfirm-gzb	CALL	a0999f10-5228-43f6-aa8a-18e506a1b5e2	supplied location is confirmed, not re-asked

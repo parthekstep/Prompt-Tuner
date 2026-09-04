@@ -1096,3 +1096,38 @@ the bridge used to cover is already spoken by the tool's own `hold_message`, so 
 nothing available to say, the only way forward is the tool call.
 
 **Source.** All 12 KKB/Maya conversation prompts, 2026-09-04. Related: D57, D50, D25, D47.
+
+### D66 — An ALIAS for an input variable makes every test of that variable silently false
+
+**Symptom.** The bot tells a job-seeker there are no jobs on a call where jobs were supplied. Harness
+call `8d3453b1`: `agent_args` carried `recommendations` with **22 valid jobs**, and the bot said
+*"अभी आपके लिए मुझे जॉब्स नहीं मिल रहीं — एक बार फिर से देखकर मैं आपको वापस कॉल करती हूँ।"* — eight times,
+including directly after the caller asked "कौन सी जॉब्स हैं सारी बता दीजिए". Not one job was named.
+
+**Root cause.** The Input Variables section declared the variable with an alias:
+*"**`${recommendations}`** as job_recommendations — a JSON array of up to 10 job objects…"*, and then
+**65 references across six prompts used the alias instead of the variable**, including the Pre-check
+whose entire job is to decide whether any jobs were supplied: *"Before greeting the user or fetching a
+profile, check `job_recommendations`. If it is empty, null, or contains no valid jobs → skip all steps
+and trigger No-Match Fallback immediately."* There is no input called `job_recommendations`. A model
+that takes that instruction literally finds nothing, concludes "empty", and fires the missing-job-data
+line — which is exactly what a confused, low-ASR-quality call pushes it towards, because the
+pre-check is the first and simplest rule in the section. The emptiness guard was **inverted by a
+naming convention**, and it stayed hidden for as long as it did because on a clean call the model
+reads the populated `${recommendations}` elsewhere and never consults the pre-check.
+
+**Detection heuristic.** For every prompt, extract the set of `${...}` input variables actually
+declared, then grep for identifier-shaped tokens used in rule prose (backticked or bare snake_case)
+that are NOT in that set and are not tool names, tool parameters or response fields. Any such token
+that appears in a CONDITION — "if X is empty", "check X", "X contains no" — is a test that can never
+pass. Aliases are the usual source: look for "`${var}` as other_name", "also called", "referred to
+below as".
+
+**Fix direction.** Delete the alias and use the real variable name everywhere — one name for one
+thing. This is language-agnostic content, so the rename is byte-identical across every language of the
+bot (never localise a variable name). Do not "document the alias more clearly": the model does not
+need a glossary, it needs the condition to name something that exists.
+
+**Source.** KKB Hindi/Kannada (both Signals and legacy) and Maya Hindi (both), 2026-09-04 — 65
+references. Found by `raya/overnight/overnight_sweep.py` on its second call, not by a report.
+Related: D59 (reading the wrong field), D62 (a condition that can never be satisfied).
