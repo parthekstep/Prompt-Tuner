@@ -10,3 +10,5 @@
 - **2026-08-24_183555** — `pre-reconcile-2408` — adopt live Hindi (team named the partner + detailed service answer) _(4 files)_
 - **2026-08-24_183556** — `pre-deploy-trrain-hi-out-2026-08-24_183556` — auto snapshot before Raya deploy of TRRAIN/TRRAIN Hindi.md _(4 files)_
 - **2026-08-24_184347** — `pre-deploy-trrain-kn-out-2026-08-24_184347` — auto snapshot before Raya deploy of TRRAIN/TRRAIN Kannada.md _(4 files)_
+- **2026-09-04_212049** — `pre-kn-name-trrain-trust` — Kannada mirror never names TRRAIN Trust; Hindi master does (unregistered drift) _(4 files)_
+- **2026-09-04_212055** — `pre-deploy-trrain-kn-out-2026-09-04_212055` — auto snapshot before Raya deploy of TRRAIN/TRRAIN Kannada.md _(4 files)_

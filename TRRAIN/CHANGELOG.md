@@ -28,6 +28,58 @@
 - **Files:** `TRRAIN/TRRAIN Hindi.md` (new), `TRRAIN/TRRAIN Kannada.md` (new), `TRRAIN/TRRAIN Output.md` (new), `TRRAIN/TRRAIN Memory.md` (new), `TRRAIN/CHANGELOG.md` (new), `raya/agents.json`, `CLAUDE.md` (path map).
 - **Raya agents:** `TRRAIN Hindi` = `cf39a59a-3b24-4842-ba03-4248ec245aa1`, `TRRAIN Kannada` = `dfeda883-3d2d-4a74-a0b5-1a47fdde2282`. Both created via `POST /api/agent` with `say_hello=false`, `max_call_duration_mins=5`, memory enabled.
 
+### 2026-09-04 — Registered as a Signals bot; Kannada was still refusing to name TRRAIN Trust
+
+- **Feedback/bug:** "the TRRAIN bot is still not on the signals API." Its *tools* have pointed at
+  `gzb-signals` / `dharwad-signals` since the 2026-08-28 cutover and its prompt already reads the
+  Signals `items[]` shape — but every tool that derives a bot's backend did so from the target **id**
+  (`"signals" in t["id"]`), and TRRAIN's ids are `trrain-hi-out` / `trrain-kn-out`. So TRRAIN was
+  classified `dhiway` in `fleet.json`, grouped as "TRRAIN / legacy" by `toolschema_parity.py`, and
+  excluded from `--signals-only` and from the Signals contract checks entirely. On the API it was
+  migrated; in our own tooling it was invisible.
+- **Change (registration):** `raya/agents.json` — all six TRRAIN targets now carry `"signals": true`
+  (the flag `static_regression.discover_prompts()` already honoured); `scripts/toolschema_parity.py`
+  now derives the backend from that flag with the id substring only as a fallback, so a bot whose id
+  lacks the token can no longer fall out of the Signals family. `fleet.json` rebuilt: TRRAIN reads
+  `backend: signals`, `sync_group TRRAIN:outbound:signals`. Parity clean across all 12 bots.
+- **Verified on the live API:** TRRAIN's `get_profile` is byte-identical to the KKB Signals bots' —
+  same per-region URL, same `x-api-key` / `x-acting-org-id` headers, same org ids, same tool and
+  parameter descriptions. End-to-end: **`6e5b67de`** (Hindi) and **`58174cf7`** (Kannada) both fetched
+  from the Signals participant endpoint, read the caller's name out of the `items[]` response, made
+  the offer once and closed.
+- **Bug found by that test — Kannada had never received the TRRAIN-naming change.** The Hindi master
+  names the partner in 7 places (offer introduction, the "who is TRRAIN Trust" FAQ, the prohibition
+  list's carve-out); the Kannada mirror had **zero** and still carried the superseded rule
+  *"Never name TRRAIN or any other partner organisation aloud"* plus *"never name the organisation
+  behind it"*. Heading counts matched 54/54, so the skeleton was aligned and only this content block
+  was missing — an unregistered divergence, i.e. a regression under the sync rule.
+- **Change (Kannada port):** brought the Kannada mirror up to the master — the offer now introduces
+  "ಟ್ರೇನ್ ಟ್ರಸ್ಟ್" with the one-line public-charitable-trust description; the naming rule replaces the
+  old prohibition; the "what is this service" FAQ answer names TRRAIN Trust and carries the master's
+  sanctioned scope; "ಯಾರು ಕಾಲ್ ಮಾಡ್ತಾರೆ?" now answers with TRRAIN Trust's team; the missing
+  "ಟ್ರೇನ್ ಟ್ರಸ್ಟ್ ಅಂದ್ರೆ ಏನು?" question was added with the sanctioned description; the prohibition list
+  now reads "any partner organisation OTHER than TRRAIN Trust"; and both sample conversations were
+  updated so they demonstrate the naming rather than the old silence (D50 — a sample that shows the
+  superseded behaviour reinstates it). Heading parity held at 54/54, static suite 0 critical/0 major.
+- **Files:** `TRRAIN/TRRAIN Kannada.md`, `raya/agents.json`, `scripts/toolschema_parity.py`,
+  `raya/regression/fleet.json`, root `CLAUDE.md` (its TRRAIN line still said "the partner is never
+  named aloud" — stale since the Hindi change, and it is what made me briefly mis-read the correct
+  Hindi behaviour on `6e5b67de` as a bug).
+- **Verification:** Hindi `6e5b67de` (names ट्रेन ट्रस्ट, one offer, sanctioned FAQ answer on request).
+  Kannada port is **DEPLOYED, NOT VERIFIED** at the time of writing — it is in the overnight sweep
+  queue (`raya/overnight/overnight_sweep.py`, case `trrain-kn-out / kn-trrain-accept-then-asks`).
+- **⚠ OWNER DECISION I MADE WITHOUT AN ANSWER — read this.** The 2026-08-24 entry below deliberately
+  did NOT mirror the naming into Kannada, on the grounds that naming a partner aloud reverses a
+  standing constraint in the repo `CLAUDE.md` and is the owner's call, and it asked for confirmation.
+  No answer was ever recorded. I mirrored it anyway, for three reasons: the team themselves put the
+  naming into LIVE Hindi on the console (so the policy is already in production with real callers);
+  an unregistered language divergence is a regression under this repo's own sync rule; and the
+  alternative — Kannada callers getting a materially different answer to "who is calling me?" — is
+  itself a defect. **If that call is wrong, it is one command to undo:**
+  `scripts/prompt-version.sh restore TRRAIN 2026-09-04_212049__pre-kn-name-trrain-trust`, then
+  `scripts/deploy_check.sh trrain-kn-out`. If instead the Kannada silence was intentional, it needs an
+  entry in `raya/divergences.json` rather than being left to the next audit to "fix" either way.
+
 ### 2026-08-10 (later) — two fixes from the first live calls
 - **`[role]` → `${applied_job_role}`.** The very first live call carried `applied_job_role: "Data Entry Operator"` in its args but the bot spoke the generic "एक जॉब के लिए अप्लाई किया था", dodging the bracketed placeholder it was asked to fill. `${...}` is substituted by the platform; `[...]` is work the model can skip or get wrong. The spoken line now carries `${applied_job_role}` directly and the branch decides from the interpolated value. **Verified in both languages after the fix** — Kannada call `6347810f` (08:26:34Z, four minutes after the fix went live) said "ಡೇಟಾ ಎಂಟ್ರಿ ಆಪರೇಟರ್", and the Hindi wrong-person call said "डेटा एंट्री ऑपरेटर". Catalogued as analyser **G3**; it is now a three-time bug across two agents.
 - **Phone normalisation before `get_profile`.** The same call sent a 10-digit number and got an empty result. `${contact_phone}` binds to the number actually dialled and does not always carry the country code. The rule now normalises: strip `+`/spaces, prepend `91` only if 10 digits remain, never double an existing `91`. Later calls sent `917946350285` and the profile came back, so the caller is greeted by name.

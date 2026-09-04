@@ -511,3 +511,12 @@
 - **2026-09-04_205310** — `pre-deploy-kkb-kn-out-2026-09-04_205310` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(10 files)_
 - **2026-09-04_205311** — `pre-deploy-kkb-hi-in-2026-09-04_205311` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(10 files)_
 - **2026-09-04_205312** — `pre-deploy-kkb-kn-in-2026-09-04_205312` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(10 files)_
+- **2026-09-04_211159** — `pre-drop-apply-bridge` — the licensed bridge line is what the model speaks INSTEAD of calling apply_job _(10 files)_
+- **2026-09-04_211339** — `pre-deploy-kkb-hi-signals-2026-09-04_211339` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
+- **2026-09-04_211340** — `pre-deploy-kkb-kn-signals-2026-09-04_211340` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada Signals.md _(10 files)_
+- **2026-09-04_211341** — `pre-deploy-kkb-hi-in-signals-2026-09-04_211341` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Signals.md _(10 files)_
+- **2026-09-04_211342** — `pre-deploy-kkb-kn-in-signals-2026-09-04_211342` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada Signals.md _(10 files)_
+- **2026-09-04_211346** — `pre-deploy-kkb-hi-out-2026-09-04_211346` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi.md _(10 files)_
+- **2026-09-04_211348** — `pre-deploy-kkb-kn-out-2026-09-04_211348` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(10 files)_
+- **2026-09-04_211349** — `pre-deploy-kkb-hi-in-2026-09-04_211349` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(10 files)_
+- **2026-09-04_211352** — `pre-deploy-kkb-kn-in-2026-09-04_211352` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(10 files)_

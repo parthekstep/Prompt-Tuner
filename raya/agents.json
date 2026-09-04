@@ -494,7 +494,8 @@
     "staging": ""
    },
    "deploy": true,
-   "_note": "New 2026-08-10. Outbound-only follow-up campaign for seekers who already applied. NO tools. say_hello=false + audio-check Turn 1."
+   "_note": "New 2026-08-10. Outbound-only follow-up campaign for seekers who already applied. NO tools. say_hello=false + audio-check Turn 1. 2026-09-04: flagged signals=true — its get_profile has pointed at gzb-signals/dharwad-signals since the 2026-08-28 cutover, but every tool that derives the backend from the target id was still classifying it as legacy, so TRRAIN was excluded from the Signals parity group, --signals-only runs and the Signals contract checks.",
+   "signals": true
   },
   {
    "id": "trrain-kn-out",
@@ -513,7 +514,8 @@
     "staging": ""
    },
    "deploy": true,
-   "_note": "Mirror of trrain-hi-out (master = Hindi)."
+   "_note": "Mirror of trrain-hi-out (master = Hindi). 2026-09-04: flagged signals=true — its get_profile has pointed at gzb-signals/dharwad-signals since the 2026-08-28 cutover, but every tool that derives the backend from the target id was still classifying it as legacy, so TRRAIN was excluded from the Signals parity group, --signals-only runs and the Signals contract checks.",
+   "signals": true
   },
   {
    "id": "trrain-hi-memory",
@@ -530,7 +532,9 @@
     "prod": "cf39a59a-3b24-4842-ba03-4248ec245aa1",
     "staging": ""
    },
-   "deploy": true
+   "deploy": true,
+   "signals": true,
+   "_note": "2026-09-04: flagged signals=true — its get_profile has pointed at gzb-signals/dharwad-signals since the 2026-08-28 cutover, but every tool that derives the backend from the target id was still classifying it as legacy, so TRRAIN was excluded from the Signals parity group, --signals-only runs and the Signals contract checks."
   },
   {
    "id": "trrain-kn-memory",
@@ -547,7 +551,9 @@
     "prod": "dfeda883-3d2d-4a74-a0b5-1a47fdde2282",
     "staging": ""
    },
-   "deploy": true
+   "deploy": true,
+   "signals": true,
+   "_note": "2026-09-04: flagged signals=true — its get_profile has pointed at gzb-signals/dharwad-signals since the 2026-08-28 cutover, but every tool that derives the backend from the target id was still classifying it as legacy, so TRRAIN was excluded from the Signals parity group, --signals-only runs and the Signals contract checks."
   },
   {
    "id": "trrain-hi-output",
@@ -564,7 +570,9 @@
     "prod": "cf39a59a-3b24-4842-ba03-4248ec245aa1",
     "staging": ""
    },
-   "deploy": true
+   "deploy": true,
+   "signals": true,
+   "_note": "2026-09-04: flagged signals=true — its get_profile has pointed at gzb-signals/dharwad-signals since the 2026-08-28 cutover, but every tool that derives the backend from the target id was still classifying it as legacy, so TRRAIN was excluded from the Signals parity group, --signals-only runs and the Signals contract checks."
   },
   {
    "id": "trrain-kn-output",
@@ -581,7 +589,9 @@
     "prod": "dfeda883-3d2d-4a74-a0b5-1a47fdde2282",
     "staging": ""
    },
-   "deploy": true
+   "deploy": true,
+   "signals": true,
+   "_note": "2026-09-04: flagged signals=true — its get_profile has pointed at gzb-signals/dharwad-signals since the 2026-08-28 cutover, but every tool that derives the backend from the target id was still classifying it as legacy, so TRRAIN was excluded from the Signals parity group, --signals-only runs and the Signals contract checks."
   }
  ]
 }

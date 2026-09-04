@@ -73,7 +73,7 @@ def main():
     if a.family:
         targets = [t for t in targets if (t.get("agent") or "").upper() == a.family.upper()]
     if a.signals_only:
-        targets = [t for t in targets if "signals" in t["id"]]
+        targets = [t for t in targets if (t.get("signals") or "signals" in t["id"])]
 
     def fetch(t):
         try:
@@ -95,7 +95,11 @@ def main():
         # Group by agent AND backend: Signals and legacy legitimately differ (phone_number vs
         # phoneNumber, acting_as_user_id, different profile field sets). Comparing across them
         # reports architecture as drift and buries the real thing.
-        backend = "signals" if "signals" in t["id"] else "legacy"
+        # Derive the backend the SAME way static_regression/build_fleet_manifest do: the
+        # manifest's explicit `signals` flag first, the id substring only as a fallback. TRRAIN's
+        # ids carry no "signals" token, so the substring test alone put a bot whose tools point at
+        # gzb-signals into the "legacy" family and out of --signals-only entirely (2026-09-04).
+        backend = "signals" if (t.get("signals") or "signals" in t["id"]) else "legacy"
         fams.setdefault("%s / %s" % (t.get("agent") or "?", backend), []).append((t["id"], tl))
 
     findings = 0
