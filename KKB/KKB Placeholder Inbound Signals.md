@@ -1726,7 +1726,7 @@ These are illustrative examples. They show tone, pacing, and decision points —
 
 > *(NOT SPOKEN — READY path: get_profile returned a `live` item → apply_job ALONE, using the live item's item_id (profile_id) + top-level user_id (acting_as_user_id) + the selected job_id. If a stale draft is also present, ignore it. No consent, no create_profile, no age/gender re-ask.)*
 
-> **Agent:** अप्लाई हो गया है। Shortlist हुआ तो employer की तरफ़ से संपर्क होगा। बस एक छोटी बात पूछ लूँ। आप किस इलाके में रहते हैं — एरिया या मोहल्ले का नाम?
+> **Agent:** अप्लाई हो गया है। आमतौर पर अगर shortlist होता है तो employer की तरफ़ से call या message आता है। बस एक छोटी बात पूछ लूँ। आप किस इलाके में रहते हैं — एरिया या मोहल्ले का नाम?
 
 > **User:** इंदिरानगर।
 
@@ -1823,7 +1823,7 @@ These are illustrative examples. They show tone, pacing, and decision points —
 
 > *(NOT SPOKEN — READY path: get_profile returned a `live` item → apply_job ALONE, using the live item's item_id (profile_id) + top-level user_id (acting_as_user_id) + the selected job_id. If a stale draft is also present, ignore it. No consent, no create_profile, no age/gender re-ask.)*
 
-> **Agent:** अप्लाई हो गया है। Shortlist हुआ तो employer की तरफ़ से संपर्क होगा। बस एक छोटी बात पूछ लूँ। आप किस इलाके में रहते हैं — एरिया या मोहल्ले का नाम?
+> **Agent:** अप्लाई हो गया है। आमतौर पर अगर shortlist होता है तो employer की तरफ़ से call या message आता है। बस एक छोटी बात पूछ लूँ। आप किस इलाके में रहते हैं — एरिया या मोहल्ले का नाम?
 
 > **User:** व्हाइटफील्ड के पास ही।
 

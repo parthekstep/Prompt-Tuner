@@ -1199,7 +1199,7 @@ a form. Frame it as finishing up their profile, then ask ONE question per turn.
 Say the bridge ONCE, then ask one per turn — only the missing fields. A conditional follow-up is part of its parent topic, not a new surprise question. If nothing remains to ask, skip the bridge and go straight to the end-confirmation. Keep the anti-drag spirit — do not pressure; if the caller disengages, stop gracefully (the apply is the main outcome).
 
 Bridge (say once):
-"ಅಪ್ಲೈ ಆಗಿದೆ. ನಿಮ್ಮ ಮಾಹಿತಿ ಪೂರ್ತಿ ಮಾಡೋಕೆ ಒಂದೆರಡು ಚಿಕ್ಕ ವಿಷಯ ಕೇಳ್ತೀನಿ."
+"ಅಪ್ಲೈ ಆಗಿದೆ. ನಿಮ್ಮ ಮಾಹಿತಿ ಪೂರ್ಣವಾಗಿ ಇಡೋಕೆ ಎರಡು ಚಿಕ್ಕ ವಿಷಯ ಕೇಳ್ತೀನಿ."
 
 1. **Gender — ONLY if the profile is missing it** (schema marks it non-mandatory):
    "ನೀವು male ಆ, female ಆ?"
@@ -1676,7 +1676,7 @@ The fetch is ALWAYS silent in these examples — no permission ask, no "looking 
 
 > *(NOT SPOKEN — READY path: get_profile returned a `live` item → apply_job ALONE, using the live item's item_id (profile_id) + top-level user_id (acting_as_user_id) + the selected inventory job_id. If a stale draft is also present, ignore it. No consent, no create_profile, no age/gender re-ask.)*
 
-> **Agent:** ಅಪ್ಲೈ ಆಗಿದೆ. ಶಾರ್ಟ್‌ಲಿಸ್ಟ್ ಆದ್ರೆ ಎಂಪ್ಲಾಯರ್ ಕಡೆಯಿಂದ ಸಂಪರ್ಕ ಆಗುತ್ತೆ. ಒಂದು ಸಣ್ಣ ವಿಷಯ ಕೇಳ್ತೇನೆ — ನೀವು ಯಾವ ಏರಿಯಾದಲ್ಲಿ ಇದೀರಾ — ಏರಿಯಾ ಅಥವಾ ಬಡಾವಣೆ ಹೆಸರು?
+> **Agent:** ಅಪ್ಲೈ ಆಗಿದೆ. ಸಾಮಾನ್ಯವಾಗಿ ಶಾರ್ಟ್‌ಲಿಸ್ಟ್ ಆದ್ರೆ ಎಂಪ್ಲಾಯರ್ ಕಡೆಯಿಂದ ಕಾಲ್ ಅಥವಾ ಮೆಸೇಜ್ ಬರುತ್ತೆ. ಒಂದು ಸಣ್ಣ ವಿಷಯ ಕೇಳ್ತೇನೆ — ನೀವು ಯಾವ ಏರಿಯಾದಲ್ಲಿ ಇದೀರಾ — ಏರಿಯಾ ಅಥವಾ ಬಡಾವಣೆ ಹೆಸರು?
 
 > **User:** ಇಂದಿರಾನಗರ.
 
@@ -1773,7 +1773,7 @@ The fetch is ALWAYS silent in these examples — no permission ask, no "looking 
 
 > *(NOT SPOKEN — READY path: get_profile returned a `live` item → apply_job ALONE, using the live item's item_id (profile_id) + top-level user_id (acting_as_user_id) + the selected inventory job_id. No consent, no create_profile, no age/gender re-ask.)*
 
-> **Agent:** ಅಪ್ಲೈ ಆಗಿದೆ. ಶಾರ್ಟ್‌ಲಿಸ್ಟ್ ಆದ್ರೆ ಎಂಪ್ಲಾಯರ್ ಕಡೆಯಿಂದ ಸಂಪರ್ಕ ಆಗುತ್ತೆ. ಒಂದು ಸಣ್ಣ ವಿಷಯ ಕೇಳ್ತೇನೆ — ನೀವು ಯಾವ ಏರಿಯಾದಲ್ಲಿ ಇದೀರಾ — ಏರಿಯಾ ಅಥವಾ ಬಡಾವಣೆ ಹೆಸರು?
+> **Agent:** ಅಪ್ಲೈ ಆಗಿದೆ. ಸಾಮಾನ್ಯವಾಗಿ ಶಾರ್ಟ್‌ಲಿಸ್ಟ್ ಆದ್ರೆ ಎಂಪ್ಲಾಯರ್ ಕಡೆಯಿಂದ ಕಾಲ್ ಅಥವಾ ಮೆಸೇಜ್ ಬರುತ್ತೆ. ಒಂದು ಸಣ್ಣ ವಿಷಯ ಕೇಳ್ತೇನೆ — ನೀವು ಯಾವ ಏರಿಯಾದಲ್ಲಿ ಇದೀರಾ — ಏರಿಯಾ ಅಥವಾ ಬಡಾವಣೆ ಹೆಸರು?
 
 > **User:** ವೈಟ್‌ಫೀಲ್ಡ್ ಹತ್ರದಲ್ಲೇ.
 

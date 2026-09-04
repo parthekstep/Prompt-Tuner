@@ -2143,7 +2143,7 @@ The fetch is ALWAYS silent in these examples — no permission ask, no "looking 
 
 > *(READY path: get_profile returned a `live` item → apply_job ALONE, using the live item's item_id (profile_id) + top-level user_id (acting_as_user_id) + job_id. If a stale draft is also present, ignore it. No create-consent, no create_profile, no age/gender re-ask — **but the data-sharing line above is still owed and was spoken**; "no consent" here means no PROFILE-CREATION consent, never permission to share their details with this employer.)*
 
-> **Agent:** अप्लाई हो गया है। Shortlist हुआ तो employer की तरफ़ से संपर्क होगा। बस दो छोटी बातें पूछ लूँ। अभी आप कोई काम कर रहे हैं, या पढ़ाई कर रहे हैं?
+> **Agent:** अप्लाई हो गया है। आमतौर पर अगर shortlist होता है तो employer की तरफ़ से call या message आता है। बस दो छोटी बातें पूछ लूँ। अभी आप कोई काम कर रहे हैं, या पढ़ाई कर रहे हैं?
 
 > **User:** अभी कुछ नहीं, काम छूट गया था।
 
@@ -2280,7 +2280,7 @@ The fetch is ALWAYS silent in these examples — no permission ask, no "looking 
 
 > *(READY path: get_profile returned a `live` item → apply_job ALONE, using the live item's item_id (profile_id) + top-level user_id (acting_as_user_id) + job_id. If a stale draft is also present, ignore it. No create-consent, no create_profile, no age/gender re-ask — **but the data-sharing line above is still owed and was spoken**; "no consent" here means no PROFILE-CREATION consent, never permission to share their details with this employer.)*
 
-> **Agent:** अप्लाई हो गया है। Shortlist हुआ तो employer की तरफ़ से संपर्क होगा। बस दो छोटी बातें पूछ लूँ। अभी आप कोई काम कर रहे हैं, या पढ़ाई कर रहे हैं?
+> **Agent:** अप्लाई हो गया है। आमतौर पर अगर shortlist होता है तो employer की तरफ़ से call या message आता है। बस दो छोटी बातें पूछ लूँ। अभी आप कोई काम कर रहे हैं, या पढ़ाई कर रहे हैं?
 
 > **User:** अभी कुछ नहीं।
 
