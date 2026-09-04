@@ -280,3 +280,6 @@
 - **2026-09-04_221034** — `pre-deploy-maya-hi-in-2026-09-04_221034` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_
 - **2026-09-04_222450** — `pre-deploy-maya-hi-signals-2026-09-04_222450` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
 - **2026-09-04_222452** — `pre-deploy-maya-hi-out-2026-09-04_222452` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-09-04_223604** — `pre-open-line-no-city` — Maya's open ask names a city, so it looks like it uses the location and wins over confirm _(6 files)_
+- **2026-09-04_223631** — `pre-deploy-maya-hi-in-signals-2026-09-04_223630` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-09-04_223632** — `pre-deploy-maya-hi-in-2026-09-04_223632` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_

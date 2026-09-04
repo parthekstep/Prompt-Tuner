@@ -1,2 +1,4 @@
 maya-hi-signals	hi	hi-student-cooperative	gzb-validated-12	CALL	d57b9ff6-e37c-4ff6-8953-0544210db22f	Maya opener branch B: no college_name supplied -> name NO institution, never read the token (718aa8ab)
 maya-hi-signals	hi	hi-force-apply	maya-college-gzb	CALL	24293fbe-5b8f-4e86-8681-a2f3dc9c8a4d	Maya opener branch A: college_name supplied -> speak the college, not the token
+maya-hi-in-signals	hi	hi-loc-confirm-then-landmark	inbound-probe	CALL	ed9435d5-c493-4c26-9a2a-551eb36b34fb	Maya inbound: confirm the profile location (closed-set fix, 0baf8765)
+trrain-kn-out	kn	kn-trrain-accept-then-asks	trrain-kn	CALL	d4e42fca-7431-4ff6-be94-f2e83f733d9e	TRRAIN Kannada: names TRRAIN Trust, ported from Hindi tonight
