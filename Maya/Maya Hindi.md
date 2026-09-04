@@ -366,8 +366,14 @@ If all 3 best-fit jobs share the same city:
 If the jobs span different cities:
 "आपके लिए कुछ जॉब्स हैं — [city], [city] जैसी जगहों पर। किस इलाके या शहर के पास काम करना चाहेंगे, या कहीं भी चलेगा?"
 
-**CLOSED SET: this turn is EXACTLY one of the two sentences above, with only the `[city]` / `[area]`
-slots filled, and NOTHING else.** In particular **never insert a ROLE qualifier into them.** "आपके लिए
+**CLOSED SET: this turn is EXACTLY one of the sentences in the location branch list above, with
+only the `[जगह]` / `[city]` / `[area]` slots filled, and NOTHING else** — the CONFIRM line
+(**"आप [जगह] के आसपास ही देखें?"**) when you already hold a location, and one of the two open
+questions only when both sources are empty. **The confirm line is inside this closed set.**
+It used to say "one of the two sentences above", naming only the two OPEN questions, which put
+the confirm branch outside the set the model was told it must choose from: on harness call
+`0baf8765` the fetched profile carried `Vasundhara, Ghaziabad, India` and Maya asked the open
+"which area of Ghaziabad" question anyway, because that was the only wording this rule allowed. In particular **never insert a ROLE qualifier into them.** "आपके लिए
 गाज़ियाबाद में **मार्केटिंग से जुड़ी** कुछ जॉब्स हैं" is not a filled-in version of either sentence — it is a new
 sentence, and it makes a claim about what we hold in that role that you have not checked. On live call
 `0178c996` the bot said exactly that and then presented an HR Admin job; on `4eed42c8` it said the same

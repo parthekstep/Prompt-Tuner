@@ -1037,3 +1037,62 @@ read the address aloud.
 
 **Source.** All six KKB/Maya inbound prompts, 2026-09-04. Bugs `b48f70fb`, `2d8b7cb1`. Related: D50,
 D57, D61.
+
+### D64 — A "CLOSED SET" of allowed sentences that enumerates only some branches deletes the others
+
+**Symptom.** A branch rule is correct, its line is quoted, the structure is right — and the bot still
+takes a different branch, using a wording from further down the section. Maya inbound `0baf8765`:
+the fetched profile carried `Vasundhara, Ghaziabad, India` and Maya asked the open *"which area of
+Ghaziabad"* question, hours after the confirm-first branch list was added directly above it and the
+KKB twins had been verified taking the confirm branch (`8235309e`, `537549c6`).
+
+**Root cause.** Below the branch list sat a tightening from an earlier bug: *"**CLOSED SET: this turn
+is EXACTLY one of the two sentences above**, with only the `[city]`/`[area]` slots filled, and NOTHING
+else."* Both of "the two sentences above" were the OPEN questions. The confirm line, added later as
+branch 1, was never added to the set — so the prompt simultaneously told the model to confirm and
+told it that only the two open sentences were permitted here. A closed set is the strongest kind of
+instruction in a prompt; anything left out of it is not merely unemphasised, it is **forbidden**.
+
+**Detection heuristic.** Grep for closed-set language — `CLOSED SET`, `EXACTLY one of`, `only these`,
+`Nothing else counts`, `the ONLY line permitted`, `and NOTHING else` — and for each hit, enumerate the
+lines it admits, then compare that against every branch of the surrounding decision. Any branch whose
+line is not in the set is dead. This is the same shape as **D62** (an evidence whitelist that omits
+the case the mapping needs): both are enumerations that fell out of date when a branch was added
+above them. **When you add a branch to a decision, grep downward for the enumeration that has to
+learn about it.**
+
+**Fix direction.** Add the new branch's line to the set, and say explicitly that it is in the set.
+Do not weaken the closed set — it exists because free composition here caused a different bug — and
+do not restate the branch rule a third time above it.
+
+**Source.** All four Maya prompts, 2026-09-04. Bug `0baf8765`. Related: D62, D61, D50.
+
+### D65 — A licensed spoken line that is indistinguishable from the action becomes a substitute for the action
+
+**Symptom.** The bot tells a caller their application went through on a call where `apply_job` was
+never invoked. Measured at 5 of 23 success-claiming calls (21.7%) and still occurring after the
+spoken-variant collapse: `af52d37c`, `0162ff69`, `15b61561`, and earlier `3c7e9ad0`, `febe0441`,
+`19616c90`, `1fe093a9`, `29c4f152`.
+
+**Root cause.** The prompt licensed a "conversational bridge before apply" whose allowed examples
+were *"ठीक है, आपकी तरफ़ से अप्लाई कर देती हूँ."* and *"अप्लाई कर देती हूँ."* — sentences that assert the
+apply is happening. Ten lines below, the same section said **"Never narrate the apply as if it is
+happening."** The two cannot both be obeyed, and on the failing calls the model spoke the licensed
+line, ended the turn, and then spoke the success line: from inside the model's own transcript the
+apply *had* been performed, because the sentence that performs it had been said. Four escalating
+prose guards, a tool-description constraint and a variant collapse had all failed first, because each
+of them made the wrong output less encouraged while leaving it **available**.
+
+**Detection heuristic.** For every action that must be performed by a TOOL, list the spoken lines the
+prompt permits immediately before that tool call, and ask of each: *if the tool never ran, would this
+sentence be false?* Any line that would be false is a fabrication the prompt has pre-authorised.
+Grep the samples too — 32 sample-conversation instances carried the bridge line, so the examples
+demonstrated the substitution even where the rule forbade it (D50).
+
+**Fix direction.** Remove the line, do not forbid it harder (escalation ladder rung 3). Leave only an
+acknowledgement that asserts nothing about the action (*"ठीक है।"* / *"ಸರಿ."*), state that no line
+containing the action word may precede the tool RESULT, and change every sample to match. The pause
+the bridge used to cover is already spoken by the tool's own `hold_message`, so nothing is lost. With
+nothing available to say, the only way forward is the tool call.
+
+**Source.** All 12 KKB/Maya conversation prompts, 2026-09-04. Related: D57, D50, D25, D47.
