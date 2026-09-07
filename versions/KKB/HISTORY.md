@@ -545,3 +545,8 @@
 - **2026-09-07_231920** — `pre-deploy-kkb-kn-out-2026-09-07_231920` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(10 files)_
 - **2026-09-07_231921** — `pre-deploy-kkb-hi-in-signals-2026-09-07_231921` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Signals.md _(10 files)_
 - **2026-09-07_231923** — `pre-deploy-kkb-kn-in-signals-2026-09-07_231923` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada Signals.md _(10 files)_
+- **2026-09-07_233409** — `pre-nojobs-count-precondition` — missing-data line spoken on a location refusal with a job unpresented (af627b9d) _(10 files)_
+- **2026-09-07_233420** — `pre-deploy-kkb-hi-signals-2026-09-07_233420` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
+- **2026-09-07_233422** — `pre-deploy-kkb-kn-signals-2026-09-07_233422` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada Signals.md _(10 files)_
+- **2026-09-07_233424** — `pre-deploy-kkb-hi-out-2026-09-07_233424` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi.md _(10 files)_
+- **2026-09-07_233425** — `pre-deploy-kkb-kn-out-2026-09-07_233425` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(10 files)_

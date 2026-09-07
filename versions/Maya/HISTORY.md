@@ -296,3 +296,6 @@
 - **2026-09-07_231825** — `pre-readback-and-noplace` — same _(6 files)_
 - **2026-09-07_231924** — `pre-deploy-maya-hi-signals-2026-09-07_231924` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
 - **2026-09-07_231926** — `pre-deploy-maya-hi-in-signals-2026-09-07_231926` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-09-07_233409** — `pre-nojobs-count-precondition` — same _(6 files)_
+- **2026-09-07_233427** — `pre-deploy-maya-hi-signals-2026-09-07_233427` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-09-07_233428** — `pre-deploy-maya-hi-out-2026-09-07_233428` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_

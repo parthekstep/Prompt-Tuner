@@ -10,6 +10,55 @@ Every prompt edit to KKB is logged here. Entry format:
 - **Ported from:** <source agent> (only for cross-agent ports)
 ```
 
+### 2026-09-07 (later) — the missing-job-data line had no precondition the model could check
+
+- **Found while trying to verify the read-back, not reported.** Harness call `af627b9d`: one job was
+  supplied (Field Marketing Executive, Vasundhara, Ghaziabad), the caller said she wanted Bengaluru
+  only, and the bot answered **"अभी आपके लिए मुझे जॉब्स नहीं मिल रहीं"** — the *missing-job-data* line,
+  i.e. "no jobs were supplied to this call". A job existed and had never been named to her.
+- **Root cause:** there was **no line for "you want a city we have nothing in, and I still have a job
+  to show you"**. Path L (location mismatch) is gated on every job having already been presented, which
+  had not happened; the role-no-match line is about a role, not a place. With no rule for the case, the
+  model reached for the nearest line that sounded close — and that line asserts something false about
+  the array. Same structural shape as D66, D69 and D70: no rule for the case, so it inherits a wrong
+  default.
+- **Change:** the missing-job-data line now carries a precondition the model can check on the spot —
+  **count the valid entries in `${recommendations}`; if the count is more than zero you may NOT say it,
+  whatever the caller has just refused.** "No jobs were supplied" is a statement about the ARRAY, never
+  about the caller's city or role. If jobs remain unnamed, name them; if all have been named and turned
+  down for a place, that is the location-mismatch path. Applied to the 6 prompts that carry the line
+  (the 4 KKB outbound + 2 Maya outbound; the inbound bots use a hardcoded inventory).
+- **Verified `55a44edb`:** same fixture, same single job, and the bot said **"अभी के लिए मेरे पास यही एक
+  जॉब थी। किस तरह का काम देख रहे हैं?"** instead — true, and it keeps the call open.
+  `nojobs_integrity.py` reports no finding on it and still flags `af627b9d`.
+- **A correction to something I nearly reported as a bug.** On `af627b9d` the bot said the caller's
+  location was **बेंगलुरु** when the campaign sent `Muradnagar, 110045`, which looked like the
+  profile-substitution bug the location sentence exists to prevent. It was not: at turn 6 the caller
+  said *"बेंगलुरु में कहीं भी ठीक है मैडम"* out loud, and a city the caller states in THIS call is rank 1
+  on the candidate list, ahead of the campaign value. The bot was right and the persona was simply a
+  Bengaluru caller paired with a Ghaziabad fixture — my error, not the prompt's.
+
+### 2026-09-07 — verification blocked: the tester DID can no longer produce a successful apply
+
+The end-of-call read-back fix (previous entry) is still **DEPLOYED, NOT VERIFIED** after five attempts,
+and the blocker is now identified precisely rather than guessed at.
+
+`get_profile` on the tester DID returns **five** `profile_1.0` seeker items — `588a907f`, `5822b168`,
+`2557ed02`, `0ee9e95a`, `0b84429b` — so which profile an apply goes out from varies per call. Across
+every seeker bot's tester traffic, **15 of the 21 job_ids ever attempted are now blocked** (a prior
+success, or `ACTION_LIMIT_REACHED`), and jobs my scan classed as never-attempted still come back
+`ACTION_LIMIT_REACHED` (`e2658094` on both `1536830c` and `55a44edb`) — an active request can exist
+between a profile and a job from activity that never appears in the call transcripts I can read.
+
+The read-back only fires after a SUCCESSFUL apply, so on this number it is unreachable. Clearing it
+needs one of:
+- the data team clearing the tester profiles' applications (and ideally de-duplicating the five
+  profiles down to one), or
+- a second authorised test number — **not** a real user's, per the standing rule, or
+- one real QA call, which is the cheapest of the three.
+
+Recorded here rather than left as "flaky", because it is not flaky: it is a saturated fixture.
+
 ### 2026-09-07 — Khushboo r4: PIN read aloud as a quantity, location turn skipped, end-of-call read-back missing
 
 **Reported (calls 5053389 = `8674462f`, 5054799 = `a899617e`, both `kkb-hi-signals`, both
