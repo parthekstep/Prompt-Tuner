@@ -65,3 +65,56 @@ TRANSCRIPT:
 [assistant] यह एक फ्री सर्विस है — उनकी टीम आपसे बात करके समझती है कि कौन सा काम आपके लिए सही रहेगा, और ज़रूरत हो तो ट्रेनिंग और कोर्स के ज़रिए नई स्किल भी सिखाती है। इसके लिए कोई पैसा नहीं लगता। क्या आप इंटरेस्टेड हैं? 
 
 [maya-hi-signals-hi-student-cooperative] TESTER leg 0b35ee4f: outcome=Completed dur=306 turns=32 call_output=null
+[maya-hi-signals-hi-student-cooperative] POST /api/call -> 200 {"message": "Call initiated successfully", "uuid": "f330d05a-0572-4008-8998-bbca64c77bb0"}
+[maya-hi-signals-hi-student-cooperative] poll 0: outcome='Pending' dur=0 turns=0
+[maya-hi-signals-hi-student-cooperative] poll 1: outcome='Pending' dur=0 turns=0
+[maya-hi-signals-hi-student-cooperative] poll 2: outcome='Pending' dur=0 turns=0
+[maya-hi-signals-hi-student-cooperative] poll 3: outcome='Pending' dur=0 turns=0
+[maya-hi-signals-hi-student-cooperative] poll 4: outcome='Pending' dur=0 turns=0
+[maya-hi-signals-hi-student-cooperative] poll 5: outcome='Completed' dur=100 turns=12
+
+============================================================================
+[maya-hi-signals-hi-student-cooperative] BOT f330d05a-0572-4008-8998-bbca64c77bb0 outcome=Completed dur=100
+call_output: {
+  "jobs_shown": "No",
+  "drop_reason": "Hung up mid-call",
+  "seeker_name": "सुनीता",
+  "user_intent": "NA",
+  "call_engaged": "No",
+  "jobs_applied": [],
+  "call_answered": "Yes",
+  "final_summary": "The agent attempted to follow up with Sunita regarding her job search for a Data Entry Operator role. Due to audio issues, the student could not be heard, and the agent ended the call.",
+  "mpl_presented": "No",
+  "primary_topic": "No engagement",
+  "applied_to_job": "No",
+  "consent_status": "NA",
+  "jobs_recommended": [],
+  "mpl_registration": "Not offered",
+  "college_confirmed": "NA",
+  "hr_contact_shared": "No",
+  "applications_count": 0,
+  "benefits_mentioned": "No",
+  "callback_requested": null,
+  "experience_captured": "No",
+  "ready_for_interview": "NA",
+  "jobs_failed_to_apply": [],
+  "not_interested_in_jobs": "No",
+  "service_provider_pitched": "No",
+  "service_provider_interest": "NA"
+}
+
+TRANSCRIPT:
+[user] hello
+[assistant] हैलो, मेरी आवाज़ आ रही है? 
+[user]  हैलो? हाँ, जी, आवाज़ आ रही है। कौन बोल रहा है?
+[assistant] नमस्ते। मैं माया बोल रही हूँ। हम आपके रोज़गार से जुड़ी कुछ जॉब्स की जानकारी देने के लिए कॉल कर रही हूँ। यह बातचीत रिकॉर्ड की जा सकती है। क्या आप अभी काम ढूंढ रहे हैं? 
+[user]   नमस्ते माया। हाँ जी, मैं अभी जॉब ही ढूँढ रहा हूँ। बताइए, क्या जानकारी है?
+[assistant->TOOL] get_profile({"phone_number": "917946350285", "hold_message": "एक मिनट।"})
+[tool] {'user_id': 'a6c122eb-634e-4955-9ae9-f36306b31c7a', 'user_consent': {'terms_accepted': True, 'privacy_accepted': True, 'has_age': True}, 'items': [{'item_id': '588a907f-bc3b-4bad-9695-d6300a3dbd6d', 'item_network': 'blue_dot', 'item_domain': 'seeker', 'item_type': 'profile_1.0', 'lifecycle_status': 'live', 'profile_consent_accepted': True, 'item_state': {'age': 22, 'name': 'Aryan', 'phone': '917946350285', 'gender': 'Male', 'location': 'Sahibabad, Ghaziabad, India', 'educationCategory': 'College', 'collegeQualification': 'B.Com', 'nameOfJobRolesInterestedIn': 'Any'}, 'item_locations': [{'lat':
+[assistant] एक मिनट। सुनीता जी, पिछली बार हमारी बात एक जॉब में अप्लाई करने के बारे में हुई थी — आप अभी डेटा एंट्री ऑपरेटर का काम देख रहे हैं, क्या आप अभी भी डेटा एंट्री ऑपरेटर की जॉब देख रहे हैं? 
+[user]  *No audio/User is speaking softly*
+[assistant] सुनीता जी, क्या मेरी आवाज़ आ रही है? आप अभी डेटा एंट्री ऑपरेटर की जॉब देख रहे हैं? 
+[user]  *No audio/User is speaking softly*
+[assistant] लगता है लाइन ठीक नहीं है, मैं बाद में कॉल करती हूँ। Goodbye 
+
+[maya-hi-signals-hi-student-cooperative] TESTER leg 53a07790: outcome=Completed dur=100 turns=16 call_output=null

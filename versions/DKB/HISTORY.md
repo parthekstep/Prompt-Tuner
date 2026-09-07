@@ -30,3 +30,6 @@
 - **2026-09-04_230309** — `pre-declare-contact-name` — contact_name is sent on campaign traffic and named nowhere (D68) _(8 files)_
 - **2026-09-04_230310** — `pre-deploy-dkb-hi-out-2026-09-04_230310` — auto snapshot before Raya deploy of DKB/DKB Hindi.md _(8 files)_
 - **2026-09-04_230335** — `pre-deploy-dkb-kn-out-2026-09-04_230335` — auto snapshot before Raya deploy of DKB/DKB Kannada.md _(8 files)_
+- **2026-09-07_160416** — `pre-remove-govt-legacy` — legacy DKB prompts still script 'गवर्नमेंट एम्प्लॉयमेंट प्रोग्राम' (tracker rows 4/56 landed on Signals only) _(8 files)_
+- **2026-09-07_160510** — `pre-deploy-dkb-hi-out-2026-09-07_160510` — auto snapshot before Raya deploy of DKB/DKB Hindi.md _(8 files)_
+- **2026-09-07_160512** — `pre-deploy-dkb-kn-out-2026-09-07_160512` — auto snapshot before Raya deploy of DKB/DKB Kannada.md _(8 files)_

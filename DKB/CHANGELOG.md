@@ -59,7 +59,38 @@ Every prompt edit to DKB is logged here. Entry format:
   - Rewrote the `${country_code}` declaration to state it is **NOT a passed input** on an inbound call, must never be referenced in any tool payload, and that the country code is **always assumed `+91`** — the `phoneNumber` field is built from the caller's number with a literal `+91` prefix (pointing to `${contact_phone}`).
   - Strengthened the `${contact_phone}` declaration to require the `+91` prefix always (never the bare 10-digit number) and added the **don't-double-prefix guard** ("if `${contact_phone}` already includes a country code, do not double-prefix; the value must carry exactly one `+91`"), mirroring the KKB inbound precedent (`KKB Placeholder Inbound.md`).
   - **Audited all four tool payloads** (`create_job`, `update_job_status`, `update_job_details`, `get_talent_insights`): none references `${country_code}`; every `phoneNumber` already uses `${contact_phone}` "(in +91 form)" and the example payloads use literal `+919108790249`. No payload change was needed — only the input-variable declaration was wrong.
-  - **Untouched (verified byte-identical):** all fixed params (`sourceService: "ONESTAGENT"`, `eventType: "UPDATE_JOB"`/`"JOB"`, `app_instance: "up-postjob"`), enum values, field names, the `### Contact context` memory block, and every spoken line.
+  - **Untouched (verified byte-identical):** all fixed params (`sourceService: "ONESTAGENT"`, `eventType: "UPDATE_JOB"`/`"JOB"`, `app_instance: "up-postjob"`), enum values, field names, the `### 2026-09-07 — The legacy DKB pair was still SCRIPTING the government identity
+
+- **Feedback/bug:** found by the overnight sweep's own detector, not by a report.
+  `dkb_employer_integrity` flagged **G CLAIMED TO BE GOVERNMENT** on live call `4b2d7dca`
+  (`dkb-hi-out`, 2026-09-04T18:41): the bot opened with *"जी, मैं **गवर्नमेंट एम्प्लॉयमेंट प्रोग्राम** की
+  तरफ से कॉल कर रही हूँ"* and then said *"हम **गवर्नमेंट के साथ मिलकर** ब्लू डॉट पर आपकी जॉब पोस्टिंग्स
+  लिस्ट करने में हेल्प कर रहे हैं"*.
+- **Root cause:** tracker rows 4/56 ("remove 'government ki taraf se'") were applied to KKB, Maya and
+  the DKB **Signals** pair on 2026-09-03. The **legacy** pair was missed, and it did not carry the
+  never-government rule at all — so there was nothing to violate. Five scripted spoken lines in
+  `DKB Hindi.md` and five in `DKB Kannada.md`, plus one in each Inbound file, named the government
+  outright. This is not model drift: the prompt told it to say that.
+- **Change:** replaced the identity in all four legacy prompts with the wording the Signals twins
+  already use — शहर प्रशासन की एम्प्लॉयमेंट पहल / ನಗರ ಆಡಳಿತದ ಎಂಪ್ಲಾಯ್ಮೆಂಟ್ ಉಪಕ್ರಮ — 12 spoken lines in
+  total, and added the never-claim-to-be-the-government rule to each. No other content touched.
+- **Guard widened:** `raya/regression/fix_presence.py`'s `dkb-not-government` row was scoped to
+  `DKB_SIGNALS`, which is precisely why it reported CLEAN while the legacy pair was broken. **A row
+  that checks only the bots you happened to fix is not a guard.** It now covers all six DKB
+  conversation prompts, and was self-tested by dropping the rule from `DKB Kannada.md` (caught) and
+  restoring it (clean).
+- **Files:** `DKB/DKB Hindi.md`, `DKB/DKB Kannada.md`, `DKB/DKB Inbound Hindi.md`,
+  `DKB/DKB Inbound Kannada.md`, `raya/regression/fix_presence.py`.
+- **Deployed:** `dkb-hi-out`, `dkb-kn-out`. The two inbound DKB targets have no prod uuid in
+  `raya/agents.json`, so they are repo-only and cannot be deployed or tested from here.
+- **Verification:** **DEPLOYED, NOT VERIFIED.** The prompt text is fixed and read back, but no call
+  has yet been placed on the corrected legacy prompt. `4b2d7dca` is the call that proves the bug; the
+  call that proves the fix does not exist yet.
+- **Also corrected downstream:** these four files had already been pushed to the PUBLIC
+  `Blue-Dots-Economy/AI-Agent-Prompts` repo earlier today, so an adopter forking it would have
+  inherited a prompt that impersonates a government programme. Re-pushed.
+
+### Contact context` memory block, and every spoken line.
   - Change is language-agnostic (payload/logic); applied to Hindi (source of truth) and mirrored **verbatim** to Kannada. The two edited declaration lines are byte-identical across H/K.
 - **Files:** `DKB/DKB Inbound Hindi.md`, `DKB/DKB Inbound Kannada.md`
 

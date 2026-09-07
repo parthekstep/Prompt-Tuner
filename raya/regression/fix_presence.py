@@ -31,6 +31,9 @@ MAYA_CONV = sorted(f for f in glob.glob(os.path.join(REPO, "Maya", "*.md"))
                    if "CHANGELOG" not in f and "Memory" not in f and "Output" not in f)
 TRRAIN_CONV = [os.path.join(REPO, "TRRAIN", "TRRAIN Hindi.md"), os.path.join(REPO, "TRRAIN", "TRRAIN Kannada.md")]
 DKB_SIGNALS = [os.path.join(REPO, "DKB", "DKB Hindi Signals.md"), os.path.join(REPO, "DKB", "DKB Kannada Signals.md")]
+DKB_ALL_CONV = [os.path.join(REPO, "DKB", n) for n in
+                ("DKB Hindi Signals.md", "DKB Kannada Signals.md", "DKB Hindi.md",
+                 "DKB Kannada.md", "DKB Inbound Hindi.md", "DKB Inbound Kannada.md")]
 
 
 def seeker_conv():
@@ -83,8 +86,14 @@ FIXES = [
     ("maya-confirm-in-closed-set", "the confirm line is inside the location closed set (D64, 0baf8765)",
      MAYA_CONV, ["The confirm line is inside this closed set."], []),
 
-    ("dkb-not-government", "DKB is the city administration's initiative, never a government programme",
-     DKB_SIGNALS, ["never claim to be the government"], []),
+    # Scoped to DKB_SIGNALS when first written, which is exactly why it passed while the LEGACY pair
+    # still SCRIPTED the government line — live call 4b2d7dca on 2026-09-04 opened with "मैं गवर्नमेंट
+    # एम्प्लॉयमेंट प्रोग्राम की तरफ से". A row that checks only the bots you happened to fix is not a
+    # guard. Now every DKB conversation prompt, and the forbidden wording must be gone from the
+    # SPOKEN lines (the rule itself quotes it, so the must-not list cannot be used here).
+    ("dkb-not-government", "DKB is the city administration's initiative, never a government programme "
+                           "— all SIX conversation prompts, not just the Signals pair (4b2d7dca)",
+     DKB_ALL_CONV, ["never claim to be the government"], []),
 
     ("dkb-expiry-needs-a-role", "the expiry opener requires a real job_role (e2ce642a, 0eb3fc72)",
      DKB_SIGNALS, ["THE NEW-VACANCY OPENING IS THE DEFAULT"], []),

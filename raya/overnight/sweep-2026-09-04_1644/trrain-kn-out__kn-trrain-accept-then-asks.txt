@@ -36,3 +36,18 @@ TRANSCRIPT:
 [assistant] ತುಂಬಾ ಒಳ್ಳೆದು, ನಮ್ಮ ಟೀಮ್ ಒಂದು-ಎರಡು ದಿನದಲ್ಲಿ ನಿಮಗೆ ಕಾಲ್ ಮಾಡುತ್ತೆ. ಇದು ಟ್ರೇನ್ ಟ್ರಸ್ಟ್‌ನ ಒಂದು ಫ್ರೀ ಸರ್ವಿಸ್ — ಅವರ ಟೀಮ್ ನಿಮ್ಮ ಅಗತ್ಯಕ್ಕೆ ಅನುಸಾರ ಯಾವ ಕೆಲಸ ನಿಮಗೆ ಸರಿ ಹೊಂದುತ್ತೆ ಅಂತ ಅರ್ಥ ಮಾಡ್ಕೊಳ್ಳೋಕೆ ಸಹಾಯ ಮಾಡ್ತಾರೆ, ಆಮೇಲೆ ಟ್ರೇನಿಂಗ್ ಮತ್ತು ಕೋರ್ಸ್ ಮೂಲಕ ಹೊಸ ಸ್ಕಿಲ್ ಕಲಿಸಿ ಆ ಕೆಲಸಕ್ಕೆ ನಿಮ್ಮನ್ನ ತಯಾರು ಮಾಡ್ತಾರೆ. ಇದಕ್ಕೆ ದುಡ್ಡು ಏನೂ ಕೊಡಬೇಕಾಗಿಲ್ಲ.  ಸರಿ, ನಿಮ್ಮ ದಿನ ಚೆನ್ನಾಗಿರಲಿ. Goodbye 
 
 [trrain-kn-out-kn-trrain-accept-then-asks] TESTER leg 730044f9: outcome=Completed dur=76 turns=10 call_output=null
+[trrain-kn-out-kn-trrain-accept-then-asks] POST /api/call -> 200 {"message": "Call initiated successfully", "uuid": "35e501f5-b08b-4514-8da4-dbce46e76889"}
+[trrain-kn-out-kn-trrain-accept-then-asks] poll 0: outcome='Pending' dur=0 turns=0
+[trrain-kn-out-kn-trrain-accept-then-asks] poll 1: outcome='Failure' dur=0 turns=0
+[trrain-kn-out-kn-trrain-accept-then-asks] connect attempt 1 did not bridge (outcome=Failure); letting the tester line settle for 90s
+[trrain-kn-out-kn-trrain-accept-then-asks] POST /api/call -> 200 {"message": "Call initiated successfully", "uuid": "a73e09f9-b82c-4a71-a067-f8042d9b1b5e"}
+[trrain-kn-out-kn-trrain-accept-then-asks] poll 0: outcome='Failure' dur=0 turns=0
+[trrain-kn-out-kn-trrain-accept-then-asks] connect attempt 2 did not bridge (outcome=Failure); letting the tester line settle for 90s
+[trrain-kn-out-kn-trrain-accept-then-asks] POST /api/call -> 200 {"message": "Call initiated successfully", "uuid": "eb1962ae-9cfd-45ee-a879-9d1887fc21dc"}
+[trrain-kn-out-kn-trrain-accept-then-asks] poll 0: outcome='Failure' dur=0 turns=0
+[trrain-kn-out-kn-trrain-accept-then-asks] connect attempt 3 did not bridge (outcome=Failure); letting the tester line settle for 90s
+[trrain-kn-out-kn-trrain-accept-then-asks] POST /api/call -> 200 {"message": "Call initiated successfully", "uuid": "7342ada6-974e-49cb-b0b1-73fd3ff73787"}
+[trrain-kn-out-kn-trrain-accept-then-asks] poll 0: outcome='Failure' dur=0 turns=0
+[trrain-kn-out-kn-trrain-accept-then-asks] connect attempt 4 did not bridge (outcome=Failure); letting the tester line settle for 90s
+
+[trrain-kn-out-kn-trrain-accept-then-asks] NEVER BRIDGED after 4 attempts (flaky telephony).
