@@ -59,6 +59,30 @@ needs one of:
 
 Recorded here rather than left as "flaky", because it is not flaky: it is a saturated fixture.
 
+**Attempt 6 — the Kannada route, which should have worked and didn't.** The Ghaziabad saturation does
+not apply to `kkb-kn-signals`: it runs on the Dharwad instance with a different profile set, and it
+produced a genuine successful apply earlier the same evening (`e853e2c0`, action_id `4fbb97ec`). The
+read-back fix is language-agnostic and is present in both Signals prompts, so verifying it there is
+equally valid. Scanned all three Kannada seeker bots' tester traffic: 8 Dharwad job_ids blocked, **10
+of 12 validated Dharwad jobs fresh**, and built `readback-kn.json` on `9b42e02f` (Mechanic, Channamma
+Automotive, Rayapur, Hubballi) with `location: "Hubballi"`.
+
+**Eight consecutive dial attempts across two runs never bridged** (`outcome=Failure`, `dur=0`, no
+transcript) — the harness's known telephony flakiness on the single tester DID, after a full 7-minute
+idle to recover the bridge rate. Nothing to do with the prompt or the fixture.
+
+So the fixture problem is solved and the verification is now purely blocked on getting a call to
+connect. The fixture is committed and ready: whoever next has a working line can run
+
+    python3 scripts/raya_testcall.py lang <tester> kn
+    python3 scripts/raya_testcall.py persona <tester> raya/personas/kn-force-apply.md
+    python3 scripts/raya_testrun.py 33037201-78ce-405d-b509-a3b6934e20f1 7946350285 \
+        raya/testcases/args/r3/readback-kn.json <tester> readback-kn
+
+and the pass condition is one line: after the apply-success line and the service-provider reply, the
+bot must read back name, age, gender, role, qualification and area, then ask "सब सही?" — in Kannada,
+"ಎಲ್ಲಾ ಸರಿನಾ?".
+
 ### 2026-09-07 — Khushboo r4: PIN read aloud as a quantity, location turn skipped, end-of-call read-back missing
 
 **Reported (calls 5053389 = `8674462f`, 5054799 = `a899617e`, both `kkb-hi-signals`, both
