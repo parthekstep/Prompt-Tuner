@@ -10,6 +10,75 @@ Every prompt edit to KKB is logged here. Entry format:
 - **Ported from:** <source agent> (only for cross-agent ports)
 ```
 
+### 2026-09-07 — Khushboo r4: PIN read aloud as a quantity, location turn skipped, end-of-call read-back missing
+
+**Reported (calls 5053389 = `8674462f`, 5054799 = `a899617e`, both `kkb-hi-signals`, both
+`location: "Muradnagar, 110045"`):** (1) location not being asked; (2) at the end the bot used to
+reiterate the details and ask the nearby location and didn't; (3) prominent latency after each turn at
+the start. Second call: the location WAS asked but the PIN was spoken as a number.
+
+- **Root cause 1 — the PIN.** `## Numbers` says "do not write digits in spoken Hindi output, write them
+  in words" with cardinal examples; `## Phone number` had its own digit-by-digit exception; **a PIN code
+  had no rule at all**, so it fell to the cardinal default and `११००४५` came out as a quantity. Behind
+  that, the LOCATION SENTENCE deliberately says to speak `${location}` exactly as it arrives (that
+  instruction fixed six calls that had resolved the slot to the profile's city instead), so the PIN was
+  pushed through on purpose.
+  **Fix:** the location sentence now speaks only the PLACE WORDS in `${location}` — every digit dropped,
+  no PIN, no plot/house number — stated as a formatting reduction of the given value, not permission to
+  choose a different place. Plus a new `## PIN / postal codes` section: an identifier is spoken digit by
+  digit like a phone number, never as a quantity, and preferably not spoken at all.
+  **Verified `36802370`:** "हमारे पास आपकी जॉब की लोकेशन **मुराद नगर** है" with
+  `location: "Muradnagar, 110045"` in the arguments — no PIN spoken.
+- **Root cause 2 — the location turn was optional on one path.** Case B carried a hard
+  "**the location turn happens once per call on EVERY path** … do not skip"; **Case A had only a
+  pointer** — "→ Then run the Location step below". `8674462f` took Case A (role confirmed off the
+  profile), went role-confirm straight to jobs and never mentioned the location; `a899617e` twenty
+  minutes later, same bot and same arguments, did say it. Same prompt, opposite behaviour — a missing
+  gate, not model whim.
+  **Fix:** a GATE at the top of **Step 2**, the chokepoint both paths must cross: no job may be named
+  until the location sentence has been spoken this call (or deliberately skipped because
+  `${contact_memory}` shows it was confirmed on an earlier call). Placed there rather than as a second
+  copy of the rule in Case A.
+  **Verified `36802370`, `6fe05a86`, `1536830c`:** location sentence spoken before any job on all three.
+- **Root cause 3 — the end-of-call read-back was conditional on Phase 2 having work to do.** The rule
+  read "*after the Phase-2 fields are captured*, read back ALL the details". Every Phase-2 question is
+  "only if missing", and granular location is explicitly skipped when the location turn already captured
+  an area — so on a caller whose profile is complete, Phase 2 asks nothing, nothing is "captured", and
+  the read-back never fires. That is what Khushboo lost: the read-back is also the only place a stale
+  stored location gets corrected (her profile says `Bengaluru, Karnataka, India`).
+  **Fix:** the read-back now triggers after a SUCCESSFUL apply **whether or not Phase 2 had a single
+  question to ask**, in all six Signals prompts. Also, Need Capture's reply routing no longer sends the
+  call to Graceful Exit when an apply succeeded and Post-Application Info Gathering has not run.
+  **DEPLOYED, NOT VERIFIED** — see below.
+- **Found while testing, not reported: the no-match line named the profile's stale city.** The mandated
+  line is "[role] की जॉब अभी नहीं है — लेकिन [kind], [kind] जैसी जॉब्स हैं" and **neither slot is a place**.
+  On `6fe05a86` the bot composed its own sentence instead: **"अभी बेंगलुरु के लिए डेटा एंट्री या कंप्यूटर
+  ऑपरेटर की जॉब्स उपलब्ध नहीं हैं"** — twice — where बेंगलुरु came off the fetched profile, minutes after
+  it had correctly confirmed मुराद नगर and told the caller the jobs are in गाज़ियाबाद. Whether a role is
+  in `${recommendations}` has nothing to do with the caller's city. **Fix:** that line's rules now state
+  that neither slot is a place and no city may be added to it; the only places nameable aloud are the
+  jobs' own cities in Step 2.
+- **Complaint 3 (latency) — not reproducible or measurable from here, and not caused by the recent
+  edits.** The Raya call API exposes only `call_start_time` / `call_end_time` / `call_duration`; the
+  transcript turns carry no timestamps, so per-turn latency cannot be measured. What is measurable: the
+  prompt is **239,932 bytes** now against **236,190** before the 2026-09-04 work (+1.6%), so the recent
+  changes are not a step change. A 240 KB instruction set is re-read every turn and that is a chronic
+  cost — the lever is consolidating the accumulated guard prose, which is real work and not a one-line
+  fix. Flagged, not attempted.
+- **Files:** the 4 KKB outbound prompts (PIN rule), the 2 KKB Signals prompts (Step-2 gate, digit-stripped
+  location, no-place no-match clause), and all 6 Signals prompts + Need Capture routing in 12
+  KKB/Maya prompts (read-back trigger).
+- **Verification status, honestly:** the PIN fix and the location gate are proven by call ids above. The
+  read-back / Phase-2 ordering is **NOT** proven. Three attempts (`36802370`, `6fe05a86`, `1536830c`)
+  each failed to reach the end of the flow: the tester agent is capped at 5 minutes and the persona
+  spent it, and the third call's apply returned `ACTION_LIMIT_REACHED` so the success-only path was
+  unreachable. That needs either a real call or a persona that reaches apply inside two minutes.
+- **Test-number hygiene finding:** `get_profile` on the tester DID now returns **five** `profile_1.0`
+  seeker items (`588a907f`, `5822b168`, `2557ed02`, `0ee9e95a`, `0b84429b`). Duplicate profiles are
+  accumulating on the test number, which makes `profile_id` selection ambiguous and makes
+  `ACTION_LIMIT_REACHED` depend on which profile the apply happened to use. Worth a clean-up before the
+  next test round.
+
 ### 2026-09-04 — Tracker sweep: row-1 already-applied was UNREACHABLE (row 103); inbound Example 2 demonstrated the open area ask (rows 106/108)
 
 - **Feedback/bug:** Tracker `All Issues` review. Row 103 (KKB Hindi Signals, P1) "bot is saying

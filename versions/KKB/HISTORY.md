@@ -528,3 +528,20 @@
 - **2026-09-04_221235** — `pre-token-empty-clause` — an unsupplied location arrives as the raw token, not as empty _(10 files)_
 - **2026-09-04_221253** — `pre-deploy-kkb-hi-signals-2026-09-04_221253` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
 - **2026-09-04_221255** — `pre-deploy-kkb-kn-signals-2026-09-04_221255` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada Signals.md _(10 files)_
+- **2026-09-07_161108** — `pre-location-gate-and-pin` — location turn skipped on Case A (5053389); PIN spoken as a cardinal (5054799) _(10 files)_
+- **2026-09-07_161427** — `pre-needcapture-phase2-routing` — a declined Need Capture offer skips Post-Application Info Gathering (5053389) _(10 files)_
+- **2026-09-07_161437** — `pre-deploy-kkb-hi-signals-2026-09-07_161437` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
+- **2026-09-07_161439** — `pre-deploy-kkb-kn-signals-2026-09-07_161439` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada Signals.md _(10 files)_
+- **2026-09-07_161441** — `pre-deploy-kkb-hi-out-2026-09-07_161441` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi.md _(10 files)_
+- **2026-09-07_161445** — `pre-deploy-kkb-kn-out-2026-09-07_161445` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(10 files)_
+- **2026-09-07_161446** — `pre-deploy-kkb-hi-in-signals-2026-09-07_161446` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Signals.md _(10 files)_
+- **2026-09-07_161448** — `pre-deploy-kkb-kn-in-signals-2026-09-07_161448` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada Signals.md _(10 files)_
+- **2026-09-07_161451** — `pre-deploy-kkb-hi-in-2026-09-07_161451` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(10 files)_
+- **2026-09-07_161453** — `pre-deploy-kkb-kn-in-2026-09-07_161453` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(10 files)_
+- **2026-09-07_231825** — `pre-readback-and-noplace` — read-back skipped when Phase 2 had nothing to ask; no-match line naming the profile's stale city _(10 files)_
+- **2026-09-07_231915** — `pre-deploy-kkb-hi-signals-2026-09-07_231915` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
+- **2026-09-07_231917** — `pre-deploy-kkb-kn-signals-2026-09-07_231917` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada Signals.md _(10 files)_
+- **2026-09-07_231918** — `pre-deploy-kkb-hi-out-2026-09-07_231918` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi.md _(10 files)_
+- **2026-09-07_231920** — `pre-deploy-kkb-kn-out-2026-09-07_231920` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(10 files)_
+- **2026-09-07_231921** — `pre-deploy-kkb-hi-in-signals-2026-09-07_231921` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Signals.md _(10 files)_
+- **2026-09-07_231923** — `pre-deploy-kkb-kn-in-signals-2026-09-07_231923` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada Signals.md _(10 files)_

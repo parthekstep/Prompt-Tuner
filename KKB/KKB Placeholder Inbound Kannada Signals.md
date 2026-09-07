@@ -1253,7 +1253,8 @@ Bridge (say once):
   `workExperienceYearsConditional`, `otherHelpNeeded`) and all payload values MUST be in
   ENGLISH / Latin script. Do NOT re-send a field you already persisted in an earlier
   `update_profile` this call.
-- **Confirm at the end (once):** after the Phase-2 fields are captured, read back **ALL**
+- **Confirm at the end (once):** after a SUCCESSFUL apply — **whether or not Phase 2 had a
+  single question to ask** — read back **ALL**
   the details you now have for the caller — **LABELLED** (say each field with its name, not
   a bare comma-list) — and ask if everything is correct. Cover EVERY field you know:
   **name, age, gender, role, qualification, location** (plus experience if gathered). Do NOT read the phone
@@ -1515,7 +1516,10 @@ A concrete reason for saying no means **Path A**, not Path B — they are not co
 - **Clear no** ("ಇಲ್ಲ", "ಬೇಡ", "ಅವಶ್ಯಕತೆ ಇಲ್ಲ") → say "ಪರವಾಗಿಲ್ಲ, ಧನ್ಯವಾದ." and set `service_provider_interest` = **No**. Do not ask again and do not rephrase.
 - **Unclear** ("ನೋಡೋಣ", "ಗೊತ್ತಿಲ್ಲ", or no real answer) → say "ಸರಿ, ನಮ್ಮ ಟೀಮ್ ನಿಮ್ಮನ್ನ ಸಂಪರ್ಕ ಮಾಡುತ್ತೆ." and set `service_provider_interest` = **Maybe**.
 
-Set `service_provider_pitched` = **Yes** as soon as the offer has been spoken (**No** if the call ended before you reached this step). Then go to Graceful Exit.
+Set `service_provider_pitched` = **Yes** as soon as the offer has been spoken (**No** if the call ended before you reached this step).
+
+**Then: Graceful Exit is NOT the next step if an apply succeeded on this call and Post-Application Info Gathering has not run yet.** Whatever the caller answered here — yes, no or unclear — that flow comes FIRST, and Graceful Exit only after it. A "no" to this offer declines the service provider; it does not decline the two short profile questions or the read-back.
+This mattered on live call `8674462f` (2026-09-07): the apply succeeded, the offer was made in the same turn as the success line (as this prompt requires), the caller said "नहीं", and the bot closed — so the granular-location question and the confirm read-back never happened and `nearest_landmark` came back `NA`. Reported by QA as "at the end the bot used to reiterate the details and ask nearby location but it didn't this time". Two rules disagreed about what follows the reply: Apply Success says *"only after that reply, move into Post-Application Info Gathering"*, and this line said Graceful Exit. The nearer rule won. Ordering is now stated once, here, where the reply is actually read.
 
 ## Rules
 - **Never fire this while jobs remain unshown.** If the Job Inventory still holds fitting jobs the caller has not heard, the job flow is NOT finished — present those first. This offer belongs at the very end of the call and never replaces the next set of jobs.

@@ -288,3 +288,11 @@
 - **2026-09-04_225707** — `pre-declare-location-input` — Maya never names ${location}, so the campaign's location can never be confirmed _(6 files)_
 - **2026-09-04_225709** — `pre-deploy-maya-hi-signals-2026-09-04_225708` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
 - **2026-09-04_225710** — `pre-deploy-maya-hi-out-2026-09-04_225710` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-09-07_161427** — `pre-needcapture-phase2-routing` — same routing _(6 files)_
+- **2026-09-07_161455** — `pre-deploy-maya-hi-signals-2026-09-07_161455` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-09-07_161457** — `pre-deploy-maya-hi-in-signals-2026-09-07_161457` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-09-07_161503** — `pre-deploy-maya-hi-out-2026-09-07_161503` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-09-07_161505** — `pre-deploy-maya-hi-in-2026-09-07_161505` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_
+- **2026-09-07_231825** — `pre-readback-and-noplace` — same _(6 files)_
+- **2026-09-07_231924** — `pre-deploy-maya-hi-signals-2026-09-07_231924` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-09-07_231926** — `pre-deploy-maya-hi-in-signals-2026-09-07_231926` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
