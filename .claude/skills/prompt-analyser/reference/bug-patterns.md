@@ -1201,3 +1201,60 @@ an unsupplied argument arrives as the raw token, so "empty" has to include "stil
 
 **Source.** Maya Hindi and Maya Hindi Signals, 2026-09-04, found by the overnight sweep after two
 earlier fixes to the same symptom missed. Related: D66, D67, D61.
+
+### D69 — An identifier with no rule of its own falls to the "numbers in words" default and is spoken as a quantity
+
+**Symptom.** QA: *"pincode is read in words, should be 11205 not 11 thousand two hundred etc"*. Live
+call `a899617e` was sent `location: "Muradnagar, 110045"` and said *"लोकेशन मुराद नगर, **११००४५** है"*.
+
+**Root cause.** Three rules, none of them wrong on its own:
+`## Numbers` — "do not write digits in spoken Hindi output, write them in words" — with **cardinal**
+examples (`३५०` → "तीन सौ पचास"); `## Phone number` — "say digit by digit in words" — a carve-out for
+one identifier; and **nothing at all for a PIN code**. So a PIN inherited the cardinal default. Behind
+that, the location sentence deliberately instructs the model to speak `${location}` *exactly as it
+arrives* (that instruction fixed six calls that had substituted the profile's city), so the PIN was
+being pushed through by design rather than by accident.
+
+**Detection heuristic.** List every kind of number the bot can ever speak — salary, vacancy count,
+ordinal, age, experience years, phone, PIN, plot/house/gali/sector number, OTP, job id — and check that
+each has an explicit spoken form. Any kind not named inherits the general rule, and the general rule is
+almost always cardinal. Then check the reverse: for each input variable that reaches a spoken line,
+does the value shape include digits the caller must not hear?
+
+**Fix direction.** Two changes, not one. (1) Give the identifier its own rule next to the phone-number
+carve-out — digit by digit, never a quantity — so it is not inheriting anything. (2) Better, remove it
+from speech entirely: the spoken line strips every digit out of the value first, phrased as a
+*formatting reduction of the given value* so it cannot be read as licence to substitute a different
+place. Both, because the first covers the case where a number must be said and the second means it
+usually is not.
+
+**Source.** KKB Hindi/Kannada, Signals and legacy, 2026-09-07. Bug `a899617e`, fix verified on
+`36802370`. Related: D67 (a token inside quoted speech).
+
+### D70 — A rule triggered "after X is captured" never fires when X is only-if-missing
+
+**Symptom.** QA: *"at the end bot used to reiterate the details and ask nearby location but it didn't
+this time"*. The end-of-call read-back stopped happening on calls where the caller's profile was
+already complete — `8674462f`, and reproduced on `6fe05a86` and `1536830c`.
+
+**Root cause.** The read-back read *"after the Phase-2 fields are captured, read back ALL the details"*.
+Every Phase-2 question is gated on **only if missing**, and granular location is explicitly skipped when
+the location turn already captured an area. On a complete profile, Phase 2 therefore asks nothing,
+nothing is "captured", and the trigger condition is never satisfied. The rule was not ignored — it was
+never true. Worse, the read-back is the only point in the call where a **stale stored value** gets
+corrected, so the callers it silently skips are exactly the ones whose records are wrong (this caller's
+profile says `Bengaluru` while the campaign dialled her in `Muradnagar`).
+
+**Detection heuristic.** For every rule whose trigger is the *completion* of another step, ask what
+happens when that step legitimately does nothing. Grep for triggers of the form "after … is captured",
+"once … has been collected", "after you have asked …" and check each against the case where the
+preceding step is entirely skipped. A step made of only-if-missing questions can always be a no-op, so
+any rule hanging off its completion has a silent zero case.
+
+**Fix direction.** Trigger on the **event**, not on the side-effect of a conditional step: "after a
+successful apply, whether or not Phase 2 had a single question to ask". Same shape as gating on the
+chokepoint rather than on a path (D63/D64).
+
+**Source.** All six KKB/Maya Signals prompts, 2026-09-07. Bug `8674462f`. **Fix deployed, NOT
+verified** — three harness attempts ran past the tester's five-minute cap before reaching the end of
+the flow. Related: D63, D64, D68.
