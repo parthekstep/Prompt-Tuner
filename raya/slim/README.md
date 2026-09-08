@@ -248,8 +248,29 @@ naming two rather than guessing.
 
 **Why slim only.** This changes what the caller hears, so it is not something to ship to production
 bots unattended — it is precisely the decision the EOD note flags as the owner's. The fat prompts
-keep the counter, so the next A/B round measures this change and nothing else. Dialled with
-`morejobs-22.json` (22 jobs) and `hi-asks-for-all-jobs`, the scenario in the matrix built for it.
+keep the counter, so the next A/B round measures this change and nothing else.
+
+**Result: it works.** `43e7e5e4` (`morejobs-22.json`, 22 jobs, `hi-asks-for-all-jobs`, 197 s):
+
+> आपके लिए जॉब्स हैं — **पहला**: बिलिंग इंजीनियर … **दूसरा**: टेली मार्केटिंग … **तीसरा**: …
+> **इनके अलावा ये जॉब्स भी हैं** — कमर्शियल मैनेजर, ग्रे फैशन … **और**: फील्ड सेल्सपर्सन …
+> **इनके अलावा ये जॉब्स भी हैं** — क्रू मेंबर, मैकडॉनल्ड्स … **और**: सेल्स रिप्रेज़ेंटेटिव …
+> **इनके अलावा ये जॉब्स भी हैं** — कस्टमर सपोर्ट एग्जीक्यूटिव, सी वाई फ्यूचर …
+
+**Ordinal sequence spoken across the whole call: पहला दूसरा तीसरा. Four further batches, zero
+numbering, zero restarts.** The same bot on `4d6d4d02`, before this change, ran पहला दूसरा तीसरा
+**four times over**.
+
+One apparent defect on that call is not one: it named "क्रू मेंबर - मैकडॉनल्ड्स, मैकडॉनल्ड्स" twice.
+The payload contains **four distinct McDonald's crew-member postings** with four different
+`job_id`s (and two CY FUTURE ones); all 22 ids are unique. The bot was walking the array faithfully
+— the same payload-duplication case `jobs_presented` was taught to downgrade to info rather than
+report as repetition.
+
+**So the recommendation to the owner is now evidenced rather than theoretical:** dropping the
+cross-turn counter fixes a 58% failure with no loss of selectability, because the caller picks by
+name from the second batch on and the confirmation rules already cover that. It is ready to port to
+the four KKB/Maya Signals prompts on your word.
 
 ## Running the comparison
 
