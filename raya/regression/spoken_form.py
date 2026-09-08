@@ -69,7 +69,7 @@ salary interview interviews update updated active minimum specific area address 
 technical issue unclear assistant exact and the for you your eligible
 data entry operator supervisor helper fitter electrician driver marketing sales
 mba bca mca bba iti pf esi cv resume email id link app google form
-phone option options timing exact process update team service free
+phone option options timing exact process update team service free note noted
 """.split())
 # "phone" (from "Phone interview भी हो सकती है"), "option" (from "एक और option है") and "exact"
 # (from "Exact timing अलग हो सकती है") are words the prompts WRITE into spoken lines. They surfaced
