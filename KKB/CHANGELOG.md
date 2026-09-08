@@ -83,6 +83,99 @@ and the pass condition is one line: after the apply-success line and the service
 bot must read back name, age, gender, role, qualification and area, then ask "सब सही?" — in Kannada,
 "ಎಲ್ಲಾ ಸರಿನಾ?".
 
+### 2026-09-08 (night) — the confirm-first location rule fails 9 of 10 times. NO fifth wording written.
+
+**Found by the standing suite.** `6570a566` and `fe3161c3` (both today, `kkb-kn-in-signals`, real
+inbound callers): the fetched profile carried `Dharwad`, and the bot asked
+**"ನೀವು ಯಾವ ಏರಿಯಾದಲ್ಲಿ ಕೆಲಸ ಹುಡುಕ್ತಾ ಇದೀರಾ?"** — the open area question — so the caller supplied
+"ಹುಬ್ಬಳಿ ಧಾರವಾಡ", a fact we were already holding.
+
+**Counted: of 10 cached calls where the profile held a real location and an area question was asked,
+9 asked it openly.** `kkb-kn-in-signals` 4, `kkb-hi-in-signals` 2, and one each on `dkb-kn-signals`,
+`kkb-hi-in`, `kkb-kn-out`. Held values that went unconfirmed: `Kundgol`, `Hubballi`,
+`Bailahongala`, `Koramangala, Bengaluru`, `Sahibabad, Ghaziabad`, `BHOJPUR`, `Chikodi`.
+
+**No prompt edit was made, and that is the finding.** The rule is present in all six inbound prompts
+and has already been rewritten four times, each rewrite carrying the previous failure's call ids —
+"Decide WHICH line to say BEFORE you speak", "the location you already hold comes first", "Only when
+BOTH are empty", "The open ask is the LAST branch, not the default", citing `bbdb6eaf`, `5a3aef43`,
+`0358c875`, and `2d8b7cb1` as a post-fix recurrence. CLAUDE.md forbids a third wording of a guard
+that has failed twice; this would be the fifth.
+
+**Why prose cannot hold it.** The rule asks the model to recall, while composing an area question, a
+value it read in a tool result several turns earlier. **Every rule in these prompts that reliably
+holds is checkable against the turn being composed** — "is there a fresh `apply_job` result in this
+turn?", "is the text `nearest_landmark` present in the context block?" — and the two that fail
+worst are both cross-turn recall: this one and the ordinal running count (58%, D76). By contrast the
+OUTBOUND bots read the caller's place out of a substituted `${location}` token and produced **zero**
+real-caller substitutions across 449 calls. The difference is not wording; it is whether the value is
+in the sentence or in the model's memory.
+
+**Escalated as `ESCALATION-data-team.md` §6:** pass `${location}` on inbound too, populated from the
+caller's stored `item_state.location`, so the confirm line reads a token instead of a memory.
+
+**Severity, honestly:** an irritation, not a falsehood. The caller is asked something we already know
+and generally answers it consistently, so nothing untrue is said — unlike the two apply-claim bugs
+found the same night. It is on the list because re-asking a fact we hold is the most annoying thing
+this bot does, and because the fix is cheap upstream and unavailable to us.
+
+### 2026-09-08 (night) — `apply_job` fired with no data-sharing disclosure on 18 of 105 calls, every one inbound or Maya
+
+**Found by the standing suite, not reported.** On `73764d9d` (2026-09-08 13:56, `kkb-kn-in-signals`,
+a real inbound caller) the caller said *"ಕೃಷ್ಣ ಇಂಡಸ್ಟ್ರಿ. ಎಲ್ಲದಕ್ಕೂ ಅಪ್ಲೈ ಮಾಡ್ರಿ"* — apply me to all of
+them. The bot replied that it could only apply to one at a time, the caller said *"ಓಕೆ"*, and it
+emitted `apply_job`. **The disclosure that applying shares the caller's details with the company was
+never spoken.**
+
+**Counted first, over 105 `apply_job` calls in the cache: 18 had no disclosure before them (17%).**
+The distribution is the whole diagnosis:
+
+| bot | violations |
+|---|---|
+| `kkb-hi-in-signals` | 8 |
+| `maya-hi-in` | 5 |
+| `maya-hi-out` | 2 |
+| `kkb-hi-in`, `kkb-kn-in-signals`, `maya-hi-in-signals` | 1 each |
+| **`kkb-hi-signals`, `kkb-kn-signals`** (outbound Signals) | **0** |
+
+**The rule is not missing and not unclear.** It is present in 10 of 12 prompts — including every one
+where it failed — it is titled "MANDATORY immediately before every `apply_job`", it says "no
+`apply_job` call is permitted until this line has been spoken and answered", and it already names
+the caller-picks-straight-off-the-list case with two call ids. It has now failed twice.
+
+**What the split says.** Outbound walks list → deep dive → doubts → consent → apply, and reaches the
+disclosure turn on its way. **An inbound caller says "apply me to this one" and the bot treats their
+REQUEST as the disclosure** — which it is not: the caller asking to apply is not us telling them what
+applying shares. Nor is the bot's own reply to it; on `73764d9d` the turn that got the "ಓಕೆ" was an
+explanation about applying to one job at a time.
+
+**Change — the check is now one the model can run against the turn it is composing**, which is the
+property every rule in these prompts that actually holds turns out to share (the apply-success
+positional rule holds; this prose gate did not): *"Before you emit `apply_job`, look at your own last
+two spoken turns. If neither contains the words about details being shared with the company, you have
+not disclosed it — do not emit the tool. Speak the line now and wait instead. That is a check you can
+perform; remember whether you said it earlier is not."* Plus the two false-equivalences named
+explicitly — the caller's request, and the bot's own reply to it.
+
+**Files:** 10 KKB/Maya conversation prompts + the slim rewrite. The two legacy outbound prompts
+(`KKB Placeholder Hindi.md`, `KKB Placeholder Kannada.md`) have the spoken line but no
+"MANDATORY before every apply_job" section to attach it to; they have had 1 engaged call between them
+since 2026-09-01 and are excluded from the `fix_presence` row for that reason — **noted as a real
+gap, not fixed.** `fix_presence` row `disclosure-checked-on-the-turn`.
+
+**A stronger fix exists and is an owner call.** `apply_job` already carries a REQUIRED
+`duplicate_check` parameter, which is precedent: a constraint expressed in the tool schema is read at
+the moment of use and is far stickier than a rules paragraph (CLAUDE.md ladder rung 4). A required
+`disclosure_spoken` enum would make the tool uncallable without the assertion, and the assertion is
+checkable against the transcript. I have not done it: it changes the live tool contract on 12
+production bots, and a required parameter the model omits turns every apply into an error. That is
+not a change to make unattended.
+
+**Verification:** **DEPLOYED, NOT VERIFIED.** The reproducing shape is an inbound caller who asks to
+apply before hearing about any single job — `raya/testcases/args/r3/inbound-probe.json` with a
+persona that opens on "apply me to all of them". Inbound bots need the tester dialled IN, so this
+needs a harness run rather than production traffic.
+
 ### 2026-09-08 (late, correction) — the location "substitutions" were my own test fixture. Zero real callers.
 
 **I reported the location sentence naming the wrong place on 5 of 15 calls, then 8 of 16, and said

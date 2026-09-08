@@ -172,6 +172,15 @@ FIXES = [
                                         "(D64/D71, QA call 5035574; reproducing call id still pending)",
      seeker_conv(), ["never what they DO"], []),
 
+    ("disclosure-checked-on-the-turn", "the data-sharing disclosure is checked against the turn "
+                                       "being composed, and the caller's own apply request is named "
+                                       "as NOT being the disclosure — 18 of 105 apply_job calls had "
+                                       "no disclosure before them, all on inbound bots or Maya "
+                                       "(73764d9d)",
+     [f for f in seeker_conv() if "Placeholder Hindi.md" not in os.path.basename(f)
+      and "Placeholder Kannada.md" not in os.path.basename(f)],
+     ["CHECK IT ON THE TURN YOU ARE COMPOSING"], []),
+
     ("phase2-bridge-claims-nothing", "the Phase-2 bridge does NOT assert the apply succeeded — "
                                      "e75bf95f and 7e586f14 told real callers \"ಅಪ್ಲೈ ಆಗಿದೆ\" after "
                                      "two 422s, via this line rather than the guarded success line",

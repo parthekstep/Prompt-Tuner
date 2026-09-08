@@ -321,3 +321,7 @@
 - **2026-09-08_210916** — `pre-phase2-bridge-no-claim` — e75bf95f + 7e586f14: real callers told ಅಪ್ಲೈ ಆಗಿದೆ after two failed applies _(6 files)_
 - **2026-09-08_211029** — `pre-deploy-maya-hi-signals-2026-09-08_211029` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
 - **2026-09-08_211039** — `pre-deploy-maya-hi-in-signals-2026-09-08_211038` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-09-08_211504** — `pre-deploy-maya-hi-signals-2026-09-08_211504` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-09-08_211510** — `pre-deploy-maya-hi-in-signals-2026-09-08_211510` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-09-08_211530** — `pre-deploy-maya-hi-out-2026-09-08_211530` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-09-08_211534** — `pre-deploy-maya-hi-in-2026-09-08_211534` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_

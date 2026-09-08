@@ -165,3 +165,46 @@ caller, and it was wrong of me to quote it as a caller-facing rate.
 `7b841e6b` and `a5ba6894`, the last of them after the fix, with `location: "10987, Sarhanpur"`
 (digits first, a shape the prompt's worked examples do not cover). A `location_spoken` argument that
 is already digit-free and already in the call's script removes that class entirely.
+
+
+---
+
+## 6. Pass `${location}` on INBOUND too, populated from the caller's stored profile (added 2026-09-08)
+
+**The ask:** inbound agents currently receive no `location` argument. Send one, filled from the
+caller's own stored `item_state.location`, so the confirm line reads a substituted token instead of
+requiring the model to recall what a tool result said several turns earlier.
+
+**Why this is rung 5 and not another prompt edit.** The rule "if you hold a location, CONFIRM it,
+never ask openly" is present in all six inbound prompts and has been rewritten four times, each time
+with the previous failure's call ids attached (`bbdb6eaf`, `5a3aef43`, `0358c875`, then `2d8b7cb1`
+as a post-fix recurrence). Measured over the cached calls: **of 10 calls where the profile held a
+real location and the bot asked an area question, 9 asked it OPENLY without confirming what we
+already had.**
+
+| bot | open asks on a known location |
+|---|---|
+| `kkb-kn-in-signals` | 4 |
+| `kkb-hi-in-signals` | 2 |
+| `dkb-kn-signals`, `kkb-hi-in`, `kkb-kn-out` | 1 each |
+
+Examples: `6570a566` (today) held `Dharwad` and asked "ನೀವು ಯಾವ ಏರಿಯಾದಲ್ಲಿ ಕೆಲಸ ಹುಡುಕ್ತಾ ಇದೀರಾ?", so the
+caller supplied "ಹುಬ್ಬಳಿ ಧಾರವಾಡ" — a fact we were holding. `05a4b394` held `Kundgol`, `be84007a` held
+`Hubballi`, `5076af4a` held `Bailahongala`, `1c3b4fe7` held `Sahibabad, Ghaziabad`.
+
+**Why the prompt cannot fix it.** The rule requires the model to remember, at the moment it composes
+an area question, a value it read in a tool result several turns earlier. Every rule in these prompts
+that reliably holds is instead **checkable against the turn being composed** — the apply-success
+positional rule ("is there a fresh apply_job result in this turn?"), the Turn-B landmark check ("is
+the text `nearest_landmark` present in the context block?"). A cross-turn recall has no such handle,
+which is the same reason the ordinal running count fails on 58% of multi-batch calls (analyser D76).
+
+**Contrast that with what works.** On the OUTBOUND bots the caller's place arrives as `${location}`
+and is read out of a substituted token. Over 449 calls, real callers produced **zero** cases of the
+bot naming a place other than the one it was given. The mechanism difference is not the wording —
+it is whether the value is in the sentence or in the model's memory.
+
+**Severity, stated honestly:** this is an irritation, not a falsehood. The caller is asked something
+we already know and usually answers it consistently, so nothing untrue is said. It is worth fixing
+because re-asking a fact we hold is the most annoying thing this bot does, and because the fix is
+cheap on your side and impossible on ours.
