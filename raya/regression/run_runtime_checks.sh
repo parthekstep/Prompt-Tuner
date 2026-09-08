@@ -36,7 +36,13 @@ echo ""
 echo "================================================================ input_coverage"
 python3 raya/regression/input_coverage.py || FAIL=1
 
-for chk in dkb_employer_integrity inbound_location_consent nojobs_integrity jobs_presented consent_before_apply location_chain location_reconfirm apply_result_integrity apply_failure_wording location_integrity apply_outcomes; do
+# Added 2026-09-08. spoken_form catches a stored value read out in its WRITTEN form (Latin script,
+# a PIN as a quantity, a field label, a placeholder) -- the class behind QA calls 5035574 and
+# 5061404, and behind DKB greeting owners as "Not Available" on seven calls. location_said asks a
+# narrower question the others cannot: WHICH place did the bot name? That one sentence produces four
+# outcomes -- correct, the raw argument, a DIFFERENT place it happened to know, or nothing at all --
+# and only two of them look like failures to any other check.
+for chk in spoken_form location_said dkb_employer_integrity inbound_location_consent nojobs_integrity jobs_presented consent_before_apply location_chain location_reconfirm apply_result_integrity apply_failure_wording location_integrity apply_outcomes; do
   echo ""
   echo "================================================================ $chk"
   python3 "raya/regression/$chk.py" "${ARGS[@]}" || FAIL=1

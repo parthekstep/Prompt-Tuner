@@ -190,6 +190,34 @@ def report(rows):
         print("FEWER THAN 2 CALLS ON A SIDE — this is not yet a comparison, it is an anecdote.")
 
 
+# The scenario matrix. One fixture is one path; a comparison run on a single path says nothing
+# about the others, and the paths that matter most are the ones where the two prompts describe the
+# same behaviour with very different amounts of prose. Each row is
+# (name, fixture, persona, what the run is for).
+MATRIX = [
+    ("offlist-loc-apply", "raya/testcases/args/r5/sarjapur-offlist.json",
+     "raya/personas/hi-detail-then-apply.md",
+     "off-list location + a deep dive + an apply — exercises the location conversion, the company "
+     "names, the qualification line and the whole apply sequence in one call"),
+    ("many-jobs-batches", "raya/testcases/args/r3/morejobs-22.json",
+     "raya/personas/hi-asks-for-all-jobs.md",
+     "22 jobs and a caller who keeps asking for more — ordinals must run continuously and no job "
+     "may be named twice, which is where the fat prompt failed on 09978532"),
+    ("nothing-fits", "raya/testcases/args/r3/deadjobs.json",
+     "raya/personas/hi-wants-different-job.md",
+     "a caller who wants a role the array does not hold — the two-slot no-match line, both slots "
+     "filled, neither of them a place"),
+    ("already-applied", "raya/testcases/args/r3/already-applied-from-memory.json",
+     "raya/personas/hi-force-apply.md",
+     "a job the memory says was already applied for — the pre-tool duplicate check, and the "
+     "already-applied line spoken as good news rather than as a failure"),
+    ("declines-everything", "raya/testcases/args/r3/gzb-validated-12.json",
+     "raya/personas/hi-unsure-declines.md",
+     "an undecided caller who turns everything down — Need Capture Path B is owed, and the "
+     "preference capture must not fire while jobs remain unshown"),
+]
+
+
 SELFTEST = [
     ({"call_duration": 60, "agent_args": {"location": "Sarjapur, 110045"}, "call_transcript": [
         {"role": "assistant", "content": u"हैलो, मेरी आवाज़ आ रही है?"},
@@ -235,10 +263,46 @@ def main():
     ap.add_argument("--persona", default="")
     ap.add_argument("--score-only", action="store_true")
     ap.add_argument("--selftest", action="store_true")
+    ap.add_argument("--matrix", action="store_true",
+                    help="run every scenario in MATRIX once per bot instead of one fixture N times")
+    ap.add_argument("--list-matrix", action="store_true")
     a = ap.parse_args()
 
     if a.selftest:
         selftest()
+    if a.list_matrix:
+        for n, fx, pe, why in MATRIX:
+            print("  %-20s %-52s %s" % (n, fx, os.path.basename(pe)))
+            print("  %-20s %s" % ("", why))
+        return
+
+    if a.matrix:
+        rows = []
+        for name, fx, pe, _why in MATRIX:
+            if not os.path.exists(os.path.join(REPO, fx)):
+                print("SKIP %s — fixture missing: %s" % (name, fx)); continue
+            subprocess.run([sys.executable, os.path.join(REPO, "scripts/raya_testcall.py"),
+                            "persona", TESTER, pe], cwd=REPO, capture_output=True)
+            for bot, uu in (FAT, SLIM):
+                print("\n>>> %s / %s" % (name, bot), flush=True)
+                cid, out = dial(uu, fx, "abm-%s-%s" % (name, bot))
+                print(out.strip().splitlines()[-1] if out.strip() else "(no output)")
+                if not cid:
+                    continue
+                full = get("/api/call/" + cid)
+                m, f = score(full)
+                m["scenario"] = name
+                rows.append((bot, cid, m, f))
+        if rows:
+            report(rows)
+            print("\nby scenario:")
+            for name, _, _, _why in MATRIX:
+                sel = [(b, m) for b, _, m, _ in rows if m.get("scenario") == name]
+                if sel:
+                    print("  %-20s %s" % (name, "  ".join("%s %ss/turn" % (b, m["sec_per_turn"]) for b, m in sel)))
+        else:
+            print("no calls completed.")
+        return
 
     if a.persona:
         subprocess.run([sys.executable, os.path.join(REPO, "scripts/raya_testcall.py"),

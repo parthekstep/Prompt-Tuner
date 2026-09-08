@@ -157,6 +157,13 @@ FIXES = [
                                         "usable role — QA heard 'आप अभी बी०टेक०(ई०सी०एस) का काम कर रहे हैं' "
                                         "(D64/D71, QA call 5035574; reproducing call id still pending)",
      seeker_conv(), ["never what they DO"], []),
+
+    ("maya-collegename-only-decides", "ONLY the college_name value line picks Maya's opener — the bare "
+                                      "string 'Not Available' in `contact_memory` was satisfying branch B, "
+                                      "so branch A fired 48/48 on maya-hi-out and 2/14 on maya-hi-signals "
+                                      "(D75, 08a8ff4f)",
+     [f for f in MAYA_CONV if "Inbound" not in os.path.basename(f)],
+     ["No other field's value has any bearing on it"], []),
 ]
 
 
