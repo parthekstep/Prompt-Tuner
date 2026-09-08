@@ -83,6 +83,52 @@ and the pass condition is one line: after the apply-success line and the service
 bot must read back name, age, gender, role, qualification and area, then ask "सब सही?" — in Kannada,
 "ಎಲ್ಲಾ ಸರಿನಾ?".
 
+### 2026-09-08 (evening) — payload company names spoken in Latin on BOTH prompts; the ordinal counter fails 58% of the time
+
+**Found by the A/B harness, not reported.** Ten calls, five on the 219k prompt and five on the 69k
+rewrite, same fixture and persona.
+
+**1 — `[company]` and `[role]` were being read out of the payload in Latin, on both prompts.**
+`ea0477f4` (fat) did it **five times in one call** — "मार्केटिंग, **SARA ENTERPRISES** में", "एक और
+option है — फील्ड मार्केटिंग एग्जीक्यूटिव, **BayLink**", "टेली मार्केटिंग फीमेल, **GLOBAL CHEMICALS**".
+Slim's `90658584` did it three times and `f90a0b97` spoke a salary in digits.
+
+I first recorded this as a regression caused by the rewrite, because slim did it and fat had got it
+right on `02c5f7f0`. **That was wrong and is corrected here:** `ea0477f4` is the fat prompt, on the
+same fixture, failing worse. It is a shared bug.
+
+**Root cause (D71 again).** The Devanagari-only rule is stated FIVE times in these prompts — the
+Script Output Rule, the English-origin-words section, Named entities, Canonical Location Spellings,
+and the location step — and in none of those places is it stated at **the line that consumes these
+values**, which is the job-presentation format. That format says only "Speak the company name
+([company]) for each option where present".
+
+**Change:** the conversion is now stated at the point of use, inside the step-2 rules and the
+deep-dive rules, with the exact values that failed worked through — "GLOBAL CHEMICALS" → "ग्लोबल
+केमिकल्स", "SARA ENTERPRISES" → "सारा एंटरप्राइज़ेज़", "BayLink" → "बेलिंक", "QUESS CORP LTD." → "क्वेस
+कॉर्प" — plus the off-list clause. 12 KKB/Maya prompts (Kannada twins in Kannada script) and the slim
+prompt. Heading parity intact on all four language pairs. All deployed. `fix_presence` row
+`company-converted-at-point-of-use`, 12 bots. **DEPLOYED, NOT VERIFIED** — a re-dial of both bots on
+the same fixture is in flight.
+
+**2 — the ordinal running count restarts on 58% of the calls that reach a second batch.** Counted
+first, over 1,675 cached calls: 82 spoke an ordinal, 24 got past one batch, and **14 of those 24
+restarted at पहला**. `5a1c0c77` ran पहला दूसरा तीसरा four times over. It happens inbound and
+outbound, Hindi and Kannada, and on both the 219k and the 69k prompt in the same A/B run
+(`09978532`, `4d6d4d02`).
+
+The rule is already unambiguous — *"Ordinals run continuously across batches and NEVER restart"* —
+so this is not a clarity problem. It asks the model to carry a counter across an unbounded number of
+turns, and it cannot: unlike the positional rules that DO hold ("this line may only appear in a turn
+containing a fresh apply_job result", checkable against the turn being composed), an ordinal that
+depends on what was said three turns ago cannot be self-checked at the moment of speaking.
+
+**No third wording was written** (analyser **D76**). The fix is to remove the cross-turn state, and
+that changes spoken output, so it is an owner decision: either drop the numbering on later batches
+and let selection happen by role and company — which the phonetic-confirmation rules already cover —
+or make the numbering explicitly per-batch and re-anchor selection on the name. **The experiment
+belongs on the slim A/B bot first**, which is what it is for.
+
 ### 2026-09-08 (evening) — the end-of-call read-back is VERIFIED, and the location numbers corrected
 
 **Read-back: PROVEN on `08a8ff4f`** (2026-09-08 06:53 UTC, `maya-hi-signals`, post-deploy). Six

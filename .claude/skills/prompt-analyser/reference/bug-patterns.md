@@ -1460,3 +1460,44 @@ re-word the arms; the arms were fine.
 
 **Source.** Maya Hindi + Maya Hindi Signals, 2026-09-08. Bugs `08a8ff4f`, `9fd1e0d9`, `35dd4e66`,
 `9fa8975f`, `771fc142`, `6e3ba9ff`, `8e04a854`. Related: D67, D68, D71, D73.
+
+---
+
+### D76
+**A rule that requires the model to maintain a RUNNING COUNT across turns. It will lose it.**
+
+**Symptom.** The job list numbers itself पहला, दूसरा, तीसरा … and then the next batch starts at पहला
+again. The caller who says "पहला" now means a different job from the one the bot means.
+
+**Root cause.** The prompt says: *"Ordinals run continuously across batches and NEVER restart. If a
+batch ended on तीसरा, the next batch begins at चौथा… The ordinal is a running count of the jobs you
+have actually READ ALOUD on this call."* That is not a rule the model can follow by reading — it is a
+counter it must carry across an unbounded number of turns, alongside which array entries it has
+already named. It loses it, and it loses it more often than not.
+
+**Measured (ladder rung 0, over 1,675 cached calls):** 82 calls spoke an ordinal; 24 of them got past
+one batch; **14 of those 24 — 58% — restarted the count.** Examples: `5a1c0c77` went
+पहला दूसरा तीसरा four times over, and `90f70860`, `dc562e00`, `5d6702fc`, `738d3400`, `75e69c6b`,
+`9d5e9848`, `a0999f10` all restarted once. It happens on inbound and outbound, Hindi and Kannada, on
+the 219k prompt and on the 69k rewrite alike (`09978532` and `4d6d4d02` in the same A/B run), so it
+is neither a prose-volume problem nor bot-specific. **A guard that fails on the majority of the calls
+that reach it is not a guard.**
+
+**Detection heuristic.** Grep for rules containing "running count", "continuously", "never restart",
+"do not renumber", "the same number as before", "keep track of how many". Then ask the question that
+decides it: *can the model verify compliance from what is in front of it in this turn?* An ordinal
+that depends on what was said three turns ago cannot be checked at the moment of speaking, and rules
+that cannot be self-checked at the point of use are the ones that fail (contrast the positional rules
+that DO hold — "this line may only appear in a turn containing a fresh apply_job result" is checkable
+against the turn being composed).
+
+**Fix direction — remove the requirement, do not restate it.** Either
+(a) drop the running count and let later batches be introduced without numbering ("एक और जॉब है — …"),
+so selection happens by role and company, which the phonetic-confirmation rules already cover; or
+(b) keep per-batch numbering but make it explicitly per-batch and re-anchor selection on the name.
+Both remove the cross-turn state. What does NOT work is a third wording of "never restart": the rule
+is already unambiguous, and it is the memory it presumes that is missing, not the clarity.
+
+**Source.** All KKB/Maya prompts, measured 2026-09-08. Related: D70 (a trigger that is never true),
+D71. The fix is an owner decision because it changes spoken output; the experiment belongs on the
+slim A/B bot first.
