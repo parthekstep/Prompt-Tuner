@@ -114,10 +114,24 @@ def classify(arg_location, agent_turns, caller_turns, has_sentence=True):
 
     # SUBSTITUTED: a canonical place was spoken whose English form is absent from the argument,
     # and the caller never said it either.
+    #
+    # Spelling variants matter here. The campaign sends "Hubballi" and the canonical Kannada form is
+    # ಹುಬ್ಬಳ್ಳಿ, whose English key in CANON is "hubli" -- so a CORRECT conversion looked like a
+    # substitution and 6286926f (a clean end-to-end success) was flagged. Same trap for
+    # Bengaluru/Bangalore and Mysuru/Mysore. Normalise the argument through the aliases before
+    # deciding anything.
+    ALIASES = {"hubli": ("hubli", "hubballi", "hubbali"),
+               "dharwad": ("dharwad", "dharwar"),
+               "bengaluru": ("bengaluru", "bangalore", "bengalooru"),
+               "mysuru": ("mysuru", "mysore"),
+               "ghaziabad": ("ghaziabad", "gaziabad"),
+               "muradnagar": ("muradnagar", "murad nagar"),
+               "koramangala": ("koramangala", "koramangla")}
     argl = str(arg_location).lower()
     said_by_caller = " ".join(caller_turns)
     for dev, eng in CANON.items():
-        if dev in spoken and eng not in argl and dev not in said_by_caller:
+        forms = ALIASES.get(eng, (eng,))
+        if dev in spoken and not any(f in argl for f in forms) and dev not in said_by_caller:
             return ("SUBSTITUTED", spoken,
                     "spoke %r; the argument was %r and the caller never named it" % (dev, arg_location))
     return "OK", spoken, "converted from the argument"
@@ -193,6 +207,8 @@ SELFTEST = [
      "SUBSTITUTED", "8eb83bc2 — same failure on the SLIM prompt"),
     ("Muradnagar, 110045", [u"हमारे पास आपकी जॉब की लोकेशन मुराद नगर है, और अभी जॉब्स गाज़ियाबाद में हैं"], [],
      "OK", "55a44edb — on-list value, converted"),
+    ("Hubballi", [u"ನಮ್ಮ ಹತ್ರ ನಿಮ್ಮ ಜಾಬ್ ಲೊಕೇಶನ್ ಹುಬ್ಬಳ್ಳಿ ಅಂತ ಇದೆ, ಮತ್ತೆ ಈಗ ಜಾಬ್‌ಗಳು ಹುಬ್ಬಳ್ಳಿಯಲ್ಲಿ ಇವೆ"], [],
+     "OK", "6286926f — Hubballi -> ಹುಬ್ಬಳ್ಳಿ is CORRECT; the alias must not read as a substitution"),
     ("Muradnagar, 110045", [u"पहला: फील्ड मार्केटिंग एग्जीक्यूटिव, बेलिंक, सैलरी अठारह हज़ार"], [],
      "ABSENT", "8674462f — jobs presented, location turn skipped"),
     ("Sarjapur, 110045", [u"आपके लिए गाज़ियाबाद में कुछ जॉब्स हैं। आप गाज़ियाबाद में किस इलाके के पास काम करना चाहेंगे?",

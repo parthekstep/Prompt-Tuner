@@ -83,6 +83,37 @@ and the pass condition is one line: after the apply-success line and the service
 bot must read back name, age, gender, role, qualification and area, then ask "सब सही?" — in Kannada,
 "ಎಲ್ಲಾ ಸರಿನಾ?".
 
+### 2026-09-08 (night) — VERIFIED end-to-end on `6286926f`: five fixes at once, on a real successful apply
+
+**The first genuine `apply_job` success on the tester's Dharwad profile** — `action_id`
+`ec5a2416-e8ec-4fe2-9a6a-8dcde048f984`, `status: "success"` — which is what six earlier read-back
+attempts had been blocked on (the Ghaziabad profile is saturated with `ACTION_LIMIT_REACHED`).
+`kkb-kn-signals`, 2026-09-08 16:19 UTC, fixture `readback-kn.json`.
+
+> ಒಂದ್ಸಲ ಕನ್ಫರ್ಮ್ ಮಾಡ್ತೀನಿ — ನಿಮ್ಮ ಹೆಸರು ಪಾರ್ಥ, ವಯಸ್ಸು **ಇಪ್ಪತ್ತಾರು**, **ಮಹಿಳೆ**, ಕೆಲಸ ಇನ್ಶೂರೆನ್ಸ್
+> ಫೀಲ್ಡ್ ಏಜೆಂಟ್, ಓದು **ಹನ್ನೆರಡನೇ ತರಗತಿ**, ಏರಿಯಾ ಕೋರಮಂಗಲ — ಎಲ್ಲಾ ಸರಿನಾ?
+
+**Five things proven in one call:**
+
+| fix | proof in this call |
+|---|---|
+| **age in words** | `ವಯಸ್ಸು ಇಪ್ಪತ್ತಾರು` — 26 spelled out, not "26". This is the exact bot that said **"ವಯಸ್ಸು 38, Male"** on `08449995` |
+| **gender in the target language** | `ಮಹಿಳೆ`, not `Female` |
+| **qualification in words** | `ಹನ್ನೆರಡನೇ ತರಗತಿ`, not "12th" |
+| **the read-back is LABELLED and covers all six fields** | name · age · gender · ಕೆಲಸ (role) · ಓದು (qualification) · ಏರಿಯಾ — closing the gap on `08a8ff4f`, which omitted role and qualification |
+| **the Phase-2 bridge carries no duplicate claim** | the success line ran in the turn holding the real result, then the bridge said only *"ನಿಮ್ಮ ಮಾಹಿತಿ ಪೂರ್ಣವಾಗಿ ಇಡೋಕೆ…"* — no second "ಅಪ್ಲೈ ಆಗಿದೆ". First verification of this on Kannada |
+
+Also correct on the same call: the location sentence spoke `Hubballi` as **ಹುಬ್ಬಳ್ಳಿ** (canonical
+Kannada), the data-sharing line preceded the apply, and `update_profile` fired to persist. Every
+detector clean — `spoken_form`, `bracket_leak`, `apply_result_integrity`.
+
+**A false positive in my own detector, found by this call and fixed.** `location_said` flagged
+ಹುಬ್ಬಳ್ಳಿ as a substitution: the campaign sends `"Hubballi"`, the canonical Kannada form's English
+key in the detector was `"hubli"`, and `"hubli" not in "hubballi"`. So a **correct** conversion read
+as a wrong place. Spelling aliases are now normalised before the comparison —
+hubli/hubballi, dharwad/dharwar, bengaluru/bangalore, mysuru/mysore, ghaziabad/gaziabad,
+muradnagar/murad nagar, koramangala/koramangla — with this call as self-test row 11.
+
 ### 2026-09-08 (night) — the confirm-first location rule fails 9 of 10 times. NO fifth wording written.
 
 **Found by the standing suite.** `6570a566` and `fe3161c3` (both today, `kkb-kn-in-signals`, real
