@@ -586,3 +586,10 @@
 - **2026-09-08_204401** — `pre-deploy-kkb-hi-in-signals-2026-09-08_204401` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Signals.md _(10 files)_
 - **2026-09-08_204406** — `pre-deploy-kkb-kn-in-signals-2026-09-08_204406` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada Signals.md _(10 files)_
 - **2026-09-08_210331** — `pre-deploy-kkb-hi-signals-slim-2026-09-08_210331` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Hindi Signals.md _(10 files)_
+- **2026-09-08_210916** — `pre-phase2-bridge-no-claim` — e75bf95f + 7e586f14: real callers told ಅಪ್ಲೈ ಆಗಿದೆ after two failed applies _(10 files)_
+- **2026-09-08_211006** — `pre-deploy-kkb-hi-signals-2026-09-08_211006` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
+- **2026-09-08_211012** — `pre-deploy-kkb-kn-signals-2026-09-08_211012` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada Signals.md _(10 files)_
+- **2026-09-08_211019** — `pre-deploy-kkb-hi-in-signals-2026-09-08_211019` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Signals.md _(10 files)_
+- **2026-09-08_211025** — `pre-deploy-kkb-kn-in-signals-2026-09-08_211025` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada Signals.md _(10 files)_
+- **2026-09-08_211044** — `pre-deploy-kkb-hi-signals-slim-2026-09-08_211044` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Hindi Signals.md _(10 files)_
+- **2026-09-08_211121** — `pre-deploy-kkb-hi-signals-slim-2026-09-08_211121` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Hindi Signals.md _(10 files)_

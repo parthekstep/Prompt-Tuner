@@ -28,6 +28,38 @@
 - **Files:** `TRRAIN/TRRAIN Hindi.md` (new), `TRRAIN/TRRAIN Kannada.md` (new), `TRRAIN/TRRAIN Output.md` (new), `TRRAIN/TRRAIN Memory.md` (new), `TRRAIN/CHANGELOG.md` (new), `raya/agents.json`, `CLAUDE.md` (path map).
 - **Raya agents:** `TRRAIN Hindi` = `cf39a59a-3b24-4842-ba03-4248ec245aa1`, `TRRAIN Kannada` = `dfeda883-3d2d-4a74-a0b5-1a47fdde2282`. Both created via `POST /api/agent` with `say_hello=false`, `max_call_duration_mins=5`, memory enabled.
 
+### 2026-09-08 — Signals migration re-verified from the LIVE tool configuration
+
+Re-checked because the migration kept being questioned on the strength of the changelog alone. This
+is the dispositive test — what the live `get_profile` tool actually points at, read from the agent
+config on the API:
+
+| bot | tools | endpoint |
+|---|---|---|
+| `trrain-hi-out` | `get_profile` only | `gzb-signals.bluedotseconomy.org/api/v1/admin/participant` |
+| `trrain-kn-out` | `get_profile` only | `dharwad-signals.bluedotseconomy.org/api/v1/admin/participant` |
+| `kkb-hi-signals` (reference) | 4 tools | `gzb-signals.bluedotseconomy.org/api/v1/admin/participant` (+ `/action/perform`) |
+
+Same Signals host, same path, as the reference Signals bot. Not the ONEST backend. `get_profile` is
+its only tool, which is the spec — TRRAIN cannot apply, create or update anything.
+
+Corroborating, all independently checkable:
+- all six TRRAIN targets in `raya/agents.json` carry `"signals": true`;
+- neither prompt contains `sourceService` or `ONESTAGENT` (0 occurrences), the tokens a
+  pre-migration prompt would still have;
+- `scripts/toolschema_parity.py` places TRRAIN in a Signals group and reports `get_profile` on 2/2
+  bots with matching schemas;
+- end-to-end fetches on `6e5b67de` (Hindi) and `58174cf7` (Kannada), 2026-09-04.
+
+**Nothing to migrate.** Recorded here with the endpoint evidence so the question is answerable
+without re-reading the API.
+
+**Also confirmed today:** TRRAIN is the one bot family with **zero** written-value leaks — 0 across 98
+cached calls — and the reason is instructive rather than luck. Its prompt states the conversion **at
+the line that speaks the value** ("speak the NAMED line, with the role transliterated into
+Devanagari"). KKB, Maya and DKB state the same rule in up to five distant sections and leaked on 13
+calls between them. See analyser D71.
+
 ### 2026-09-04 — Registered as a Signals bot; Kannada was still refusing to name TRRAIN Trust
 
 - **Feedback/bug:** "the TRRAIN bot is still not on the signals API." Its *tools* have pointed at

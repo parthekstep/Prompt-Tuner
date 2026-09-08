@@ -1572,3 +1572,48 @@ file.
 **Source.** All 20 conversation prompts + the slim rewrite, 2026-09-08. Detector
 `raya/regression/bracket_leak.py`, 9/9 self-test. Related: D67 (`${token}` in quoted speech), D74
 (a token inside a sample's speech), D71.
+
+
+---
+
+### D78
+**A guard stops the line it names, and a DIFFERENT line carries the same claim.**
+
+**Symptom.** A caller whose application failed twice is told the application went through. The
+prompt has an explicit, well-tested guard against exactly that — and the guard was obeyed.
+
+**Root cause.** On `e75bf95f` and `7e586f14` (2026-09-08, `kkb-kn-signals`, **both real callers**),
+two `apply_job` calls returned 422. The bot did everything the guard asks:
+
+1. spoke the row-2 failure line after the first 422;
+2. spoke the second-consecutive-failure line after the second;
+3. spoke the Need Capture acknowledgement with the correct **verbatim** no-job-remains line, which
+   the prompt quotes precisely so there is "no free slot" for a success claim.
+
+Then it said the **Phase-2 bridge**, whose first words are *"ಅಪ್ಲೈ ಆಗಿದೆ"* — "the apply has been
+done". The bridge is gated on a successful apply, in prose, in a different section. The guard
+protected the sentence it was written about; the claim simply arrived inside another sentence that
+also contained it.
+
+**The generalisation, and it is the useful part.** A prohibition is scoped to a STRING. An assertion
+is a property of MEANING. Enumerate every line in the prompt that asserts the same fact, not just
+the one that failed — and check each of them separately. Here the fact "the apply succeeded" was
+asserted in two places: the success line (guarded, positional rule, five call ids in its comment) and
+the Phase-2 bridge (unguarded, because nobody thought of it as a claim).
+
+**Detection heuristic.** For each fact the bot can state that might be false — an application
+submitted, a record saved, a callback promised, a place confirmed — grep the prompt for **every**
+quoted line that asserts it, then ask of each: what makes this one unsayable when the fact is false?
+A line whose answer is "a rule in another section" is the next occurrence. Mechanically:
+`grep` the success/save/confirm vocabulary (`हो गया`, `ಆಗಿದೆ`, `नोट कर लिया`, `सेव`) across all
+quoted lines and count how many distinct lines carry each claim. More than one is this pattern.
+
+**Fix direction — rung 3, remove the wrong option.** Take the claim out of the line that does not
+need it. The Phase-2 bridge does not have to announce the apply: the success line already did, one
+turn earlier, in the turn holding the tool result. Deleting the prefix leaves a bridge that cannot be
+false, which no amount of gating achieves. **Do not add a second gate.** The first gate works; the
+problem was never gate strength.
+
+**Source.** All 6 KKB/Maya Signals prompts + the slim rewrite, 2026-09-08. `fix_presence` row
+`phase2-bridge-claims-nothing` carries the removed strings as a must-NOT-contain, so the prefix
+cannot come back. Related: D65 (a licensed line indistinguishable from the action), D47, D49.

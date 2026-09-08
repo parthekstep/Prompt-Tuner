@@ -172,6 +172,13 @@ FIXES = [
                                         "(D64/D71, QA call 5035574; reproducing call id still pending)",
      seeker_conv(), ["never what they DO"], []),
 
+    ("phase2-bridge-claims-nothing", "the Phase-2 bridge does NOT assert the apply succeeded — "
+                                     "e75bf95f and 7e586f14 told real callers \"ಅಪ್ಲೈ ಆಗಿದೆ\" after "
+                                     "two 422s, via this line rather than the guarded success line",
+     [f for f in seeker_conv() if "Signals" in os.path.basename(f)],
+     ["asserts NOTHING about the application"],
+     ["अप्लाई हो गया है। आपकी जानकारी पूरी", "ಅಪ್ಲೈ ಆಗಿದೆ. ನಿಮ್ಮ ಮಾಹಿತಿ"]),
+
     ("readback-age-gender-in-words", "the read-back template itself says [age] is spoken in words and "
                                      "[gender] in the target language — 08449995 said "
                                      "\"ವಯಸ್ಸು 38, Male\", and 8 of 28 read-backs carried a raw "
