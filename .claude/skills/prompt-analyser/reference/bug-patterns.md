@@ -1305,9 +1305,17 @@ consumed in one specific sentence, put the conversion at the point of use as an 
 delete any nearby permission to pass the value through ("say the sentence as it arrives", "the
 actual literal value", "VERBATIM"), which is the competing instruction the model was obeying.
 
+**A control group in the same fleet, found on 2026-09-08 and worth more than the argument.**
+**TRRAIN leaked nothing across 98 cached calls.** Its prompt has no off-list clause and no company
+list — what it has is the conversion stated **at the line that speaks the value**: *"speak the NAMED
+line, with the role transliterated into Devanagari"*. KKB, Maya and DKB state the Devanagari rule in
+up to five distant sections and leaked on 13 calls between them. Same fleet, same model, same voice,
+same script requirement; the difference is where the rule sits. That is the strongest evidence in the
+repo for fixing this class at the point of use rather than by adding another general statement.
+
 **Source.** 2026-09-08, QA calls 5035574 / 5061404. 16 prompts. Standing detector:
 `raya/regression/spoken_form.py`. Related: D50 (the sample outvotes the rule), D64 (closed set),
-D67, D72, D73.
+D67, D72, D73, D77.
 
 ---
 
@@ -1527,6 +1535,26 @@ the mild end of it. The severe end is internal text:
 | `1131d79c` | "क्या आप **[company_name]** से बोल रहे हैं?" · "आपकी एक posting है — **[job_role]**, **[num_vacancies]** vacancies, सैलरी **[salary]**" |
 | `f391ab35` | "**[Proceeding to Phase 2]**" and "**[INTERNAL: update_job_status called with status \\"open\\" for the job]**" |
 | `1b7fb500`, `78ef362f` | "**[UUID from create_profile result]**" |
+
+**And the severe end is worse than a marker.** On 2026-09-04 three bots read an entire fabricated
+tool call out loud, payload included:
+
+    78ef362f  maya-hi-out  *(Silent tool call: create_profile with agentId: "up-getjob",
+                             phone: "+917946350285", name: "सुनीता", age: 27, gender: "female")*
+    1b7fb500  kkb-kn-out   *(Silent tool call: create_profile with name: "ಸುಜಾತಾ",
+                             phone: "+917946350285", agentId: "up-getjob")*
+    35de19e7  kkb-hi-in    *(… name: "आर्यन", age: 26, gender: "male",
+                             totalYearsOfExperience: 1)*  … profile_id: <UUID from create_profile result>
+
+The caller heard their own phone number, name, age and gender recited back as a JSON-ish payload —
+and no tool ran, so these are the same calls as the fabricated-apply class. The prompts already ban
+speaking a payload and already say a `*( )*` parenthetical is never speech; both bans are stated in
+prose far from any template, which is the D71 shape again.
+
+**Currently dormant, not currently fixed by anything targeted:** the window since 2026-09-06 is
+clean over 252 calls, most likely because the 2026-09-04 bridge removal forbade any pre-result line
+containing "अप्लाई". The bracket rule added on 2026-09-08 is preventive rather than corrective, so
+the honest status of this class is *no occurrences in 252 calls*, not *fixed*.
 
 **Detection heuristic.** Grep assistant turns for `\[[A-Za-z_][\w :"'.]{2,60}\]`, for a
 Devanagari/Kannada run inside brackets, for `\*\([^)]+\)\*`, and for a line beginning `INTERNAL`.
