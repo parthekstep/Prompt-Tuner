@@ -178,6 +178,35 @@ of the cached calls and the forbidden line was spoken on **none** of them, so th
 about 144 of 145 observed cases. **No edit was made.** Recorded so that if it recurs there is a prior
 occurrence to count from, rather than re-worded on the strength of one call.
 
+### Experiment 1 on the slim bot: naming the attractor
+
+The location sentence's caller-place slot has failed three wordings. The fourth is not another way
+of saying "say the value you were given" — it names the thing none of the three mentioned.
+
+**The evidence that suggested it.** Of the five substitutions on record, four said **साहिबाबाद** and
+one **गाज़ियाबाद**, for a `${location}` of `Sarjapur, 110045`. Both are entries in the prompt's own
+Canonical Location Spellings list, which sits directly beneath the conversion step. So the model is
+not picking a place at random — it is picking one off the list. The instruction *"use Canonical
+Location Spellings for a place on that list; a place NOT on the list is converted the same way"*
+makes list-membership the salient operation, and the off-list clause reads as "find the nearest
+listed place".
+
+**What was added** (slim only, 70,668 chars):
+
+> **THE CANONICAL LIST IS A SPELLING TABLE, NEVER A MENU.** You consult it to learn how a name you
+> ALREADY HAVE is written — you never pick a place out of it. … **If the place you are about to say
+> is a list entry and the words in `${location}` are not, you have taken a name off the menu and
+> must stop.**
+
+The last sentence is the part that matters: it is a check the model can run against the turn it is
+composing, which is the property the rules in these prompts that actually hold all share. "Say the
+value you were given" is not checkable in that way — it requires comparing against something the
+model believes it already did.
+
+**Deliberately slim-only.** The fat prompts keep the failing wording, so the next A/B round measures
+this change and nothing else. If it holds it ports to all four KKB/Maya Signals prompts; if it does
+not, the upstream `location_spoken` field is the remaining route (`ESCALATION-data-team.md` §5).
+
 ## Running the comparison
 
 ```

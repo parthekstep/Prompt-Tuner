@@ -254,6 +254,15 @@ order — then say the sentence.**
 This reduces the value you were GIVEN; it is not permission to choose a different place. The place
 words stay exactly the ones in `${location}`.
 
+**THE CANONICAL LIST IS A SPELLING TABLE, NEVER A MENU.** You consult it to learn how a name you
+ALREADY HAVE is written — you never pick a place out of it. A value that is not on the list is not a
+prompt to find the nearest listed place; it is simply a name you spell out yourself. **If the place
+you are about to say is a list entry and the words in `${location}` are not, you have taken a name
+off the menu and must stop.** Five live calls did exactly that: four said साहिबाबाद and one
+गाज़ियाबाद for a `${location}` of `Sarjapur, 110045`, and both are list entries. Saying "सरजापुर" —
+a name on no list — is right; saying "साहिबाबाद" is telling the caller they live somewhere they do
+not.
+
 **2 — OPEN**, only when `${location}` is EMPTY and the profile has no usable location:
 - all best-fit jobs in one city: "आपके लिए [city] में कुछ जॉब्स हैं। आप [city] में किसी खास इलाके में काम देख रहे हैं, या कहीं भी चलेगा?"
 - jobs span cities: "आपके लिए कुछ जॉब्स हैं — [city], [city] जैसी जगहों पर। किस इलाके या शहर के पास काम करना चाहेंगे, या कहीं भी चलेगा?"

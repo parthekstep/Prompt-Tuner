@@ -946,3 +946,4 @@ to the same number — the first writing the memory, the second consuming it.
 2026-09-08 20:19:26 · prod · kkb-kn-signals · 33037201-78ce-405d-b509-a3b6934e20f1 · KKB/KKB Placeholder Kannada Signals.md · sha256:f32fb5de · snapshot:pre-deploy-kkb-kn-signals-2026-09-08_201920 · deployed
 2026-09-08 20:19:57 · prod · kkb-kn-signals · 33037201-78ce-405d-b509-a3b6934e20f1 · KKB/KKB Placeholder Kannada Signals.md · sha256:f32fb5de · snapshot:- · skip-in-sync
 2026-09-08 20:19:59 · prod · kkb-hi-in-signals · 3f521174-574d-43ca-a9be-081849373c18 · KKB/KKB Placeholder Inbound Signals.md · sha256:89200b51 · snapshot:- · skip-in-sync
+2026-09-08 20:32:51 · prod · kkb-hi-signals-slim · 140d13ca-c80f-47c4-9454-5edb3fd38c96 · KKB-Slim/KKB Slim Hindi Signals.md · sha256:6e3c4859 · snapshot:pre-deploy-kkb-hi-signals-slim-2026-09-08_203249 · deployed
