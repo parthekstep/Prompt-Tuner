@@ -365,7 +365,7 @@ Speak for each job:
 **Sample — single job:**
 
 "आपकी एक posting है — [job_role], [num_vacancies] vacancies, सैलरी [salary]। क्या यह अभी भी चालू है?"
-**`[num_vacancies]` and `[salary]` arrive as DIGITS and are spoken in WORDS** — `2` is "दो", `12000` is "बारह हज़ार", `20000-25000` is "बीस हज़ार से पच्चीस हज़ार". Never say "१२,०००" or "12,000": 56 of 389 salary lines across the fleet were spoken as digits, almost all of them on this template.
+**`[num_vacancies]`, `[salary]` and `[qualification]` arrive as DIGITS and are spoken in WORDS** — `2` is "दो", `12000` is "बारह हज़ार", `20000-25000` is "बीस हज़ार से पच्चीस हज़ार", and `10th pass` is "दसवीं पास", not "10वीं पास" (live call `b187ffeb`). Never say "१२,०००" or "12,000": 56 of 389 salary lines across the fleet were spoken as digits, almost all of them on this template.
 
 **Sample — multiple jobs:**
 

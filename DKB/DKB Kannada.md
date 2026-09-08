@@ -285,7 +285,7 @@ Speak for each job:
 **Sample — single job:**
 
 "ನಿಮ್ಮ ಒಂದು posting ಇದೆ — [job_role], [num_vacancies] vacancies, ಸಂಬಳ [salary]. ಇದು ಈಗಲೂ ಚಾಲೂ ಇದೆಯಾ?"
-**`[num_vacancies]` and `[salary]` arrive as DIGITS and are spoken in WORDS** — `2` is "ಎರಡು", `12000` is "ಹನ್ನೆರಡು ಸಾವಿರ", `20000-25000` is "ಇಪ್ಪತ್ತು ಸಾವಿರದಿಂದ ಇಪ್ಪತ್ತೈದು ಸಾವಿರ". Never say the figures as digits.
+**`[num_vacancies]`, `[salary]` and `[qualification]` arrive as DIGITS and are spoken in WORDS** — `2` is "ಎರಡು", `12000` is "ಹನ್ನೆರಡು ಸಾವಿರ", `20000-25000` is "ಇಪ್ಪತ್ತು ಸಾವಿರದಿಂದ ಇಪ್ಪತ್ತೈದು ಸಾವಿರ", and `10th pass` is "ಹತ್ತನೇ ಪಾಸ್", never with the digit. Never say the figures as digits.
 
 **Sample — multiple jobs:**
 

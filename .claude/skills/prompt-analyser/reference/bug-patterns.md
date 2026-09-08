@@ -1466,13 +1466,15 @@ opener was the only instance in the fleet.
 says", naming the specific colliding field so the reader knows which trap is meant. Do not
 re-word the arms; the arms were fine.
 
-**RETRACTED as the diagnosis of the Maya case, 2026-09-08 — kept as a pattern, but Maya is not an
-instance of it.** The correlation was strong: `maya-hi-out` receives no `contact_memory` and fires
-branch A 48/48; `maya-hi-signals` receives `contact_memory: "Not Available"` and fires it 2/14. The
-fix naming the field was written, deployed, and **failed on `d15a8f9b`**. A controlled dial then
-settled it: `910b2d29`, same fixture with `contact_memory` **removed entirely**, still opened with no
-institution. The two prompts' opener blocks are byte-equivalent, so the prompt text is not the
-difference either. **The cause of the Maya split is unknown and is not this pattern.**
+**UNCONFIRMED as the diagnosis of the Maya case, 2026-09-08.** The correlation is strong:
+`maya-hi-out` receives no `contact_memory` and fires branch A 48/48; `maya-hi-signals` receives
+`contact_memory: "Not Available"` and fires it 2/14. The fix naming the field was written, deployed,
+and **failed on `d15a8f9b`** — so the fix does not work, whatever the cause. I then recorded the
+hypothesis as REFUTED on the strength of `910b2d29`, a dial that omitted `contact_memory` and still
+opened with no institution. **That retraction was itself wrong:** `910b2d29` made **zero tool
+calls** and fabricated an application, so it is a degenerate call and not a control for anything.
+The hypothesis is therefore untested, not refuted, and this entry says so rather than claiming
+either way.
 
 What the episode is worth keeping is the method lesson, which is the opposite of the one I drew:
 **a per-bot correlation is not a mechanism.** Two bots differing in one argument and in their

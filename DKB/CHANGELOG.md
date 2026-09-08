@@ -127,6 +127,36 @@ Every prompt edit to DKB is logged here. Entry format:
 - **Change:** No prompt changes. DKB already has the complete set (Hindi, Kannada, Memory, Output) and serves as the reference implementation for the new skills' anatomy docs.
 - **Files:** none
 
+## 2026-09-08 (night) — VERIFIED: three fixes proven on one call, with a clean before/after
+
+**`b187ffeb`** (2026-09-08 16:04 UTC, `dkb-hi-signals`, fixture `dkb-latin-business-name.json` with
+`company_name: "VANS TRADING COMPANY"`, `num_vacancies: "3"`, `salary: "14000"`):
+
+> हैलो! क्या आप **वैन्स ट्रेडिंग कंपनी** से बोल रहे हैं?
+> … आपकी एक posting है — हेल्पर, **तीन** vacancies, सैलरी **चौदह हज़ार**। क्या यह अभी भी चालू है?
+
+Against the pre-fix baseline on the **same bot and the same template**:
+
+| | call | spoke |
+|---|---|---|
+| before | `8f2f0a98` (09-04) | "क्या आप **Shree Balaji Traders** से बोल रहे हैं?" |
+| before | `0da5e1f9` | "क्या आप **VANS TRADING COMPANY** से बोल रहे हैं?" |
+| before | `0eb3fc72`, `12dc1466`, … | "सैलरी **१२,०००**", "सैलरी **2000**" |
+| **after** | **`b187ffeb`** | **"वैन्स ट्रेडिंग कंपनी"**, **"तीन vacancies, सैलरी चौदह हज़ार"** |
+
+**Three things proven at once:**
+1. the business name converted to Devanagari — the `"literal"`/`"VERBATIM"` disambiguation works;
+2. `[num_vacancies]` and `[salary]` spoken in words — the point-of-use conversion works;
+3. no `[company_name]`, `[job_role]` or `[salary]` marker spoken — `bracket_leak` **clean** on the call.
+
+**One residual, found by the detector on the same call and fixed.** The bot said **"10वीं पास"** from
+`qualification: "10th pass"` — Devanagari and transliterated, but the digit kept. `[qualification]`
+was not in the conversion line; it is now, with `10th pass` → "दसवीं पास" worked through and the
+Kannada twin in Kannada. 4 DKB prompts, deployed. **NOT VERIFIED** — needs one more dial.
+
+**Note on the check that caught it:** `spoken_form` flagged exactly one thing on a call I had already
+read and judged clean by eye. That is the argument for the detector existing.
+
 ## 2026-09-08 (evening) — the business name was going out in Latin, and the template's own `[company_name]` marker was being read aloud
 
 - **Feedback/bug:** found while checking whether the KKB payload-conversion fix needed porting to
