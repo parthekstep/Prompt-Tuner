@@ -42,6 +42,44 @@ and applying breaks outright. Not worth it on the most important function in the
 
 ---
 
+
+### Measured rate, added 2026-09-08 — and why the prompt has run out of moves
+
+Of **41 calls that spoke the apply-success line**, 14 had no successful apply behind them:
+
+| | n |
+|---|---|
+| `apply_job` never called at all | **5** (+ `910b2d29` today, not in that window) |
+| `apply_job` called and errored | 9 |
+
+The five outright-fabricated ones are on five DIFFERENT bots — `kkb-hi-in`, `kkb-hi-signals`,
+`kkb-kn-out`, `maya-hi-in-signals`, `maya-hi-out` — so this is not one bot's prompt.
+
+**Three of the six are a form we have now closed.** `35de19e7`, `1b7fb500` and `78ef362f` wrote the
+tool call out as prose — *"एक मिनट। \*(Silent tool call: create_profile with agentId: …)\*"* — and a
+rule about bracketed markers and stage directions went into all 21 prompts on 2026-09-08.
+`bracket_leak` has been clean over the 252 calls since. A fourth, `febe0441`, used the bridge line
+("ठीक है, आपकी तरफ़ से अप्लाई कर देती हूँ") that was forbidden on 2026-09-04.
+
+**Two are the bare form, and that is the one we cannot reach.** `4b6aca57` and `910b2d29` (today)
+simply say *"अप्लाई हो गया है। आमतौर पर अगर shortlist होता है…"* — no stage direction, no bridge line,
+no tell of any kind. On `910b2d29` the bot asked the data-sharing line, asked the consent line, got a
+yes, said *"एक मिनट। एक सेकंड।"* and then the success line, **having made zero tool calls on the
+entire call** — not even `get_profile`.
+
+**A hypothesis we tested and dropped, so you don't have to:** that the model imitates the surface
+form of a tool call, since `hold_message` lands in the post-result turn rather than being played
+during it (§3), making "hold phrase + outcome" indistinguishable in the transcript from a real call.
+It does not hold — 40% of fabricated success lines carry a hold phrase against 53% of genuine ones.
+
+**Why §1 is the only remaining route.** The prompt states the constraint as explicitly as language
+permits: a positional rule ("the success line may ONLY appear in a turn containing a fresh successful
+`apply_job` result"), a hard law ("never claim an action you have not performed"), a 7,000-character
+section on parentheticals and describing-is-not-calling, and four prior occurrences cited by id. It
+has still happened today. **The confirmation line should be emitted by the runtime on a real
+`apply_job` success, not composed by the model** — that is the only version of this that cannot be
+fabricated.
+
 ## 2. Surface the tool error reason to the model
 
 **The bug.** The agent cannot tell "you have already applied" from "this failed for a technical
