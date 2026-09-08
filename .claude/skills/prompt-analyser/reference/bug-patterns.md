@@ -1466,8 +1466,25 @@ opener was the only instance in the fleet.
 says", naming the specific colliding field so the reader knows which trap is meant. Do not
 re-word the arms; the arms were fine.
 
-**Source.** Maya Hindi + Maya Hindi Signals, 2026-09-08. Bugs `08a8ff4f`, `9fd1e0d9`, `35dd4e66`,
-`9fa8975f`, `771fc142`, `6e3ba9ff`, `8e04a854`. Related: D67, D68, D71, D73.
+**RETRACTED as the diagnosis of the Maya case, 2026-09-08 — kept as a pattern, but Maya is not an
+instance of it.** The correlation was strong: `maya-hi-out` receives no `contact_memory` and fires
+branch A 48/48; `maya-hi-signals` receives `contact_memory: "Not Available"` and fires it 2/14. The
+fix naming the field was written, deployed, and **failed on `d15a8f9b`**. A controlled dial then
+settled it: `910b2d29`, same fixture with `contact_memory` **removed entirely**, still opened with no
+institution. The two prompts' opener blocks are byte-equivalent, so the prompt text is not the
+difference either. **The cause of the Maya split is unknown and is not this pattern.**
+
+What the episode is worth keeping is the method lesson, which is the opposite of the one I drew:
+**a per-bot correlation is not a mechanism.** Two bots differing in one argument and in their
+behaviour is a hypothesis, and the cheap controlled dial that distinguishes it from the alternatives
+costs one call. I wrote the fix from the correlation and spent the dial afterwards; the dial should
+have come first. The `D75` shape — a sentinel-triggered branch that does not name its field — remains
+a real thing to look for (the fleet sweep found the shape in DKB's `job_role` check, correctly
+resolved one line above), but it has **no confirmed instance**.
+
+**Source.** Maya Hindi + Maya Hindi Signals, 2026-09-08. Correlated on `08a8ff4f`, `9fd1e0d9`,
+`35dd4e66`, `9fa8975f`, `771fc142`, `6e3ba9ff`, `8e04a854`; refuted by `910b2d29`. Related: D67,
+D68, D71, D73.
 
 ---
 

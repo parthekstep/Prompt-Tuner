@@ -303,11 +303,15 @@ that is a statement about the MEMORY, not about the college. It does not make th
 does an empty `location`, an empty `recommendations`, or a missing `contact_name`. Look at the
 `college_name:` line, and nothing else.
 
-Measured before this was written: on `maya-hi-out`, which is sent no `contact_memory` at all, branch
-A fired on **48 of 48** calls carrying a real college name. On `maya-hi-signals`, which is sent
-`contact_memory: "Not Available"`, it fired on **2 of 14** — the other twelve callers were greeted
-with no institution at all, which removes the entire campus-recruitment premise of the call. Same
-rule, same prompt, opposite outcomes, split by which arguments the campaign sends.
+**The split is real and its cause is NOT known.** On `maya-hi-out` branch A fires on **48 of 48**
+calls carrying a real college name; on `maya-hi-signals`, **2 of 14** — the other twelve callers
+greeted with no institution at all, which removes the campus premise of the call. The obvious
+explanation was `contact_memory`, which `maya-hi-signals` receives as the string `"Not Available"`
+and `maya-hi-out` does not receive at all. **That was tested and refuted:** on `910b2d29` the
+fixture omitted `contact_memory` entirely and the bot still opened with no institution. The two
+prompts' opener blocks are also byte-equivalent, so it is not the prompt text either. Do not "fix"
+this by re-wording the branches again — three framings have failed. See
+`ESCALATION-litwiz.md` §4.
 
 **Read that value line and answer ONE question: does it show a real college name?**
 - **Yes → A, and A is then MANDATORY.** The campus identity is the entire point of this call; dropping

@@ -1,4 +1,4 @@
-# Three platform asks for LitWiz (Raya) — 2026-09-03, §3 added 2026-09-08
+# Four platform asks for LitWiz (Raya) — 2026-09-03, §3 and §4 added 2026-09-08
 
 Both block behaviour we cannot fix in the prompt. Each has call ids.
 
@@ -217,6 +217,42 @@ parameter has no observable effect in 348 of 348 uses, with the ordering visible
 you serve.
 
 ---
+
+
+## 4. Is the platform's own memory store injected alongside `${contact_memory}`? (added 2026-09-08)
+
+**Two questions, both cheap for you and unanswerable from here.**
+
+**(a) Does `memory_enabled: true` inject a memory record into the model's context in addition to the
+`${contact_memory}` argument?** On `d15a8f9b` the fixture set `contact_memory` to the literal string
+`"Not Available"` — and the bot nonetheless opened its role check with *"पिछली बार हमारी बात एक जॉब
+में अप्लाई करने के बारे में हुई थी"*, a specific claim about a previous conversation. That content is
+not in the argument we sent. If there is a second memory source, our prompts do not know about it:
+every rule they carry about deciding from memory reads the `${contact_memory}` block, and a caller's
+opener, role check and location turn all branch on it.
+
+**(b) What decides Maya's opener?** Same prompt block, byte-equivalent between two bots, and:
+
+| bot | `college_name` | branch A (names the college) |
+|---|---|---|
+| `maya-hi-out` | `VTU`, `Ghaziabad Institute of Technology` | **48 / 48** |
+| `maya-hi-signals` | `VMLG College` (345 of 460 calls), `LR College` | **2 / 14** |
+
+Twelve of fourteen campus callers were greeted with no institution, which removes the entire premise
+of the call. We have ruled out, by controlled dial rather than by reading:
+
+- **`contact_memory`** — `910b2d29` omitted it entirely and still opened with no institution;
+- **the prompt text** — the two files' opener blocks are byte-equivalent, same length, same order;
+- **a duplicate demonstration** — the institution-free line appears exactly once in the prompt, the
+  named line twice;
+- **an unsubstituted token** — `b6353cfb` spoke `VMLG College` aloud, so the value does reach the
+  model on this bot.
+
+Three prompt framings have now failed (the first made branch A never fire, `24293fbe`). We are not
+writing a fourth. **What differs between these two agents other than their instructions?** If the
+answer is the memory store, or argument delivery, or anything else in the agent config, that is the
+thing to change — and if `college_name` is reliably supplied on the campaign, the cleanest fix is to
+stop making the bot choose: send a value that is always speakable and let the opener be one line.
 
 ## What we did on our side
 

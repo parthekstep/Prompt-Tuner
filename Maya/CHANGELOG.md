@@ -10,6 +10,49 @@ Every prompt edit to Maya is logged here. Maya is Hindi-only (KKB spinoff). Entr
 - **Ported from:** <source agent> (only for cross-agent ports)
 ```
 
+### 2026-09-08 (night) — my opener fix FAILED, and the diagnosis behind it is refuted by experiment
+
+**The fix did not work.** `d15a8f9b` (post-deploy, 15:51 UTC, `college_name: "VMLG College"`) opened
+**"नमस्ते। मैं माया बोल रही हूँ"** — branch B, no institution, with a real college name in the
+arguments.
+
+**And the reason I gave for the bug is wrong.** I attributed it to `contact_memory` arriving as the
+string `"Not Available"` and satisfying branch B's sentinel trigger, on the strength of a clean
+per-bot correlation: `maya-hi-out` receives no `contact_memory` and fires branch A 48/48;
+`maya-hi-signals` receives it and fires 2/14. **One controlled dial settled it the other way:**
+`910b2d29`, the identical fixture with `contact_memory` **removed entirely**, still opened with no
+institution.
+
+Everything else I could rule out from here, I have:
+
+| candidate | ruled out by |
+|---|---|
+| `contact_memory` | `910b2d29` — omitted entirely, same failure |
+| the prompt text | the two files' opener blocks are **byte-equivalent** — same length, same order, same content |
+| a duplicate demonstration (D50) | the institution-free line appears **once**; the named line twice |
+| an unsubstituted token | `b6353cfb` spoke `VMLG College` **aloud**, so the value does reach this bot |
+
+**So the cause is unknown, three prompt framings have failed, and no fourth was written.** The first
+framing made branch A never fire (`24293fbe`); the second was the two-opener block; the third named
+the field. Escalated as `ESCALATION-litwiz.md` §4 — *what differs between these two agents other
+than their instructions?* — together with a second question the same transcript raised: `d15a8f9b`
+produced a specific callback claim (*"पिछली बार हमारी बात एक जॉब में अप्लाई करने के बारे में हुई थी"*)
+that was **not in the `contact_memory` we sent**, which suggests Raya's own `memory_enabled` store is
+injected alongside the argument. If so, every rule in these prompts that branches on memory is
+reading only half of what the model sees.
+
+**What was left in the prompt and what was taken out.** The scoping sentence — *only the
+`college_name` value line decides this; no other field's value bears on it* — is true and stays. The
+paragraph that cited the 48/48-vs-2/14 split as evidence for the `contact_memory` mechanism is
+**replaced** with the refutation, so the next reader does not re-derive a ruled-out cause. Analyser
+**D75** is retracted as the Maya diagnosis; the shape it describes remains worth looking for but has
+no confirmed instance.
+
+**The method lesson, which is the opposite of the one I drew at the time:** a per-bot correlation is
+not a mechanism. Two bots differing in one argument and in their behaviour is a hypothesis, and the
+controlled dial that separates it from the alternatives costs one call. I wrote the fix from the
+correlation and spent the dial afterwards. The dial should have come first.
+
 ### 2026-09-08 (evening) — the opener's branch B was being satisfied by `contact_memory`, not by `college_name`
 
 **Feedback/bug:** found while measuring, not reported. On `08a8ff4f` (2026-09-08 06:53 UTC, seven
