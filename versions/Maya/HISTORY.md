@@ -304,3 +304,6 @@
 - **2026-09-08_121632** — `pre-deploy-maya-hi-in-signals-2026-09-08_121632` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
 - **2026-09-08_121644** — `pre-deploy-maya-hi-out-2026-09-08_121644` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
 - **2026-09-08_121646** — `pre-deploy-maya-hi-in-2026-09-08_121646` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_
+- **2026-09-08_193443** — `pre-collegename-only-decides` — branch B fired on contact_memory='Not Available'; A fires 14% on signals vs 100% on outbound _(6 files)_
+- **2026-09-08_193456** — `pre-deploy-maya-hi-signals-2026-09-08_193456` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-09-08_193511** — `pre-deploy-maya-hi-out-2026-09-08_193511` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_

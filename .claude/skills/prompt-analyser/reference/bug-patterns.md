@@ -1397,3 +1397,50 @@ direction naming what was substituted — "`${college_name}` = `LR College`, an 
 spoken form is एलआर कॉलेज".
 
 **Source.** Maya Hindi + Maya Hindi Signals, 2026-09-08. Bug `b6353cfb`. Related: D50, D63, D67, D71.
+
+---
+
+### D75
+**A branch test that never names WHICH field it reads, satisfied by a different field that happens to carry the trigger string.**
+
+**Symptom.** A two-way branch takes the wrong arm on one bot and the right arm on its twin, with the
+same rule, the same prompt family and the same field value. It reads as model whim. It is not — it
+splits by which *arguments the campaign sends*, and the split is total.
+
+**Root cause.** Maya's opener chooses between naming the caller's college and naming no institution:
+
+> **A — college_name shows a REAL name** → say it
+> **B — college_name is empty, "Not Available", or still a token** → name NO institution
+
+Arm B's trigger is the bare string `"Not Available"`. `maya-hi-out` is sent no `contact_memory`;
+`maya-hi-signals` is sent `contact_memory: "Not Available"`, which reaches the model inside the
+Contact context block as `Here is the caller context: {Not Available}`. The prompt never said which
+field the test reads, so a different field's value satisfied it.
+
+**Measured, before any edit (ladder rung 0 — count before you write a word):**
+
+| bot | `contact_memory` sent | branch A fires |
+|---|---|---|
+| `maya-hi-out` | not sent at all | **48 / 48** |
+| `maya-hi-signals` | the string `"Not Available"` | **2 / 14** |
+
+Twelve of fourteen campaign callers were greeted with no institution, which removes the entire
+campus-recruitment premise of the call. Counting first is what turned "the opener is flaky" into a
+one-line cause; a third wording of the branch would have changed nothing, because the branch was
+being *correctly* evaluated against the wrong input.
+
+**Detection heuristic.** For every branch whose arms are selected by a literal value — `"Not
+Available"`, `"NA"`, `"None"`, `"Any"`, `"null"`, `""` — check that the condition names the field.
+Then grep the whole prompt for that same literal appearing in ANY other input's documentation,
+sample or injected block. A sentinel string that is shared between fields and used as a branch
+trigger is this bug. Cross-check against production arguments per bot: the same prompt on two bots
+receiving different argument sets is where it shows, and comparing a single bot's calls will never
+reveal it.
+
+**Fix direction.** Name the field in the condition and add the exclusion explicitly — "ONLY the
+`college_name` value line decides this; no other field's value has any bearing on it, whatever it
+says", naming the specific colliding field so the reader knows which trap is meant. Do not
+re-word the arms; the arms were fine.
+
+**Source.** Maya Hindi + Maya Hindi Signals, 2026-09-08. Bugs `08a8ff4f`, `9fd1e0d9`, `35dd4e66`,
+`9fa8975f`, `771fc142`, `6e3ba9ff`, `8e04a854`. Related: D67, D68, D71, D73.

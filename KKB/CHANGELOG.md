@@ -83,6 +83,52 @@ and the pass condition is one line: after the apply-success line and the service
 bot must read back name, age, gender, role, qualification and area, then ask "सब सही?" — in Kannada,
 "ಎಲ್ಲಾ ಸರಿನಾ?".
 
+### 2026-09-08 (evening) — the end-of-call read-back is VERIFIED, and the location numbers corrected
+
+**Read-back: PROVEN on `08a8ff4f`** (2026-09-08 06:53 UTC, `maya-hi-signals`, post-deploy). Six
+earlier attempts never reached the end of the flow. This one did, on real campaign traffic:
+
+> "एक बार confirm कर लूँ — आपका नाम आर्यन, उम्र बाईस, पुरुष, एरिया साहिबाबाद — सब सही?"
+
+It fired after a successful `apply_job`, after the service-provider offer was answered, which is
+exactly the ordering the 2026-09-07 fix put in place — and it is the Phase-2-had-nothing case the
+old trigger silently skipped. **Khushboo's r4 item 2 is closed.**
+**One gap in it:** the template says to cover name, age, gender, role, qualification and area; this
+call read name, age, gender and area and omitted **role and qualification**. Partial, so the
+labelled-fields half of that rule is still unproven.
+
+**Correction to this morning's location figures.** I reported "42% of location sentences wrong". That
+number was inflated by a false positive in my own new detector: it looked for the two-slot sentence
+on every KKB/Maya bot, but only the two KKB Signals prompts contain it — Maya and the KKB
+outbound/inbound prompts ask about the area in their own words. Three calls (`08a8ff4f`,
+`78ef362f`, `1b7fb500`) were reported as failures for not saying a sentence their prompt does not
+have. `location_said.py` now reads its scope from the prompt files.
+
+**Corrected, over 463 calls since 2026-09-01, on the 30 where the sentence was in play:**
+
+| outcome | n | |
+|---|---|---|
+| OK — the argument's place words, converted | 19 | |
+| ABSENT — jobs presented, sentence never spoken | 7 | **all seven are 2026-09-04, i.e. before the Step-2 gate** |
+| RAW — the written value spoken as-is | 3 | `a899617e`, `7b841e6b` (both pre-fix), `a5ba6894` (post) |
+| SUBSTITUTED — a different place named | 1 | `1450f797` (post) |
+
+**So the two fixes have opposite verdicts, and I had them backwards this morning:**
+- **The Step-2 location gate WORKS.** Seven skipped-sentence calls, every one before the gate
+  shipped, none after. That closes Khushboo's r4 item 1.
+- **The digit/script conversion does NOT.** One RAW and one SUBSTITUTED after it shipped. Retained
+  as retracted; see the earlier entry today and `ESCALATION-data-team.md` §5.
+
+**The same failure occurs on the 68k slim prompt** (`8eb83bc2` spoke साहिबाबाद for
+`location: "Sarjapur, 110045"`) at the same rate as on the 219k one, so it is not caused by the
+surrounding prose and shrinking the prompt cannot fix it. That is the strongest argument yet for the
+upstream `location_spoken` field.
+
+**New standing detector:** `raya/regression/location_said.py` — classifies the sentence as OK / RAW /
+SUBSTITUTED / ABSENT / NA, scopes itself to the prompts that contain it, and self-tests 9/9 against
+the real calls above, including `af627b9d`, where the caller named Bengaluru herself and it must NOT
+be counted as a substitution.
+
 ### 2026-09-08 (later the same day) — RETRACTION: the location-sentence fix is NOT holding, and the slot is not prose-fixable
 
 **I reported the PIN/Latin location fix as proven earlier today. That was premature.** Two calls

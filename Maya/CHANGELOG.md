@@ -10,6 +10,55 @@ Every prompt edit to Maya is logged here. Maya is Hindi-only (KKB spinoff). Entr
 - **Ported from:** <source agent> (only for cross-agent ports)
 ```
 
+### 2026-09-08 (evening) — the opener's branch B was being satisfied by `contact_memory`, not by `college_name`
+
+**Feedback/bug:** found while measuring, not reported. On `08a8ff4f` (2026-09-08 06:53 UTC, seven
+minutes after that morning's deploy) `college_name` was `"VMLG College"` and Maya opened
+**"नमस्ते। मैं माया बोल रही हूँ"** — branch B, no institution — with a perfectly good college name in
+the arguments.
+
+**Root cause — counted before anything was written (analyser D75).** With a real `college_name`:
+
+| bot | `contact_memory` sent | branch A fires |
+|---|---|---|
+| `maya-hi-out` | not sent at all | **48 / 48** |
+| `maya-hi-signals` | the string `"Not Available"` | **2 / 14** |
+
+Same rule, same prompt family, same kind of value, opposite outcomes — and the split is by BOT, not
+by value, which means it is not adherence. The difference is the argument set. Branch B's condition
+read *"college_name is empty, **"Not Available"**, or still a token"* and never said which field it
+reads; `maya-hi-signals` is sent `contact_memory: "Not Available"`, which the prompt injects as
+`Here is the caller context: {Not Available}`. The trigger string was sitting in the model's context
+attached to the wrong field, and the branch evaluated correctly against the wrong input.
+
+Twelve of fourteen campaign callers were therefore greeted with no institution at all — which
+removes the entire campus-recruitment premise of the call, on the bot that runs the campaign.
+
+**Change:** the arms are untouched (they were right). Branch B's condition now names the field — "the
+`college_name` VALUE LINE above" — followed by an explicit exclusion that names the colliding field:
+*"ONLY the `college_name` value line decides this. No other field's value has any bearing on it,
+whatever that field happens to say. `contact_memory` in particular very often arrives as the string
+`"Not Available"` … that is a statement about the MEMORY, not about the college."* Plus the measured
+48/48-vs-2/14 split, so a future editor can see why the sentence is there.
+
+**Files:** `Maya/Maya Hindi Signals.md`, `Maya/Maya Hindi.md`. Both deployed.
+
+**Verification:** reproducing fixture `raya/testcases/args/r5/maya-vmlg-offlist.json` now carries the
+exact failing input — `college_name: "VMLG College"` **and** `contact_memory: "Not Available"`. Pass
+condition, one line: the opener says **वीएमएलजी कॉलेज**. A dial is in flight; until it lands this is
+**DEPLOYED, NOT VERIFIED**.
+
+**Also seen on `08a8ff4f`, not fixed here (flagged):**
+- The Case B pool overview was spoken **twice**, the second time bundled with the location question
+  AND the job list in one turn — three questions in one breath.
+- **"ठीक है, नोट कर लिया"** and **"मैंने अपडेट कर दिया है"** were both spoken. Both are storage
+  claims the prompt bans.
+- The read-back omitted **role** and **qualification** (see `KKB/CHANGELOG.md` for the verification).
+- `college_name` arrives in Latin and was spoken in Latin on 6 calls across both Maya bots
+  (`b6353cfb`, `2cb97508`, `78ef362f`, `ebf85d38`, `d543c5b0`, `79a745d9` — values `VMLG College`,
+  `Ghaziabad Institute of Technology`, `VTU`). That is what this morning's conversions-list edit
+  targets; still unverified.
+
 ### 2026-09-08 — Maya's own worked examples were teaching the bot to speak the raw ${college_name}
 
 **Feedback/bug:** found while root-causing Khushboo's r5 report on KKB (see `KKB/CHANGELOG.md` for the
