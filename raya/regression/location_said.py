@@ -82,7 +82,14 @@ def get(path, tries=6):
 
 
 def classify(arg_location, agent_turns, caller_turns, has_sentence=True):
-    """-> (verdict, spoken, detail). Verdict in OK / RAW / SUBSTITUTED / ABSENT / NA."""
+    """-> (verdict, spoken, detail). Verdict in OK / RAW / SUBSTITUTED / ABSENT / NA.
+
+    `caller_turns` must contain ONLY what the caller said BEFORE the location sentence. Passing the
+    whole call excuses every substitution: the tester personas repeat proper nouns back to record
+    what they heard, so the bot says साहिबाबाद, the caller echoes साहिबाबाद, and "the caller named it
+    themselves" -- the exemption that exists for af627b9d -- fires on the bot's own mistake. That
+    silently downgraded 8eb83bc2 and f90a0b97 to OK.
+    """
     spoken = None
     for a in agent_turns:
         m = SENT_HI.search(a) or SENT_KN.search(a)
@@ -120,7 +127,15 @@ def check(bot, uuid, has_sentence=True):
     c = get("/api/call/" + uuid)
     turns = c.get("call_transcript") or []
     agent = [str(t.get("content") or "") for t in turns if t.get("role") == "assistant" and t.get("content")]
-    caller = [str(t.get("content") or "") for t in turns if t.get("role") == "user" and t.get("content")]
+    # caller turns BEFORE the location sentence only -- see classify()
+    cut = len(turns)
+    for i, t in enumerate(turns):
+        if t.get("role") == "assistant" and t.get("content") and (
+                SENT_HI.search(str(t["content"])) or SENT_KN.search(str(t["content"]))):
+            cut = i
+            break
+    caller = [str(t.get("content") or "") for t in turns[:cut]
+              if t.get("role") == "user" and t.get("content")]
     arg = (c.get("agent_args") or {}).get("location")
     v, spoken, detail = classify(arg, agent, caller, has_sentence)
     return dict(bot=bot, call=uuid, at=str(c.get("created_at"))[:19], verdict=v,
@@ -175,7 +190,10 @@ SELFTEST = [
      "NA", "08a8ff4f — Maya has no two-slot sentence; asking its own way is not a failure", False),
     ("Muradnagar, 110045", [u"हमारे पास आपकी जॉब की लोकेशन बेंगलुरु है, और अभी जॉब्स वसुंधरा में हैं"],
      [u"बेंगलुरु में कहीं भी ठीक है"],
-     "OK", "af627b9d — the CALLER said Bengaluru in-call, so it is not a substitution"),
+     "OK", "af627b9d — the CALLER said Bengaluru BEFORE the sentence, so it is not a substitution"),
+    ("Sarjapur, 110045", [u"हमारे पास आपकी जॉब की लोकेशन साहिबाबाद है, और अभी जॉब्स गाज़ियाबाद में हैं"], [],
+     "SUBSTITUTED", "8eb83bc2 / f90a0b97 / fa9a16c0 — साहिबाबाद is a CANONICAL-LIST member, not the "
+     "argument; the caller echoing it afterwards must NOT excuse it"),
 ]
 
 

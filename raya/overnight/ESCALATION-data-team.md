@@ -123,3 +123,30 @@ transformation we are currently asking a language model to perform on every call
 **Separately, and cheaper:** `location` values that are a bare PIN, a state name, or campaign
 metadata (`"Call status: not_dialled"`) should not be sent at all — the prompt already treats them
 as empty, so sending them only creates the risk of one being read aloud.
+
+### Sharper diagnosis, added after four more calls
+
+The substituted place is not arbitrary. Of the four substitutions now on record, **three named
+साहिबाबाद and one गाज़ियाबाद — and both are entries in the prompt's Canonical Location Spellings
+list**:
+
+| call | bot | `location` sent | spoken |
+|---|---|---|---|
+| `1450f797` | fat | `Sarjapur, 110045` | गाज़ियाबाद |
+| `8eb83bc2` | slim | `Sarjapur, 110045` | साहिबाबाद |
+| `f90a0b97` | slim | `Sarjapur, 110045` | साहिबाबाद |
+| `fa9a16c0` | fat | `Sarjapur, 110045` | साहिबाबाद |
+
+So the mechanism is not simply "two competing instructions" — it is that **the canonical list acts
+as an attractor.** The conversion step says *"Use Canonical Location Spellings for a place on that
+list. A place NOT on the list is converted exactly the same way."* With the list sitting immediately
+below, list-membership becomes the salient operation, and a value that is not on it gets mapped
+**to** a member rather than converted on its own terms. The off-list clause is read as "find the
+nearest listed place", which is exactly what a Ghaziabad-locality list makes easy.
+
+That predicts the failure will keep happening for any locality outside the list, on either prompt
+size, which is what the four calls show. It also gives one more prompt-only thing worth trying
+before the upstream change: state that **the list is a spelling table, never a menu** — if a value is
+not on it you still say that value, never a list member. That is not another wording of the same
+guard; it names the attractor the guard never mentioned. It is queued as the next experiment on the
+slim A/B bot rather than applied to live traffic.

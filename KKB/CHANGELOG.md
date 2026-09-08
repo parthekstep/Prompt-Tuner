@@ -83,6 +83,57 @@ and the pass condition is one line: after the apply-success line and the service
 bot must read back name, age, gender, role, qualification and area, then ask "सब सही?" — in Kannada,
 "ಎಲ್ಲಾ ಸರಿನಾ?".
 
+### 2026-09-08 (late) — the location sentence names the WRONG PLACE on a third of the calls it is spoken on; the company fix is verified
+
+**The company-name fix is PROVEN, with a clean before/after.** Same fixture, same persona, twelve
+minutes apart, the prompt differing only by the point-of-use edit:
+
+| | call | spoke |
+|---|---|---|
+| before | `ea0477f4` 14:12 | "मार्केटिंग, **SARA ENTERPRISES** में" |
+| after | `fa9a16c0` 14:24 | "**सारा एंटरप्राइज़ेज़** में मार्केटिंग की जॉब" |
+
+Everything else on those two calls was held constant, so the edit is what changed it. That closes
+the payload-name half of Khushboo's r5 item 1 on the Hindi Signals bot. The Kannada twin, the inbound
+prompts and Maya carry the same edit and are **still unverified**.
+
+**Two bugs in my own detectors, both found by hand-checking their output, both under-reporting.**
+Recorded because the numbers I gave earlier today came out of them:
+1. `extract_spec.py` paired quotes across the whole 220k file, so one stray unmatched quote shifted
+   every pairing after it and three spoken lines present in the slim prompt were reported dropped.
+   Now scans per block.
+2. `location_said.py` had an ordering bug: it excused a substitution whenever the caller said that
+   place anywhere in the call. The tester personas **repeat proper nouns back** to record what they
+   heard — so the bot said साहिबाबाद, the caller echoed साहिबाबाद, and the exemption that exists for
+   `af627b9d` (where the caller genuinely named her own city first) fired on the bot's own mistake.
+   It now looks only at caller turns BEFORE the sentence. Self-test 10/10.
+
+**With that fixed, today's location numbers are worse than I reported.** Of the 15 calls on 2026-09-08
+where the sentence was spoken, across both the 219k prompt and the 69k rewrite:
+
+| outcome | n | calls |
+|---|---|---|
+| OK | 8 | |
+| **SUBSTITUTED — a different place named** | **5** | `1450f797`, `8eb83bc2`, `ea0477f4`, `f90a0b97`, `fa9a16c0` |
+| RAW — the written value spoken as-is | 2 | `7b841e6b`, `a5ba6894` |
+
+**Seven of fifteen wrong, and substitution is now the dominant mode.** Nearly half of these callers
+were told something false about their own location.
+
+**Sharper mechanism, and it is not "two competing instructions".** Four of the five substitutions
+named **साहिबाबाद** and one गाज़ियाबाद — **both are entries in the prompt's own Canonical Location
+Spellings list.** The conversion step says *"Use Canonical Location Spellings for a place on that
+list; a place NOT on the list is converted exactly the same way"*, with the list immediately below.
+List-membership becomes the salient operation and an off-list value gets mapped **to** a member. The
+list is being read as a menu of places to choose from rather than a spelling table for names you
+already have.
+
+That predicts the failure recurs for any locality outside the list, at any prompt size — which is
+what five calls across two prompts show. One more prompt-only thing is therefore worth trying before
+the upstream field, and it is not another wording of the same guard: **say that the list is a spelling
+table and never a menu — if a value is not on it you still say that value, never a list member.**
+Queued as the next experiment on the slim A/B bot, not applied to live traffic.
+
 ### 2026-09-08 (evening) — payload company names spoken in Latin on BOTH prompts; the ordinal counter fails 58% of the time
 
 **Found by the A/B harness, not reported.** Ten calls, five on the 219k prompt and five on the 69k
