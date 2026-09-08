@@ -223,6 +223,34 @@ harness dial, manufactured by a fixture that deliberately disagrees with the tes
 The precedence weakness is real and reproducible; the caller-facing rate I quoted was my own test
 setup.
 
+### Experiment 2 on the slim bot: remove the counter instead of restating the rule
+
+The ordinal running count fails on **14 of 24** multi-batch calls (58%). The rule is unambiguous —
+*"Ordinals run continuously across batches and NEVER restart"* — so this is not a clarity problem.
+It asks the model to carry a counter across an unbounded number of turns and to know, at the moment
+it composes a batch, how many jobs it has read out several turns earlier. That is the one property
+every rule in these prompts that reliably holds does **not** require: the apply-success positional
+rule asks "is there a fresh result in this turn?", the Turn-B landmark check asks "is this text in
+the context block?". Both are answerable from what is in front of the model. A running count is not.
+
+**What was changed (slim only, 72,069 chars).** The first batch keeps पहला / दूसरा / तीसरा, because
+the caller needs some way to pick one of three. **From the second batch on there is no numbering at
+all** — the jobs are introduced as more jobs and chosen by name:
+
+> "इनके अलावा ये जॉब्स भी हैं — [role], [company], [location]। और: [role], [company], [location]।
+> किसी के बारे में और जानना चाहेंगे?"
+
+Both चौथा-and-upward and restarting at पहला are forbidden, for the same stated reason: each requires
+the count. With no numbering after the first batch there is no count to keep and nothing to get
+wrong. Selection by role and company is already covered by the phonetic-confirmation rules, and if a
+caller does say a number after the first batch the prompt now tells the bot to ask which one by
+naming two rather than guessing.
+
+**Why slim only.** This changes what the caller hears, so it is not something to ship to production
+bots unattended — it is precisely the decision the EOD note flags as the owner's. The fat prompts
+keep the counter, so the next A/B round measures this change and nothing else. Dialled with
+`morejobs-22.json` (22 jobs) and `hi-asks-for-all-jobs`, the scenario in the matrix built for it.
+
 ## Running the comparison
 
 ```

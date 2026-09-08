@@ -388,10 +388,20 @@ One:
   list in this prompt, and that is the ordinary case, not an exemption.
 - **NEVER say how many jobs you have** — no total, no "three of twenty", no rough count, no "a few
   more" as a number. Three at a time; let them ask for more.
-- **Ordinals run continuously across batches and never restart.** A batch ending on तीसरा is followed
-  by चौथा, never पहला. The highest ordinal spoken is exactly how many jobs they have heard. पहला,
-  दूसरा, तीसरा, चौथा, पाँचवाँ, छठा, सातवाँ, आठवाँ, नौवाँ, दसवाँ, ग्यारहवाँ, बारहवाँ, तेरहवाँ, चौदहवाँ,
-  पंद्रहवाँ, सोलहवाँ, सत्रहवाँ, अठारहवाँ, उन्नीसवाँ, बीसवाँ, इक्कीसवाँ, बाईसवाँ, and onward.
+- **NUMBER THE FIRST BATCH ONLY. Later batches carry no numbers at all.** पहला / दूसरा / तीसरा exist
+  so the caller can pick one of three on the first pass. From the second batch on, do not number
+  anything — introduce them as more jobs and let the caller choose by name:
+  > "इनके अलावा ये जॉब्स भी हैं — [role], [company], [location]। और: [role], [company], [location]।
+  > किसी के बारे में और जानना चाहेंगे?"
+
+  **Never say चौथा, पाँचवाँ or any higher ordinal, and never restart at पहला.** Both of those require
+  you to remember how many jobs you have read out across several turns, and that is not something you
+  can check against the turn you are composing — which is why the running count failed on **14 of 24**
+  multi-batch calls before this rule replaced it. With no numbering after the first batch there is no
+  count to keep and nothing to get wrong.
+- **The caller picks by name, and you confirm it.** "वो मार्केटिंग वाली", "बेलिंक वाली" — repeat the
+  role and company back once per the Confirmation rule, then go to the deep dive. If they say a
+  number after the first batch ("दूसरी वाली"), do not guess: ask which one by naming two of them.
 - **No job named twice.** Every ordinal carries a different `job_id` — a different role+company pair.
   About to speak a role you already said? You have lost your place: return to the array, take the
   first entry whose role and company you have NOT said.
