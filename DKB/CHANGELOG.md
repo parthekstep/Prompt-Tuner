@@ -127,6 +127,51 @@ Every prompt edit to DKB is logged here. Entry format:
 - **Change:** No prompt changes. DKB already has the complete set (Hindi, Kannada, Memory, Output) and serves as the reference implementation for the new skills' anatomy docs.
 - **Files:** none
 
+## 2026-09-08 (evening) — the business name was going out in Latin, and the template's own `[company_name]` marker was being read aloud
+
+- **Feedback/bug:** found while checking whether the KKB payload-conversion fix needed porting to
+  DKB. It did, and worse. Two separate failures on the opener:
+  - **The business name spoken in Latin.** `0da5e1f9`: **"हैलो! क्या आप VANS TRADING COMPANY से बोल
+    रहे हैं?"** · `199a3b20`: **"YOGITA CLOTH EMPORIUM"**. Across the cached calls, `Shree Balaji
+    Traders` alone appears 24 times in Latin inside Hindi speech, and 55-57 turns per Signals bot
+    speak some raw value from their own arguments.
+  - **The marker itself spoken.** `1131d79c`, `9cde78df`, `cb4f29f8`, `f391ab35`, `f2c4cd80` and
+    `7992e013` asked owners **"क्या आप [company_name] से बोल रहे हैं?"** — the slot, not the value.
+    `1131d79c` also recited **"आपकी एक posting है — [job_role], [num_vacancies] vacancies, सैलरी
+    [salary]"**, and `f391ab35` read out **"[Proceeding to Phase 2]"** and an **"[INTERNAL:
+    update_job_status called with status \"open\" for the job]"** note.
+- **Root cause 1 — the opener says to speak the *literal* value.** *"where [company_name] is replaced
+  with the actual literal value of `${company_name}`"*, and the Signals pair adds *"`[company_name]`
+  is `${company_name}` **VERBATIM** — never another business's name."* Both lines were written to stop
+  the bot naming a DIFFERENT business (`e2ce642a`, `68de2002`). Neither meant "read Latin letters
+  aloud" — but that is what they say, and it is what the bot did.
+  **Change:** the line now draws the distinction it never drew — *the same business, spoken in
+  Devanagari; "literal" and "VERBATIM" mean you may not substitute a different business's name, they
+  do not mean you read Latin letters aloud* — with `VANS TRADING COMPANY` → "वैन्स ट्रेडिंग कंपनी",
+  `YOGITA CLOTH EMPORIUM` → "योगिता क्लॉथ एम्पोरियम", `Shree Balaji Traders` → "श्री बालाजी ट्रेडर्स"
+  worked through, and the Kannada twins in Kannada script.
+- **Root cause 2 — no prompt in the fleet had a rule about square-bracket markers** (analyser
+  **D77**). They cover `*( )*` stage directions and tool payloads, both written after those specific
+  failures; the brackets their own templates are built from were never mentioned. **Change:** one
+  language-agnostic rule, byte-identical, added to all 20 conversation prompts and the slim rewrite —
+  a bracketed marker is a slot to FILL and never words to say; if you cannot fill it, say the
+  sentence without that part or a different sentence; the same goes for `*( )*` and any `INTERNAL`
+  line.
+- **Files:** the 4 outbound DKB prompts for the script fix; all 6 DKB prompts (and every other
+  conversation prompt) for the bracket rule. Deployed; **live read-back confirms the bracket rule on
+  19 of 19 conversation bots.**
+- **Detector:** `raya/regression/bracket_leak.py`, 9/9 self-test, wired into
+  `run_runtime_checks.sh`. It has **no allow-list and no info tier** — unlike the Latin-script checks,
+  nothing bracketed has any legitimate reason to reach a caller. `fix_presence` rows
+  `brackets-are-slots-not-speech` (21 bots) and `dkb-business-name-in-script` (4).
+- **Verification:** **DEPLOYED, NOT VERIFIED** for both. DKB is outbound-only from a campaign, so a
+  harness dial needs a `company_name` fixture — `raya/testcases/args/r5/dkb-no-company-name.json`
+  covers the absent case; the Latin-script case needs a fixture carrying a real Latin business name.
+- **Tooling bug fixed in passing:** `deploy_check.sh` labelled two transient deploy failures as
+  "REFUSED (guard)" because it grepped for the word "placeholder", which matches the **filename**
+  `KKB Placeholder Kannada Signals.md`. The pattern is now anchored to the deploy script's own
+  refusal wording. `kkb-kn-signals` had genuinely not received the rule; it has now.
+
 ## 2026-09-08 — DKB was greeting business owners as "Not Available" (7 live calls)
 
 - **Feedback/bug:** found while measuring the KKB written-value bug class (analyser **D73**). On

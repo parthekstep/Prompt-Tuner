@@ -36,6 +36,20 @@ DKB_ALL_CONV = [os.path.join(REPO, "DKB", n) for n in
                  "DKB Kannada.md", "DKB Inbound Hindi.md", "DKB Inbound Kannada.md")]
 
 
+def all_conv():
+    """EVERY conversation prompt in the repo, all four bots plus the slim A/B rewrite. For rules
+    that are fleet-wide by nature -- a marker spoken aloud is wrong on any bot in any language."""
+    out = []
+    for f in (KKB_CONV + MAYA_CONV + DKB_ALL_CONV + TRRAIN_CONV
+              + sorted(glob.glob(os.path.join(REPO, "KKB-Slim", "*.md")))):
+        b = os.path.basename(f)
+        if "CHANGELOG" in b or "Memory" in b or "Output" in b:
+            continue
+        if f not in out:
+            out.append(f)
+    return out
+
+
 def seeker_conv():
     """KKB + Maya conversation prompts (memory/output excluded — they carry no spoken flow)."""
     return [f for f in KKB_CONV if "Memory" not in f and "Output" not in f] + MAYA_CONV
@@ -157,6 +171,18 @@ FIXES = [
                                         "usable role — QA heard 'आप अभी बी०टेक०(ई०सी०एस) का काम कर रहे हैं' "
                                         "(D64/D71, QA call 5035574; reproducing call id still pending)",
      seeker_conv(), ["never what they DO"], []),
+
+    ("brackets-are-slots-not-speech", "every conversation prompt says a [slot] marker is filled, "
+                                      "never spoken — 13 live calls read one out, including two that "
+                                      "said '[UUID from create_profile result]' to a caller (D77)",
+     all_conv(), ["A square-bracket marker is a SLOT TO FILL"], []),
+
+    ("dkb-business-name-in-script", "\"literal\"/\"VERBATIM\" on the DKB opener means the same "
+                                   "business, NOT the same script — 0da5e1f9 asked an owner "
+                                   "\"क्या आप VANS TRADING COMPANY से बोल रहे हैं?\"",
+     DKB_SIGNALS + [os.path.join(REPO, "DKB", "DKB Hindi.md"),
+                    os.path.join(REPO, "DKB", "DKB Kannada.md")],
+     ["the same business, spoken in"], []),
 
     ("company-converted-at-point-of-use", "the job-presentation format itself says [role]/[company]/"
                                           "[location] arrive in Latin and are converted — the "

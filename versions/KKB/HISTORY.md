@@ -569,3 +569,14 @@
 - **2026-09-08_195222** — `pre-deploy-kkb-kn-out-2026-09-08_195222` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(10 files)_
 - **2026-09-08_195231** — `pre-deploy-kkb-hi-in-2026-09-08_195230` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(10 files)_
 - **2026-09-08_195236** — `pre-deploy-kkb-kn-in-2026-09-08_195236` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(10 files)_
+- **2026-09-08_201235** — `pre-bracket-slots` — 13 calls spoke [company_name] / [job_role] / [UUID from create_profile] aloud _(10 files)_
+- **2026-09-08_201518** — `pre-deploy-kkb-hi-signals-2026-09-08_201518` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
+- **2026-09-08_201538** — `pre-deploy-kkb-kn-signals-2026-09-08_201537` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada Signals.md _(10 files)_
+- **2026-09-08_201610** — `pre-deploy-kkb-hi-in-signals-2026-09-08_201609` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Signals.md _(10 files)_
+- **2026-09-08_201655** — `pre-deploy-kkb-kn-in-signals-2026-09-08_201655` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada Signals.md _(10 files)_
+- **2026-09-08_201718** — `pre-deploy-kkb-hi-out-2026-09-08_201718` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi.md _(10 files)_
+- **2026-09-08_201726** — `pre-deploy-kkb-kn-out-2026-09-08_201726` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(10 files)_
+- **2026-09-08_201731** — `pre-deploy-kkb-hi-in-2026-09-08_201731` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(10 files)_
+- **2026-09-08_201734** — `pre-deploy-kkb-kn-in-2026-09-08_201734` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(10 files)_
+- **2026-09-08_201752** — `pre-deploy-kkb-hi-signals-slim-2026-09-08_201752` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Hindi Signals.md _(10 files)_
+- **2026-09-08_201920** — `pre-deploy-kkb-kn-signals-2026-09-08_201920` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada Signals.md _(10 files)_

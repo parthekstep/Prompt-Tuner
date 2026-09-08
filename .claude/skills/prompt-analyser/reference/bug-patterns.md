@@ -1501,3 +1501,46 @@ is already unambiguous, and it is the memory it presumes that is missing, not th
 **Source.** All KKB/Maya prompts, measured 2026-09-08. Related: D70 (a trigger that is never true),
 D71. The fix is an owner decision because it changes spoken output; the experiment belongs on the
 slim A/B bot first.
+
+---
+
+### D77
+**The `[slot]` markers a spoken template is BUILT FROM get read out as words.**
+
+**Symptom.** A caller hears the template instead of the sentence: *"हैलो! क्या आप **[company_name]**
+से बोल रहे हैं?"* — asked of the owner of that very business.
+
+**Root cause.** Every spoken template in these prompts is written with square-bracket markers —
+`[company_name]`, `[job_role]`, `[role]`, `[शहर]`, `[नाम]` — and **not one prompt in the fleet had a
+rule about them.** They carry a rule for `*( )*` stage directions ("a parenthetical is never
+speech") and a hard rule against speaking tool payloads, and both were written after those specific
+failures; the brackets the templates are made of were never mentioned, because to a human reader
+they are obviously placeholders. They are not obviously placeholders to a model that has just been
+handed a sentence with one in it.
+
+**Measured: 13 calls across 6 bots** (`dkb-hi-out` 13 turns, `dkb-kn-out` 4, `dkb-hi-signals` 3,
+`kkb-hi-signals`, `kkb-kn-out`, `maya-hi-out` 1 each), 2026-07-16 to 2026-09-04. The placeholders are
+the mild end of it. The severe end is internal text:
+
+| call | spoken to a caller |
+|---|---|
+| `1131d79c` | "क्या आप **[company_name]** से बोल रहे हैं?" · "आपकी एक posting है — **[job_role]**, **[num_vacancies]** vacancies, सैलरी **[salary]**" |
+| `f391ab35` | "**[Proceeding to Phase 2]**" and "**[INTERNAL: update_job_status called with status \\"open\\" for the job]**" |
+| `1b7fb500`, `78ef362f` | "**[UUID from create_profile result]**" |
+
+**Detection heuristic.** Grep assistant turns for `\[[A-Za-z_][\w :"'.]{2,60}\]`, for a
+Devanagari/Kannada run inside brackets, for `\*\([^)]+\)\*`, and for a line beginning `INTERNAL`.
+None of them has any legitimate reason to reach a caller, so this check needs **no allow-list and no
+info tier** — unlike the Latin-script checks, where the prompts deliberately script Hinglish. Run it
+against production rather than reading prompts: the bug is invisible in the prompt, where the markers
+are correct.
+
+**Fix direction.** State the rule that was missing, once, in a section every prompt has: a
+bracketed marker is a slot to FILL and never words to say; if you cannot fill it, say the sentence
+without that part or say a different sentence. Extend it to `*( )*` and to `INTERNAL` lines in the
+same breath, since the same calls produced all three. Language-agnostic, so byte-identical in every
+file.
+
+**Source.** All 20 conversation prompts + the slim rewrite, 2026-09-08. Detector
+`raya/regression/bracket_leak.py`, 9/9 self-test. Related: D67 (`${token}` in quoted speech), D74
+(a token inside a sample's speech), D71.

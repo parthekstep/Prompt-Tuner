@@ -11,7 +11,12 @@ for t in "$@"; do
   out=$(python3 scripts/raya_deploy.py deploy "$t" --yes 2>&1)
   if   grep -q "DEPLOYED" <<<"$out";                    then v="DEPLOYED"
   elif grep -q "Skipping PUT" <<<"$out";                then v="already current"
-  elif grep -qi "refus\|guard\|placeholder" <<<"$out";  then v="REFUSED (guard)"; rc=1
+  # Match the deploy script's OWN refusal wording, anchored, not any line containing the word
+  # "placeholder" -- every KKB file is called "KKB Placeholder ...", so the old pattern labelled a
+  # transient network failure on those bots as "REFUSED (guard)" and sent the reader looking for a
+  # guard that had not fired. Seen on kkb-kn-signals and kkb-hi-in-signals, 2026-09-08.
+  elif grep -qiE "REFUS(ING|ED) TO DEPLOY|placeholder job_id|PLACEHOLDER SAMPLE DATA" <<<"$out"; then
+    v="REFUSED (guard)"; rc=1
   else v="FAILED"; rc=1; fi
   printf "%-22s %s\n" "$t" "$v"
   [ "$v" = "FAILED" ] && echo "$out" | tail -4 | sed 's/^/      /'

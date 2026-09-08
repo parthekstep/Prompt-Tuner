@@ -311,3 +311,8 @@
 - **2026-09-08_195202** — `pre-deploy-maya-hi-in-signals-2026-09-08_195202` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
 - **2026-09-08_195242** — `pre-deploy-maya-hi-out-2026-09-08_195242` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
 - **2026-09-08_195247** — `pre-deploy-maya-hi-in-2026-09-08_195247` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_
+- **2026-09-08_201235** — `pre-bracket-slots` — 13 calls spoke [company_name] / [job_role] / [UUID from create_profile] aloud _(6 files)_
+- **2026-09-08_201705** — `pre-deploy-maya-hi-signals-2026-09-08_201705` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-09-08_201713** — `pre-deploy-maya-hi-in-signals-2026-09-08_201713` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-09-08_201740** — `pre-deploy-maya-hi-out-2026-09-08_201740` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-09-08_201746** — `pre-deploy-maya-hi-in-2026-09-08_201746` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_

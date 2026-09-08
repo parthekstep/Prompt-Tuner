@@ -42,7 +42,7 @@ python3 raya/regression/input_coverage.py || FAIL=1
 # narrower question the others cannot: WHICH place did the bot name? That one sentence produces four
 # outcomes -- correct, the raw argument, a DIFFERENT place it happened to know, or nothing at all --
 # and only two of them look like failures to any other check.
-for chk in spoken_form location_said dkb_employer_integrity inbound_location_consent nojobs_integrity jobs_presented consent_before_apply location_chain location_reconfirm apply_result_integrity apply_failure_wording location_integrity apply_outcomes; do
+for chk in bracket_leak spoken_form location_said dkb_employer_integrity inbound_location_consent nojobs_integrity jobs_presented consent_before_apply location_chain location_reconfirm apply_result_integrity apply_failure_wording location_integrity apply_outcomes; do
   echo ""
   echo "================================================================ $chk"
   python3 "raya/regression/$chk.py" "${ARGS[@]}" || FAIL=1

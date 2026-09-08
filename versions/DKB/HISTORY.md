@@ -38,3 +38,8 @@
 - **2026-09-08_121649** — `pre-deploy-dkb-kn-out-2026-09-08_121649` — auto snapshot before Raya deploy of DKB/DKB Kannada.md _(8 files)_
 - **2026-09-08_121650** — `pre-deploy-dkb-hi-signals-2026-09-08_121650` — auto snapshot before Raya deploy of DKB/DKB Hindi Signals.md _(8 files)_
 - **2026-09-08_121652** — `pre-deploy-dkb-kn-signals-2026-09-08_121652` — auto snapshot before Raya deploy of DKB/DKB Kannada Signals.md _(8 files)_
+- **2026-09-08_201235** — `pre-bracket-slots` — 13 calls spoke [company_name] / [job_role] / [UUID from create_profile] aloud _(8 files)_
+- **2026-09-08_201415** — `pre-deploy-dkb-hi-out-2026-09-08_201415` — auto snapshot before Raya deploy of DKB/DKB Hindi.md _(8 files)_
+- **2026-09-08_201418** — `pre-deploy-dkb-kn-out-2026-09-08_201418` — auto snapshot before Raya deploy of DKB/DKB Kannada.md _(8 files)_
+- **2026-09-08_201426** — `pre-deploy-dkb-hi-signals-2026-09-08_201426` — auto snapshot before Raya deploy of DKB/DKB Hindi Signals.md _(8 files)_
+- **2026-09-08_201436** — `pre-deploy-dkb-kn-signals-2026-09-08_201436` — auto snapshot before Raya deploy of DKB/DKB Kannada Signals.md _(8 files)_
