@@ -141,6 +141,43 @@ stated **at the point of use**, in the job-presentation format itself, in all 12
 in the slim prompt. That is the one place the rule was never stated, despite being stated five times
 elsewhere. Both sides need re-dialling to confirm it.
 
+### Post-fix round: three fixes verified on the slim prompt in one run
+
+Four more calls after the point-of-use conversion shipped to both bots.
+
+**`317bd6e0` (slim) is the cleanest call either bot has produced.** Same fixture that had produced
+the leaks:
+
+> हमारे पास आपकी जॉब की लोकेशन **सरजापुर** है, और अभी जॉब्स गाज़ियाबाद, नोएडा और ग्रेटर नोएडा में हैं …
+> पहला: **टेली मार्केटिंग फीमेल**, **ग्लोबल केमिकल्स**, गाज़ियाबाद, सैलरी **बीस हज़ार से पच्चीस हज़ार**.
+> दूसरा: मार्केटिंग, **सारा एंटरप्राइज़ेज़**, गाज़ियाबाद …
+> मार्केटिंग, सारा एंटरप्राइज़ेज़ में, गाज़ियाबाद — … **क्वालिफिकेशन:** एक से दो साल का अनुभव।
+
+Four separate fixes visible in one call: the off-list location converted (`Sarjapur, 110045` →
+सरजापुर), the payload company and role names in Devanagari (`GLOBAL CHEMICALS`, `SARA ENTERPRISES`,
+`Tele Marketing Female`), the salary in words, and the qualification label in Devanagari where it
+used to read `Qualification:`.
+
+| | post-fix calls | invariant failures |
+|---|---|---|
+| slim | `317bd6e0`, `69155e23` | **0** |
+| fat | `fa9a16c0`, `9d479905` | 3 (ordinal reuse, a location substitution, a short call) |
+
+The payload-name conversion is verified on both prompts; the fat proof is the `ea0477f4` →
+`fa9a16c0` before/after twelve minutes apart. What is **not** fixed on either is the location
+substitution — `69155e23` still said साहिबाबाद — and the ordinal restart.
+
+**One thing found here that argues against a habit I applied all day.** On `69155e23` the slim bot
+said **"आप अभी 'Any' का काम देख रहे हैं"** — which is, verbatim, the sentence the prompt quotes in
+order to forbid it: *never "आप Any का काम देख रहे हैं"*. Naming the exact wrong string is usually
+what makes a ban stick (D50), but for a **template** prohibition — one containing a slot the model
+fills — the quote is also a ready-made sentence.
+
+It is one occurrence, and the counting rule cuts the other way here: `role: "Any"` appears on **144**
+of the cached calls and the forbidden line was spoken on **none** of them, so the guard holds on
+about 144 of 145 observed cases. **No edit was made.** Recorded so that if it recurs there is a prior
+occurrence to count from, rather than re-worded on the strength of one call.
+
 ## Running the comparison
 
 ```
