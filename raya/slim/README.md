@@ -65,6 +65,37 @@ tool round-trip, 189 of them `get_profile`, which fires at the top of every call
 `ESCALATION-litwiz.md` §3). So before spending more on characters, `ab_compare.py` should say
 whether 68k is measurably faster than 219k at all.
 
+## The flow, which is the point of the rewrite
+
+The 219k prompt describes this same call in 148 sections whose order does not match the order of the
+call, with the No-Match handling in two places and the location work spread across four. The rewrite
+is 14 numbered steps in the order they happen, so "what do I do next" is never a judgement call.
+This is the whole map — a reviewer can check the design without reading the prompt:
+
+| step | one turn each unless noted | what it guarantees |
+|---|---|---|
+| 0 | pre-check | count the array *before* greeting; an empty array has its own line and never becomes an invented job |
+| 1 | audio check | one line, no greeting, at most one repeat, never revisited |
+| 2 | introduction | said once per call; ends on the question; **no tool call in this turn** |
+| 3 | silent `get_profile` | never revealed; picks the `profile_1.0`+`seeker` item, never `items[0]` blindly |
+| 4 | name + memory + role check | one turn, one question; a qualification is not a role; nothing the profile holds is ever re-asked |
+| 5 | orient, then the location turn | Case A/B, then CONFIRM → one finer detail (first call only) → jobs. Hard cap of three location turns |
+| 6 | present jobs | gated on step 5 having happened; role-relevant only, never padded to three; no counts spoken |
+| 7 | deep dive | ends on the doubts question; "no doubts" is a green light, not a decline |
+| 8 | minimum fields | validate the set, ask only the gaps; the home city is bounded and never loops |
+| 9 | consent | new/draft only, once, and `create_profile` is blocked until it is given |
+| 10 | apply | data-sharing line first, duplicate check before the tool, then ONE path — one tool or two, never batched |
+| 11 | the result | one line looked up from the result, never chosen; success continues into the offer, failure ends on another job |
+| 12 | finish the record | only the missing fields, one per turn, persisted as you go, then the labelled read-back |
+| 13 | Need Capture | one offer, owed on every engaged call, immediately before the exit |
+| 14 | graceful exit | checks the offer was made, reflects one line, ends on Goodbye |
+
+Then four reference sections the steps point into rather than repeat: **No-Match Fallback** (once, not
+twice), **Tools** (four payloads and their enums), **Speaking** (script, canonical places, TTS),
+**Hearing** (ASR and confirmation), and **Situations** (silence, emotion, proxy, do-not-call, "are you
+a bot"). Two worked calls at the end, chosen for disjoint paths: an apply that succeeds, and a
+no-match that ends in a preference capture.
+
 ## A/B results — 10 calls, 5 per side, same fixture and persona
 
 Run alternating so line conditions hit both sides.
