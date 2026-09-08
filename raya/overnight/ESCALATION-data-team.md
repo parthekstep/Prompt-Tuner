@@ -88,3 +88,38 @@ Also note the company name is spelled **three different ways** across those five
 `MacDonalds`, `McDonald's` — which the bot has to speak, so it says the brand differently depending on
 which row it is reading.
 
+
+---
+
+## 5. Send a cleaned `location_spoken` argument (added 2026-09-08)
+
+**The ask:** alongside `location`, send a second argument — `location_spoken` — containing the same
+place with **every digit removed and the words already in the call's script** (Devanagari for Hindi,
+Kannada for Kannada). The prompt would then read it verbatim.
+
+**Why the prompt cannot do this itself — three failures, three wordings.** The caller-place slot in
+the location sentence carries two instructions that cannot both be obeyed: "this is a literal
+substituted token, there is nothing to resolve" (added because six calls resolved it to the
+profile's stale city) and "convert it first — drop the digits, write it in Devanagari" (added for
+the PIN and Latin leaks). Reading it literally leaks the raw value; trying to convert it makes the
+model reach for a place it already knows in Devanagari.
+
+| call | `location` sent | spoken | |
+|---|---|---|---|
+| `a899617e` | `Muradnagar, 110045` | "मुराद नगर, ११००४५" | PIN as a quantity |
+| `7b841e6b` | `Sarjapur, 110045` | "Sarjapur, 110045" | raw, Latin + PIN |
+| `a5ba6894` | `10987, Sarhanpur` | "10987, Sarhanpur" | raw, after the fix |
+| `1450f797` | `Sarjapur, 110045` | "गाज़ियाबाद" | **wrong place** — the jobs' city |
+
+Reading a substituted token verbatim is the one thing this prompt does reliably. Give it a token
+that is already sayable and the whole class disappears.
+
+**What the values actually look like** (from the calls above and the 272 with postal addresses):
+`Muradnagar, 110045` · `Sarjapur, 110045` · `10987, Sarhanpur` · `9, PVR, Indirapuram, 201014,
+Ghaziabad`. So the cleaning is: drop every digit-only fragment, drop house/plot numbers, keep the
+locality and city. That is a few lines where the argument is assembled, and it is the same
+transformation we are currently asking a language model to perform on every call.
+
+**Separately, and cheaper:** `location` values that are a bare PIN, a state name, or campaign
+metadata (`"Call status: not_dialled"`) should not be sent at all — the prompt already treats them
+as empty, so sending them only creates the risk of one being read aloud.

@@ -112,6 +112,26 @@
    "deploy": true
   },
   {
+   "id": "kkb-hi-signals-slim",
+   "file": "KKB-Slim/KKB Slim Hindi Signals.md",
+   "agent": "KKB",
+   "language": "hi",
+   "direction": "outbound",
+   "kind": "conversation",
+   "profile": "conversation",
+   "signals": true,
+   "expected_name_contains": [
+    "Slim"
+   ],
+   "raya_name": "KKB Slim- Hindi Signals API (A/B)",
+   "raya_agent_id": {
+    "prod": "140d13ca-c80f-47c4-9454-5edb3fd38c96",
+    "staging": ""
+   },
+   "deploy": true,
+   "_note": "A/B TWIN of kkb-hi-signals. Same tools, voice, language, DID, timings, memory and output prompts -- cloned field by field via raya/slim/create_slim_bot.py -- so the ONLY difference from 115b38a5 is the conversation prompt: 68,744 chars against 219,518. It exists to test whether prompt size is what the latency complaints are actually about. Do NOT point production traffic at it until the A/B has run; do NOT let /sync-check treat it as a mirror of the Kannada Signals prompt (it is a rewrite of the Hindi one, not a language variant)."
+  },
+  {
    "id": "dkb-hi-out",
    "file": "DKB/DKB Hindi.md",
    "agent": "DKB",

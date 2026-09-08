@@ -83,6 +83,66 @@ and the pass condition is one line: after the apply-success line and the service
 bot must read back name, age, gender, role, qualification and area, then ask "सब सही?" — in Kannada,
 "ಎಲ್ಲಾ ಸರಿನಾ?".
 
+### 2026-09-08 (later the same day) — RETRACTION: the location-sentence fix is NOT holding, and the slot is not prose-fixable
+
+**I reported the PIN/Latin location fix as proven earlier today. That was premature.** Two calls
+placed AFTER the 12:16 IST deploy show it failing in **both** directions, and a third pre-fix
+wording had already failed, so this guard has now failed three times with three different wordings.
+
+| call | UTC | `location` argument | what the bot said | failure |
+|---|---|---|---|---|
+| `a5ba6894` | 08:56 | `10987, Sarhanpur` | "लोकेशन **10987, Sarhanpur** है" | raw passthrough — digits AND Latin |
+| `1450f797` | 12:34 | `Sarjapur, 110045` | "लोकेशन **गाज़ियाबाद** है" | substituted a DIFFERENT place — the jobs' city |
+
+`1450f797` is the worse of the two. The sentence became "your job location is गाज़ियाबाद, and the
+jobs are in गाज़ियाबाद, वसुंधरा and ग्रेटर नोएडा" — which is not merely ugly, it **hides the mismatch
+the sentence exists to expose**: the caller was dialled about Sarjapur and never heard that.
+
+**Root cause — two instructions on one slot, and the model can only obey one.** The block says both:
+1. *"The first slot is the LITERAL TOKEN `${location}` … the platform substitutes it before you ever
+   read this line — there is no resolution step and no opportunity to prefer the fetched profile."*
+   (Added because SIX calls had resolved the slot to the profile's stored city.)
+2. *"`${location}` arrives as a WRITTEN value … convert it FIRST — drop every digit, then write it in
+   Devanagari."* (Added this morning for the PIN and Latin leaks.)
+
+Rule 1 says the text in front of you is already correct and there is nothing to do. Rule 2 says
+transform it. **Obeying 1 produces `a5ba6894`. Attempting 2 — "I must end up with a Devanagari place
+name" — produces `1450f797`, because the nearest Devanagari place to hand is the jobs' city.** The
+`10987, Sarhanpur` shape also sits outside every row of the worked table (digits FIRST, no city),
+which is the same closed-list boundary as D71 one level down: the table taught place-then-PIN.
+
+**No fourth wording was written.** CLAUDE.md forbids a third wording of a guard that has failed
+twice, and this is the third failure. Escalated instead (see `ESCALATION-data-team.md` §5), with the
+two mechanisms that would actually end it:
+
+- **(a) Upstream, preferred.** Send a second argument — `location_spoken` — already stripped of
+  digits and already in Devanagari, and let the prompt do the one thing it does reliably: read a
+  substituted token verbatim. Rule 1 works; it is rule 2 that cannot be made to work in prose.
+- **(b) Prompt-only fallback, an OWNER decision.** Drop the caller-place slot from the sentence and
+  speak only the jobs' cities, which are read off array fields and have never been misread. That
+  removes both failure modes at the cost of no longer confirming the caller's area aloud — which the
+  prompt itself argues is worth having.
+
+**Not applied to the A/B slim prompt either, deliberately** — changing this behaviour in the slim
+bot would confound the size comparison with a behaviour change.
+
+**Also found in the same sweep, both POST-deploy, both forbidden by the prompt already:**
+- **The introduction was spoken TWICE** on `1450f797` and `9b844751` — the prompt's intro rules say
+  it is "spoken ONCE per call and is NEVER repeated". 2 of the 8 scored calls.
+- `1450f797` also bundled the location sentence and a job sentence into one turn, breaking the
+  one-question-per-turn rule that the location block states twice.
+
+**Honest status of this morning's work, per fix:**
+
+| fix | status |
+|---|---|
+| Latin `Qualification:` label → `क्वालिफिकेशन:` | deployed; no post-deploy call has reached a deep dive yet — **NOT VERIFIED** |
+| off-list branch in `## Named entities` | deployed — **NOT VERIFIED** |
+| Maya sample tokens / `VMLG` | deployed — **NOT VERIFIED** |
+| qualification-is-not-a-role | deployed — **NOT VERIFIED**, and the reported call was never located |
+| DKB absent-`company_name` | deployed — **NOT VERIFIED** |
+| location digits + script | **FAILING post-deploy — see above.** Retracted |
+
 ### 2026-09-08 — Khushboo r5: a stored value read out in its written form (four bugs, one mechanism)
 
 **Reported.** (1) QA call **5035574**, KKB Hindi Signals: *"Bot is reading out the exact written
