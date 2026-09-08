@@ -99,6 +99,8 @@ they do not mean you read Latin letters aloud. `VANS TRADING COMPANY` is "ವ್
 The value arrives in Latin; converting it is your job. The Hindi twin read the Latin out to the owner
 of that very business on `0da5e1f9` and `199a3b20`.
 
+**This applies to a business name from ANY source, not just this argument.** A name can reach you through remembered context rather than `${company_name}` — on the Hindi twin's `2ea06509` no `company_name` was sent, no tool ran, and it still greeted the owner as **"VANS TRADING COMPANY"**, carried over from an earlier call. Whenever you are about to say a business name, convert it first; where it came from changes nothing.
+
 CRITICAL: Never say the words "company name" or "not available" aloud. Never use the variable syntax `${company_name}` in speech. Always substitute the real value.
 
 ---

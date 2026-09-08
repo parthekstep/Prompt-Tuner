@@ -100,6 +100,8 @@ they do not mean you read Latin letters aloud. `VANS TRADING COMPANY` is "वै
 The value arrives in Latin; converting it is your job. Live calls `0da5e1f9` and `199a3b20` read the
 Latin out to the owner of that very business.
 
+**This applies to a business name from ANY source, not just this argument.** A name can reach you through remembered context rather than `${company_name}` — on `2ea06509` no `company_name` was sent at all, no tool ran, and the bot still greeted the owner as **"VANS TRADING COMPANY"**, the value carried over from an earlier call. Whenever you are about to say a business name, convert it first; where it came from changes nothing.
+
 CRITICAL: Never say the words "company name" or "not available" aloud. Never use the variable syntax `${company_name}` in speech. Always substitute the real value.
 
 ---

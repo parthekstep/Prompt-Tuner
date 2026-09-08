@@ -45,3 +45,33 @@ caller; all ten were dials with this fixture and not one was a real caller.
 
 **So:** use it to test conversion and precedence, read the three outcomes above as three different
 findings, and take rates only from `location_said.py`'s REAL CALLERS line.
+
+## Repeated dials on the tester DID are NOT independent — platform memory carries between them
+
+**Proven on `2ea06509`.** That dial sent **two** arguments — `contact_memory` (literally
+`"No Old Memory, Mandatory get_profile for the user"`) and `country_code`. No `company_name`. The
+call made **zero tool calls**. And the bot opened with
+**"हैलो! क्या आप VANS TRADING COMPANY से बोल रहे हैं?"** — the value from `b187ffeb`, dialled ten
+minutes earlier on the same tester number.
+
+The path is documented, not inferred: `dkb-hi-signals` has `memory_enabled: True`, and its memory
+prompt records **`business_name`** keyed on `business_id` (the phone number). So Raya wrote the
+company name after the first dial and injected it into the second — **bypassing the
+`${contact_memory}` argument entirely**, which is why saying "No Old Memory" in that argument
+changed nothing.
+
+**What this means for every fixture here:**
+
+- **A value you deliberately omit may still reach the bot** from a previous dial on the same number.
+  Omission is not a clean negative test.
+- **Back-to-back dials are correlated.** Two dials of the same fixture are not two samples; two dials
+  of *different* fixtures can contaminate each other.
+- **A test of "what happens when field X is absent" needs a phone number with no history**, or the
+  memory cleared, or a long enough gap — none of which the harness currently gives you.
+- **This invalidated one experiment today.** `910b2d29` was meant to be the control for whether
+  `contact_memory` drives Maya's opener; it omitted the field but ran on a number with history, and
+  made zero tool calls. It controls nothing, and the conclusion drawn from it was withdrawn.
+
+Corroborated independently on Maya: `d15a8f9b` produced a specific callback claim — *"पिछली बार हमारी
+बात एक जॉब में अप्लाई करने के बारे में हुई थी"* — that was **not** in the `contact_memory` sent to it.
+Two bots, two mechanisms of the same kind. See `ESCALATION-litwiz.md` §4(a).

@@ -269,6 +269,23 @@ not in the argument we sent. If there is a second memory source, our prompts do 
 every rule they carry about deciding from memory reads the `${contact_memory}` block, and a caller's
 opener, role check and location turn all branch on it.
 
+**A second, cleaner instance — and this one is unambiguous.** `2ea06509` (`dkb-hi-signals`,
+2026-09-08 16:14) was sent exactly two arguments: `contact_memory` set to the literal string
+`"No Old Memory, Mandatory get_profile for the user"`, and `country_code`. No `company_name`. The
+call made **zero tool calls**. It opened with **"हैलो! क्या आप VANS TRADING COMPANY से बोल रहे हैं?"**
+— the value from a dial ten minutes earlier on the same number. `dkb-hi-signals` has
+`memory_enabled: True` and its memory prompt records `business_name` keyed on the phone number, so
+the path is documented rather than guessed: **memory prompt → platform store → next call's context,
+bypassing `${contact_memory}`.**
+
+That is confirmation, not a hypothesis. What we need from you is the shape of it: **is the store
+injected as text in the system prompt, as a separate message, or into the model's state? And can it
+be read or cleared per number?** Three things depend on the answer — our prompts' memory rules all
+read `${contact_memory}` and are therefore reading half the picture; our harness cannot run a clean
+negative test, because omitting an argument does not remove the value; and a value arriving this way
+bypasses the conversion rules attached to argument slots, which is exactly how `2ea06509` came to
+speak a business name in Latin script.
+
 **(b) What decides Maya's opener?** Same prompt block, byte-equivalent between two bots, and:
 
 | bot | `college_name` | branch A (names the college) |
