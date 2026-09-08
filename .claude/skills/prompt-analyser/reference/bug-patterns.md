@@ -1430,12 +1430,28 @@ one-line cause; a third wording of the branch would have changed nothing, becaus
 being *correctly* evaluated against the wrong input.
 
 **Detection heuristic.** For every branch whose arms are selected by a literal value — `"Not
-Available"`, `"NA"`, `"None"`, `"Any"`, `"null"`, `""` — check that the condition names the field.
-Then grep the whole prompt for that same literal appearing in ANY other input's documentation,
-sample or injected block. A sentinel string that is shared between fields and used as a branch
-trigger is this bug. Cross-check against production arguments per bot: the same prompt on two bots
-receiving different argument sets is where it shows, and comparing a single bot's calls will never
-reveal it.
+Available"`, `"NA"`, `"None"`, `"Any"`, `"null"`, `""` — check that the condition names the field it
+tests. Then grep the whole prompt for that same literal appearing in ANY other input's
+documentation, sample or injected block. A sentinel shared between fields and used as a branch
+trigger is this bug. Cross-check against production arguments **per bot**: the same prompt on two
+bots receiving different argument sets is where it shows, and comparing one bot's calls to each
+other will never reveal it.
+
+**Two things learned running this sweep across all 20 prompts** (2026-09-08), so the next run is not
+a wall of noise. It returned 51 sentinel conditions, of which a crude "does this line name a field"
+test flagged 33 — and **every one of the 33 except Maya's was a false positive**:
+
+- **Look at the two lines ABOVE the condition, not just the condition.** DKB's *"If the raw value is
+  exactly \"Not Available\" — STOP"* names nothing on its own line, but the line directly above it
+  is *"Read the raw value of `${job_role}`."* Four files, all fine.
+- **Exclude two shapes outright.** The deep-dive rule *"If any field is missing or 'Not Available',
+  skip it naturally"* is deliberately generic and correct — it is about the job record's own fields,
+  not a branch on an input. And the output prompts' *"If a value is not present, use 'NA'"* is an
+  instruction about what to WRITE, not a branch at all.
+
+What is left after those two exclusions is the real signal: a condition whose sentinel is also a
+plausible value of a **different** field that reaches the model in the same context window. Maya's
+opener was the only instance in the fleet.
 
 **Fix direction.** Name the field in the condition and add the exclusion explicitly — "ONLY the
 `college_name` value line decides this; no other field's value has any bearing on it, whatever it

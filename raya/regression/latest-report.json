@@ -1,5 +1,5 @@
 {
- "prompts_checked": 20,
+ "prompts_checked": 21,
  "total_findings": 1,
  "bots": [
   {
@@ -98,6 +98,13 @@
    "blurb": "Government-job matching for workers / job-seekers — the bot phones the person, in Kannada, on the new Signals DPG backend",
    "agent": "KKB",
    "file": "KKB/KKB Placeholder Kannada Signals.md",
+   "findings": 0
+  },
+  {
+   "bot": "KKB-Slim Hindi · outbound · Signals",
+   "blurb": "KKB-Slim — the bot phones the person, in Hindi, on the new Signals DPG backend",
+   "agent": "KKB-Slim",
+   "file": "KKB-Slim/KKB Slim Hindi Signals.md",
    "findings": 0
   },
   {
