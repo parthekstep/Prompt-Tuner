@@ -25,3 +25,23 @@ Tester agent `f60e0899-aa3a-4be7-9b4f-0296bd28ef48`, inbound DID `7946350285`. S
 `scripts/raya_testcall.py persona <tester> <persona.md>` and the language with `… lang <tester> hi|kn`
 before dialling — the tester keeps whatever was set last, and a Kannada fixture on a Hindi persona
 proves nothing.
+
+## A confound in `sarjapur-offlist.json` — read this before quoting a rate from it
+
+`get_profile` on the tester DID returns a profile carrying **`location: "Sahibabad, Ghaziabad,
+India"`**. This fixture sends `location: "Sarjapur, 110045"`. So every dial with it creates a
+**profile-versus-argument conflict**, and the bot has two ways to be wrong and one to be right:
+
+| what it says | what that means |
+|---|---|
+| सरजापुर | correct — argument obeyed and converted (`317bd6e0`, `cea642ea`) |
+| साहिबाबाद / गाज़ियाबाद | the **profile** beat `${location}` — a precedence failure, not a conversion one |
+| `Sarjapur, 110045` | conversion failed — the raw written value |
+
+That makes it a good two-in-one test and a **terrible source of a production rate**: real callers are
+generally dialled where their profile says they live, so the conflict this fixture guarantees is rare
+in traffic. Ten "substitution" findings were reported as a caller-facing rate before being split by
+caller; all ten were dials with this fixture and not one was a real caller.
+
+**So:** use it to test conversion and precedence, read the three outcomes above as three different
+findings, and take rates only from `location_said.py`'s REAL CALLERS line.

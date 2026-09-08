@@ -956,3 +956,5 @@ to the same number — the first writing the memory, the second consuming it.
 2026-09-08 20:44:30 · prod · dkb-hi-out · 57814ac8-5d79-41f5-bab7-bcfe2d9aac4f · DKB/DKB Hindi.md · sha256:2f45e011 · snapshot:pre-deploy-dkb-hi-out-2026-09-08_204429 · deployed
 2026-09-08 20:44:35 · prod · dkb-kn-out · d1a1614f-fa7e-41c1-8963-e7f3af213a13 · DKB/DKB Kannada.md · sha256:a7cc484b · snapshot:pre-deploy-dkb-kn-out-2026-09-08_204434 · deployed
 2026-09-08 20:44:40 · prod · dkb-hi-signals · fabda71d-af75-4ddd-8cf1-fa35c827f753 · DKB/DKB Hindi Signals.md · sha256:8c23f33e · snapshot:pre-deploy-dkb-hi-signals-2026-09-08_204437 · deployed
+2026-09-08 20:44:44 · prod · dkb-kn-signals · 847a85e2-c5c8-4727-9918-f1db9efad05d · DKB/DKB Kannada Signals.md · sha256:8abd7532 · snapshot:pre-deploy-dkb-kn-signals-2026-09-08_204441 · deployed
+2026-09-08 21:03:32 · prod · kkb-hi-signals-slim · 140d13ca-c80f-47c4-9454-5edb3fd38c96 · KKB-Slim/KKB Slim Hindi Signals.md · sha256:64059997 · snapshot:pre-deploy-kkb-hi-signals-slim-2026-09-08_210331 · deployed

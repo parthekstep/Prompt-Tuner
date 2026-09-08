@@ -83,6 +83,55 @@ and the pass condition is one line: after the apply-success line and the service
 bot must read back name, age, gender, role, qualification and area, then ask "सब सही?" — in Kannada,
 "ಎಲ್ಲಾ ಸರಿನಾ?".
 
+### 2026-09-08 (late, correction) — the location "substitutions" were my own test fixture. Zero real callers.
+
+**I reported the location sentence naming the wrong place on 5 of 15 calls, then 8 of 16, and said
+"nearly half of these callers were told something false about their own location". That was wrong.
+Split by caller, over 449 calls since 2026-09-01:**
+
+| | ABSENT | OK | RAW | SUBSTITUTED |
+|---|---|---|---|---|
+| **real callers** | 6 | 4 | **3** | **0** |
+| harness dials | 1 | 20 | 0 | **10** |
+
+**All ten substitutions are harness dials on the tester DID. Not one is a real caller.**
+
+**Why my own harness manufactured them.** `get_profile` on the tester DID returns a profile carrying
+`location: "Sahibabad, Ghaziabad, India"`. My fixture sends `location: "Sarjapur, 110045"`. So
+**every harness dial creates a profile-versus-argument conflict** — which is precisely the condition
+the precedence bug needs, and a condition real traffic rarely produces, because a campaign generally
+targets people where their profile says they are. `input_coverage.py` had the identical flaw for the
+identical reason a week ago; I fixed it there and did not think to look for it here.
+
+**And my diagnosis was wrong on top of the rate.** I concluded the Canonical Location Spellings list
+was acting as an "attractor" — the model picking a name off the list — because four of the calls said
+साहिबाबाद and one गाज़ियाबाद, and both are list entries. **साहिबाबाद is also the tester profile's
+stored city**, and गाज़ियाबाद is the city half of `"Sahibabad, Ghaziabad, India"`. I read the first
+coincidence and missed the second. The actual mechanism is the one already documented and already
+guarded: **the fetched profile's location beating `${location}`.**
+
+**The experiment I ran on that diagnosis failed 0/3, correctly.** The slim prompt was given a rule
+saying the canonical list is a spelling table and never a menu; all three dials still said साहिबाबाद,
+because the model was not reading a list — it was reading the profile. **The rule has been reverted**
+(slim back to 69,974 chars): a prompt carrying a plausible-sounding rule aimed at the wrong mechanism
+is worse than one that carries nothing, because the next person reads it as ruled out.
+
+**What survives, and it is narrow.** The RAW failures are real callers and the fix genuinely has not
+landed for one shape: `a899617e` and `7b841e6b` (both pre-fix) and **`a5ba6894` (post-fix)**, whose
+value was `10987, Sarhanpur` — digits FIRST, a shape no row of the worked table covers. So:
+
+- **RAW on real callers: a genuine, current, single-shape bug.** One post-fix occurrence.
+- **SUBSTITUTED: not observed on any real caller.** It is reproducible in the harness whenever the
+  profile and the argument disagree, so it is a real precedence weakness worth fixing — but it is not
+  a production rate and I should not have quoted it as one.
+- The ABSENT calls remain all pre-gate.
+
+**`location_said.py` now splits real callers from harness dials and prints them separately**, and its
+pass line says so explicitly. Two of my own detectors produced inflated numbers today — this one and
+its earlier caller-echo ordering bug — and in both cases I reported before splitting the data. The
+detector self-tests catch logic errors; they cannot catch a confounded population. That needs the
+question asked out loud every time: *who was actually on these calls?*
+
 ### 2026-09-08 (late) — the overnight suite found two more instances of the same class: the read-back's age/gender, and DKB's salary
 
 **Found by `run_runtime_checks.sh` over 356 calls since 2026-09-06, not reported.** Both are the

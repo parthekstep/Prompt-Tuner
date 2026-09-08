@@ -150,3 +150,18 @@ before the upstream change: state that **the list is a spelling table, never a m
 not on it you still say that value, never a list member. That is not another wording of the same
 guard; it names the attractor the guard never mentioned. It is queued as the next experiment on the
 slim A/B bot rather than applied to live traffic.
+
+### Correction, same day — the substitution half of this is not a production rate
+
+The four "spoke a different place" calls quoted above (`1450f797`, `8eb83bc2`, `f90a0b97`,
+`fa9a16c0`) and six more found later are **all harness dials on the tester DID**, whose stored
+profile carries `location: "Sahibabad, Ghaziabad, India"` while the fixture sends
+`"Sarjapur, 110045"`. Split by caller over 449 calls since 01-09: **real callers 3 RAW, 0
+SUBSTITUTED; harness 10 SUBSTITUTED, 0 RAW.** The substitution is a genuine precedence weakness that
+reproduces whenever the profile and the argument disagree — but it has not been seen on a real
+caller, and it was wrong of me to quote it as a caller-facing rate.
+
+**The ask below is unchanged and rests on the RAW calls, which ARE real callers** — `a899617e`,
+`7b841e6b` and `a5ba6894`, the last of them after the fix, with `location: "10987, Sarhanpur"`
+(digits first, a shape the prompt's worked examples do not cover). A `location_spoken` argument that
+is already digit-free and already in the call's script removes that class entirely.

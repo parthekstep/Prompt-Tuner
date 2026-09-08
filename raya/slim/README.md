@@ -178,7 +178,7 @@ of the cached calls and the forbidden line was spoken on **none** of them, so th
 about 144 of 145 observed cases. **No edit was made.** Recorded so that if it recurs there is a prior
 occurrence to count from, rather than re-worded on the strength of one call.
 
-### Experiment 1 on the slim bot: naming the attractor
+### Experiment 1 on the slim bot: naming the attractor — FAILED, and the diagnosis was wrong
 
 The location sentence's caller-place slot has failed three wordings. The fourth is not another way
 of saying "say the value you were given" — it names the thing none of the three mentioned.
@@ -204,8 +204,24 @@ value you were given" is not checkable in that way — it requires comparing aga
 model believes it already did.
 
 **Deliberately slim-only.** The fat prompts keep the failing wording, so the next A/B round measures
-this change and nothing else. If it holds it ports to all four KKB/Maya Signals prompts; if it does
-not, the upstream `location_spoken` field is the remaining route (`ESCALATION-data-team.md` §5).
+this change and nothing else.
+
+**Result: 0 of 3. Reverted.** All three dials still said साहिबाबाद. The reason is that the diagnosis
+was wrong: **साहिबाबाद is not only a Canonical-list entry, it is the tester profile's stored city**
+(`get_profile` returns `location: "Sahibabad, Ghaziabad, India"` for the tester DID), and गाज़ियाबाद
+on `1450f797` is the city half of the same string. The model was not picking a name off a list — it
+was preferring the fetched profile over `${location}`, which is the mechanism already documented and
+already guarded. I read the list coincidence and missed the profile one.
+
+The rule was removed rather than left in place (slim back to 69,974 chars). A prompt carrying a
+plausible rule aimed at the wrong mechanism is worse than one carrying nothing, because the next
+reader takes that mechanism as ruled out.
+
+**And the failure it was chasing is not a production rate.** Split by caller over 449 calls: real
+callers 3 RAW and **0 SUBSTITUTED**; harness dials 10 SUBSTITUTED and 0 RAW. Every substitution is a
+harness dial, manufactured by a fixture that deliberately disagrees with the tester's stored profile.
+The precedence weakness is real and reproducible; the caller-facing rate I quoted was my own test
+setup.
 
 ## Running the comparison
 

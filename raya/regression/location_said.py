@@ -123,6 +123,9 @@ def classify(arg_location, agent_turns, caller_turns, has_sentence=True):
     return "OK", spoken, "converted from the argument"
 
 
+TESTER_DID = "7946350285"
+
+
 def check(bot, uuid, has_sentence=True):
     c = get("/api/call/" + uuid)
     turns = c.get("call_transcript") or []
@@ -138,8 +141,15 @@ def check(bot, uuid, has_sentence=True):
               if t.get("role") == "user" and t.get("content")]
     arg = (c.get("agent_args") or {}).get("location")
     v, spoken, detail = classify(arg, agent, caller, has_sentence)
+    # HARNESS calls must be counted separately, never folded into a production rate. The tester
+    # DID's stored profile carries `location: "Sahibabad, Ghaziabad, India"`, so a fixture that
+    # sends any other place creates a profile-vs-argument conflict on EVERY harness dial -- exactly
+    # the condition the precedence bug needs. Nine "substitution" calls were reported as a
+    # production rate of 8-in-16 before this split was added; all nine were harness dials and not
+    # one was a real caller. (input_coverage.py had the identical flaw for the identical reason.)
+    harness = TESTER_DID in str(c.get("to_number") or "") or TESTER_DID in str(c.get("caller_no") or "")
     return dict(bot=bot, call=uuid, at=str(c.get("created_at"))[:19], verdict=v,
-                arg=arg, spoken=spoken, detail=detail)
+                arg=arg, spoken=spoken, detail=detail, harness=harness)
 
 
 # The two-slot location SENTENCE does not exist in every prompt. Maya and the KKB
@@ -259,18 +269,28 @@ def main():
     if not rows:
         print("  NO CALLS IN WINDOW — this check proved nothing. Not a pass.")
         sys.exit(0)
+    real = [r for r in rows if not r["harness"]]
+    harn = [r for r in rows if r["harness"]]
+    for label, sel in (("REAL CALLERS", real), ("harness dials", harn)):
+        if not sel:
+            print("  %-14s (none in window)" % label); continue
+        t = {}
+        for r in sel:
+            t[r["verdict"]] = t.get(r["verdict"], 0) + 1
+        print("  %-14s %s" % (label, "  ".join("%s=%d" % (k, t[k]) for k in sorted(t))))
     tally = {}
-    for r in rows:
+    for r in real:
         tally[r["verdict"]] = tally.get(r["verdict"], 0) + 1
-    print("  " + "  ".join("%s=%d" % (k, tally[k]) for k in sorted(tally)))
     for r in sorted(rows, key=lambda r: (r["verdict"] not in ("RAW", "SUBSTITUTED"), r["at"])):
         if r["verdict"] in ("OK", "NA"):
             continue
-        print("  %-12s %-19s %-22s %s" % (r["verdict"], r["at"], r["bot"], r["call"][:8]))
+        print("  %-12s %-19s %-22s %s%s" % (r["verdict"], r["at"], r["bot"], r["call"][:8],
+                                            "  [harness]" if r["harness"] else ""))
         print("        %s" % r["detail"])
     bad = tally.get("RAW", 0) + tally.get("SUBSTITUTED", 0)
     if not bad:
-        print("  no RAW or SUBSTITUTED calls")
+        print("  no RAW or SUBSTITUTED calls FROM A REAL CALLER (harness findings above, if any, "
+              "may be fixture artefacts -- check the tester profile's stored location first)")
     sys.exit(1 if bad else 0)
 
 
