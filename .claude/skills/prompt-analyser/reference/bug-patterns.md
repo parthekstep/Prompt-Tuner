@@ -1258,3 +1258,142 @@ chokepoint rather than on a path (D63/D64).
 **Source.** All six KKB/Maya Signals prompts, 2026-09-07. Bug `8674462f`. **Fix deployed, NOT
 verified** — three harness attempts ran past the tester's five-minute cap before reaching the end of
 the flow. Related: D63, D64, D68.
+
+---
+
+### D71
+**A script/spelling rule backed by a CLOSED LIST converts what is on the list and passes the rest through verbatim.**
+
+**Symptom.** The bot speaks a stored value in its written form — Latin script, ASCII digits, an
+acronym — inside an otherwise perfect Indic sentence, *on some calls and not others*. It reads as
+flakiness. It is not.
+
+**Root cause.** Every "speak X in <script>" rule in these prompts is backed by an enumeration:
+Canonical Location Spellings, Maya's "Common conversions", the first-name list. The prose says
+"Devanagari only" and even carries an off-list fallback, but the **examples are what the model
+actually follows**, so a value on the list is converted and a value absent from every list is
+emitted unchanged. Four proofs in one night, three different lists, one mechanism:
+
+| call | value in the arguments | what the caller heard | which list it was off |
+|---|---|---|---|
+| `7b841e6b` | `location: "Sarjapur, 110045"` | "लोकेशन Sarjapur, 110045 है" | Canonical Location Spellings |
+| `1536830c` | `company: "SARA ENTERPRISES"` | "SARA ENTERPRISES" | no company list exists |
+| `9d5e9848` | `company: "MAHARAJA ENGINEERING WORKS"` | said verbatim | no company list exists |
+| `b6353cfb` | `college_name: "VMLG College"` | "VMLG College" | Maya "Common conversions" (had LR, TPS, MMH) |
+
+On every one of those calls a value that WAS on the relevant list came out correctly **in the same
+breath** — `7b841e6b` said गाज़ियाबाद, `02c5f7f0` said "ग्लोबल केमिकल्स" out of `GLOBAL CHEMICALS`.
+So the split is deterministic, and the five preceding `Muradnagar` calls that passed were passing
+because the value was on a list, not because the rule was working.
+
+**Detection heuristic.** Two passes, and the second is the one that finds real bugs.
+1. *Static.* For every rule of the form "speak <thing> in <script>", locate its backing list and ask
+   what the prompt tells the model to do with a value that is **not on it**. If the answer is a
+   trailing clause, a conditional ("if you are unsure…"), or absent, it is this bug. A fallback
+   conditioned on the model's *uncertainty* never fires: an acronym is not something it feels unsure
+   about (cf. D70 — a trigger that is never true).
+2. *Against production arguments.* Pull the values the campaign actually sends for each spoken
+   variable and check them against the list. This is what turned "VMLG is one bad call" into
+   "`college_name` is `VMLG College` on 345 of 460 calls and it was on no list" — i.e. the majority
+   of that bot's callers heard a Latin acronym.
+
+**Fix direction.** Do not lengthen the list and do not re-word the rule (that is the banned third
+wording). State that **the list is examples, not an allow-list, and that being absent from it is the
+ordinary case**, then demonstrate the conversion on the exact values that failed. Where the value is
+consumed in one specific sentence, put the conversion at the point of use as an ordered precondition
+("convert first, then say the sentence") rather than as a caveat after the spoken template — and
+delete any nearby permission to pass the value through ("say the sentence as it arrives", "the
+actual literal value", "VERBATIM"), which is the competing instruction the model was obeying.
+
+**Source.** 2026-09-08, QA calls 5035574 / 5061404. 16 prompts. Standing detector:
+`raya/regression/spoken_form.py`. Related: D50 (the sample outvotes the rule), D64 (closed set),
+D67, D72, D73.
+
+---
+
+### D72
+**An English field LABEL inside a spoken template is read out to the caller.**
+
+**Symptom.** Mid-sentence, in Hindi, the bot says "**Qualification:** आईटीआई वेल्डिंग" — a form label
+with a colon, in Latin script, in the middle of speech.
+
+**Root cause.** The prompt's own spoken template said it. `Qualification: [qualification]।` sat inside
+the Step-3 deep-dive block, and **three to five sample conversations per file demonstrated the agent
+saying it aloud**. This is not a model error at all: the bot was reading the template correctly. The
+label had been written as scaffolding for whoever maintains the prompt and never converted into
+speech. The Kannada twins had already solved it the right way — `ಕ್ವಾಲಿಫಿಕೇಷನ್:` — so the Hindi files
+were also behind their own mirrors.
+
+**Detection heuristic.** Grep every spoken template and every `> **Agent:**` line for
+`\b[A-Z][a-z]+\s*:` — a capitalised English word followed by a colon inside quoted speech. Cross-check
+against the language twin: if one language transliterates the label and the other does not, the
+untransliterated one is the bug. `raya/regression/spoken_form.py` carries this as an always-blocking
+`FIELD LABEL SPOKEN ALOUD` check.
+
+**Fix direction.** Transliterate the label into the target script (matching whatever the twin already
+does), or fold it into the sentence so no label is spoken. Fix the samples in the same edit — a
+template fixed while five samples still demonstrate the old form will regress (D50).
+
+**Source.** 2026-09-08. 31 occurrences across 8 Hindi prompts. Live: `1536830c`, `9d5e9848`,
+`4872fa0e`. Related: D50, D71.
+
+---
+
+### D73
+**An emptiness test that enumerates the placeholder STRING and NULL, but not the ABSENT argument.**
+
+**Symptom.** The bot greets a business owner with **"क्या आप Not Available से बोल रहे हैं?"** — "are
+you calling from Not Available?" Seven live calls: `564e1d45` (2026-09-05), `343f8924`, `7427b12e`,
+`7db95662`, and in Kannada `be4ab8c3` (2026-09-07), `061fb2cd`, `431a070a`.
+
+**Root cause — and it is the opposite of what the symptom suggests.** Across 137 cached DKB calls
+carrying a `company_name` argument the value was **always real, never the string "Not Available"**.
+On the seven failing calls the argument was **not sent at all**. The prompt's test read
+*`If ${company_name} is exactly "Not Available" or is NULL`* — two arms, neither of which matches a
+**dropped** argument, which the platform delivers as the raw `${company_name}` token. With no arm
+matching, the model fell through to the present-value branch, which said to substitute *"the actual
+literal value"*, and it synthesised the placeholder wording it had just read in that very section.
+So the prompt supplied both the missing branch and the wrong words to fill it with.
+
+**Detection heuristic.** For every `${var}` that is spoken or branched on, check the emptiness test
+covers **three** cases, not two: the placeholder string, NULL/empty, and **the unsubstituted token**.
+The platform drops an argument it was never given rather than sending a blank, so absence always
+arrives as `${var}` itself. A file that declares "AN UNSUBSTITUTED TOKEN COUNTS AS EMPTY" for one
+variable and not for its neighbours is the strongest signal: the author knew the rule and applied it
+once. Also grep for any nearby "literal value" / "VERBATIM" / "as it arrives" wording — that is the
+branch the model takes when the test fails to match.
+
+**Fix direction.** Add the absent case to the existing test rather than writing a new guard, so the
+pass-through branch becomes unreachable when there is no value (remove the wrong option — ladder rung
+3 — instead of forbidding the output). Say explicitly that the placeholder string is a value the
+prompt tests FOR and never something to speak.
+
+**Source.** DKB, 2026-09-08. 4 outbound DKB prompts. Related: D67 (the token spoken aloud), D71, D64.
+
+---
+
+### D74
+**A sample conversation whose Context line defines a variable in terms of itself, and whose speech line then shows the raw token.**
+
+**Symptom.** The bot speaks an unconverted variable value — or the token itself — inside an otherwise
+correct scripted line, while four separate rules above tell it to convert.
+
+**Root cause.** Maya's Example 1 and Example 2 opened with **`**Context:** ${college_name} =
+${college_name}.`** — a tautology that establishes no value at all — and their agent lines then read
+**`> **Agent:** नमस्ते। मैं माया, ${college_name} की ओर से…`**. Two worked examples per file
+demonstrated the agent uttering the unsubstituted variable. On `b6353cfb` the bot did exactly that
+with the real value, in Latin. The rules said convert; the demonstration said copy; the demonstration
+won.
+
+**Detection heuristic.** Two greps, both cheap and both worth running on every prompt:
+`^\s*>\s*\*\*Agent` lines containing `\$\{`, and Context/stage-direction lines matching
+`\$\{(\w+)\}\s*=\s*\$\{\1\}`. Neither can ever be legitimate: a sample exists to show a concrete
+value being handled. This is distinct from D67, which finds tokens inside **rule** text — a D67 sweep
+that greps only rules will pass a file whose samples are the actual cause.
+
+**Fix direction.** Give the sample a concrete value, pick one that exercises the hard shape (an
+initialism, an off-list place), show the **converted** form in the speech line, and add a stage
+direction naming what was substituted — "`${college_name}` = `LR College`, an initialism, so the
+spoken form is एलआर कॉलेज".
+
+**Source.** Maya Hindi + Maya Hindi Signals, 2026-09-08. Bug `b6353cfb`. Related: D50, D63, D67, D71.

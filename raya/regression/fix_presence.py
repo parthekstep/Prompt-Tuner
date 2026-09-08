@@ -122,6 +122,41 @@ FIXES = [
     ("no-item-state-in-dhiway", "the Dhiway prompts must never mention item_state — it is a Signals-only "
                                 "contract token and leaked twice",
      [f for f in seeker_conv() if "Signals" not in os.path.basename(f)], [], ["item_state"]),
+
+    # ---- 2026-09-08, the written-value-spoken-verbatim family (D71-D74) ----
+
+    ("offlist-value-still-converted", "a name that is on NO list in the prompt is converted exactly "
+                                      "like one that is — the off-list branch of every script rule "
+                                      "(D71; 7b841e6b said 'Sarjapur, 110045', b6353cfb said 'VMLG College')",
+     seeker_conv(), ["not an exemption"], []),
+
+    ("location-converted-before-spoken", "`${location}` is reduced to place words and written in the "
+                                         "target script BEFORE the sentence is said — and the old "
+                                         "'say the sentence as it arrives' permission is gone (D71)",
+     [os.path.join(REPO, "KKB", "KKB Placeholder Hindi Signals.md"),
+      os.path.join(REPO, "KKB", "KKB Placeholder Kannada Signals.md")],
+     ["a written value is not sayable"],
+     ["**Say the sentence as it arrives — but speak only the PLACE WORDS in it.**"]),
+
+    ("no-latin-field-label-spoken", "no English field label is left inside a Hindi spoken template or "
+                                    "sample — the Kannada twins already transliterated it (D72, 9d5e9848)",
+     [f for f in seeker_conv() if "Kannada" not in os.path.basename(f)], [], ["Qualification: "]),
+
+    ("dkb-absent-company-name", "the company-name emptiness test covers the ABSENT argument, not just "
+                                "the string 'Not Available' and NULL — 7 live calls greeted owners as "
+                                "'Not Available' because the arg was never sent (D73, 564e1d45, be4ab8c3)",
+     DKB_SIGNALS + [os.path.join(REPO, "DKB", "DKB Hindi.md"),
+                    os.path.join(REPO, "DKB", "DKB Kannada.md")],
+     ["AN UNSUBSTITUTED TOKEN COUNTS AS ABSENT"], []),
+
+    ("no-token-in-sample-speech", "no sample conversation shows the agent speaking a raw ${token} — the "
+                                  "samples outvoted four rules and taught the pass-through (D74, b6353cfb)",
+     MAYA_CONV, [], ["> **Agent:** नमस्ते। मैं माया, ${college_name} की ओर से"]),
+
+    ("qualification-not-an-occupation", "an education qualification in the profile `role` field is NOT a "
+                                        "usable role — QA heard 'आप अभी बी०टेक०(ई०सी०एस) का काम कर रहे हैं' "
+                                        "(D64/D71, QA call 5035574; reproducing call id still pending)",
+     seeker_conv(), ["never what they DO"], []),
 ]
 
 

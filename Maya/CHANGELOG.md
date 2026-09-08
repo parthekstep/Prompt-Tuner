@@ -10,6 +10,54 @@ Every prompt edit to Maya is logged here. Maya is Hindi-only (KKB spinoff). Entr
 - **Ported from:** <source agent> (only for cross-agent ports)
 ```
 
+### 2026-09-08 — Maya's own worked examples were teaching the bot to speak the raw ${college_name}
+
+**Feedback/bug:** found while root-causing Khushboo's r5 report on KKB (see `KKB/CHANGELOG.md` for the
+shared mechanism, analyser D71-D74). Live call **`b6353cfb`** (2026-09-07, `maya-hi-signals`) opened
+with **"नमस्ते। मैं माया, `VMLG College` की ओर से बात कर रही हूँ"** — the value in Latin script inside a
+Hindi sentence, which the Hindi voice then has to read letter by letter.
+
+**Root cause — the samples outvoted four rules (D74).** Maya Hindi and Maya Hindi Signals each carried
+FOUR instructions to convert the college name to Devanagari (the `## Named entities` rule, the
+"never mix Latin and Devanagari" line, a "sound it out phonetically" fallback, and the point-of-use
+instruction in opener branch A). All four were in place and it still failed. The cause was two lines
+per file that no rule can outrank:
+
+- `> **Agent:** नमस्ते। मैं माया, ${college_name} की ओर से बात कर रही हूँ…` — both worked examples
+  **demonstrated the agent speaking the unsubstituted token**, twice each.
+- `**Context:** ${college_name} = ${college_name}.` — a tautology, so the sample never established a
+  concrete value for the demonstration to convert.
+
+Secondary cause (D71): the "Common conversions" list held `Thakur`, `LR`, `TPS`, `MMH`,
+`Lajpat Rai`, `Sahibabad` — and **not `VMLG`**. Checked against production, `college_name` is
+`VMLG College` on **345** of 460 cached campaign calls and `LR College` on 111. `LR` was on the list
+and has never been reported wrong. So the single most common value on this bot was the one value
+with no demonstration behind it, and the fallback that was meant to cover it is conditioned on the
+model being *"unsure how to transliterate"* — which it is not, for a run of capital letters
+(the D70 shape: a trigger that is never true).
+
+**Change:**
+- Both samples in both files now show `LR College` → **"एलआर कॉलेज"** in the spoken line, with the
+  Context line naming the substitution: *"`${college_name}` = `LR College` — an initialism, so the
+  spoken form is 'एलआर कॉलेज'. What the agent says below is the CONVERTED form, never the value as it
+  arrived."*
+- `VMLG` → वीएमएलजी and `VTU` → वीटीयू added to Common conversions (the values production actually
+  sends), and the list is now stated to be **examples, not an allow-list**.
+- The employer-name clause the **Inbound twins already carried** was missing from both outbound files —
+  a mirror gap inside Maya's own family. Ported, with this bot's real inventory names
+  ("Kashi Infotech" → काशी इंफोटेक, "Dafsons Healthcare" → डैफसन्स हेल्थकेयर, "Procaps" → प्रोकैप्स).
+- The Inbound twins, which had the employer examples but demonstrated no **initialism**, gained that
+  shape plus the same off-list statement.
+- Mirrored from KKB in the same change: the Latin `Qualification:` label → `क्वालिफिकेशन:` (3 per file,
+  4 files), and the qualification-is-not-a-role branch in the role-usability closed set.
+
+**Files:** `Maya/Maya Hindi.md`, `Maya/Maya Hindi Signals.md`, `Maya/Maya Inbound.md`,
+`Maya/Maya Inbound Signals.md`. All four deployed and read-back verified.
+
+**Verification:** **DEPLOYED, NOT VERIFIED.** Fixture `raya/testcases/args/r5/maya-vmlg-offlist.json`
+carries the real `VMLG College` value and the real 28-job array. Pass condition, one line: the opener
+says **वीएमएलजी कॉलेज** and no Latin character appears in any spoken turn.
+
 ### 2026-09-04 — Tracker sweep (mirrored from KKB): row-1 already-applied unreachable; inbound Example 2 demonstrated the open area ask
 
 - **Feedback/bug:** Tracker `All Issues` review. Row 103 (KKB Hindi Signals, P1) "bot is saying

@@ -127,6 +127,53 @@ Every prompt edit to DKB is logged here. Entry format:
 - **Change:** No prompt changes. DKB already has the complete set (Hindi, Kannada, Memory, Output) and serves as the reference implementation for the new skills' anatomy docs.
 - **Files:** none
 
+## 2026-09-08 — DKB was greeting business owners as "Not Available" (7 live calls)
+
+- **Feedback/bug:** found while measuring the KKB written-value bug class (analyser **D73**). On
+  **`564e1d45`** (2026-09-05), `343f8924`, `7427b12e` and `7db95662` the Hindi outbound bot opened with
+  **"हैलो! क्या आप Not Available से बोल रहे हैं?"** — "are you calling from Not Available?" The Kannada
+  twin did the same on **`be4ab8c3`** (2026-09-07), `061fb2cd` and `431a070a`:
+  **"ನೀವು Not Available ನಿಂದ ಮಾತಾಡ್ತಾ ಇದ್ದೀರಾ?"**
+- **Root cause — the opposite of what it looks like.** Across **137** cached DKB calls that carried a
+  `company_name` argument the value was **always real; not once was it the string "Not Available"**.
+  On the seven failing calls **no `company_name` was sent at all** — the args held only
+  `contact_memory`. The emptiness test read *"If `${company_name}` is exactly 'Not Available' or is
+  NULL"*: two arms, neither of which matches a **dropped** argument, which the platform delivers as the
+  raw `${company_name}` token. With no arm matching, the model fell through to the present-value branch
+  — *"where `[company_name]` is replaced with the **actual literal value**"*, and in the Signals pair
+  *"`[company_name]` is `${company_name}` **VERBATIM**"* — and synthesised the placeholder wording it
+  had just read three lines earlier in that same section. The prompt supplied both the missing branch
+  and the words to fill it with. The `CRITICAL: Never say ... "not available" aloud` line directly
+  below had been there the whole time and did not help: a prohibition next to a substitution
+  instruction loses.
+- **Change:** the test is now *"is exactly 'Not Available', is NULL, **or is ABSENT**"*, followed by the
+  **AN UNSUBSTITUTED TOKEN COUNTS AS ABSENT** clause — which is the identical clause already declared
+  two paragraphs above for `${contact_name}` in the legacy pair, so this is its missing twin rather
+  than a new guard. With the absent case matched, the pass-through branch is unreachable when there is
+  no value (ladder rung 3), instead of being forbidden and obeyed anyway.
+- **Files:** `DKB/DKB Hindi.md`, `DKB/DKB Kannada.md`, `DKB/DKB Hindi Signals.md`,
+  `DKB/DKB Kannada Signals.md` (inbound has no `${company_name}` input, so it is not affected). All
+  four deployed and read-back verified.
+- **Analyser:** pattern **D73**; `raya/regression/spoken_form.py` treats a placeholder spoken to a
+  caller as always-blocking, in any language; `fix_presence.py` row `dkb-absent-company-name`.
+- **Verification:** **DEPLOYED, NOT VERIFIED.** Fixture
+  `raya/testcases/args/r5/dkb-no-company-name.json` reproduces the failing input exactly (only
+  `contact_memory`, no `company_name`). Pass condition: the bot opens with
+  **"हैलो, क्या आप एक बिज़नेस ओनर हैं?"** and the words "Not Available" appear nowhere in the transcript.
+- **Also found, NOT fixed (flagged):** on `09a7b6c8` and `0c4fd526` (both 2026-07-31, Signals) the
+  campaign genuinely sent `job_role`, `num_vacancies`, `salary`, `qualification`, `location` and
+  `work_experience` all as the string `"Not Available"`, and the bot read the posting recap out as
+  **"आपकी एक posting है — Not Available, Not Available vacancies, सैलरी Not Available।"** The recap
+  template has a placeholder test for `job_role` only, not for the other slots. Old calls and a data
+  problem at source, but the recap should refuse to speak a placeholder in any slot — left for a
+  scoped edit rather than folded into tonight's change.
+- **Also found, NOT fixed (flagged):** `DKB Kannada Signals.md` condenses the Hindi Signals prompt's
+  six-heading "Signals Backend — What Changed" section into one, so the pair fails heading-count parity
+  59/54. The **content** is present in the Kannada file (`jobProviderLocation` ×11, `job_posting_1.0`
+  ×12, `sourceService`, `get_talent_insights`, `hiringManagerName`), so this is a structural difference
+  and not a live gap — but it is unregistered, and it belongs in `raya/divergences.json` or the
+  headings should be aligned.
+
 ## 2026-09-03 — Signals tool contract documented identically in both languages
 - **Feedback/bug:** the static suite reports a section-count gap between DKB Hindi Signals and DKB
   Kannada Signals every run. Token-by-token comparison of the "Signals backend — what changed" block

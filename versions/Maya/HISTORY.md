@@ -299,3 +299,8 @@
 - **2026-09-07_233409** — `pre-nojobs-count-precondition` — same _(6 files)_
 - **2026-09-07_233427** — `pre-deploy-maya-hi-signals-2026-09-07_233427` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
 - **2026-09-07_233428** — `pre-deploy-maya-hi-out-2026-09-07_233428` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-09-08_120835** — `pre-offlist-named-entities` — VMLG College spoken in Latin on b6353cfb: off the Common-conversions list _(6 files)_
+- **2026-09-08_121631** — `pre-deploy-maya-hi-signals-2026-09-08_121631` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-09-08_121632** — `pre-deploy-maya-hi-in-signals-2026-09-08_121632` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-09-08_121644** — `pre-deploy-maya-hi-out-2026-09-08_121644` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-09-08_121646** — `pre-deploy-maya-hi-in-2026-09-08_121646` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_

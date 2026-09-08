@@ -83,6 +83,103 @@ and the pass condition is one line: after the apply-success line and the service
 bot must read back name, age, gender, role, qualification and area, then ask "सब सही?" — in Kannada,
 "ಎಲ್ಲಾ ಸರಿನಾ?".
 
+### 2026-09-08 — Khushboo r5: a stored value read out in its written form (four bugs, one mechanism)
+
+**Reported.** (1) QA call **5035574**, KKB Hindi Signals: *"Bot is reading out the exact written
+letters/words"* — "एक मिनट। सत्यजीत जी, आप अभी **बी०टेक०(ई०सी०एस)** का काम कर रहे हैं — क्या आप अभी भी
+बी०टेक०(ई०सी०एस) की जॉब देख रहे हैं?" (2) QA call **5061404** = live `7b841e6b` (2026-09-08 06:19 UTC):
+the PIN fix and the latency complaint *"not fixed, please check again"*.
+
+**Root cause — one mechanism behind all of it, and it is not flakiness.** Every script/spelling rule
+in these prompts is backed by a **closed list**. A value on the relevant list is converted; a value
+absent from every list is emitted verbatim. Counted first (CLAUDE.md ladder rung 0): of the ten
+location sentences spoken on `kkb-hi-signals` since 2026-09-04, the five spoken AFTER the 2026-09-07
+PIN fix whose `${location}` was `"Muradnagar, 110045"` were all correct — PIN dropped, Devanagari —
+and the one whose value was `"Sarjapur, 110045"` was passed straight through, Latin script and PIN
+intact. Muradnagar is on Canonical Location Spellings. Sarjapur is not. Same prompt, same rule,
+deterministic split. Three more instances of the same boundary, found while measuring:
+
+| call | argument | what the caller heard | list it was off |
+|---|---|---|---|
+| `7b841e6b` | `location: "Sarjapur, 110045"` | "लोकेशन **Sarjapur, 110045** है" | Canonical Location Spellings |
+| `1536830c` | `company: "SARA ENTERPRISES"` | "मार्केटिंग, **SARA ENTERPRISES** में" | no company list exists |
+| `9d5e9848` | `company: "MAHARAJA ENGINEERING WORKS"` | said verbatim, plus "**Qualification:**" | no company list; the label is the prompt's own |
+| `b6353cfb` | `college_name: "VMLG College"` | "मैं माया, **VMLG College** की ओर से" | Maya "Common conversions" (had LR, TPS, MMH) |
+
+On each of those calls a value that WAS on a list came out right in the same breath — `7b841e6b`
+said गाज़ियाबाद, `02c5f7f0` said "ग्लोबल केमिकल्स" out of `GLOBAL CHEMICALS`. So the rules were being
+obeyed; everything outside the lists was not covered by them.
+
+**Changes.**
+- **The location sentence (2 KKB Signals prompts).** The paragraph opened with *"**Say the sentence as
+  it arrives** — but speak only the PLACE WORDS in it"*: a pass-through permission first, the
+  transformation as a caveat, and the Devanagari instruction eight lines later at the tail of the
+  paragraph. The permission is **deleted** (ladder rung 3 — remove the wrong option, do not forbid the
+  output) and replaced by an ordered precondition: *"a written value is not sayable. Convert it FIRST
+  — drop every digit, then write it in Devanagari — and only then say the sentence."* An off-list place
+  is stated in bold to be the ordinary case, not an exemption, and there is a four-row worked table
+  including `Sarjapur, 110045` → सरजापुर.
+- **The off-list branch (8 KKB + 4 Maya prompts).** `## Named entities` now says every list in the
+  prompt is examples, never an allow-list, with the four failing values worked through. Maya's
+  "Common conversions" gained `VMLG` and `VTU` — checked against production, `college_name` is
+  **`VMLG College` on 345 of 460 cached campaign calls** and `LR College` on 111, so the value the
+  majority of Maya's callers hear was the one on no list.
+- **Maya's samples were teaching the pass-through (D74).** Both worked examples in Maya Hindi and Maya
+  Hindi Signals read `> **Agent:** नमस्ते। मैं माया, **${college_name}** की ओर से…` — the agent
+  demonstrated speaking the raw token — and their Context line was the tautology
+  `**Context:** ${college_name} = ${college_name}.`, which establishes no value at all. Four rules said
+  convert; two demonstrations said copy. The samples now use `LR College` → "एलआर कॉलेज" with a stage
+  direction naming the substitution.
+- **The Latin field label (8 Hindi prompts, 31 occurrences).** `Qualification: [qualification]।` sat
+  inside the Step-3 spoken template and 3-5 sample conversations per file demonstrated saying it. The
+  bot was reading the template correctly. Now `क्वालिफिकेशन:` — which is what the **Kannada twins
+  already had** (`ಕ್ವಾಲಿಫಿಕೇಷನ್:`), so the Hindi files were behind their own mirrors.
+- **A qualification is not a role (12 KKB/Maya prompts).** The role-usability closed set read *"a real
+  trade — NOT 'Any', 'Not Available', empty, null, or garbled"*. `B.Tech(ECS)` is a well-formed,
+  ungarbled string and none of those things, so every arm of the set said it was a usable role and the
+  bot told the caller she currently *works as* a degree. Both enumerations in each file now carry the
+  branch, routing to the existing UNKNOWN path (Step 1 Case B), with the counter-case spelled out: a
+  job title that merely mentions a qualification ("Diploma Engineer", "B.Tech Trainee") IS a trade.
+
+**Complaint 3, latency — measured this time, and it is not the prompt.** `hold_message` is supplied
+on essentially every tool call and **is never played while the tool runs**: across **1,152 calls on all
+18 bots, 348 of 348** tool calls carrying a `hold_message` had **no audio at all** between the tool
+call and the tool result, and on the Signals subset the hold text instead appears at the START of the
+assistant turn *after* the result (208 of 217). So the caller gets silence for the whole round-trip and
+then hears "एक मिनट।" once the wait is already over. 189 of those silent round-trips are `get_profile`,
+which fires at the top of every call — exactly where Khushboo reports the latency being "prominent...
+at the start". This is a runtime behaviour, not a prose problem; escalated with the counts and call
+ids. (Corroboration that the belief was already wrong: `DKB Hindi Signals` documents `hold_message`
+must stay an EMPTY string because "the platform SPEAKS whatever is in it" — someone had noticed the
+stray utterance and worked around it.)
+
+**Files:** 16 conversation prompts — 8 KKB, 4 Maya, 4 DKB (see `Maya/CHANGELOG.md` and
+`DKB/CHANGELOG.md` for their halves). All 16 deployed and read-back verified.
+
+**Analyser:** new patterns **D71** (closed-list script rule), **D72** (field label spoken),
+**D73** (emptiness test missing the absent-argument case), **D74** (a sample whose context defines a
+variable tautologically and whose speech line shows the token). New standing detector
+`raya/regression/spoken_form.py` (12/12 self-test, including two rows that exist because the FIRST
+version of that detector allow-listed "not" and "available" and so passed the DKB placeholder bug
+clean). Six new `fix_presence.py` rows; 22/22 present.
+
+**Verification status.**
+- **PROVEN:** _(pending — see below)_
+- **DEPLOYED, NOT VERIFIED:** the location conversion on an off-list value, the off-list branch, the
+  Maya sample fix, the qualification label, and the qualification-is-not-a-role branch. Fixtures are
+  committed: `raya/testcases/args/r5/sarjapur-offlist.json` (Khushboo's exact failing value plus the
+  12-job payload that also carries `SARA ENTERPRISES` and `MAHARAJA ENGINEERING WORKS`),
+  `maya-vmlg-offlist.json` (the 345-call `VMLG College` value), `dkb-no-company-name.json`. Persona
+  `raya/personas/hi-detail-then-apply.md` drives the deep dive so the company name and the
+  qualification line are both spoken. First dial `23af46f3` reached the bot leg (dur=60, outcome
+  Completed) with an **empty transcript** — the tester DID did not bridge.
+- **NO REPRO for the reported call:** 5035574 could not be located through the Raya API. 1,675 calls
+  were scanned across all 21 registered targets (400-deep on `kkb-hi-signals` and `maya-hi-signals`);
+  no transcript contains the utterance, and of the 37 distinct profile `role` values seen, **none is a
+  degree**. Raya lists **85** agents against the 21 in `raya/agents.json`, so the call is most likely
+  on an unregistered agent. The prompt gap is real and verifiable statically, so the branch was added
+  — but the reproducing call id is still needed to close it.
+
 ### 2026-09-07 — Khushboo r4: PIN read aloud as a quantity, location turn skipped, end-of-call read-back missing
 
 **Reported (calls 5053389 = `8674462f`, 5054799 = `a899617e`, both `kkb-hi-signals`, both

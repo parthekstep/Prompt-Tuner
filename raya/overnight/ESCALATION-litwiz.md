@@ -1,4 +1,4 @@
-# Two platform asks for LitWiz (Raya) — 2026-09-03
+# Three platform asks for LitWiz (Raya) — 2026-09-03, §3 added 2026-09-08
 
 Both block behaviour we cannot fix in the prompt. Each has call ids.
 
@@ -158,6 +158,63 @@ a minor; actions for minors must be completed in the app") fired 13 times, on pr
 said 28 on `af52d37c`). Any caller carrying that default can never apply by phone, and today they are
 told "technical issue" and then offered more jobs that fail identically. That one is for the data
 team.
+
+---
+
+
+## 3. `hold_message` is accepted and never played — it lands AFTER the tool result
+
+**Added 2026-09-08.** This is the concrete cause of the recurring "prominent latency after each turn
+at the start" complaint from QA (reported 2026-09-07 and again 2026-09-08). We had previously told
+Parth latency was not measurable from the API. That was wrong: the per-turn *timing* is not exposed,
+but the per-turn *ordering* is, and the ordering shows the problem.
+
+**What we measured.** Over **1,152 calls across all 18 conversation bots** (every call the API returns
+for each agent), we took every assistant turn that issues a tool call carrying a `hold_message` and
+asked one question: is there any assistant turn with content between that tool call and its tool
+result?
+
+| | count |
+|---|---|
+| tool calls carrying a `hold_message` | **348** |
+| of those, with audio during the tool round-trip | **0** |
+| of those, silent for the entire round-trip | **348** |
+| tool calls with no `hold_message` supplied | 6 |
+
+**348 of 348.** Not one. And the hold text is not lost — on the Signals subset it reappears at the
+**start of the assistant turn after the result**, in **208 of 217** cases:
+
+```
+[assistant → TOOL_CALL] get_profile({"phone_number": "91XXXXXX6073", "hold_message": "एक मिनट।"})
+[tool]                  {...profile...}                     <-- caller hears NOTHING for this whole span
+[assistant]             एक मिनट। खुशी जी, पिछली बार हमारी…    <-- "one minute" arrives after the wait ended
+```
+Live examples: `7b841e6b`, `55a44edb`, `1536830c` (KKB Hindi Signals), `09a7b6c8`, `2c197514`
+(DKB Hindi Signals).
+
+**Why it is felt at the start of the call specifically.** Of the 348 silent round-trips, **189 are
+`get_profile`**, which fires immediately after the greeting on every call. The rest: `apply_job` 88,
+`create_job` 26, `update_profile` 21, `create_profile` 11, `update_job` 5, `get_talent_insights` 4,
+`update_job_details` 3, `update_job_status` 1. So the very first thing a caller experiences is dead
+air for a full API round-trip, followed by a filler phrase telling them to wait for something that
+has already happened.
+
+**Corroboration that this is long-standing.** `DKB Hindi Signals.md` carries the instruction
+*"`hold_message` stays an EMPTY string `""` on every tool call (the platform SPEAKS whatever is in
+it) — DKB uses no spoken 'one moment' filler."* Someone had already noticed the stray post-result
+utterance and worked around it by emptying the parameter — which removes the artifact but leaves the
+silence.
+
+**The ask.** Play `hold_message` as audio when the tool call is issued, not as text prepended to the
+model's next utterance. If that is not feasible, say so explicitly and we will stop supplying it and
+instead script a spoken filler turn before the tool call — but that costs an extra model round-trip,
+so we would rather not.
+
+**Why this is not ours to fix.** The parameter is the platform's mechanism for exactly this purpose;
+the prompt has no other way to emit audio during a tool call, because the tool call and the spoken
+turn are the same turn. We are not asking for a guess at timings — we are reporting that a documented
+parameter has no observable effect in 348 of 348 uses, with the ordering visible in the transcripts
+you serve.
 
 ---
 
