@@ -172,6 +172,20 @@ FIXES = [
                                         "(D64/D71, QA call 5035574; reproducing call id still pending)",
      seeker_conv(), ["never what they DO"], []),
 
+    ("readback-age-gender-in-words", "the read-back template itself says [age] is spoken in words and "
+                                     "[gender] in the target language — 08449995 said "
+                                     "\"ವಯಸ್ಸು 38, Male\", and 8 of 28 read-backs carried a raw "
+                                     "digit or an English enum (D71 at the point of use)",
+     [f for f in seeker_conv() if "Signals" in os.path.basename(f)],
+     ["come off the profile as a NUMBER and an English enum"], []),
+
+    ("dkb-salary-in-words", "the DKB posting recap itself says [num_vacancies] and [salary] are "
+                            "spoken in words — 56 of 389 salary lines fleet-wide used digits, almost "
+                            "all on this one template",
+     DKB_SIGNALS + [os.path.join(REPO, "DKB", "DKB Hindi.md"),
+                    os.path.join(REPO, "DKB", "DKB Kannada.md")],
+     ["arrive as DIGITS and are spoken in WORDS"], []),
+
     ("brackets-are-slots-not-speech", "every conversation prompt says a [slot] marker is filled, "
                                       "never spoken — 13 live calls read one out, including two that "
                                       "said '[UUID from create_profile result]' to a caller (D77)",

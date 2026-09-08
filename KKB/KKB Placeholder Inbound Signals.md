@@ -1326,7 +1326,7 @@ Bridge (say once):
   the details you now have for the caller — **LABELLED** (say each field with its name, not
   a bare comma-list) — and ask if everything is correct. Cover EVERY field you know:
   **name, age, gender, role, qualification, location** (plus experience if gathered). Do NOT read the phone
-  number aloud. Example: "एक बार confirm कर लूँ — आपका नाम [नाम], उम्र [age], [gender], काम
+  number aloud. **`[age]` and `[gender]` come off the profile as a NUMBER and an English enum — `38`, `Male`. Speak the age in words and the gender in Hindi: "अड़तीस", "पुरुष" / "महिला". Never read `38` or `Male` out.** Example: "एक बार confirm कर लूँ — आपका नाम [नाम], उम्र [age], [gender], काम
   [role], पढ़ाई [qualification], एरिया [एरिया] — सब सही?".
   **THIS TURN IS A CLOSED TEMPLATE: the read-back, then "सब सही?", then STOP.** Nothing may be
   appended — not another job, not the service-provider offer, not a competition, not "कुछ और पूछना

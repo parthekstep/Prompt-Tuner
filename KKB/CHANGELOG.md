@@ -83,6 +83,42 @@ and the pass condition is one line: after the apply-success line and the service
 bot must read back name, age, gender, role, qualification and area, then ask "सब सही?" — in Kannada,
 "ಎಲ್ಲಾ ಸರಿನಾ?".
 
+### 2026-09-08 (late) — the overnight suite found two more instances of the same class: the read-back's age/gender, and DKB's salary
+
+**Found by `run_runtime_checks.sh` over 356 calls since 2026-09-06, not reported.** Both are the
+point-of-use pattern again, and both were measured before anything was edited.
+
+**1 — the read-back reads `age` and `gender` straight off the profile.** On `08449995`
+(`kkb-kn-signals`) the confirmation line was **"ನಿಮ್ಮ ಹೆಸರು ಸಂತೋಷ್, ವಯಸ್ಸು 38, Male, ಕೆಲಸ ಕಸ್ಟಮರ್
+ಸರ್ವಿಸ್ ಎಕ್ಸಿಕ್ಯೂಟಿವ್…"** — the age as an ASCII numeral and the gender as the stored English enum
+value, inside a Kannada sentence. **8 of 28 read-backs carried a raw digit or an English enum.**
+
+The prompts already require numbers in words and everything spoken in the target script, in the TTS
+section. The read-back template — `उम्र [age], [gender]` / `ವಯಸ್ಸು [age], [gender]` — says nothing,
+and `[age]`/`[gender]` are exactly the two slots whose values arrive as `38` and `Male`.
+**Change:** the template now carries the conversion on its own line — the age in words, the gender in
+Hindi/Kannada, never `38` or `Male`. Six Signals prompts.
+
+**2 — DKB's posting recap speaks the salary in digits.** `सैलरी १२,०००`, `सैलरी 30,000`,
+`सैलरी 2000` — **56 of 389 salary lines fleet-wide, almost all of them on this one template**
+(`0eb3fc72`, `12dc1466`, `2c197514`, `46812a71`, `48a2fcf3`, `5596030a`, `adfe8052`, `b1b71d68`,
+`b3e2de52`, `be2808cc` …). Interestingly `[num_vacancies]` on the same line usually DOES convert
+("दो vacancies"), which is what a two-digit number does naturally and a five-digit one does not.
+**Change:** the recap line now states that both arrive as digits and are spoken in words, with
+`12000` → "बारह हज़ार" and `20000-25000` → "बीस हज़ार से पच्चीस हज़ार" worked through, and the Kannada
+twin in Kannada. Four DKB prompts.
+
+**Files:** 6 KKB/Maya Signals prompts (read-back), 4 DKB prompts (recap). Heading parity intact.
+`fix_presence` rows `readback-age-gender-in-words` and `dkb-salary-in-words`. **DEPLOYED, NOT
+VERIFIED** — the read-back needs a call that reaches the end of a successful apply, and DKB has had
+no engaged traffic since 2026-09-04, so it needs a dial.
+
+**This is the third and fourth instance of D71 found today, all of them the same shape:** the general
+rule exists and sits far from the template that consumes the value. The company names, the
+qualification label, the read-back's age and gender, and DKB's salary were all stated correctly
+somewhere else in the prompt. TRRAIN, which states its one conversion on the line that speaks the
+value, leaked nothing across 98 calls.
+
 ### 2026-09-08 (late) — the location sentence names the WRONG PLACE on a third of the calls it is spoken on; the company fix is verified
 
 **The company-name fix is PROVEN, with a clean before/after.** Same fixture, same persona, twelve

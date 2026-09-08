@@ -1557,7 +1557,7 @@ Bridge (say once):
   the details you now have for the caller — **LABELLED** (say each field with its name, not
   a bare comma-list) — and ask if everything is correct. Cover EVERY field you know:
   **name, age, gender, role, qualification, location** (plus experience if gathered). Do NOT read the phone
-  number aloud. Example: "ಒಂದ್ಸಲ ಕನ್ಫರ್ಮ್ ಮಾಡ್ತೀನಿ — ನಿಮ್ಮ ಹೆಸರು [ಹೆಸರು], ವಯಸ್ಸು [age], [gender],
+  number aloud. **`[age]` and `[gender]` come off the profile as a NUMBER and an English enum — `38`, `Male`. Speak the age in Kannada words and the gender in Kannada: "ಮೂವತ್ತೆಂಟು", "ಪುರುಷ" / "ಮಹಿಳೆ". Never read `38` or `Male` out — live call `08449995` said "ವಯಸ್ಸು 38, Male".** Example: "ಒಂದ್ಸಲ ಕನ್ಫರ್ಮ್ ಮಾಡ್ತೀನಿ — ನಿಮ್ಮ ಹೆಸರು [ಹೆಸರು], ವಯಸ್ಸು [age], [gender],
   ಕೆಲಸ [role], ಓದು [qualification], ಏರಿಯಾ [ಏರಿಯಾ] — ಎಲ್ಲಾ ಸರಿನಾ?".
   **THIS TURN IS A CLOSED TEMPLATE: the read-back, then "ಎಲ್ಲಾ ಸರಿನಾ?", then STOP.** Nothing may be
   appended — not another job, not the service-provider offer, not "ಬೇರೆ ಏನಾದ್ರೂ ಕೇಳಬೇಕಾ?". The caller has
