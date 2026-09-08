@@ -158,6 +158,13 @@ FIXES = [
                                         "(D64/D71, QA call 5035574; reproducing call id still pending)",
      seeker_conv(), ["never what they DO"], []),
 
+    ("company-converted-at-point-of-use", "the job-presentation format itself says [role]/[company]/"
+                                          "[location] arrive in Latin and are converted — the "
+                                          "Devanagari rule was stated five times elsewhere and the "
+                                          "payload still went out raw, 5x in one call (D71, ea0477f4, "
+                                          "90658584)",
+     seeker_conv(), ["arrive from `${recommendations}` in LATIN script"], []),
+
     ("maya-collegename-only-decides", "ONLY the college_name value line picks Maya's opener — the bare "
                                       "string 'Not Available' in `contact_memory` was satisfying branch B, "
                                       "so branch A fired 48/48 on maya-hi-out and 2/14 on maya-hi-signals "

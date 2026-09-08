@@ -559,3 +559,13 @@
 - **2026-09-08_121639** — `pre-deploy-kkb-kn-out-2026-09-08_121639` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(10 files)_
 - **2026-09-08_121641** — `pre-deploy-kkb-hi-in-2026-09-08_121641` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(10 files)_
 - **2026-09-08_121643** — `pre-deploy-kkb-kn-in-2026-09-08_121643` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(10 files)_
+- **2026-09-08_194356** — `pre-deploy-kkb-hi-signals-slim-2026-09-08_194356` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Hindi Signals.md _(10 files)_
+- **2026-09-08_195116** — `pre-company-pointofuse` — ea0477f4 spoke SARA ENTERPRISES / BayLink / GLOBAL CHEMICALS raw, 5x in one call _(10 files)_
+- **2026-09-08_195132** — `pre-deploy-kkb-hi-signals-2026-09-08_195132` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
+- **2026-09-08_195142** — `pre-deploy-kkb-kn-signals-2026-09-08_195142` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada Signals.md _(10 files)_
+- **2026-09-08_195146** — `pre-deploy-kkb-hi-in-signals-2026-09-08_195146` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Signals.md _(10 files)_
+- **2026-09-08_195150** — `pre-deploy-kkb-kn-in-signals-2026-09-08_195149` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada Signals.md _(10 files)_
+- **2026-09-08_195210** — `pre-deploy-kkb-hi-out-2026-09-08_195210` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi.md _(10 files)_
+- **2026-09-08_195222** — `pre-deploy-kkb-kn-out-2026-09-08_195222` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada.md _(10 files)_
+- **2026-09-08_195231** — `pre-deploy-kkb-hi-in-2026-09-08_195230` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound.md _(10 files)_
+- **2026-09-08_195236** — `pre-deploy-kkb-kn-in-2026-09-08_195236` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada.md _(10 files)_

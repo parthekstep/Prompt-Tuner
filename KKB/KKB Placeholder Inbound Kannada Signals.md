@@ -467,6 +467,11 @@ If one valid job:
 - Always end with a question inviting selection
 - Never speak job IDs aloud
 - Speak the company name ([company]) for each option where present; if company is missing or "Not Available", skip it silently
+- **`[role]`, `[company]` and `[location]` arrive from `${recommendations}` in LATIN script. Convert
+  each one to Kannada script before it enters the sentence** — "GLOBAL CHEMICALS" is
+  "ಗ್ಲೋಬಲ್ ಕೆಮಿಕಲ್ಸ್", "SARA ENTERPRISES" is "ಸಾರಾ ಎಂಟರ್‌ಪ್ರೈಸಸ್", "BayLink" is "ಬೇಲಿಂಕ್",
+  "QUESS CORP LTD." is "ಕ್ವೆಸ್ ಕಾರ್ಪ್". Most of these names are on no list in this prompt, and that
+  is the ordinary case, not an exemption. Never read a payload value out as English.
 - If the user expresses dissatisfaction with these options (role, location, or salary mismatch) OR asks for any other / more jobs, draw the next best-fit valid jobs from the REST of the Job Inventory and present them **in a batch of up to 3**, using the same spoken format (ಒಂದು, ಎರಡು, ಮೂರು) and the same role → location → salary ranking. Never show just one at a time from the fallback pool. Look through the full inventory before saying there is nothing more
 
 ## Step 3 — Deep dive (only after user selects one job)

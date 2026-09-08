@@ -65,6 +65,51 @@ tool round-trip, 189 of them `get_profile`, which fires at the top of every call
 `ESCALATION-litwiz.md` §3). So before spending more on characters, `ab_compare.py` should say
 whether 68k is measurably faster than 219k at all.
 
+## A/B results — 10 calls, 5 per side, same fixture and persona
+
+Run alternating so line conditions hit both sides.
+
+| | median s per agent turn | turn counts | applies | invariant failures |
+|---|---|---|---|---|
+| fat, 219,518 chars | **16.00** | 14, 6, 18, 16, 16 | 6 | 7 |
+| slim, 68,744 chars | **14.75** | 12, 12, 70, 17, 10 | 4 | 5 |
+
+**A 69% prompt cut bought about 7% per turn.** The fat bot's figure is strikingly consistent across
+calls of very different lengths — 16.0, 16.0, 16.5, 16.06, 13.44 — which says the metric is measuring
+something real and that the per-turn cost is nearly independent of how long the call is. Slim's set
+contains one 70-turn outlier at 4.43 s/turn; excluding it the median is 14.97, so the conclusion does
+not rest on it.
+
+That is not the step change a 219k → 50k target implies, and it is consistent with the measured
+cause: `hold_message` is never played, so **348 of 348** tool calls sit in silence for a whole API
+round-trip whatever the prompt length (`ESCALATION-litwiz.md` §3).
+
+### Quality: the two prompts fail on the same things, at similar rates
+
+Both sides produced the same failure classes. **This corrected a conclusion I had drawn from a single
+call.** After the first run I recorded that slim had regressed on speaking payload company names
+raw, because slim's `90658584` did it and the fat prompt had got it right on `02c5f7f0`. The second
+run's fat call `ea0477f4` then did it **five times in one call** — `SARA ENTERPRISES`, `BayLink`,
+`GLOBAL CHEMICALS` — so it is a shared bug of both prompts and not a cost of the rewrite.
+
+| failure | fat | slim |
+|---|---|---|
+| payload value spoken in Latin | `ea0477f4` (×5) | `90658584` (×3), `f90a0b97` (×1, a salary in digits) |
+| ordinals restarted at पहला | `09978532` | `4d6d4d02` (four restarts) |
+| introduction spoken twice | `891ff246` | — |
+| caller's place substituted in the location sentence | `1450f797` (गाज़ियाबाद) | `8eb83bc2` (साहिबाबाद) |
+
+**What that means for the rewrite.** The 219k of extra prose is not buying adherence on any of the
+classes the harness can see. It also is not the *cause* of them: the location substitution and the
+company-name leak occur at the same rate on both. Both findings point the same way — these are
+mechanism problems (a competing instruction, a rule stated nowhere near the line that consumes the
+value), and neither more prose nor less changes them.
+
+The company-name leak has since been fixed the way D71 says to fix this class — the conversion is now
+stated **at the point of use**, in the job-presentation format itself, in all 12 KKB/Maya prompts and
+in the slim prompt. That is the one place the rule was never stated, despite being stated five times
+elsewhere. Both sides need re-dialling to confirm it.
+
 ## Running the comparison
 
 ```
