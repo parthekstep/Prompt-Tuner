@@ -82,8 +82,10 @@ rest — were added on the agent and never filed. Overwriting the shared file wo
 slim-only fields onto the other KKB bots, so the live version was adopted into
 **`KKB-Slim/KKB Slim Output.md`** and the path map in `CLAUDE.md` now points there for this agent.
 
-**Reading note for anyone scripting against the API:** the call record field is **`call_output`**, not
-`output_variables`. Both names appear in our scripts; only `call_output` is populated.
+**Reading note for anyone scripting against the API:** the call record field is **`call_output`**.
+`output_variables` reads as empty on every call and is not a fallback — a throwaway script of mine
+used it tonight and reported "no metrics" on calls that had all 31. Every script and skill in the
+repo already uses `call_output` correctly, so nothing here needed changing.
 
 ### STILL OPEN
 
