@@ -27,7 +27,8 @@
    "sync_family": "KKB · outbound+inbound · signals (Kannada Signals pair)",
    "targets": [
     "kkb-kn-signals",
-    "kkb-kn-in-signals"
+    "kkb-kn-in-signals",
+    "kkb-kn-signals-slim"
    ],
    "files": [
     "KKB/KKB Placeholder Kannada Signals.md",
@@ -68,7 +69,7 @@
      ]
     }
    ],
-   "why": "Feature request from the owner: the KKB Kannada bots should be called Maya and state that name in their introduction. Applied to the Kannada Signals pair ONLY, at the owner's explicit instruction -- the Hindi Signals twins and BOTH legacy Kannada bots keep the institution-only intro with no personal name. For this pair the normal 'Hindi is source of truth, mirror to Kannada' rule was consciously suspended for a language-specific persona choice. A /sync-check WILL see a persona-line, opening-line and intro-turn-rule difference between KKB Hindi Signals and KKB Kannada Signals: that is EXPECTED, not drift. ('Maya' is also the name of the separate Maya agent -- Hindi-only, UP campus recruitment, ${college_name}. Different agents, different prompts, different uuids; the shared first name is intentional and has no functional coupling.)",
+   "why": "Feature request from the owner: the KKB Kannada bots should be called Maya and state that name in their introduction. Applied to the Kannada Signals pair ONLY, at the owner's explicit instruction -- the Hindi Signals twins and BOTH legacy Kannada bots keep the institution-only intro with no personal name. For this pair the normal 'Hindi is source of truth, mirror to Kannada' rule was consciously suspended for a language-specific persona choice. A /sync-check WILL see a persona-line, opening-line and intro-turn-rule difference between KKB Hindi Signals and KKB Kannada Signals: that is EXPECTED, not drift. ('Maya' is also the name of the separate Maya agent -- Hindi-only, UP campus recruitment, ${college_name}. Different agents, different prompts, different uuids; the shared first name is intentional and has no functional coupling.) Extended 2026-09-10 to the Kannada SLIM twin (kkb-kn-signals-slim): the slim bots are latency A/B twins of the production bots, so the Kannada slim must speak with the same persona name as the Kannada bot it is being compared against — otherwise the A/B measures two different bots.",
    "approved_by": "Parth (owner) — explicit instruction",
    "approved_on": "2026-08-04",
    "changelog_ref": "KKB/CHANGELOG.md → '2026-08-04 — KKB Kannada SIGNALS bots: introduce as \"ಮಾಯಾ\" (Maya)'",
@@ -182,6 +183,54 @@
    "registered": "2026-08-28",
    "last_reviewed": "2026-09-02",
    "_note_2026_09_02": "Ported to Kannada Signals on 2026-09-02 at Parth's request. The Kannada twin now carries the same Location step (Turn A two-slot sentence, Turn B asked once ever, nearest_landmark skip, never-answer-your-own-question) with Kannada spoken lines and its OWN canonical spellings for the Dharwad/Hubballi inventory. Raya has derived `location` into kkb-kn-signals' agent_args; the campaign must actually SEND it, otherwise the input is EMPTY and the step degrades to the open area lines (analyser G3) — that is the pre-existing behaviour, so no regression, but the reconfirm stays inert until the campaign passes it. The INBOUND Signals twins still do NOT have this step."
+  },
+  {
+   "id": "kkb-slim-location-pin-capture",
+   "bot": "KKB-Slim",
+   "sync_family": "KKB-Slim · outbound · signals (Hindi/Kannada slim pair)",
+   "targets": [
+    "kkb-hi-signals-slim",
+    "kkb-kn-signals-slim"
+   ],
+   "master_language": "hi",
+   "languages_affected": [
+    "hi",
+    "kn"
+   ],
+   "direction": "both-differ",
+   "scope": [
+    {
+     "section": "Inputs → contact variables",
+     "kind": "input-variable",
+     "what": "BOTH slim twins declare the `location` input (${location}) and the Location precedence rules. The Kannada PRODUCTION bot (kkb-kn-signals) does NOT receive that variable — see kkb-hi-signals-location-capture — so the Kannada slim is deliberately ahead of its own production twin here.",
+     "contains": [
+      "${location}",
+      "Location precedence"
+     ]
+    },
+    {
+     "section": "5 — Orient, then the location turn → Turn B (the pin code)",
+     "kind": "rule",
+     "what": "Both slim twins carry the three-turn location step: A confirm the place, B confirm/ask the 6-digit PIN spoken digit-by-digit, C the landmark. No other bot in the fleet has the pin turn yet.",
+     "contains": [
+      "Turn B — the pin code",
+      "pin code",
+      "pin_code"
+     ]
+    }
+   ],
+   "why": "The location + PIN capture work is the team-mandated proximity pilot (tracker rows 22/35: 'pass what we have, confirm it, capture simple markers (landmark / PIN / locality)'). It was built and verified on the Hindi slim bot first, then carried to the Kannada slim when that bot was created on 2026-09-10, because the slim pair is an A/B set that has to be identical in behaviour to be comparable. The production Kannada bot still has no `location` input, so a /sync-check between kkb-kn-signals and kkb-kn-signals-slim will legitimately differ here.",
+   "approved_by": "Parth (explicit instruction, 2026-09-10: fix the location/pin issue, then create a slim Kannada version)",
+   "approved_on": "2026-09-10",
+   "changelog_ref": "KKB-Slim/CHANGELOG.md — 2026-09-10 'Kannada slim twin created' + '2026-09-10 location pin turn'",
+   "still_must_match": "Everything else in the slim pair: the six laws, the call order, all tool contracts and payloads, the consent flag gate and record_consent rules, the readiness/apply logic, the post-apply topics and the read-back template. Only the two scoped items above may differ from the production Kannada bot, and NOTHING may differ between the two slim twins themselves.",
+   "not_applied_to": [
+    "kkb-kn-signals",
+    "kkb-hi-in-signals",
+    "kkb-kn-in-signals",
+    "maya-hi-signals",
+    "maya-hi-in-signals"
+   ]
   }
  ]
 }

@@ -80,6 +80,31 @@ has still happened today. **The confirmation line should be emitted by the runti
 `apply_job` success, not composed by the model** — that is the only version of this that cannot be
 fabricated.
 
+### Update 2026-09-09 — a post-fix occurrence, and the prose guard has now failed six times
+
+Tonight we removed the last thing the prompt could have been imitating: the guard against speaking
+stage directions had been QUOTING the forbidden string verbatim (`*(Silent tool call: apply_job)*`),
+in both the rule and its own evidence citation. That string is now gone from all 21 prompts.
+
+**It did not fix this.** Call `6acd1397` (kkb-kn-out, 2026-09-09, after the deploy) contains no stage
+direction at all — and still said **"ಅಪ್ಲೈ ಆಗಿದೆ"** at turn 23 with **zero tool calls on the entire
+call**. Not `apply_job`, not `get_profile`, nothing. The tools are correctly configured on that agent
+(`get_profile`, `apply_job`, `create_profile` all present in its config).
+
+Occurrences of the same failure: `29c4f152`, four calls on 2026-09-03, `910b2d29`, `e4e81fe2`,
+`6acd1397`. **Eight.** The prompt states the rule about as directly as language allows — "never speak
+the apply-success line unless a successful `apply_job` result is in front of you in this turn" — and
+adds that emitting a description of a tool call does not call the tool.
+
+Measured rate across all recent traffic: **45 of 254 real conversations made zero tool calls (18%)**,
+and **4 of 254 claimed an apply anyway (1.6%)** — kkb-hi-signals, kkb-hi-in, kkb-kn-out, maya-hi-out.
+Most of the 18% is DKB, where a call that never reaches a posting legitimately calls nothing.
+
+We have exhausted the prompt side and we are not going to add a ninth wording. The ask in §1 stands
+and is now the only remaining route: **the runtime should emit the apply-confirmation line, on a real
+tool result.** A sentence that asserts a state change should not be something the model can produce
+without the state change having happened.
+
 ## 2. Surface the tool error reason to the model
 
 **The bug.** The agent cannot tell "you have already applied" from "this failed for a technical
@@ -334,3 +359,154 @@ false failure is not an improvement; it just moves who gets hurt.
 This is why the ask is a runtime one. The runtime is the only place that knows, with certainty,
 whether the write happened — and a confirmation spoken from that knowledge cannot be wrong in either
 direction. Everything a prompt can do here is a guess about what the model can see.
+
+---
+
+## 5. We need a way to clear a contact's memory store (added 2026-09-09)
+
+**The bug.** `dkb-hi-signals` announced the same fabricated posting on **eight consecutive calls**,
+byte-identical every time — a role and a salary that were never supplied — while the arguments
+carried different values (`job_role: "Sales"`, `salary: "30000"`, and on one call every field
+`"Not Available"`).
+
+Calls: `714ebfc0`, `cc1b0ecc`, `965f9d06`, `dfaf30eb`, `90bd2e80`, `71c66134`, `0c870680`,
+`9ba6186a`.
+
+**What we ruled out, in order, each with a deploy and a live call after it:**
+
+| # | hypothesis | change made | result |
+|---|---|---|---|
+| 1 | worked example values printed beside the template | stripped them from 18 prompts | unchanged |
+| 2 | no rule saying the argument beats memory | added at the point of use, 4 prompts | unchanged |
+| 3 | the remembered value did not read as historical | date-stamped `budget_per_hire` in the memory prompt | unchanged |
+| 4 | our own evidence note quoted the bad sentence | removed the verbatim quote | unchanged |
+| 5 | `roles_posted` stored the posting itself | changed to store a COUNT, all 4 agents | unchanged |
+
+The sentence does not appear in any prompt — verified against the LIVE instructions, not the repo
+copy. `contact_memory` is **absent from `agent_args`** on every one of those calls, and
+`memory_enabled` is true.
+
+**What we think is happening.** Fix 5 changes what the memory prompt WRITES from now on. It cannot
+touch what is already in the store. Entries written before the fix are still there and are still
+being injected, and the store keeps winning over the arguments.
+
+**What we need.** Either an endpoint to clear (or read) a contact's memory for an agent, or
+confirmation of how long entries persist and whether a write replaces or appends. We probed
+`/api/memory`, `/api/contact`, `/api/contacts`, `/api/contact_memory`,
+`/api/agent/{id}/memory` and `/api/agent/{id}/contacts` — all 404. Without one of those we cannot
+verify any memory-related fix, because every test call reads a store we cannot inspect or reset.
+
+**Note on the equivalent KKB bug**, for contrast: the same field shape
+(`last_options_presented`) caused the same failure on the seeker bots, and the same fix verified
+clean on the second call (`7bf46d06`, 1 job supplied and 1 offered, after a 12-job call). So the
+memory-prompt lever DOES work — which is why the DKB case reads as stale store contents rather than
+a wrong rule.
+
+### PROVEN 2026-09-09 — memory OFF makes the same call correct
+
+`59a87113`, same agent, same fixture, same arguments, `memory_enabled: false`:
+
+> "आपकी एक posting है — **सेल्स**, दो vacancies, सैलरी **तीस हज़ार**"
+
+`job_role: "Sales"` spoken as "सेल्स", `salary: "30000"` spoken as "तीस हज़ार", and with
+`company_name` absent it took the no-name branch instead of greeting with an earlier caller's
+business. **Every field correct.** One call with memory off, against eight byte-identical wrong
+calls with it on.
+
+That closes the diagnosis: the prompts are right, the memory STORE contents are the bug, and the
+five prompt-side fixes could never have worked because they only affect what is written from now on.
+`memory_enabled` has been restored to `true` — turning it off is a product decision, not ours.
+
+**The ask is now specific:** clear the stored memory for this contact/agent pair, or give us an
+endpoint to do it. Every DKB memory test until then reads a store polluted by earlier calls.
+
+**Likely lower severity for real owners than these numbers suggest**, and worth saying: our tester
+DID has been used across many different businesses, so its store holds several owners' postings. A
+real owner's store holds only their own, where remembering the last posting is closer to correct
+than wrong. The mechanism is proven; the production blast radius is probably smaller than 8/8.
+
+### 2026-09-09 — the fabricated apply is now ISOLATED: three causes tested and ruled out
+
+The claim "you have been applied" with **zero tool calls on the entire call** survives all three
+things it could plausibly have been. Each was tested with a deploy and a live call after it:
+
+| hypothesis | test | result |
+|---|---|---|
+| the memory store licenses the claim (`jobs_applied` makes the model believe an application exists) | `memory_enabled: false` on kkb-kn-out | `557fbeb0` — still claimed it, still zero tools |
+| the bot narrates the tool call instead of making it, and the narration substitutes for the call | removed the marker form from the rule | `2126a5bc` — still narrated, still claimed it |
+| the SAMPLES demonstrate a speech-shaped stage direction the model reproduces | converted all 151 `*(NOT SPOKEN …)*` annotations to `INTERNAL:` lines | `f31e1587` — **narration and the phone-number leak are GONE**, and the claim REMAINS with zero tools |
+
+That last row is the useful one: it fixed a real caller-facing privacy leak and proved the two
+behaviours are independent. The fabricated claim is not a side effect of the narration.
+
+So what is left is exactly what §1 asks for: the model emits a sentence asserting a state change
+without the state change having happened, and no prompt-side construct we have found prevents it.
+Latest occurrence `f31e1587`, 2026-09-09, on a prompt with the guard stated, the demonstration
+removed, and memory irrelevant.
+
+### 2026-09-09 — the already-applied line: four mechanisms, one clean test, no movement
+
+`5bbb6ca1` is the test we had been unable to construct all night: `apply_job` invoked once,
+`ACTION_LIMIT_REACHED` returned, and every prompt-side lever live on that agent at the same time.
+
+The bot said the generic failure line — "इस जॉब के लिए अप्लाई अभी पूरा नहीं हो पाया" — **three times.**
+The caller has an application and was told the apply had not gone through.
+
+What was live on that agent when it did that:
+
+1. Row 1's condition names `ACTION_LIMIT_REACHED` explicitly, and has for weeks.
+2. The generic failure row was rewritten tonight to EXCLUDE `ACTION_LIMIT_REACHED` and the duplicate
+   case in so many words — "Those go to Row 1 and this row does NOT apply to them."
+3. The `apply_job` tool description was corrected tonight from "an error whose reason you usually
+   CANNOT read" to "an error NAMING its reason in `"error":"..."` - READ IT. ACTION_LIMIT_REACHED
+   ... means the caller ALREADY APPLIED: say so plainly, never call it a failure."
+4. There is now exactly ONE generic failure line, so there is no second wording competing.
+
+Measured rate, unchanged: **4 of 34 calls (12%)** get the correct line when `ACTION_LIMIT_REACHED`
+comes back. `ESCALATION-litwiz.md` §1 framed the same thing as 45 of 60.
+
+One observation that may help you: the 4 that DO get it right are all INBOUND agents, which arrive
+with empty `agent_args` and therefore no `${recommendations}` in context. Every failure is on an
+agent carrying a job array. That is a context-competition pattern, not a wording problem, and it is
+not something we can fix from the prompt.
+
+**We are done trying on our side.** Four mechanisms, each deployed and each tested against a live
+call that reached the condition. This needs the runtime to select the line off the tool result.
+
+### 2026-09-09 — BOTH routes to the already-applied line fail independently
+
+Row 1 has two documented routes and neither works. That is the complete picture, and it is why we
+cannot fix this from the prompt.
+
+**Route A — the duplicate pre-check.** Reads `jobs_applied` out of `${contact_memory}` and is
+supposed to prevent the redundant apply entirely. Two separate failures:
+- the array is almost always empty — non-empty on **2 of 76** calls that carried it, because the
+  memory prompt never said a successful `apply_job` result is what writes it (now fixed);
+- and it does not fire even when the array IS populated. On `7f2e3928` we injected
+  `contact_memory` with `jobs_applied: ["2026-09-08: Field Salesperson, Shree Krishna Industrie,
+  Ghaziabad"]` and put that same job in `${recommendations}`. The agent called `apply_job` anyway.
+
+**Route B — recognising the error name.** `ACTION_LIMIT_REACHED` in the tool result. Succeeds on
+**4 of 34** calls (12%), and all 4 are inbound agents with empty `agent_args`. Four prompt-side
+mechanisms were deployed against it and each failed against a live call (`6caf1fbe`, `513a1d01`,
+`5bbb6ca1`).
+
+So: the prevention path ignores memory it is told to read, and the recovery path ignores an error
+name it is told to read. Both are stated plainly in the prompt and in the tool description. We have
+no further lever.
+
+**One more data point that closes it.** `ff6accc0`, immediately after the successful apply on
+`7f2e3928`: `apply_job` called again, `ACTION_LIMIT_REACHED` returned — so the application really
+was on record — and the agent still spoke the generic failure line. On that call `contact_memory`
+was absent from `agent_args` entirely, so the only memory channel is the platform store, which we
+cannot read.
+
+Net: we can neither observe what memory holds nor make either route fire. Three specific asks, in
+priority order:
+
+1. **The runtime should select the apply-outcome line from the tool result** (this is §1). A
+   sentence asserting a state change should not be producible without the state change.
+2. **An endpoint to read and clear a contact's memory store** (this is §5). Without it, no
+   memory-related fix on any bot can be verified — we hit this on DKB too.
+3. Confirmation of whether the duplicate pre-check is expected to work at all, given it ignored a
+   `jobs_applied` entry naming the exact job in `${recommendations}` on `7f2e3928`.

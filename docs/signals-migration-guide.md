@@ -136,6 +136,50 @@ and ignored** — they do not make a profile live. Live payload template (as dep
 - **Localise `languageSpoken`** per bot: `["Kannada"]` for KKB-Kn, `["Hindi"]` for
   Hi bots, etc.
 
+### A.2b Consent on an EXISTING profile — `record_consent` (verified 2026-09-09)
+
+The same endpoint updates when an `item_id` is supplied, and an update **may carry the `compliance`
+array** — that is how consent is recorded for a caller who already has a profile:
+
+```jsonc
+POST /api/v1/admin/participant
+{
+  "item_id": "<live seeker item_id>", "item_type": "profile_1.0",
+  "domain": "seeker", "channel": "voice", "network": "blue_dot",
+  "age": <known>, "name": "<known>", "phone_number": "+91XXXXXXXXXX",
+  "compliance": [
+    { "key": "user_terms",       "value": true },
+    { "key": "user_privacy",     "value": true },
+    { "key": "profile_creation", "value": true }
+  ],
+  "item_state": { "age": <known>, "name": "<known>", "phone": "91XXXXXXXXXX" }
+}
+```
+
+Curl-grounded facts:
+
+| probe | result |
+|---|---|
+| update POST with `compliance` all-true | **200**; the `item_state` merge keeps every other field |
+| update POST with `compliance` `false` | **400 `CONSENT_DECLINED`** — *"consent cannot be declined — omit a key to skip it"* |
+| `create_profile` on a participant with 5 seeker profiles | **409 `PROFILE_LIMIT_REACHED`** — *"maximum of 5 seeker profile(s) allowed"* |
+
+Two consequences worth planning around:
+
+- **Consent is write-once-true.** It can never be un-set through the API, so a false-flag fixture
+  **cannot be manufactured** — and since a compliance-less item is necessarily `draft`, the state
+  "live profile + a false consent flag" cannot be constructed from our side at all. Testing the
+  false branch of a consent gate needs a record provisioned by the data team.
+- **This must NOT go into `update_profile`.** Its payload template is fixed, so a `compliance` array
+  inside it would assert consent on every gender/location/role write, asked or not. It belongs in a
+  separate tool called only after the caller says yes — `raya/toolspecs/record_consent.json`, added
+  with `scripts/raya_tooladd.py`.
+
+**What `get_profile` actually returns** (probed live, same date): `{ user_id, user_consent, items }`,
+with `user_consent = { terms_accepted, privacy_accepted, has_age }` at the participant level and a
+`profile_consent_accepted` boolean on each item. Apply consent has no stored flag at all — it rides
+in `apply_job`'s payload as `consent: { version: 1, acknowledged: true }`, per action.
+
 ### A.3 `apply_job` — submit application (POST)
 
 ```

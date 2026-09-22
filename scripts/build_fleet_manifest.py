@@ -28,6 +28,7 @@ OUT = os.path.join(REPO, "raya", "regression", "fleet.json")
 # folder is not listed lands in "unassigned" and is reported, never silently dropped.
 PROJECTS = {
     "KKB": "blue-dots",
+    "KKB-Slim": "blue-dots",
     "DKB": "blue-dots",
     "Maya": "blue-dots",
     "TRRAIN": "blue-dots",

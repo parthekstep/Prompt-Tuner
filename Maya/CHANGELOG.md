@@ -798,3 +798,131 @@ string the model never receives), **D53** (an input echo-back suppressed by a gu
 - **Ported from:** KKB / TRRAIN (2026-09-03).
 - **Analyser:** D50 addendum.
 - **Status:** VERIFY-PENDING.
+
+## 2026-09-09 — apply-failure table had no row for a NAMED non-duplicate error
+- **Feedback/bug:** the apply-failure table routed every non-duplicate error into Row 2, "you cannot
+  tell why it failed", whose line asserts a cause: "अप्लाई अभी आगे नहीं बढ़ा है, technical issue है".
+  But the tool result DOES name the error — `__RAYA_TOOL_DEBUG__` carries a
+  `response_body_excerpt` with `"error":"..."`, and 67 of 73 observed apply failures name it. So on
+  `MINOR_ACTION_CHANNEL_BLOCKED` (an age/channel policy block, not a fault) the bot told 5 callers
+  there was a technical issue — a claim the prompt had licensed and that was false. Calls
+  `5a1c0c77` (kkb-hi-signals), `1715a207` (kkb-kn-signals), `05a4b394` (kkb-kn-in-signals),
+  `2cb97508` (maya-hi-signals, `TARGET_ITEM_NOT_FOUND`), `b9629043` (`USER_NOT_FOUND`).
+- **Change:** inserted a new row BEFORE the catch-all — a named error that is not
+  `ACTION_LIMIT_REACHED` gets a line that asserts only that the apply did not complete:
+  "इस जॉब के लिए अप्लाई अभी पूरा नहीं हो पाया। हमने आपकी रुचि नोट कर ली है। क्या मैं आपको दूसरी जॉब्स बताऊँ?"
+  (Kannada: "ಈ ಜಾಬ್‌ಗೆ ಅಪ್ಲೈ ಇನ್ನೂ ಪೂರ್ತಿ ಆಗಿಲ್ಲ. ನಿಮ್ಮ ಆಸಕ್ತಿ ನಾವು ನೋಟ್ ಮಾಡ್ಕೊಂಡಿದೀವಿ. ಬೇರೆ ಜಾಬ್‌ಗಳನ್ನ ಹೇಳಲಾ?")
+  Escalation-ladder rung 3 — the wrong option is removed rather than forbidden: Row 2 keeps
+  "technical issue" only for the genuinely unreadable case (timeout, no response), where it is true.
+  Purely additive; Row 1 and Row 2 are unchanged. Row order is Row 1, Row 2a, Row 2 so the specific
+  case matches before the catch-all.
+- **Files:** 9 Hindi + 4 Kannada conversation prompts across KKB, Maya and KKB-Slim.
+- **Status:** VERIFY-PENDING. Rolling out to kkb-hi-signals and kkb-kn-signals first (the two bots
+  where the false line was observed); the rest are DEPLOYED, NOT VERIFIED until called.
+
+## 2026-09-09 — apply-failure catch-all tightened so a NAMED error has no catch-all (VERIFY-PENDING)
+- **Feedback/bug:** the dominant apply-failure defect is the opposite of D80 — **45 of 60**
+  `apply_job` calls that returned `ACTION_LIMIT_REACHED` spoke the Row 2 technical-issue line
+  instead of the Row 1 already-applied line (measured 2026-09-03/04, `ESCALATION-litwiz.md` §1).
+  Row 1 already named `ACTION_LIMIT_REACHED` as a trigger, so reachability was never the problem:
+  Row 2 stayed available as a safe hedge and the model kept taking it. §1 concluded "there is no
+  wording that resolves a distinction the model cannot observe" — but the model CAN observe it. The
+  `apply_job` failure result carries `__RAYA_TOOL_DEBUG__` with
+  `response_body_excerpt={"error":"..."}`, and 67 of 73 observed failures name the error.
+  An earlier attempt to drive Row 1 off the error name was reverted because it leaked onto
+  `USER_NOT_FOUND` (call `5f0d3671`); the new Row 2a now absorbs that case, so the fix is unblocked.
+- **Change:** Row 2 is no longer "you cannot tell why it failed". Its condition is now "the result
+  carries NO error name at all — a timeout, no response, or a body with nothing in `"error":"..."`",
+  with an explicit instruction to check the result in hand before choosing it. The three rows are
+  now disjoint and exhaustive: `ACTION_LIMIT_REACHED` matches ONLY Row 1, any other name matches
+  ONLY Row 2a, and no name matches ONLY Row 2 — which stays the one row permitted to attribute a
+  cause, because it is the only row where a technical fault is what you actually have. Rung 3: the
+  wrong option is removed rather than forbidden. Spoken lines unchanged in all three rows.
+- **Files:** 9 Hindi + 4 Kannada conversation prompts across KKB, Maya and KKB-Slim.
+- **Status:** VERIFY-PENDING — not yet deployed; the Row 2a verification dial is still in flight and
+  one change is being verified at a time.
+
+## 2026-09-09 — returning-caller callback clause was missing from both Kannada prompts
+- **Feedback/bug:** tracker items "Missing returning call user" were fixed on KKB Hindi, KKB Hindi
+  Signals and Maya Hindi Signals and **never mirrored**. `KKB Placeholder Kannada Signals.md` and
+  `KKB Placeholder Kannada.md` had ZERO occurrences of the callback clause,
+  `last_conversation_summary` or `overall_conversation_summary`; the Hindi master has the clause 5x
+  and "previous conversation" 20x. Kannada jumped straight from the get_profile-read paragraph to
+  "Greet by first name", so a returning Kannada caller was greeted as if never called before.
+  Maya Hindi had the same gap against its own Signals twin.
+- **Change:** ported the whole block. English rules, field names and the callback-clause bullet list
+  copied VERBATIM (agnostic); the quoted clause and its placeholder adapted to Kannada
+  ("[ಮೊದಲ ಹೆಸರು] ಅವರೇ, ಹಿಂದಿನ ಸಲ ನಾವು [ಯಾವ ವಿಷಯದ ಬಗ್ಗೆ ಮಾತಾಡಿದ್ವಿ] ಬಗ್ಗೆ ಮಾತಾಡಿದ್ವಿ — …"), and the
+  banned-wording bullet localised to the Kannada words it names. Maya Hindi took the Hindi block
+  verbatim. No Hindi text leaked into either Kannada file (verified 0).
+- **Files:** `KKB/KKB Placeholder Kannada Signals.md`, `KKB/KKB Placeholder Kannada.md`,
+  `Maya/Maya Hindi.md`. Inbound variants deliberately untouched — their Hindi masters also lack the
+  block, so that is a design question, not drift.
+- **Status:** DEPLOYED (kkb-kn-signals, kkb-kn-out, maya-hi-out). **NOT VERIFIED** — needs a call
+  from a number with prior memory.
+
+## 2026-09-09 — Kannada apply-failure line blended two rows and re-asserted "technical issue"
+- **Feedback/bug:** call `41a2c19d` returned `TARGET_ITEM_NOT_FOUND` three times and the bot said
+  "ಈ ಜಾಬ್‌ಗೆ ಅಪ್ಲೈ ಇನ್ನೂ ಪೂರ್ತಿ ಆಗಿಲ್ಲ, technical issue ಇದೆ" every time — the new Row 2a opening welded
+  to Row 2 cause claim. The two Kannada lines shared the prefix "ಈ ಜಾಬ್‌ಗೆ ಅಪ್ಲೈ ಇನ್ನೂ" and differed
+  only in the verb phrase. Hindi passed the same test (`199caee7`) because its two lines are
+  lexically distinct — a direct demonstration of the never-extrapolate rule.
+- **Change:** Row 2a Kannada now opens on different words entirely — "ಈ ಅಪ್ಲಿಕೇಶನ್ ಸಧ್ಯಕ್ಕೆ ಆಗಿಲ್ಲ." —
+  so there is no shared opening to blend, plus an inline note naming call `41a2c19d` so the wording
+  is not "tidied" back into a shared prefix. Row 2 is UNCHANGED: its "technical issue" is there at
+  the owner explicit request (see the note above the table) and was not removed.
+- **Files:** the 4 KKB Kannada conversation prompts.
+- **Status:** DEPLOYED (kkb-kn-signals, kkb-kn-out, kkb-kn-in-signals, kkb-kn-in). **NOT VERIFIED.**
+
+## 2026-09-09 — the prohibition against speaking stage directions was supplying the string
+- **Feedback/bug:** on `e4e81fe2` (kkb-kn-out, live) the bot spoke
+  `*(Silent tool call: apply_job with profile_id: "5051" and job_id: "19e3da1f-...")*` aloud, leaking
+  a profile id and a job UUID to the caller, then said "ಅಪ್ಲೈ ಆಗಿದೆ" — applied. **Zero tools ran on
+  that call.** No `get_profile`, no `apply_job`, no application. Same class as `29c4f152` and the
+  four occurrences on 2026-09-03 that the prompt already documents, so this guard has now failed
+  five times. 6 more cached calls across kkb-kn-signals, maya-hi-out, kkb-hi-in and kkb-kn-out spoke
+  a stage direction; two of them read the caller phone number `+917946350285` aloud inside a
+  `create_profile` stage direction.
+- **Root cause:** the guard quoted the forbidden output verbatim. Both the prohibition ("Writing
+  `*(Silent tool call: apply_job)*` ... applies nobody") and the evidence citation for `29c4f152`
+  wrote the exact string the bot then emitted. Rung 1 — the wrong output was in the prompt, in the
+  rule meant to prevent it.
+- **Change:** the literal form is gone from every prompt (verified 0 remaining). The prohibition and
+  the citation now DESCRIBE it — "a stage direction naming the apply tool" — instead of printing it.
+  No new prohibition wording was added: this guard had already failed five times, so volume was not
+  the lever.
+- **Files:** 12 KKB/Maya conversation prompts (TRRAIN and slim did not carry the string).
+- **Status:** DEPLOYED to all 15 conversation targets, all verified in sync. **NOT VERIFIED** — needs
+  a call that reaches an apply on a Kannada outbound bot.
+- **Known larger change NOT made:** the samples still render 12-38 inline `*( )*` stage directions
+  each. Converting them to a non-inline `INTERNAL:` form would remove the imitable shape entirely,
+  but that is a 15-file reformat that cannot be tested in one night and needs sign-off.
+
+## 2026-09-09 — slash spoken aloud: rule missing on 9 bots, and point-of-use missing on the rest
+- **Feedback/bug:** tracker items "Slash is said out loud" were CLOSED, and the behaviour has
+  regressed: **28 of 438 cached calls** emit a literal "/" inside a spoken line. Most common is the
+  array role "Computer Operator / Data Entry" read verbatim (21 calls). Bots affected: dkb-kn-out,
+  trrain-hi-out, kkb-hi-in-signals, maya-hi-out, maya-hi-in, maya-hi-in-signals.
+- **Root cause, two halves.** (1) The "## Slash ( / ) symbol" section existed in the 12 KKB/Maya
+  prompts but was ABSENT from all 6 DKB, both TRRAIN and slim — and dkb-kn-out and trrain-hi-out are
+  among the offenders, so for them there was no rule at all. (2) On the bots that DO have the rule,
+  it sits in its own section far from the template that speaks `[role]`. Same point-of-use failure
+  as the location conversion, the `[company]` script fix and the never-invent guard.
+- **Change:** ported the Slash section to the 9 prompts missing it (Kannada adapted: "ಅಥವಾ", not
+  "या"), and added a one-line rule AT the job-presentation template in all 13 KKB/Maya/slim prompts —
+  a `[role]` containing "/" is spoken with "या"/"ಅಥವಾ" in its place, naming "Computer Operator / Data
+  Entry" as the worked case since it is the one that actually leaks.
+- **Files:** 6 DKB + 2 TRRAIN + slim (new section); 12 KKB/Maya + slim (point-of-use line).
+- **Status:** DEPLOYED to all 19 conversation targets, all verified in sync. **NOT VERIFIED** — needs
+  a call presenting a slash-bearing role.
+
+## 2026-09-09 — Maya spoke salary as digits, and reads the college abbreviation twice
+- **Feedback/bug:** `maya-hi-signals` carried digits in 4 of 16 salary phrases and
+  `maya-hi-in-signals` in 5 of 72. The numbers rule sits ~700 lines below the job template that
+  speaks the value (D82). Fixed at the template in all four Maya prompts — `[salary]` and
+  `[vacancy]` arrive as digits and are spoken as words.
+- **Also noted, NOT fixed:** the identity line renders the college abbreviation twice —
+  "माया, वीटीयू (VTU) की ओर से" reads the Latin in parentheses aloud (`0a3cba76`). Maya's caller
+  identity is a product decision, so this is flagged for the owner rather than edited.
+- **Files:** `Maya Hindi Signals.md`, `Maya Hindi.md`, `Maya Inbound Signals.md`,
+  `Maya Inbound.md`. **Status:** DEPLOYED. **NOT VERIFIED.**

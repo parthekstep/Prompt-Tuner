@@ -1,0 +1,525 @@
+# KKB-Slim — Changelog
+
+A/B twin of `kkb-hi-signals` (`115b38a5`). Same tools, voice, language, DID, timings, memory and
+output prompts; the ONLY difference is the conversation prompt — a ground-up rewrite at ~73k chars
+against the master's ~224k. It exists to test whether prompt size is what the latency complaints
+are about. Not a language variant, so `/sync-check` must not treat it as a mirror.
+
+## 2026-09-23 — the services offer now survives a failed apply (VERIFIED); the location-turn fix was attempted and REVERTED
+
+- **Feedback/bug:** two defects found by counting live calls rather than by reading the prompt.
+  (1) **Khushboo's UAT report** — "pincode is missing, only city name is asked or confirmed" and
+  "nearby landmark is not being asked or confirmed at the end". Across the 13 live calls that reached
+  the location block, the pin was read back on 10 and the landmark asked on 6; exactly one of the
+  seven landmark misses had a landmark genuinely on record (`28704be3`), so the real score is
+  **6/13**. (2) **The closing services offer never fired after a FAILED apply** — `c883aa34` and
+  `670cbb12` both went from the failure line straight to Goodbye with `services_pitched: No`, while
+  every successful-apply call made the offer.
+
+### Shipped and VERIFIED — the services offer after a failed apply
+
+Two competing instructions were routing the failure path past step 13, both nearer the decision than
+step 13 itself:
+
+- the failure branch read "**On FAILURE the turn ends on the offer of another job and NOTHING follows
+  it** — no service-provider pitch", scoped to *the turn* by intent and read as scoped to *the path*.
+  It now says "no service-provider pitch **in this turn**" and states where the offer is still owed;
+- the second-failure route "Then Graceful Exit" became "Then **step 13**, then Graceful Exit";
+- **step 14's pre-close checklist gained a second item** — "has the services offer been made?" — beside
+  the Need Capture check that already works reliably. A checklist naming one owed item implies the
+  list is complete, which is why step 13's own prose was being skipped.
+
+**VERIFIED on `6ae79885`** (171s): `apply_job` returned 422, the bot spoke the honest interest-noted
+line, offered two further jobs, the caller declined — and it then called `get_services` and made the
+offer before closing. On the two previous runs of that exact scenario it went straight to Goodbye.
+
+### Attempted and REVERTED — required tool parameters for the location turns
+
+`get_recommended_jobs` and `get_jobs` were given `caller_pin_code` and `caller_landmark` as required
+parameters (absent from `payload_template`, so never sent to the backend), on the ladder's principle
+that a constraint expressible in the tool schema belongs there. **It failed on the first live call and
+failed worse than the bug.** On `6ae79885` the model called `get_recommended_jobs` with
+`caller_pin_code: "110045"` — lifted from the injected `${location}` string — and
+`caller_landmark: "not-known"`, **then asked the location and pin questions afterwards**. The tool ran
+before the turns it was meant to gate, the landmark was still never asked, and the skip now carried a
+parameter asserting it had been asked. That is the D91 failure mode: a required parameter constrains
+what the model says, not what it did. Both parameters were removed, the tools restored, and the
+prompt paragraph describing them deleted, the same night.
+
+- **Files:** `KKB-Slim/KKB Slim Hindi Signals.md`, `raya/toolspecs/get_recommended_jobs.json` and
+  `get_jobs.json` (changed then restored), `.claude/skills/prompt-analyser/reference/bug-patterns.md`
+  (D95 records the attempt and why not to repeat it; D96 records the checklist pattern).
+- **Scope:** KKB Slim **Hindi only**, as instructed. The Kannada slim twin still runs the older
+  `${recommendations}` design with its older toolset, is internally consistent, and was not touched.
+
+### `call_direction` — the variable is found and working; read it from the call record, not the output prompt
+
+`${call_direction}` is the variable you were thinking of, and it is alive and correct: the CALL
+CONTEXT block carries `inbound` on genuine inbound legs (`72692e1a`, `28704be3`, `2027e477`) and
+`outbound` on every dialled call.
+
+Capturing it as an output metric did **not** work and was backed out. Added as field 26 of the output
+prompt, it produced **`"outbound"` on `2027e477`, a call that was genuinely inbound** — the extractor
+does not appear to see the CALL CONTEXT system block, so it fell back to the value in the prompt's own
+JSON example. That is the D50 pattern (a demonstration becomes the output), and a metric that can be
+silently wrong is worse than no metric. Field removed; the output prompt is byte-identical to what it
+was before (18,274 chars, PATCH read-back verified).
+
+**Direction is exactly derivable from the call record instead, with no model involved:**
+
+| | `in_did` | `out_did` | `caller_no` | `to_number` |
+|---|---|---|---|---|
+| **inbound** | set | null | set | null |
+| **outbound** | null | set | null | set |
+
+Confirmed on `2027e477` (inbound) against `4817a3fd` and `511171cf` (outbound). Any reporting layer
+should read it from there.
+
+**One real consequence for the repo:** the slim agent's live `output_instructions` had already drifted
+ahead of the shared `KKB/KKB Output.md` (18,274 vs 15,068) because tonight's new metrics —
+`jobs_interest`, `jobs_fetched`, `services_pitched`, `service_offered`, `service_need_matched` and the
+rest — were added on the agent and never filed. Overwriting the shared file would have pushed
+slim-only fields onto the other KKB bots, so the live version was adopted into
+**`KKB-Slim/KKB Slim Output.md`** and the path map in `CLAUDE.md` now points there for this agent.
+
+**Reading note for anyone scripting against the API:** the call record field is **`call_output`**, not
+`output_variables`. Both names appear in our scripts; only `call_output` is populated.
+
+### STILL OPEN
+
+**The landmark turn is skipped on 10 of 16 calls** (pin on 3 of 16), counting only calls that
+reached the location block with no landmark already on record. Prose has been sharpened twice and
+the tool-schema route is now closed. The reason skipping is free is that **nothing downstream consumes
+the answers** — the next step runs regardless. The next attempt should give them a real consumer
+rather than add a third guard.
+
+## 2026-09-23 (overnight) — ONE bot for both directions; jobs + services come from APIs, not an injected array
+
+- **Request:** one bot for inbound and outbound; recommend jobs AND services; move off the
+  campaign-injected `${recommendations}` onto the recommendations API for both directions; integrate
+  a services API; make the conversation less rigid; measure it all as output variables. Location work
+  and the DKB provider-initiated change explicitly out of scope.
+
+### The direction variable is a dead end, and the resolution
+
+`${call_direction}` is what the owner remembered. A combined prompt using it was built and **retired
+in July 2026** because the platform never injects it on API-triggered calls
+(`raya/combined/ABANDONED.md`, open-items #12). **Re-verified today:** no direction hint in the call
+context on either an inbound or an outbound agent. So the flow is now **direction-agnostic** — same
+audio check, same introduction, same silent fetch, same everything — and the prompt forbids inferring
+direction from who spoke first, from `${location}`, or from anything else. **Direction for metrics is
+derived from the call record** (`in_did`/`caller_no` = inbound, `to_number`/`out_did` = outbound), and
+the output prompt says so, so nobody adds a hallucinated field later. The introduction was rewritten
+to be true in both directions: it no longer says "आपको कॉल कर रही हूँ", because on an incoming call we
+did not dial.
+
+### Three new tools (specs in `raya/toolspecs/`)
+
+- `get_recommended_jobs(profile_id)` — **signals-search ANCHOR** on the caller's own profile. This is
+  the recommendations API. Scores 0.70-0.72 on a real role vs 0.58-0.69 for text search.
+- `get_jobs(query)` — signals-search textSearch, for when the caller names what they want.
+- `get_services()` — `fetch_local` on `item_domain: service_provider` / `profile_1.0`. **This is the
+  services API**: not a parameter change on the jobs call, a different domain. Six live rows, five
+  real (TRRAIN Trust, Aastha Skill Development Centre, Yuva Kaushal Vikas Kendra, Model Career Centre
+  Ghaziabad, HHH Foundation) + one test record.
+- signals-search is deployed on gzb and **accepts the existing Signals `x-api-key`** — no separate
+  search key needed. `scripts/raya_tooladd.py` gained `path_override` so a tool can target another
+  service on the same instance while still cloning auth headers (no key in the repo).
+
+### Prompt + metrics
+
+No job array in the inputs; the pre-call count is gone (nothing is pre-loaded, so the "no jobs" line
+may only be said AFTER a tool returns nothing usable); step 6 split into 6a-fetch / 6b-present with a
+junk filter and a relevance check; Case B no longer names a trade before a tool has returned one; a
+**jobs-interest gate** at the introduction sends a "no" straight to services; a new **section S**
+fetches, matches need→service, and offers ONE by name with its cost. Ten metrics added:
+`jobs_interest`, `jobs_fetched`, `jobs_offered_count`, `job_roles_offered`, `job_no_match`,
+`asked_job_location`, `services_pitched`, `service_interest`, `service_offered`,
+`service_need_matched`.
+
+### VERIFIED on live calls
+
+| path | call | evidence |
+|---|---|---|
+| **INBOUND, full end-to-end** | **`28704be3`** (228s, genuine inbound leg) | identical flow; terms → `create_profile` → `get_jobs` → **apply succeeded** → `get_services` → **named TRRAIN Trust**. Metrics: `jobs_fetched: Search`, `applied_to_job: Yes`, `services_pitched: Yes`, `service_offered: "TRRAIN Trust"`, `service_need_matched: Placement` |
+| Outbound, personalised recs + apply | `edd3d6f6`, `e0333123` | `get_recommended_jobs`; role + company, **no city**, junk dropped; **apply succeeded** |
+| Outbound, new caller, no profile | `6dc1a058` | Case B asked openly; `get_jobs("data entry operator")`; **apply succeeded**; `consent_status: Given` |
+| Outbound, profile role = `Any` | `2b529ea1` | correctly used `get_jobs`, **not** the anchor |
+| Outbound, not looking for work → services | `9b43850e` | no job tool at all; `get_services`; named **Aastha Skill Development Centre** with its real cost; refused to invent a contact number |
+
+### Defects found and fixed during the run
+
+1. **Services offer failed twice in the apply-success turn** — first a generic pitch with no tool call
+   and nobody named (`edd3d6f6`, `service_offered: NA`), then, after tightening, no offer at all
+   (`e0333123`, `services_pitched: No`). Two failures of the same *placement*, so the offer was moved
+   out of that crowded turn into step 13 with `get_services` as the step's first action. **Verified
+   working on `28704be3`.**
+2. **The placeholder role was spoken aloud** — `2b529ea1` said "कमल जी, आप अभी 'Any' का काम देख रहे
+   हैं". The rule existed but sat away from where the sentence is composed; the check now happens at
+   the point of speaking. **Verified on `511171cf`** — three roles read out ("डेटा एंट्री",
+   "कंप्यूटर ऑपरेटर या डेटा एंट्री", "डेटा एंट्री ऑपरेटर"), no placeholder token spoken.
+3. **Absent fields were announced** — "सैलरी की जानकारी उपलब्ध नहीं है". With 90% of rows carrying no
+   salary this would be most of what callers hear; omission now explicitly means silence. **Verified
+   on `511171cf` and `45490ef6`** — the third job (Inthing Creations) carries no salary and the bot
+   read role + company only, in silence about the rest.
+4. **The service name was read in Latin script** ("TRRAIN Trust" pronounced as English). **Verified
+   fixed on `511171cf`** — spoken as "ट्रेन ट्रस्ट"; the English string survives only in the
+   `service_offered` output variable, which is correct.
+
+### Closed on the final sweep
+
+- **The closing services offer on an OUTBOUND call — VERIFIED on `45490ef6`** (186s) and again on
+  `511171cf` (200s): step 13 calls `get_services` and names ट्रेन ट्रस्ट, `service_offered:
+  "TRRAIN Trust"`. The earlier outbound miss (`c883aa34`) was not the offer failing — that fixture
+  had already applied to the job, so `apply_job` returned 422 and the call ended on the failure
+  branch.
+- **Asks-where-the-job-is — VERIFIED on `511171cf`.** The caller asked twice ("यह जॉब कहाँ पर है?",
+  then "कौन से एरिया में है?"). Both times the bot said it does not hold the exact location and
+  that the employer will make contact. **It invented no city** — which is the whole point, because
+  99.9% of live rows carry a masked `jobProviderLocation` (`G***`, `R***`).
+
+### NOT verified
+
+- **No-match (caller wants teaching work)** — still unbridged after 4 attempts.
+
+### On the ~24s "no audio" drops
+
+Six of eighteen calls ended at 24–25s. The bot leg is healthy on every one of them (it greets, then
+logs `*No audio/User is speaking softly*` twice and hangs up politely); the **tester** leg shows the
+bot's audio arriving and **zero assistant turns** — the tester agent hears and does not speak. I
+first blamed the harness, then the persona files. Both were wrong: `hi-asks-where-job-is` failed at
+21:33 and the **same file, unchanged**, produced the clean 200s `511171cf` at 21:35. It is an
+intermittent tester-side fault, and the only reliable handling is to re-dial.
+
+### Test-harness changes
+
+`scripts/raya_testrun.py`: line-buffered output; a preflight that refuses to dial a DID not bound to
+the tester; and — after that guard blocked the first inbound attempt — a reverse-direction mode for
+when the tester is the CALLER. The Testing Agent was given `out_did: 911204404272` (it had none, so
+Raya 500'd on any call it tried to originate); this is our own test agent and reverse tests are
+impossible without it.
+
+**DID note:** `in_did` cannot simply be assigned — a number only used as a caller-ID elsewhere
+(`917946350283`) is not provisioned for inbound, so the call completed in 3s and the bot never
+received a leg. The inbound proof therefore borrowed **911204404274** from KKB Hindi Inbound Signals
+for ~4 minutes; prior state was saved to `inbound_swap_state.json` and **restored immediately after**
+(verified: KKB Hindi Inbound Signals has its number back).
+
+**Files:** `KKB-Slim/KKB Slim Hindi Signals.md`, `raya/toolspecs/get_recommended_jobs.json`,
+`raya/toolspecs/get_jobs.json`, `raya/toolspecs/get_services.json`, `scripts/raya_tooladd.py`,
+`scripts/raya_testrun.py`, `raya/personas/hi-no-jobs-wants-training.md`,
+`raya/personas/hi-wants-teacher-job.md`, `raya/personas/hi-asks-where-job-is.md`,
+`raya/overnight/ESCALATION-data-team.md`
+
+## 2026-09-10 — verification ledger for the day's slim work (16 live calls)
+
+Per-scenario, per-variant, with the call that proves it. Tester leg ids; both bots dialled the tester
+DID `917946350285`, backend state asserted on the API after each consent call.
+
+| # | scenario | bot | call | result |
+|---|---|---|---|---|
+| 1 | flags all true → NO consent line, normal opening | Hindi | `00b805ce` | PASS |
+| 2 | flags false → gate → agree → `record_consent` → normal flow; ONE profile, live+consented | Hindi | `f796df13` | PASS |
+| 3 | consent DECLINED → exact decline line, **no tools**, call ends (65s) | Hindi | `f7207437` | PASS |
+| 4 | new caller (empty fetch) → pool overview → jobs → create-consent → apply | Hindi | `b91340a8` | PASS (was the `fd01b717` bug) |
+| 5 | multi-place `${location}` → every place word spoken | Hindi | `9c9f7e34`, `b7001381` | PASS |
+| 6 | pin turn confirms the held pin, digit-by-digit | Hindi | `9c9f7e34`, `b7001381` | PASS |
+| 7 | landmark turn last, and genuinely last | Hindi | `9c9f7e34` | PASS |
+| 8 | pin refused ("पता नहीं") → accepted in a clause, no loop | Hindi | `a0dd528e` | PASS |
+| 9 | Kannada happy path: Maya intro, dharwad fetch, 3 location turns, ranked jobs, salary in words | Kannada | `d7012890`, `63a2d145` | PASS |
+| 10 | Kannada flags false → gate in Kannada → live+consented, ONE item | Kannada | `5e3d8c69` | PASS |
+| 11 | Kannada consent DECLINED → decline line, no tools, 39s | Kannada | `8ce1d71e` | PASS |
+| 12 | Kannada new caller (empty fetch on dharwad) → pool overview, no close | Kannada | `daa1a8bb` | PASS |
+| 13 | pin read as SIX digit-words (both zeros) | Kannada | `36e314df`, `d3562f78` | PASS (was `5e3d8c69`) |
+| 14 | `${location}` keeps both place words in Kannada | Kannada | `49f64839` | PASS (was `6ff40ebb`) |
+| 15 | role-change line makes no fake storage claim | Kannada | `63a2d145`, `54f365d2` | 2/3 — regressed on `49f64839` |
+| 15a | …re-mechanised as "tool is mandatory" | Kannada | `bec28724` | FAIL — killed the false claim but narrated the tool AND spoke the `*( )*` stage direction |
+| 15b | …re-mechanised again as a CLOSED spoken template | Kannada | `c75ec7a9`, S17 | **DEPLOYED, NOT VERIFIED** — 0 violations on both, but the role-change branch never triggered: an earlier test's `update_profile` persisted "Data Entry Operator" onto the tester DID, so the persona now agrees with the stored role. Needs a tester DID whose stored role differs from the persona's. |
+| 16 | static suite (all 22 fleet prompts) | both | — | 0 critical, 0 major, 1 pre-existing minor |
+
+**Bugs found and fixed today, each with the call that showed it:**
+1. the pin was never asked at all — added as location Turn B (UAT report, `280e9d0b`)
+2. the pin turn was unreachable behind the landmark line's "आखिरी सवाल" promise — reordered (`d47db4c0`)
+3. an "anywhere is fine" answer cancelled the pin as well as the landmark — scoped (`b42779bf`)
+4. `create_profile` on an unconsented EXISTING caller minted a second live profile — switched to
+   `record_consent`, which turns the draft live in place (`e0e7bbc2`)
+5. **a genuinely new caller was told "no jobs" and the call was closed** — the no-jobs line is now
+   scoped to the job array and cannot be reached from an empty fetch (`fd01b717`)
+6. the Kannada role-change turn claimed "ನೋಟ್ ಮಾಡ್ಕೊಂಡೆ" with no tool call (`d7012890`, `49f64839`)
+7. the Kannada pin was read back with five digit-words for a six-digit pin (`5e3d8c69`)
+8. `${location}` was collapsed to its locality because the canonical-spellings rule printed that very
+   pair as an example to shorten (`6ff40ebb`)
+
+**Found, NOT fixed (out of scope, reported):** the production **Kannada** prompt
+(`KKB/KKB Placeholder Kannada Signals.md`, line ~754) has "ಪ್ರೊಫೈಲ್" inside its create-consent line —
+the one word the caller must never hear, and a law-3 breach in a MANDATED line. The slim Kannada twin
+was authored without it. The fat Hindi twin had the same bug and it was fixed there on 2026-09-09.
+
+**Still blocked (data team, `raya/overnight/ESCALATION-data-team.md` §5):** no successful `apply_job`
+on either instance — fixture job ids are dead and a self-minted `job_posting_1.0` will not go live
+(`PROFILE_NOT_LIVE` on the target). So the post-apply questions, the profile write-backs and the
+closing read-back have never executed in a test, on any bot.
+
+## 2026-09-10 — Kannada slim twin created (`kkb-kn-signals-slim`)
+- **Ask:** "create a slim version of KKB Kannada as well. test everything thoroughly."
+- **Prompt:** `KKB-Slim/KKB Slim Kannada Signals.md`, 121KB, authored from the Hindi slim master.
+  Every English instruction is byte-identical; only spoken content was re-authored in Kannada, taking
+  the proven wording from the live `KKB/KKB Placeholder Kannada Signals.md` where an equivalent line
+  existed and authoring the new ones (the consent flag gate, the pin turn) natively. Built with an
+  explicit fragment map and a **zero-Devanagari assertion**, so a missed line fails the build rather
+  than shipping half-translated. Kannada machinery re-derived, not translated: Kanglish word list,
+  Kannada-script numerals as words, Kannada number/ordinal normalisation, Karnataka canonical place
+  spellings (ಹುಬ್ಬಳ್ಳಿ / ಧಾರವಾಡ / ಬೆಂಗಳೂರು / ಕೇಶ್ವಾಪುರ …) plus the Ghaziabad-payload list, prohibited
+  phrases, style markers and the pin digit-words (`580023` → "ಐದು, ಎಂಟು, ಸೊನ್ನೆ, ಸೊನ್ನೆ, ಎರಡು, ಮೂರು").
+- **Persona:** the bot names itself **ಮಾಯಾ**, matching its production Kannada twin — the registered
+  divergence `kkb-kn-signals-maya-name`, extended to this target. A slim A/B twin that used a
+  different persona name would not be comparable to the bot it is measured against.
+- **Deliberate divergence registered:** `kkb-slim-location-pin-capture` — both slim twins declare
+  `${location}` and carry the three-turn location step, which the production Kannada bot does not.
+- **Agent:** created on Raya via the new `scripts/raya_clone_agent.py` (settings cloned from the Hindi
+  slim — timings, nudges, interruption thresholds, out_did; language machinery cloned from
+  `kkb-kn-signals` — language_id, voice_id, tools, memory/output prompts). It therefore reads
+  **dharwad-signals** with `languageSpoken: ["Kannada"]`, verified. `record_consent` added as its 5th
+  tool; `pin_code` added to its output prompt.
+- **Registered:** `raya/agents.json` (`kkb-kn-signals-slim`), the path map in `CLAUDE.md` (KKB-Slim
+  row, Hindi master + Kannada mirror), `raya/regression/fleet.json` (22 bots; KKB-Slim mapped to
+  blue-dots in `build_fleet_manifest.py`, which was silently dropping it into "unassigned").
+- **VERIFIED on live call `d7012890`** (first dial, Kannada tester persona): Maya intro → silent
+  `get_profile` on dharwad → Kannada role check → location "ಕೇಶವಾಪುರ, ಹುಬ್ಬಳ್ಳಿ" (**both** place
+  words, pin dropped) → pin confirmed digit-by-digit in Kannada → landmark last → ranked job list
+  with ordinals and salary in Kannada words → deep dive → data-sharing line → `apply_job`. Static
+  suite: 22 prompts, 0 critical, 0 major.
+- **Bug found and fixed on that call:** the role-change turn said "ಸರಿ, ಡೇಟಾ ಎಂಟ್ರಿ ಕೆಲಸದ ಬಗ್ಗೆ ನಾನು
+  ನೋಟ್ ಮಾಡ್ಕೊಂಡೆ" (*I've noted it*) and called no tool — a law-4 fake-storage claim. Added the
+  point-of-use guard to BOTH twins: say only the quoted line, and the `update_profile` call is the
+  record. **VERIFY-PENDING** on the re-dial.
+- **Known gap:** `apply_job` 422s `TARGET_ITEM_NOT_FOUND` on the Kannada bot because the fixture job
+  ids are gzb-instance ids and this bot reads dharwad. Needs real dharwad inventory ids.
+- **Files:** `KKB-Slim/KKB Slim Kannada Signals.md`, `KKB-Slim/KKB Slim Hindi Signals.md`,
+  `raya/agents.json`, `CLAUDE.md`, `raya/divergences.json`, `raya/regression/fleet.json`,
+  `scripts/raya_clone_agent.py`, `scripts/build_fleet_manifest.py`,
+  `raya/personas/kn-loc-pin-plain.md`, `raya/personas/kn-consent-plain.md`,
+  `raya/testcases/args/kn-slim-loc-pin.json`, `raya/testcases/args/kn-consent-flags-false.json`
+
+## 2026-09-10 — the pin code is confirmed and captured (location Turn B) + consent rewired to `record_consent`
+- **Feedback/bug (UAT, Khushboo):** "Location — pincode is missing, only city name is asked or
+  confirmed." Grounded on her call `280e9d0b`: `${location}` was `Muradnagar, Delhi 110098`, the bot
+  said "मुराद नगर, दिल्ली" and the pin was never mentioned. The tracker's own location rows (22/35)
+  say the intent is to "pass what we have, confirm it, capture simple markers (landmark / PIN /
+  locality)" — so a silently dropped pin is the bug, not the design.
+- **Change:** the location step is now three turns — **A** confirm the place, **B** the pin code,
+  **C** one finer detail (landmark), then the jobs. Turn B confirms a pin we already hold (read
+  digit-by-digit in words) or asks for one once when we do not; "don't know" is accepted in a clause
+  and never blocks the jobs; it is skipped only when the pin is already settled this call or memory
+  carries one. The blanket "a PIN is NEVER spoken" ban is now **scoped** rather than contradicted:
+  never inside a place name, spoken digit-by-digit in this one turn. New output variable `pin_code`
+  on both twins.
+- **Order matters and is now recorded:** the pin turn originally sat AFTER the landmark turn and
+  never fired, twice — the landmark line promises "आखिरी सवाल" (last question), and the model kept
+  that promise. Reordered so the promise stays true. **VERIFIED on live call `9c9f7e34`**: all three
+  turns, in order, pin spoken as "एक, एक, शून्य, शून्य, चार, पाँच".
+- **Also fixed:** an "anywhere is fine" answer used to cancel the pin turn as well as the landmark
+  turn. It is a statement about where they will WORK; the pin is where they LIVE. It now cancels only
+  the landmark (lost the pin on `b42779bf` before this).
+- **Consent path rewired to `record_consent` (better than the 2026-09-09 design):** on agreement the
+  bot now records consent against the caller's existing seeker item whether `live` or `draft`.
+  Grounded on the API: the consent array against a **draft** records the consent AND turns that item
+  **live**, so the caller becomes applyable with no second profile. `create_profile` is now reserved
+  for a genuinely empty fetch — on `e0e7bbc2` it had minted a SECOND live profile and left the draft
+  behind, the duplicate this prompt forbids elsewhere. Create-response reading corrected from
+  `items[0]` to "the item whose `lifecycle_status` is live".
+- **VERIFIED end-to-end on live call `f796df13`** (fixture `918888888885`, a draft with
+  `user_consent {terms:false, privacy:false}`): the gate fired straight after the intro, the caller
+  agreed, tools were `get_profile` → **`record_consent`** → `apply_job` with **no** `create_profile`,
+  the flow then ran normally (role → location → pin → landmark → jobs → deep dive → interview →
+  data-share), and the record ended `live` / consent `true` with exactly ONE seeker item.
+- **How the false-flag state was fixturable at all** (owner's suggestion, and it corrected a
+  documented platform limit): `contact_phone` in `agent_args` DOES reach the model — `${contact_phone}`
+  rendered the fixture value and `get_profile` fired against it while the call was dialled to the
+  tester DID. `/voice-test` §6c said otherwise; corrected there as 6c-0. Consent facts learned:
+  terms and privacy must be sent **together** (`USER_LEVEL_INCOMPLETE`), consent is **write-once-true**
+  (`CONSENT_DECLINED` on any `false`), and every false-flag state is therefore necessarily a `draft` —
+  "live profile + false flag" cannot be constructed, which is why the draft arm is the one that matters.
+- **Files:** `KKB-Slim/KKB Slim Hindi Signals.md`, `raya/toolspecs/record_consent.json`,
+  `.claude/skills/voice-test/SKILL.md`, `.claude/skills/prompt-analyser/reference/bug-patterns.md`
+  (D89/D90/D91), `docs/signals-migration-guide.md`, `raya/personas/hi-loc-pin-plain.md`,
+  `raya/personas/hi-loc-pin-unknown.md`, `raya/personas/hi-consent-decline.md`
+
+## 2026-09-09 — location drops place words; landmark turn re-scoped off "first call"
+- **Feedback/bug (reported):** (1) only the first word of `${location}` is spoken — `Muradnagar, KHB
+  colony, 110045` came out as just "मुराद नगर"; (2) the nearby landmark is never asked, nor confirmed
+  at the end.
+- **(1) CONFIRMED on live call `591e5c28`:** given `Muradnagar, Delhi 110098`, the bot spoke "मुराद
+  नगर" and dropped दिल्ली. **Root cause: the conversion examples, not the rule.** Two of the three
+  table rows collapsed a two-token value to one word (`Muradnagar, 110045` → मुराद नगर), and the
+  instruction read "Locality and city only" — so "keep the first place, drop the rest" was the
+  pattern actually demonstrated. **Change:** the rule is now a count — every place word is spoken, in
+  order, digits are the ONLY thing removed, count them before speaking and you have dropped one if
+  you are about to say fewer. Table gained a `places in → out` column and the two reported shapes
+  (`Muradnagar, Delhi 110098` → मुराद नगर, दिल्ली; `Muradnagar, KHB colony, 110045` → मुराद नगर, के एच
+  बी कॉलोनी), plus a pointer to Abbreviations for an initialism inside a place name.
+  **VERIFIED on 4 live calls** (`2712ae8e`, `b34ee8b8`, `ec4ec0a0`, `bcae62ca`): "मुराद नगर, के एच बी
+  कॉलोनी" / "मुराद नगर और के एच बी कॉलोनी" — both places, no digits, KHB as letters.
+- **(2) NOT a general break — Turn B is reachable and fires.** **VERIFIED on `ec4ec0a0`** (memory
+  disabled for one call, so nothing could be injected): "आखिरी सवाल… कौन सा बस स्टॉप, रेलवे या मेट्रो
+  स्टेशन है?" With memory ON it was skipped on 11/11 tester-DID calls — which is what the
+  never-ask-twice rule looks like when the platform's stored memory already holds a
+  `nearest_landmark` for that DID. Per `/voice-test` §6c, `${contact_memory}` sent in `agent_args`
+  does not reach the model, so a "no landmark on record" state **cannot be fixtured** on the tester
+  DID; whether a specific reported call was a legitimate skip needs that call's uuid.
+- **Changes made anyway, as clarifications (each UNVERIFIED — the state they govern is unfixturable):**
+  Turn B is no longer labelled "FIRST call only" — with a profile in front of it that reads as "not
+  this call", and almost every caller has a profile; the gate is now purely *do we already hold a
+  landmark*. Skipping now needs a positive reason (a landmark you can point at); found none and no
+  कहीं-भी answer → the ask is REQUIRED before step 6. A bare "चलेगा" answering Turn A is scoped as
+  agreement (LOCKED → Turn B), not as the anywhere-answer that cancels Turn B — it appeared in both
+  rows of that table. The step-12 read-back's `[एरिया]` slot is now explicitly the Turn B
+  stop/station/landmark when that is what was captured.
+- **Not reproduced: the read-back at the end.** Step 12 runs only after a SUCCESSFUL apply, and no
+  recent slim call has had one — every `apply_job` 422s on `TARGET_ITEM_NOT_FOUND` because the job
+  ids in `raya/testcases/args/sweep/kkb-hi-signals.json` are stale. Needs real inventory ids (or the
+  reporter's call uuid) before the read-back can be tested at all.
+- **Test-harness finding (not a prompt bug):** a fixture with `contact_memory` empty/absent makes the
+  bot wrap ~75% of its spoken turns in literal double quotes. Same prompt, same DID: sweep fixture
+  0/13 quoted (`014ed170`), no-memory fixture 14/19 (`ddfd1a8d`). Confounded my first read of this as
+  an edit regression — always vary one thing.
+- **Owner decision (2026-09-09):** a landmark we already hold is NOT re-asked — the never-ask-twice
+  rule stands as written. Read-back therefore scoped to what the caller said in THIS call: an
+  already-on-record landmark is neither re-asked nor recited back, because a stored value can be
+  stale or another person's and reciting it is a fabricated caller fact. (The tester DID's stored
+  memory carries a landmark the caller never gave — see `/voice-test` §6c.)
+- **Files:** `KKB-Slim/KKB Slim Hindi Signals.md`, `raya/testcases/args/loc-multiplace.json`,
+  `raya/overnight/ESCALATION-data-team.md`
+
+## 2026-09-09 — consent flags drive a re-ask for EXISTING callers (step 3.5) + `record_consent` tool (PARTLY VERIFY-PENDING)
+- **Feedback/bug:** terms-of-use / privacy-policy acceptance was only ever captured on the
+  new-caller path. `get_profile` returns `user_consent { terms_accepted, privacy_accepted, has_age }`
+  and a per-item `profile_consent_accepted`, and the prompt explicitly told the model to IGNORE them
+  ("never treat `user_consent: true` as live") — correct for readiness, but it meant a returning
+  caller whose flags are `false` (a profile created outside the bot — portal, import, another
+  partner) was never asked, and the call proceeded on a consent nobody had given.
+- **Change:** new **step 3.5**, read the moment `get_profile` returns and before a word is said. All
+  three flags true → nothing is asked and the call is byte-identical to before. Any one false →
+  ONE combined plain-Hindi ask as its own turn, in the slot step 4 would have taken (name first,
+  then the ask), before any job/location/apply talk. Agree + a `live` profile → silent
+  `record_consent`; agree + `draft` only → nothing (step 10's `create_profile` records it). Decline
+  → no jobs, no tool, graceful close. Consent given at 3.5 counts for the whole call, so step 9 is
+  never asked after it, and step 4 opens on the role check because the name was already said.
+  Missing/null/absent counts as NOT given; `has_age` is not a consent and is ignored. Worked call C
+  added. Apply consent is unchanged — it has no stored flag (it rides in `apply_job`'s payload as
+  `consent.acknowledged`) and is already asked every apply via the data-sharing line.
+- **New tool `record_consent`** (5th tool, `raya/toolspecs/record_consent.json`, added with the new
+  `scripts/raya_tooladd.py`): same Signals participant endpoint as `update_profile` (POST + an
+  `item_id` = merge) plus the `compliance` array `create_profile` uses. Deliberately NOT folded into
+  `update_profile`: that template is fixed, so compliance inside it would assert a consent on every
+  gender/location write, asked or not.
+- **Grounded against the live API (2026-09-09):** an update POST carrying `compliance` returns
+  **200** and the `item_state` merge keeps every other field. Consent is **write-once-true** — a
+  `compliance` value of `false` is rejected with **400 `CONSENT_DECLINED` "consent cannot be
+  declined — omit a key to skip it"**.
+- **Verification:**
+  - **Flags-all-true path — VERIFIED on live call `00b805ce`** (tester DID, `user_consent` all true,
+    `profile_consent_accepted: true`): no consent line spoken, no `record_consent` call, step 4
+    opened normally ("विकास जी, आप अभी मशीन ऑपरेटर का काम कर रहे हैं…"), then location → jobs →
+    deep dive → interview readiness → data-sharing line → `apply_job`. The apply 422'd on
+    `TARGET_ITEM_NOT_FOUND` — a stale `job_id` in `raya/testcases/args/sweep/kkb-hi-signals.json`,
+    not this change.
+  - **Flags-false path (step 3.5's ask, and `record_consent` itself) — VERIFY-PENDING, NOT
+    reproducible from our side.** The API refuses to un-set a consent flag, and a compliance-less
+    item is necessarily `draft`, so "live profile + false flag" cannot be constructed by us. Needs a
+    data-team-provisioned fixture: a dialable number whose participant has a **live** seeker profile
+    with `terms_accepted` / `privacy_accepted` false.
+  - **Also blocking on the tester DID:** `create_profile` now returns **409
+    `PROFILE_LIMIT_REACHED`** (5/5 seeker profiles), so the whole new-caller path is untestable
+    there until a profile is deleted or a second DID is provisioned. Seen live on `bc9e24a6`.
+  - `bc9e24a6` (the first dial of this change) also shows the pre-existing intermittent
+    missed-fetch: the model spoke the "एक मिनट।" hold without calling `get_profile`, then treated a
+    5-profile caller as new and sent a **job_id as `profile_id`**. Pre-existing — the same miss is
+    on `4c428090` before this change, and the re-dial `00b805ce` fetched correctly.
+- **Files:** `KKB-Slim/KKB Slim Hindi Signals.md`, `raya/toolspecs/record_consent.json`,
+  `scripts/raya_tooladd.py`, `.claude/skills/prompt-analyser/reference/bug-patterns.md`,
+  `docs/signals-migration-guide.md`
+
+## 2026-09-09 — never-invent guard moved to the point of use (VERIFY-PENDING)
+- **Feedback/bug:** with a 1-job `${recommendations}` array the slim bot invented a job board —
+  `45e2cb3b` offered 4 jobs on 1 supplied; `a4f378b9` offered "हेल्पर, एबीसी लॉजिस्टिक्स" with an
+  invented salary, "2 पोज़िशन" and "क्वालिफिकेशन: 12th पास". 2 of 3 dials. The fat prompt is clean on
+  5/5 comparable small-array calls, so this is a regression introduced by the rewrite.
+- **Root cause:** guard placement, not wording. Fat states "never invent a job" 17 times, spread so
+  the rule sits beside nearly every job-speaking site. The rewrite compressed it to 3 statements,
+  all top-of-file or in a flow summary, none at the batch-list or deep-dive template. Two other
+  mechanisms were tested and ruled out: memory carry-over (refuted — fabrication persisted with
+  `memory_enabled: false`) and illustration/array name overlap (refuted — fat has the same overlap
+  and is clean).
+- **Change:** added two guards, each inside the block it governs. At the batch-list template — every
+  `[role]`/`[company]` is copied from the array, the step-4 generic trades are illustrations of the
+  local market and never offerable, and "count the array first, then pick the template whose count
+  matches; there is no template for more jobs than you were given". At the deep-dive template — a
+  job not in the array has no deep dive, so its salary/`[vacancy]`/`[qualification]` cannot be
+  supplied. Count-based so it is answerable from the turn being composed. +991 chars (72,069 ->
+  73,060); no other line touched.
+- **Files:** `KKB-Slim/KKB Slim Hindi Signals.md`
+- **Status:** DEPLOYED to `140d13ca` (sha 48a6108c), **NOT VERIFIED**. Three post-deploy dials on
+  the 1-job fixture are in flight; the pre-fix rate was 2/3 fabricating, so three clean calls is
+  the minimum bar. Slim must NOT be promoted until this passes.
+
+## 2026-09-09 — apply-failure table had no row for a NAMED non-duplicate error
+- **Feedback/bug:** the apply-failure table routed every non-duplicate error into Row 2, "you cannot
+  tell why it failed", whose line asserts a cause: "अप्लाई अभी आगे नहीं बढ़ा है, technical issue है".
+  But the tool result DOES name the error — `__RAYA_TOOL_DEBUG__` carries a
+  `response_body_excerpt` with `"error":"..."`, and 67 of 73 observed apply failures name it. So on
+  `MINOR_ACTION_CHANNEL_BLOCKED` (an age/channel policy block, not a fault) the bot told 5 callers
+  there was a technical issue — a claim the prompt had licensed and that was false. Calls
+  `5a1c0c77` (kkb-hi-signals), `1715a207` (kkb-kn-signals), `05a4b394` (kkb-kn-in-signals),
+  `2cb97508` (maya-hi-signals, `TARGET_ITEM_NOT_FOUND`), `b9629043` (`USER_NOT_FOUND`).
+- **Change:** inserted a new row BEFORE the catch-all — a named error that is not
+  `ACTION_LIMIT_REACHED` gets a line that asserts only that the apply did not complete:
+  "इस जॉब के लिए अप्लाई अभी पूरा नहीं हो पाया। हमने आपकी रुचि नोट कर ली है। क्या मैं आपको दूसरी जॉब्स बताऊँ?"
+  (Kannada: "ಈ ಜಾಬ್‌ಗೆ ಅಪ್ಲೈ ಇನ್ನೂ ಪೂರ್ತಿ ಆಗಿಲ್ಲ. ನಿಮ್ಮ ಆಸಕ್ತಿ ನಾವು ನೋಟ್ ಮಾಡ್ಕೊಂಡಿದೀವಿ. ಬೇರೆ ಜಾಬ್‌ಗಳನ್ನ ಹೇಳಲಾ?")
+  Escalation-ladder rung 3 — the wrong option is removed rather than forbidden: Row 2 keeps
+  "technical issue" only for the genuinely unreadable case (timeout, no response), where it is true.
+  Purely additive; Row 1 and Row 2 are unchanged. Row order is Row 1, Row 2a, Row 2 so the specific
+  case matches before the catch-all.
+- **Files:** 9 Hindi + 4 Kannada conversation prompts across KKB, Maya and KKB-Slim.
+- **Status:** VERIFY-PENDING. Rolling out to kkb-hi-signals and kkb-kn-signals first (the two bots
+  where the false line was observed); the rest are DEPLOYED, NOT VERIFIED until called.
+
+## 2026-09-09 — apply-failure catch-all tightened so a NAMED error has no catch-all (VERIFY-PENDING)
+- **Feedback/bug:** the dominant apply-failure defect is the opposite of D80 — **45 of 60**
+  `apply_job` calls that returned `ACTION_LIMIT_REACHED` spoke the Row 2 technical-issue line
+  instead of the Row 1 already-applied line (measured 2026-09-03/04, `ESCALATION-litwiz.md` §1).
+  Row 1 already named `ACTION_LIMIT_REACHED` as a trigger, so reachability was never the problem:
+  Row 2 stayed available as a safe hedge and the model kept taking it. §1 concluded "there is no
+  wording that resolves a distinction the model cannot observe" — but the model CAN observe it. The
+  `apply_job` failure result carries `__RAYA_TOOL_DEBUG__` with
+  `response_body_excerpt={"error":"..."}`, and 67 of 73 observed failures name the error.
+  An earlier attempt to drive Row 1 off the error name was reverted because it leaked onto
+  `USER_NOT_FOUND` (call `5f0d3671`); the new Row 2a now absorbs that case, so the fix is unblocked.
+- **Change:** Row 2 is no longer "you cannot tell why it failed". Its condition is now "the result
+  carries NO error name at all — a timeout, no response, or a body with nothing in `"error":"..."`",
+  with an explicit instruction to check the result in hand before choosing it. The three rows are
+  now disjoint and exhaustive: `ACTION_LIMIT_REACHED` matches ONLY Row 1, any other name matches
+  ONLY Row 2a, and no name matches ONLY Row 2 — which stays the one row permitted to attribute a
+  cause, because it is the only row where a technical fault is what you actually have. Rung 3: the
+  wrong option is removed rather than forbidden. Spoken lines unchanged in all three rows.
+- **Files:** 9 Hindi + 4 Kannada conversation prompts across KKB, Maya and KKB-Slim.
+- **Status:** VERIFY-PENDING — not yet deployed; the Row 2a verification dial is still in flight and
+  one change is being verified at a time.
+
+## 2026-09-09 — slash spoken aloud: rule missing on 9 bots, and point-of-use missing on the rest
+- **Feedback/bug:** tracker items "Slash is said out loud" were CLOSED, and the behaviour has
+  regressed: **28 of 438 cached calls** emit a literal "/" inside a spoken line. Most common is the
+  array role "Computer Operator / Data Entry" read verbatim (21 calls). Bots affected: dkb-kn-out,
+  trrain-hi-out, kkb-hi-in-signals, maya-hi-out, maya-hi-in, maya-hi-in-signals.
+- **Root cause, two halves.** (1) The "## Slash ( / ) symbol" section existed in the 12 KKB/Maya
+  prompts but was ABSENT from all 6 DKB, both TRRAIN and slim — and dkb-kn-out and trrain-hi-out are
+  among the offenders, so for them there was no rule at all. (2) On the bots that DO have the rule,
+  it sits in its own section far from the template that speaks `[role]`. Same point-of-use failure
+  as the location conversion, the `[company]` script fix and the never-invent guard.
+- **Change:** ported the Slash section to the 9 prompts missing it (Kannada adapted: "ಅಥವಾ", not
+  "या"), and added a one-line rule AT the job-presentation template in all 13 KKB/Maya/slim prompts —
+  a `[role]` containing "/" is spoken with "या"/"ಅಥವಾ" in its place, naming "Computer Operator / Data
+  Entry" as the worked case since it is the one that actually leaks.
+- **Files:** 6 DKB + 2 TRRAIN + slim (new section); 12 KKB/Maya + slim (point-of-use line).
+- **Status:** DEPLOYED to all 19 conversation targets, all verified in sync. **NOT VERIFIED** — needs
+  a call presenting a slash-bearing role.

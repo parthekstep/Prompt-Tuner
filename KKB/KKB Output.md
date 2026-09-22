@@ -48,6 +48,25 @@ If a value is not present, use "NA" for strings, [] for arrays, or 0 for counts.
     Each object: { job_id, role, company_name, company_location, salary_offered, 
                    qualification_required, failure_reason }
 
+11b. unbacked_apply_claim — **A RECONCILIATION FLAG, and the most important field in this
+    prompt when it fires.** Set to "Yes" when the agent TOLD the caller their application had
+    gone through but NO successful apply_job result appears anywhere in the transcript for that
+    job. Otherwise "No".
+
+    Read it off the transcript literally: the agent said a success line (e.g. "अप्लाई हो गया है",
+    "ಅಪ್ಲೈ ಆಗಿದೆ", or any wording asserting the application exists) and there is no apply_job tool
+    result showing success. A hold phrase, a stage direction, or the agent describing the tool call
+    does NOT count as a result.
+
+    When this is "Yes" the caller has hung up believing they applied and they have NOT. That is a
+    person who needs calling back, so the flag exists to make them findable rather than silent.
+    It occurred on roughly 1 in 11 real calls that claimed an apply, and it is NOT fixable from the
+    conversation prompt — four mechanisms were tried and each failed against a live call
+    (`ESCALATION-litwiz.md` §1). Until the runtime owns that sentence, this field is the mitigation.
+
+    Set it independently of jobs_applied and jobs_failed_to_apply: a call can have an empty
+    jobs_applied AND unbacked_apply_claim "Yes", and that combination is exactly the case to surface.
+
 12. drop_reason — If the seeker dropped off or disengaged from the call before 
     natural completion, what was the behavioral reason? 
     This captures SEEKER behavior, not technical failures. 
@@ -193,6 +212,7 @@ If a value is not present, use "NA" for strings, [] for arrays, or 0 for counts.
       "qualification_required": "10th pass"
     }
   ],
+  "unbacked_apply_claim": "No",
   "jobs_failed_to_apply": [
     {
       "job_id": "9098465107",

@@ -329,3 +329,61 @@
 - **2026-09-08_213230** — `pre-deploy-maya-hi-out-2026-09-08_213230` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
 - **2026-09-08_213753** — `pre-deploy-maya-hi-signals-2026-09-08_213753` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
 - **2026-09-08_213759** — `pre-deploy-maya-hi-out-2026-09-08_213759` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-09-09_003556** — `pre-deploy-maya-hi-signals-2026-09-09_003556` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-09-09_003559** — `pre-deploy-maya-hi-out-2026-09-09_003559` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-09-09_003605** — `pre-deploy-maya-hi-in-signals-2026-09-09_003605` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-09-09_003609** — `pre-deploy-maya-hi-in-2026-09-09_003609` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_
+- **2026-09-09_005153** — `pre-deploy-maya-hi-out-2026-09-09_005153` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-09-09_010349** — `pre-deploy-maya-hi-signals-2026-09-09_010349` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-09-09_010354** — `pre-deploy-maya-hi-out-2026-09-09_010354` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-09-09_010357** — `pre-deploy-maya-hi-in-2026-09-09_010357` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_
+- **2026-09-09_010401** — `pre-deploy-maya-hi-in-signals-2026-09-09_010401` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-09-09_011451** — `pre-deploy-maya-hi-signals-2026-09-09_011451` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-09-09_011454** — `pre-deploy-maya-hi-out-2026-09-09_011454` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-09-09_011456** — `pre-deploy-maya-hi-in-2026-09-09_011456` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_
+- **2026-09-09_011459** — `pre-deploy-maya-hi-in-signals-2026-09-09_011459` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-09-09_020023** — `pre-deploy-maya-hi-signals-2026-09-09_020023` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-09-09_020025** — `pre-deploy-maya-hi-out-2026-09-09_020025` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-09-09_020027** — `pre-deploy-maya-hi-in-2026-09-09_020027` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_
+- **2026-09-09_020029** — `pre-deploy-maya-hi-in-signals-2026-09-09_020029` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-09-09_020547** — `pre-deploy-maya-hi-signals-2026-09-09_020547` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-09-09_020549** — `pre-deploy-maya-hi-out-2026-09-09_020549` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-09-09_020551** — `pre-deploy-maya-hi-in-2026-09-09_020551` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_
+- **2026-09-09_020553** — `pre-deploy-maya-hi-in-signals-2026-09-09_020553` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-09-09_031932** — `pre-deploy-maya-hi-signals-2026-09-09_031932` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-09-09_031934** — `pre-deploy-maya-hi-out-2026-09-09_031934` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-09-09_031936** — `pre-deploy-maya-hi-in-2026-09-09_031936` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_
+- **2026-09-09_031938** — `pre-deploy-maya-hi-in-signals-2026-09-09_031938` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-09-09_033551** — `pre-deploy-maya-hi-signals-2026-09-09_033550` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-09-09_033552** — `pre-deploy-maya-hi-out-2026-09-09_033552` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-09-09_033554** — `pre-deploy-maya-hi-in-2026-09-09_033554` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_
+- **2026-09-09_033556** — `pre-deploy-maya-hi-in-signals-2026-09-09_033556` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-09-09_042424** — `pre-deploy-maya-hi-signals-2026-09-09_042424` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-09-09_042426** — `pre-deploy-maya-hi-out-2026-09-09_042426` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-09-09_042428** — `pre-deploy-maya-hi-in-2026-09-09_042428` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_
+- **2026-09-09_042430** — `pre-deploy-maya-hi-in-signals-2026-09-09_042430` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-09-09_042941** — `pre-deploy-maya-hi-signals-2026-09-09_042941` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-09-09_042943** — `pre-deploy-maya-hi-out-2026-09-09_042943` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-09-09_042945** — `pre-deploy-maya-hi-in-2026-09-09_042945` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_
+- **2026-09-09_042947** — `pre-deploy-maya-hi-in-signals-2026-09-09_042947` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-09-09_051305** — `pre-deploy-maya-hi-signals-2026-09-09_051305` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-09-09_051307** — `pre-deploy-maya-hi-out-2026-09-09_051307` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-09-09_053526** — `pre-deploy-maya-out-memory-2026-09-09_053526` — auto snapshot before Raya deploy of Maya/Maya Memory.md _(6 files)_
+- **2026-09-09_053527** — `pre-deploy-maya-in-memory-2026-09-09_053527` — auto snapshot before Raya deploy of Maya/Maya Memory.md _(6 files)_
+- **2026-09-09_062646** — `pre-deploy-maya-hi-signals-2026-09-09_062645` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-09-09_062648** — `pre-deploy-maya-hi-out-2026-09-09_062648` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-09-09_062649** — `pre-deploy-maya-hi-in-2026-09-09_062649` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_
+- **2026-09-09_062651** — `pre-deploy-maya-hi-in-signals-2026-09-09_062651` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-09-09_063308** — `pre-deploy-maya-hi-signals-2026-09-09_063308` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-09-09_063310** — `pre-deploy-maya-hi-out-2026-09-09_063310` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-09-09_063312** — `pre-deploy-maya-hi-in-2026-09-09_063312` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_
+- **2026-09-09_063314** — `pre-deploy-maya-hi-in-signals-2026-09-09_063314` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-09-09_070703** — `pre-deploy-maya-hi-signals-2026-09-09_070703` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-09-09_070705** — `pre-deploy-maya-hi-out-2026-09-09_070705` — auto snapshot before Raya deploy of Maya/Maya Hindi.md _(6 files)_
+- **2026-09-09_070707** — `pre-deploy-maya-hi-in-2026-09-09_070707` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_
+- **2026-09-09_070709** — `pre-deploy-maya-hi-in-signals-2026-09-09_070709` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-09-23_013057** — `pre-deploy-maya-hi-signals-2026-09-23_013057` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-09-23_013058** — `pre-deploy-maya-hi-in-signals-2026-09-23_013058` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-09-23_014157** — `pre-deploy-maya-hi-signals-2026-09-23_014157` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-09-23_014601** — `pre-deploy-maya-hi-in-signals-2026-09-23_014601` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-09-23_015209** — `pre-deploy-maya-hi-in-signals-2026-09-23_015209` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_

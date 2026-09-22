@@ -169,6 +169,35 @@ is already digit-free and already in the call's script removes that class entire
 
 ---
 
+### Update 2026-09-09 — both prompt-side mechanisms have now been tried and both failed
+
+This ask is no longer a nice-to-have. Two structurally different prompt fixes were built and
+tested live, and each failed in its own way, for the same underlying reason: the sentence needs the
+value **transformed**, and every way of getting the value into the sentence defeats one half of that.
+
+| mechanism | live result |
+|---|---|
+| **bracket slot** `[जगह]` / `[ಜಾಗ]` — model resolves it from `${location}` | the model reaches for the FETCHED PROFILE instead. `2bf465d9`, `8976c120` (both sent `location: Hubli`) and `15434ef6` (`Hubballi, 580020`) all spoke "ಕೊರಮಂಗಲ", the profile's city. Three failures. |
+| **literal `${location}` token embedded in the spoken sentence** — the platform substitutes it, so there is nothing for the model to choose | the model reads the substituted value VERBATIM, pin code included. `a9039634` spoke "ಸರ್ಜಾಪುರ, 110045" — right place, raw digits. |
+
+The two are mutually exclusive. A bracket the model fills is a bracket the model can fill wrongly;
+a pre-substituted token is a string the model will read as-is. The prompt currently uses the literal
+token (because a wrong PLACE is worse than a spoken pin code) and states the digit-drop rule as
+forcefully as prose allows — "**DELETE** every digit. Deleted, not rewritten" — and `a9039634` still
+read the digits, 7 minutes after that wording went live.
+
+Per our own escalation ladder we will not add a third wording. **What we need is one field:**
+
+    location_spoken: "सरजापुर"          // or "ಸರ್ಜಾಪುರ" for a Kannada campaign
+
+Already in the target script, digits and postal codes already stripped, no locality/city/state
+tail. The prompt then speaks it with no transformation step at all, which is the only version of
+this that cannot fail. Keep sending `location` as-is for tool payloads and matching; this is purely
+the sayable form.
+
+Related: §2 (full postal addresses arriving in `location`) is the same root problem seen from the
+data side.
+
 ## 6. Pass `${location}` on INBOUND too, populated from the caller's stored profile (added 2026-09-08)
 
 **The ask:** inbound agents currently receive no `location` argument. Send one, filled from the
@@ -208,3 +237,203 @@ it is whether the value is in the sentence or in the model's memory.
 we already know and usually answers it consistently, so nothing untrue is said. It is worth fixing
 because re-asking a fact we hold is the most annoying thing this bot does, and because the fix is
 cheap on your side and impossible on ours.
+
+---
+
+# Added 2026-09-09, REVISED 2026-09-10 — consent testing is now unblocked; one ask remains
+
+## 3. WITHDRAWN — we can fixture consent states ourselves after all
+
+The 2026-09-09 version of this section asked you to provision a record with `terms_accepted` /
+`privacy_accepted` false, because we believed the caller's identity was pinned to the dialled tester
+DID. **That was our error and the ask is withdrawn.** `contact_phone` passed in a call's
+`agent_args` DOES reach the model, so we can build any profile state on a throwaway number via the
+admin API and point the bot at it. Verified end-to-end on calls `e0e7bbc2` and `f796df13`.
+
+What we learned about consent while doing it, recorded here because it constrains the data model and
+is worth your team knowing:
+
+| probe | result |
+|---|---|
+| create with `compliance` omitted | 200 — user + profile created with **zero consent rows**: `user_consent` terms/privacy **false**, item `draft`, `profile_consent_accepted` **false** |
+| create with `compliance` = `user_terms` only | **400 `USER_LEVEL_INCOMPLETE`** — *"user_terms and user_privacy must be sent together"* |
+| create with `user_terms` + `user_privacy`, no `profile_creation` | 200 — participant flags true, item `draft`, `profile_consent_accepted` **false** |
+| any `compliance` value sent as `false` | **400 `CONSENT_DECLINED`** — *"consent cannot be declined — omit a key to skip it"* |
+| update (POST with `item_id`) carrying `compliance` all-true, against a **draft** | 200 — consent recorded **and the item becomes `live`** |
+
+Two consequences we have built around: consent is **write-once-true**, and since compliance-all-true
+is what makes an item live, **"a live profile with a false consent flag" cannot exist** — every
+false-flag state is necessarily a `draft`. Our bot now repairs that state with an update carrying the
+compliance array (a `record_consent` tool) rather than `create_profile`, which was minting a second
+live profile and orphaning the first.
+
+**One question still for you:** is an update carrying `compliance` the sanctioned way to record
+consent for an existing caller, or is there an endpoint intended for it? We are relying on the
+create/update-same-endpoint behaviour documented in §A.2.
+
+## 4. WITHDRAWN — the tester DID's 5-profile cap no longer blocks us
+
+`create_profile` on `+917946350285` still returns `409 PROFILE_LIMIT_REACHED` (max 5 seeker
+profiles, and there is no DELETE route on `/api/v1/admin/participant` — `404 Route not found`), but
+we no longer need that participant for new-caller tests: we point `contact_phone` at a fresh number
+instead. Freeing those 5 stale profiles would still be tidy, and a DELETE route would help us clean
+up our own test records, but neither is blocking.
+
+## 5. WITHDRAWN — we can now get a successful `apply_job`, and we no longer need test inventory
+
+**Resolved on our side, 2026-09-23. Please ignore the ask below; it is kept for context.** The cause
+was our fixtures, not your data: we were applying to `job_id`s pasted into `${recommendations}`
+months ago. Now that the bot fetches jobs live through `signals-search` (`get_recommended_jobs` /
+`get_jobs`), every `job_id` it applies with is by construction a currently-live posting. Successful
+applies, all on `gzb-signals`: **`511171cf`**, **`6dc1a058`**, **`45490ef6`** and **`28704be3`**
+(inbound). Everything downstream of a successful apply — the post-apply questions, the profile
+write-back and the closing read-back — has now run in a real call. **No action needed from you.**
+
+The original text follows.
+
+---
+
+Every apply in testing fails at the target, not the source:
+
+- `TARGET_ITEM_NOT_FOUND` — the `job_id`s in our fixtures no longer exist. On the Kannada bot they
+  additionally belong to the wrong instance (our fixtures carry `gzb-signals` ids; that bot reads
+  `dharwad-signals`).
+- We tried minting our own job posting to apply to: `POST /admin/participant` with
+  `domain: provider`, `item_type: job_posting_1.0` + `compliance` all-true returns 200 but the item
+  stays **`draft`**, and applying to it fails `PROFILE_NOT_LIVE` — *"target_item is not live"*.
+  Adding `hiringManagerName`/`Email` does not change it; other fields are rejected as additional
+  properties. So a job posting evidently goes live by some step we cannot reach through this API.
+
+**The ask:** either (a) a handful of currently-live `job_posting_1.0` item ids per instance
+(`gzb-signals` and `dharwad-signals`) that we can keep in fixtures, or (b) tell us what makes a job
+posting live so we can mint our own test inventory. Until one of those exists, **nothing downstream
+of a successful apply is testable** — the post-apply questions, the profile-completion write-backs
+and the closing read-back have never run in a test, on any bot.
+
+---
+
+# Added 2026-09-23 — the participant consent block was renamed, and there is still no consent date
+
+## 6. `user_consent` → `compliance`: an unannounced response-shape change broke a live gate
+
+`GET /api/v1/admin/participant` used to return, at the top level:
+
+```jsonc
+"user_consent": { "terms_accepted": true, "privacy_accepted": true, "has_age": true }
+```
+
+As of **2026-09-22** it returns instead:
+
+```jsonc
+"compliance": [ { "key": "user_terms",   "value": true },
+                { "key": "user_privacy", "value": true },
+                { "key": "has_age",      "value": true } ]
+```
+
+and `user_consent` is gone (reads as absent). Verified the same day across four numbers on **both**
+instances (`gzb-signals` and `dharwad-signals`), so this is a platform-wide change, not per-tenant.
+
+**What it cost us.** Our consent gate reads those flags and — correctly — treats a missing flag as
+"consent not given". So from the moment of the rename, every caller with a profile was being read the
+full terms disclosure again, including people who had consented days earlier. The prompts are fixed,
+but the class of failure is worth naming: **a renamed field in this response silently changes what
+citizens hear on a live call.** A heads-up before a response-shape change, or a deprecation window
+where both keys are returned, would have avoided it entirely.
+
+**The ask:** tell us before the shape of this response changes again, and where practical keep the old
+key alongside the new one for a release.
+
+## 7. Still no consent TIMESTAMP — the annual refresh cannot be built
+
+The owner's T&C script requires re-asking for terms when they were accepted **more than 12 months
+ago**. That is not implementable against this API: the `compliance` rows carry a boolean and nothing
+else, and an item's `created_at` / `updated_at` is when the profile record changed, not when consent
+was given. Using the profile dates as a proxy would re-ask people who consented last week and skip
+people who consented two years ago, so we have deliberately not done it.
+
+**The ask:** expose the date each consent row was written — e.g. `{"key":"user_terms","value":true,
+"accepted_at":"2025-08-14T…"}`. Until then the annual refresh is shipped as flag-based only, and
+anyone whose flags are true will never be re-asked however old their acceptance is.
+
+## 8. `create_profile` cannot create an account from name + phone alone
+
+The script's Part 1 tells the caller "an account will be created using your name and phone number",
+then Part 2 saves the details. The API refuses that order: a create carrying `compliance` without an
+age returns **400 `AGE_REQUIRED` — "age is required with consent on this domain"**. So consent cannot
+be recorded until an age is known, and the account genuinely does not exist at the moment Part 1 is
+spoken. We therefore do not tell the caller their account is created at that point.
+
+**The ask (optional, product call):** if the intent is a real name+phone account at first contact,
+consent needs to be writable without an age. Otherwise the script's Part 1 wording should stop
+implying the account exists at that moment.
+
+---
+
+# Added 2026-09-23 (later) — moving the bot onto the jobs + services APIs: what blocks quality
+
+Context: the KKB Slim Hindi bot no longer receives a curated `${recommendations}` array from the
+campaign. It now fetches jobs itself (`signals-search` anchor + textSearch) and services
+(`fetch_local`, `item_domain: service_provider`). That works — but the raw inventory is in much worse
+shape than the curated list was, and three things below directly limit what the bot can say.
+**All figures measured on 2026-09-23 across all 1258 live `job_posting_1.0` items on gzb-signals.**
+
+## 9. 70% of live jobs have a role the bot cannot say aloud
+
+| role value | count |
+|---|---|
+| `na` | 726 |
+| `Any` | 67 |
+| `Any | Helper`, `Any | Sales`, `Any | Crew Member - McDonald's`, … (pipe-joined) | ~80 |
+| blank / null | 2 |
+| **total unusable** | **875 of 1258 (69.6%)** |
+
+The bot now drops these rows before speaking, so callers never hear them — but it means a search that
+returns 5 rows often yields 1–2 offerable jobs, and an anchor on a profile whose role is `Any` returns
+rows literally named `"Any | Anyrrr"`. **The ask:** clean or retire the `na`/`Any` rows, and stop the
+pipe-concatenation at the source. Until then the effective inventory is ~383 jobs, not 1258.
+
+## 10. `jobProviderLocation` is masked on 99.9% of jobs, so the bot cannot tell a caller where a job is
+
+`jobProviderLocation` comes back as `"G***"` on 1257 of 1258 rows — on `fetch_local` **and** on
+`signals-search`, **with** `x-api-key` + `x-acting-org-id`. Consequences we have had to ship:
+- The location sentence no longer names the jobs' city (the clause was deleted — it asserted a fact
+  we no longer have, and the only value the model could substitute is the caller's own city).
+- When a caller asks where a job is, the bot must say it does not know. On a live call today a caller
+  asked exactly that.
+- `fetch_local` **silently ignores** a `jobProviderLocation` filter — filtering on it returns all 1258
+  rows rather than an error, which is worse than failing loudly.
+
+**The ask:** unmask the employer work city for the voice-bot service credential. This is an employer's
+work location, not personal PII; proximity is the whole premise of the campaign, and right now the bot
+is the only party in the flow that cannot see it.
+
+## 11. Search has no relevance floor — it always returns rows, however wrong
+
+`POST /signals-search/v1/search` returns a full page for any query:
+
+| query | top rows | top score |
+|---|---|---|
+| `electrician` | Electrician ×3 | 0.691 |
+| `data entry operator` | Data Entry Operator ×2 | 0.666 |
+| `nurse` | `na`, `na`, `na` | 0.499 |
+| `teacher` | `Driver`, `na`, `na` | 0.540 |
+| `xyzzy nonsense query` | `na`, `ITI (Other)` | 0.434 |
+
+So a non-empty result is not evidence we hold that work, and the bot has to judge every row itself.
+**The ask:** a `minScore` parameter, or omit rows below a floor. A relevance cut-off in the API is
+worth more than any prompt rule we can write, because the prompt is guessing at a threshold
+(empirically ~0.55–0.58) that only you can set properly.
+
+## 12. Smaller things found while testing
+
+- **90% of jobs have no salary** (1127 of 1258 lack `salaryMin`). The bot says salary only when the
+  row carries one, so most jobs are announced as role + company alone.
+- **Geo search returns `distanceMeters: 0` for every row** — five different jobs, all `0m`, from a
+  point 25km away. Jobs do carry real `item_locations` lat/lng, so the distance calculation looks
+  wrong. Untrusted and unused by the bot for now.
+- **Service contact details are masked** (`contactPhoneNumber: "7***"`, `contactEmail: "s***@…"`), so
+  the bot cannot give a caller a service's number — it says our team will connect them. If the intent
+  is for seekers to contact services directly, these need unmasking.
+- **One service row is test data** ("Temp - PS", `costToBeneficiary: Free`, serves MSMEs only). The bot
+  skips MSME-only rows, but it would be cleaner not to have it live.
+- `natureOfJob` is `"Not Available"` on a large share of rows.

@@ -70,6 +70,7 @@ Filenames are kept as-is (note KKB's "Placeholder" naming). Always resolve files
 | KKB | `KKB/KKB Placeholder Hindi.md` | `KKB/KKB Placeholder Kannada.md` | `KKB/KKB Memory.md` | `KKB/KKB Output.md` |
 | DKB | `DKB/DKB Hindi.md` | `DKB/DKB Kannada.md` | `DKB/DKB Memory.md` | `DKB/DKB Output.md` |
 | Maya | `Maya/Maya Hindi.md` | — (none) | `Maya/Maya Memory.md` | `Maya/Maya Output.md` |
+| KKB-Slim | `KKB-Slim/KKB Slim Hindi Signals.md` | `KKB-Slim/KKB Slim Kannada Signals.md` | (shares KKB's, per-agent on Raya) | `KKB-Slim/KKB Slim Output.md` (Hindi agent only — diverged from KKB's on 2026-09-23) |
 | TRRAIN | `TRRAIN/TRRAIN Hindi.md` | `TRRAIN/TRRAIN Kannada.md` | `TRRAIN/TRRAIN Memory.md` | `TRRAIN/TRRAIN Output.md` |
 
 ## Core principle: agnostic vs language-specific

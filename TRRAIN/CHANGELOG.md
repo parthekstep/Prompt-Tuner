@@ -125,3 +125,21 @@ calls between them. See analyser D71.
 ### Platform notes learned while creating these agents (worth keeping)
 - `POST /api/agent` requires only `name`; everything else defaults. It **rejects** `agent_args`, `memory_enabled` and `memory_instructions` on create — the latter two must be set by a follow-up `PATCH`.
 - **`agent_args` is not settable at all.** Raya derives it from the `${...}` tokens in `instructions`. A literal `${...}` written as an *example* inside a prompt therefore creates a phantom argument named `...` — the first build of these prompts did exactly that, and the wording was changed to avoid it.
+
+## 2026-09-09 — slash spoken aloud: rule missing on 9 bots, and point-of-use missing on the rest
+- **Feedback/bug:** tracker items "Slash is said out loud" were CLOSED, and the behaviour has
+  regressed: **28 of 438 cached calls** emit a literal "/" inside a spoken line. Most common is the
+  array role "Computer Operator / Data Entry" read verbatim (21 calls). Bots affected: dkb-kn-out,
+  trrain-hi-out, kkb-hi-in-signals, maya-hi-out, maya-hi-in, maya-hi-in-signals.
+- **Root cause, two halves.** (1) The "## Slash ( / ) symbol" section existed in the 12 KKB/Maya
+  prompts but was ABSENT from all 6 DKB, both TRRAIN and slim — and dkb-kn-out and trrain-hi-out are
+  among the offenders, so for them there was no rule at all. (2) On the bots that DO have the rule,
+  it sits in its own section far from the template that speaks `[role]`. Same point-of-use failure
+  as the location conversion, the `[company]` script fix and the never-invent guard.
+- **Change:** ported the Slash section to the 9 prompts missing it (Kannada adapted: "ಅಥವಾ", not
+  "या"), and added a one-line rule AT the job-presentation template in all 13 KKB/Maya/slim prompts —
+  a `[role]` containing "/" is spoken with "या"/"ಅಥವಾ" in its place, naming "Computer Operator / Data
+  Entry" as the worked case since it is the one that actually leaks.
+- **Files:** 6 DKB + 2 TRRAIN + slim (new section); 12 KKB/Maya + slim (point-of-use line).
+- **Status:** DEPLOYED to all 19 conversation targets, all verified in sync. **NOT VERIFIED** — needs
+  a call presenting a slash-bearing role.

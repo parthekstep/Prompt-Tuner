@@ -286,6 +286,16 @@ Examples:
 - एम्प्लॉयर
 - डिसाइड
 
+## Slash ( / ) symbol
+Never say "slash"/"स्लैश" aloud, and never emit a literal "/" inside any spoken line. This applies to
+**role and category labels** too — several inventory role names arrive with a slash in them, and the
+slash must become the spoken word for "or":
+- "सेल्स/मार्केटिंग" → "सेल्स या मार्केटिंग"
+- "कस्टमर सपोर्ट/बीपीओ" → "कस्टमर सपोर्ट या बीपीओ"
+- "Computer Operator / Data Entry" → "कंप्यूटर ऑपरेटर या डेटा एंट्री"
+Where "/" means "per" (rates), speak the per-form: "₹500/day" → "पाँच सौ रुपये दिन का". Under no
+circumstance voice the "/" symbol itself.
+
 ## Named entities
 **A square-bracket marker is a SLOT TO FILL, never words to say.** `[company_name]`, `[job_role]`,
 `[role]`, `[company]`, `[location]`, `[शहर]`, `[UUID from create_profile result]` — anything inside

@@ -1636,3 +1636,763 @@ problem was never gate strength.
 **Source.** All 6 KKB/Maya Signals prompts + the slim rewrite, 2026-09-08. `fix_presence` row
 `phase2-bridge-claims-nothing` carries the removed strings as a must-NOT-contain, so the prefix
 cannot come back. Related: D65 (a licensed line indistinguishable from the action), D47, D49.
+
+---
+
+## D79 — a guard stated only at the top of the prompt loses at the point of use
+
+**Symptom.** Given a SMALL `${recommendations}` array (1-3 jobs), an outbound bot presents more
+jobs than it was given — inventing roles, companies, salaries, vacancy counts and qualifications
+that were never supplied. Intermittent: it happened on 2 of 3 identical dials.
+
+**Root cause.** Not memory, and not example contamination — both were tested and ruled out (see
+below). The cause is guard PLACEMENT. The KKB Hindi Signals prompt states "never invent a job"
+**17 times**, scattered so the rule sits next to nearly every site that speaks a job. The slim
+rewrite compressed that to **3** statements, all of them top-of-file or in a flow summary, and
+NONE at the batch-list template or the deep-dive template — the only two lines that actually
+speak a job. Same failure shape as the location conversion and the `[company]` script fix: a rule
+stated far from the template that consumes the value does not bind. What reads as redundancy in a
+long prompt is often the guard being restated at each point of use.
+
+**Detection heuristic.** For each template that emits caller-facing content built from an input
+array, check whether the constraint on that content is stated **within the template's own block**.
+A guard whose only statements are in an intro section is a finding even when it is worded
+perfectly. Count restatements per job-speaking site, not per file.
+`raya/regression/offarray_jobs.py` catches the runtime symptom; read its docstring for the blind
+spot (deep-dive template only, not the batch-list template).
+
+**Two mechanisms tested and RULED OUT — do not repeat these diagnoses.**
+
+1. **NOT the memory store.** First diagnosis was that the memory prompt's
+   `last_options_presented` (`KKB/KKB Memory.md:77`) carried previous calls' job lists into the
+   next call. Refuted directly: `memory_enabled` was PATCHed to `false` on the bot and the
+   fabrication still occurred (`a4f378b9` — invented "हेल्पर, एबीसी लॉजिस्टिक्स", a company in no
+   prompt, no fixture and no tool result). Memory is not required for it.
+2. **NOT overlap between illustration names and array roles.** Second diagnosis was that the
+   generic-trades illustration ("फिटर", "मशीन ऑपरेटर", "हेल्पर") shares names with roles used as real
+   array jobs in the worked example, collapsing the distinction. Refuted by the control: the fat
+   prompt has the SAME overlap (illustration at `KKB Placeholder Hindi Signals.md:394`, फिटर as a
+   real array job at `:2348`) and does not fabricate.
+
+**Control evidence.** Outbound calls with a 1-3 job array: fat and siblings **5/5 clean**
+(`02c5f7f0` 2 supplied/2 named, `1536830c`, `55a44edb`, `8b0e6866` all 1/1, `baf836fe` 3/3).
+Slim **2/3 fabricated** (`45e2cb3b` 1 supplied/4 named; `a4f378b9` 1/2+; `85d670bb` 1/1 clean).
+
+**Fix direction.** Put the guard IN the template block — and make it checkable from the turn being
+composed rather than as a prohibition: "count the array, then pick the template whose count
+matches; there is no template for more jobs than you were given." Do NOT respond by re-adding the
+other 14 restatements; place 2 correctly instead.
+
+**Source.** kkb-hi-signals-slim `140d13ca`, 2026-09-08/09. Fix deployed 2026-09-09,
+**VERIFY-PENDING** until a post-deploy call on a 1-job fixture proves it.
+
+---
+
+## D80 — a decision table's catch-all row asserts a cause the specific case contradicts
+
+**Symptom.** The bot tells a caller "there is a technical issue" when the real cause was a policy
+decision the tool actually named — e.g. an age/channel block. The claim is false, and the prompt
+licensed it.
+
+**Root cause.** A lookup table with a catch-all row whose CONDITION is "an error with no reason you
+can read" but whose LINE asserts a specific cause ("technical issue है"). When an error arrives that
+IS readable but has no row of its own, no row matches, the model falls into the catch-all, and
+speaks its cause claim. The table looked complete because every branch had a line; it was the
+condition coverage that had the hole.
+
+**Detection heuristic.** For every decision table in a prompt, list the input values seen in real
+tool results and check each one matches exactly one row. Then check separately that each row's
+spoken line asserts nothing its condition does not establish — a row reached by "I don't know why"
+may not say why. A catch-all whose line makes a factual claim is a finding on sight, before any
+call is examined.
+
+**The enabling fact — the error name IS available to the model.** Raya puts
+`__RAYA_TOOL_DEBUG__` in the tool result with a `response_body_excerpt` containing
+`"error":"NAME"`. 67 of 73 observed apply failures name the error this way; the 6 that do not are
+pre-2026-09-04 calls, before the debug block appeared. **This supersedes the 2026-09-01 finding
+recorded around D52/D51 that "the model has never once received the error name" — it does now.**
+Any branch that needed the error name is therefore reachable in prose, and an escalation asking the
+platform to supply it is stale. Observed names: `ACTION_LIMIT_REACHED` (59),
+`MINOR_ACTION_CHANNEL_BLOCKED` (5), `USER_NOT_FOUND` (2), `TARGET_ITEM_NOT_FOUND` (1).
+
+**Fix direction.** Rung 3, remove the wrong option: add a row for "named error that is not the
+duplicate case" whose line asserts ONLY that the action did not complete, and leave the cause claim
+in the catch-all where it is true (timeout, no response). Do not add a prohibition telling the
+model not to say "technical issue" — the line is right there in a row it is instructed to look up.
+
+**Source.** KKB + Maya + KKB-Slim, 13 conversation prompts, 2026-09-09. `5a1c0c77` kkb-hi-signals
+and `1715a207` kkb-kn-signals said the technical-issue line on `MINOR_ACTION_CHANNEL_BLOCKED`.
+Related: D65, D78 (a line carrying a claim its guard does not cover).
+
+---
+
+## D81 — a prohibition that prints the forbidden output supplies it
+
+**Symptom.** The bot speaks a stage direction aloud — `*(Silent tool call: apply_job with
+profile_id: "5051" and job_id: "19e3da1f-…")*` — leaking internal ids to the caller, and then
+speaks the success line **without having called the tool at all**. On `e4e81fe2` (kkb-kn-out, live,
+2026-09-09) zero tools ran on the entire call and the caller was told "ಅಪ್ಲೈ ಆಗಿದೆ".
+
+**Root cause.** The guard against it quoted the exact string. Both the rule ("Writing
+`*(Silent tool call: apply_job)*` … applies nobody") and the evidence citation for call `29c4f152`
+printed the literal form. The model reproduced the shape it had been shown. This is D50 with the
+demonstration living inside the prohibition rather than inside a sample conversation — a negative
+example is still an example.
+
+**Detection heuristic.** Grep every prompt for the literal text of any output it forbids. If a
+guard quotes the bad string verbatim, that is a finding on sight — no call needed. Then check the
+transcripts for that same string in assistant turns. `fix_presence` row
+`no-verbatim-stage-direction` holds the literal form out of all 21 prompts as a must-NOT-contain.
+
+**Rung 0 count.** 7 calls across 5 bots spoke a stage direction (kkb-kn-signals 2/12, maya-hi-out
+2/7, kkb-hi-in 1/22, kkb-kn-out 1/10, plus e4e81fe2). Two of them read the caller's phone number
+aloud inside a `create_profile` stage direction. The prompt already documented four occurrences on
+2026-09-03, so the guard had failed five times before this fix — volume was never the lever.
+
+**Fix direction.** Delete the literal form and describe it instead. Do NOT add another prohibition
+wording; per the escalation ladder, two failures of the same guard is the signal to change
+mechanism. The remaining structural exposure is the samples themselves, which render 12-38 inline
+`*( )*` stage directions each — moving those to a non-inline `INTERNAL:` form would remove the
+imitable shape completely, but it is a 15-file reformat needing its own test cycle and sign-off.
+
+**Source.** 12 KKB/Maya conversation prompts, 2026-09-09. Related: D50 (wrong output present in a
+sample), D77 (bracket markers read aloud), D74.
+
+---
+
+## D85 — identical output across a CHANGED prompt means the source is not the prompt
+
+**The single most useful diagnostic of 2026-09-09, learned the slow way after four wrong
+diagnoses of one bug.**
+
+DKB spoke "a role and a salary that were never supplied" on six consecutive calls, and the sentence
+was **byte-identical every time** while the prompt was edited three times between them. Each edit
+was a defensible hypothesis and each was wrong:
+
+| attempt | hypothesis | outcome |
+|---|---|---|
+| 1 | worked example values printed beside the template (D83) | stripped them; output unchanged |
+| 2 | no precedence rule saying the argument beats memory | added it at the point of use; output unchanged |
+| 3 | the remembered value did not read as historical | date-stamped it in the memory prompt; output unchanged |
+| 4 | my own evidence note quoted the bad sentence verbatim (D81b) | removed it; output unchanged |
+
+The real source was `roles_posted` in the DKB **memory prompt** — "array of strings with timestamps
+embedded (e.g. `["2026-04-22: Fitter, Nashik, 18K"]`)" — the exact analogue of KKB's
+`last_options_presented`, whose identical fix had ALREADY been verified on `7bf46d06` hours
+earlier.
+
+**Detection heuristic, and use it early.** Before theorising about wording, ask: *did the output
+change at all when the prompt changed?* If a prompt edit deployed and the spoken sentence is
+character-for-character what it was, the sentence is not coming from the prompt. Stop editing prose
+and enumerate the other channels: the memory prompt, the memory store, the tool descriptions, the
+tool results, the arguments. A byte-identical repeat is a fingerprint of a fixed source.
+
+**The corollary that would have saved all four attempts:** when a bug has an exact analogue on a
+sibling bot that is already fixed, check whether the sibling's fix applies here FIRST. KKB and DKB
+both had a memory field storing the thing just presented. One was fixed and verified; the other was
+diagnosed four different ways.
+
+**Source.** DKB, 2026-09-09. Related: D81, D81b, D83, and the KKB memory fix verified on `7bf46d06`.
+
+## D81b — an EVIDENCE NOTE that quotes the bad output is the same trap as the prohibition
+
+**This is D81 again, but the offender is the citation, not the rule — and it is the easiest one to
+write by accident.** When a fix is recorded inside a prompt ("on live call X the bot said Y"), Y is
+now printed in the prompt and is available to be reproduced.
+
+**How it played out, 2026-09-09.** A note was added to the DKB posting template recording that the
+bot had announced a fabricated posting, and it quoted the sentence verbatim. The bot then spoke that
+sentence **character-for-character on five calls** — `714ebfc0`, `cc1b0ecc`, `965f9d06`, `dfaf30eb`,
+`90bd2e80` — with `job_role: "Sales"` and `salary: "30000"` in the arguments and "Helper" and
+"twelve thousand" coming out of its mouth.
+
+Three fixes were attempted and all three failed, because none of them removed the quoted string:
+1. strip the worked example values from beside the template
+2. state at the template that the argument beats anything remembered
+3. date-stamp the remembered value in the memory prompt so it reads as historical
+
+Each was a reasonable hypothesis. All three were wrong, and the byte-identical output across three
+different prompt states was the clue that should have been read sooner: **identical output across
+changed prompts means the source did not change.**
+
+**Detection heuristic.** Grep every prompt for quoted spoken text that sits inside an evidence note
+— look for `on live call`, `on `+backtick-uuid, "announced", "said", "spoke" followed by a quoted
+native-script sentence. Any such sentence is a template the model can fill. Record the failure by
+DESCRIBING it ("announced a complete posting none of which had been supplied") and never by
+reproducing it.
+
+**Rule for this repo.** A prompt may name a call id. It may not quote what the bot wrongly said.
+
+**Source.** DKB, 2026-09-09, self-inflicted while fixing D83. Related: D81, D83, D50.
+
+## D82 — the point-of-use rule (the pattern behind nine of ten bugs found on 2026-09-08/09)
+
+**This is a meta-pattern. Check it FIRST on any new report, before reading a single transcript.**
+
+**Symptom.** A rule is present in the prompt, correctly worded, unambiguous — and the bot breaks it
+anyway. The instinct is to call this "runtime adherence" and escalate. It usually is not.
+
+**Root cause.** The rule is stated in its own section, far from the template that consumes the
+value. A rule the model reads while composing the turn binds; a rule it read 700 lines earlier does
+not. Nine separate bugs in one night were this, and in every case the fix was to restate the
+existing rule at the line that uses the value — not to reword it, not to strengthen it.
+
+| bug | rule lived | value spoken at |
+|---|---|---|
+| `${location}` read out with its pincode | its own Location section | the location-confirm sentence |
+| `[company]` spoken in Latin | a conversion section | the job-list and deep-dive templates |
+| bot invented a job board | 3 statements at the top of the slim rewrite (17 spread through the fat one) | the batch-list template |
+| literal "/" spoken | a "## Slash ( / ) symbol" section | the job-list template |
+| DKB recap in digits | the field-collection questions | a recap the bot COMPOSES, with no template at all |
+| DKB `[job_role]` in Latin | nowhere — never stated | the posting template |
+| Kannada failure line welded to the catch-all | two rows sharing an opening phrase | the row table itself |
+
+**The mirror image — an example next to a template gets read as data.** Same night:
+- the DKB posting line took "दो" and "बारह हज़ार" verbatim from the number rule printed directly
+  beneath it, on a call where every job field was "Not Available" (`714ebfc0`)
+- the KKB generic-trades illustration ("फिटर", "मशीन ऑपरेटर", "हेल्पर") became offerable jobs
+- the prohibition on speaking stage directions printed the exact string the bot then spoke (D81)
+
+**Detection heuristic — runs statically, no calls needed.** For every rule that constrains a spoken
+value, find the template(s) that actually emit that value and ask whether the rule is stated inside
+that block. If it is not, that is a finding, however well the rule is worded. Then, for every worked
+example, ask whether it sits close enough to a template that the model could substitute it as data;
+if so, either move it or mark it explicitly as an illustration.
+
+**Fix direction.** Restate the rule at the point of use. Do NOT reword the distant rule and do NOT
+add a third wording — see the escalation ladder. When writing the `fix_presence` row, assert the
+rule is present **at the point of use**, not merely present in the file: several rows written before
+this pattern was understood passed while the bug was live.
+
+**Source.** KKB, Maya, DKB and KKB-Slim, 2026-09-08/09. Related: D50, D74, D77, D81.
+
+---
+
+## D83 — a concrete value printed beside a template becomes the output
+
+**The sharpest version of D82, and it bit three times in one night.** D82 says a rule must be
+stated at the point of use. This says the opposite about VALUES: a template block may state a rule
+but must **never print a concrete example value**, because the model substitutes the example when
+the real argument is absent — and sometimes even when it is not.
+
+**Three occurrences, 2026-09-08/09, all on live calls:**
+
+| what was printed beside the template | what the bot said |
+|---|---|
+| generic trades "फिटर / मशीन ऑपरेटर / हेल्पर" as an illustration of the local job market | offered them as real, applicable jobs |
+| `VANS TRADING COMPANY` is "वैन्स ट्रेडिंग कंपनी" as a script-conversion example | greeted an owner as "वैन्स ट्रेडिंग कंपनी" with **no `company_name` supplied at all** (`bd60c6b0`) |
+| `12000` is "बारह हज़ार" as a digits-to-words example | said "बारह हज़ार" when `salary` was **30000** (`cc1b0ecc`) |
+
+The third is the instructive one: the fix that renamed the slot to carry the required FORM worked —
+the bot said words, not digits — and the adjacent example then supplied the VALUE. Form and value
+fail independently.
+
+**Detection heuristic — static, no calls needed.** In any block that contains a spoken template,
+grep for backticked literals and quoted native-script strings. A rule ("a five-digit monthly figure
+becomes its Hindi words") is fine; a value (`12000` is "बारह हज़ार") is a finding. Keep the worked
+examples, if they are needed at all, in a pronunciation/script section far from any template.
+`fix_presence` row `no-concrete-values-beside-templates` holds the known literals out of all 21
+prompts as must-NOT-contain.
+
+**Fix direction.** Replace the value with a description of the transformation. Do not simply pick a
+less realistic example — `bd60c6b0` shows any name-shaped string is substitutable, and an earlier
+KKB call invented "एबीसी लॉजिस्टिक्स" from nothing when no example was available at all.
+
+**Source.** DKB, KKB, Maya and slim — 18 prompts cleaned, 2026-09-09. Related: D50, D74, D81, D82.
+
+---
+
+## D84 — "say it in words" gets satisfied by re-rendering the digits in the target script
+
+**Symptom.** A rule requires a number be spoken as words. The bot outputs the same number in
+Devanagari or Kannada numerals — `११००४५`, `१२,००० से १६,०००` — which is not Latin digits, so it
+looks like compliance, and is not words, so it is not.
+
+**Twice in one night, on two different rules:**
+- `1c6963bb` — the location rule said "drop every digit"; the bot spoke the pin code as "११००४५"
+- `6e400995` — the salary rule said "arrive as DIGITS and are spoken as WORDS"; the bot spoke
+  "सैलरी १२,००० से १६,०००" and "२ पोज़िशन", after that rule was already live
+
+**Root cause.** "In words" and "not in digits" are read as a script instruction rather than a
+spelling instruction, because everything else nearby IS a script instruction (convert Latin to
+Devanagari, speak in the target script). The model applies the conversion it has been trained by
+context to apply.
+
+**Detection heuristic.** Grep spoken output for `[०-९]` and `[೦-೯]` runs of two or more, not just
+`[0-9]`. A detector that only looks for ASCII digits reports clean while this is happening —
+`grade_call.py`'s digit check had to be widened to all three numeral ranges before it caught it.
+
+**Fix direction.** State that native-script numerals are still digits, at the rule: "'१२,०००' is NOT
+a word — it is the same number in Devanagari numerals." Do not rely on "in words" alone. Same
+correction as the pin-code rule needed ("DELETE every digit. Deleted, not rewritten").
+
+**Source.** KKB, Maya and slim — 13 prompts, 2026-09-09. Related: D82, D83.
+
+---
+
+## D86 — a flag the prompt tells the model to IGNORE is a consent nobody checks
+
+**Symptom.** A tool response carries state that a rule correctly says is *not* the readiness signal —
+so the prompt says "ignore it" — and the state then goes unread for every other purpose too. On the
+Signals seeker bots, `get_profile` returns `user_consent { terms_accepted, privacy_accepted, has_age }`
+and a per-item `profile_consent_accepted`, and all seven prompts said, verbatim: *"Never treat
+`user_consent: true` as 'the profile is live'"*. True, and the reason it was written. The consequence:
+a returning caller whose `terms_accepted` or `privacy_accepted` is **false** — a profile created
+outside the bot, by a portal, an import or a partner — was never asked for consent, because consent
+was only ever asked on the path that CREATES a profile. The whole call then ran on a consent that had
+never been given, and the recorded flag stayed false forever.
+
+**Root cause.** "Do not use X to decide A" gets generalised to "X is noise". A field is mentioned in
+the prompt exactly once, in a negative rule, so nothing ever routes on it. This is the mirror image
+of D82 (point-of-use): the field has no point of use at all.
+
+**Detection heuristic.** For every field the tool response actually returns, grep the prompt for its
+name and classify each hit: does any hit make a DECISION, or are they all disclaimers? A field whose
+only mentions are "never use this for…" / "note: this can be true while…" is an unread field —
+report it and ask what SHOULD read it. Then ask the inverse question about every gate: *is this gate
+reachable only on one path?* A consent gate that exists solely on the create path cannot serve a
+caller who already has a record. Cheap grep: a consent/acceptance flag in the response with no
+branch on it anywhere in the prompt.
+
+**Fix direction.** Give the field a decision site of its own, as early as the data is available — for
+KKB-Slim, a step 3.5 read immediately after the fetch, ahead of any other spoken turn. Keep the
+original disclaimer (it is still right about readiness) and add the new use beside it, so the two
+never get confused. **And check there is a WRITE path before promising the fix works:** asking for a
+consent you cannot persist re-asks it on every future call. On Signals nothing could write consent
+onto an existing profile (`update_profile`'s template has no `compliance`), which is why a separate
+`record_consent` tool was needed — not compliance folded into `update_profile`, whose fixed template
+would then assert a consent on every unrelated field write.
+
+**Platform facts worth carrying (verified 2026-09-09):** an update POST (`item_id` present) carrying
+`compliance` returns 200 and the `item_state` merge preserves every other field; a `compliance` value
+of `false` is **rejected** — 400 `CONSENT_DECLINED`, *"consent cannot be declined — omit a key to skip
+it"*. Consent is write-once-true, which also means **a false-flag fixture cannot be manufactured
+through the API** — the false branch of any such gate is untestable without a provisioned record, so
+say VERIFY-PENDING rather than claiming it works.
+
+**Source.** KKB-Slim, 2026-09-09. Related: D82, D51.
+
+---
+
+## D87 — a reduction rule demonstrated only on single-token inputs teaches "keep the first one"
+
+**Symptom.** A rule says to strip one KIND of content out of a written value (digits, punctuation, a
+suffix) and speak the rest. The bot instead speaks only the FIRST surviving token and silently drops
+the others. Live: `${location}` = `Muradnagar, Delhi 110098` was spoken as "मुराद नगर" — दिल्ली gone
+(`591e5c28`); reported independently as "only the 1st word is being read" for
+`Muradnagar, KHB colony, 110045`.
+
+**Root cause.** The examples, not the rule (D83 again). Two of three table rows were single-place
+inputs whose correct output happened to be one word (`Muradnagar, 110045` → मुराद नगर), so "one word
+out" was the demonstrated pattern; the one multi-place row was the least like real campaign data. The
+prose said "Locality and city only", which reads as a licence to pick.
+
+**Detection heuristic.** For every conversion/reduction table in a prompt, count tokens in and out
+per row. **If every row but one reduces to a single output token, the rule is undemonstrated for the
+common case** — flag it. Cheap version: does the table contain at least one row where the output has
+two or more kept tokens, in the exact shape the input variable actually arrives in? Also grep the
+prose for "X and Y only" phrasing next to a list — an enumeration reads as a filter to pick from.
+
+**Fix direction.** Make it a **count** rather than a description: every place word is spoken, in
+order; digits are the only thing removed; count before speaking, and saying fewer than you were given
+means you dropped one. Add an `in → out` column so each row asserts the count, and put the real
+reported input shapes in the table. Dropping a datum is the same class of error as inventing one —
+say so, since the prompt already forbids inventing.
+
+**Source.** KKB-Slim, 2026-09-09. Related: D83, D50, D82.
+
+---
+
+## D88 — a step gated on "first call" is dead for every caller who has a profile
+
+**Symptom.** A one-time data-capture turn labelled *FIRST call only* never happens. On KKB-Slim the
+landmark turn was skipped on 11 of 11 live calls.
+
+**Root cause (two, and they stack).** (1) The model has just fetched a profile, so "first call" reads
+as *not this call* — and almost every caller has a profile, which makes the turn unreachable rather
+than rare. The condition intended "the first time we capture this datum", which is not what the words
+say. (2) The section framed skipping as the default ("asking is the EXCEPTION"), so any doubt resolved
+to skip.
+
+**Detection heuristic.** For every conditional turn, ask what fraction of callers satisfy the
+condition **as the model will read it**, not as intended. A gate phrased on call ordinality
+("first call", "new caller", "if this is their first time") that sits in a flow which fetches a
+profile is suspect by construction. Then check the framing: if the section states the skip before the
+ask, or calls the ask an exception, the skip is the default. Confirm with a count from live calls
+(D52's rung 0): a `0/N` is unreachability, not flakiness.
+
+**Fix direction.** Re-gate on the DATUM, never on the call ordinal: *do we already hold this value?*
+Found → skip; not found → required. Make the skip need a positive reason ("a value you can point at")
+and state the requirement before the exception. State explicitly that having fetched a profile says
+nothing about whether the datum is on record.
+
+**Caveat that must be checked before calling it a bug (bit us here):** when the platform injects its
+own stored memory, a caller whose memory already holds the datum SHOULD be skipped — so a consistent
+skip on a heavily-reused tester DID may be the rule working correctly. `${contact_memory}` in
+`agent_args` does not reach the model (`/voice-test` §6c), so the "nothing on record" state cannot be
+fixtured; the discriminator is one call with `memory_enabled: false`, which is what proved the turn
+reachable here. Do not report the branch fixed on the strength of that call — it proves reachability,
+not that the re-gate changed anything in production.
+
+**Source.** KKB-Slim, 2026-09-09. Related: D52, D51, D82.
+
+---
+
+## D89 — a spoken line that promises finality kills every turn after it
+
+**Symptom.** A newly added turn never fires, and the turn immediately before it ends with a line that
+promises the caller it is the last thing being asked. On KKB-Slim the landmark turn opens with
+"आखिरी सवाल, फिर सीधे जॉब्स पर आती हूँ" — *last question, then straight to the jobs* — and the pin turn
+placed after it did not run on either of two live calls (`d47db4c0`, and `b42779bf` for a different
+reason). The model was keeping the promise the prompt made it make.
+
+**Root cause.** The prohibition is in the SPOKEN text, not in the rules, so it is invisible to a reader
+auditing the rule list — and it binds harder than a rule, because breaking it would make the bot
+visibly contradict itself to the caller. A rules paragraph saying "then ask the pin" cannot win against
+a sentence the bot has already said out loud.
+
+**Detection heuristic.** Grep every mandated spoken line for finality and count markers — "आखिरी",
+"ಕೊನೆ", "last question", "one more thing", "बस एक बात और", "then we're done", "two quick things" — and
+check what the flow actually does after that turn. Any turn that follows a finality promise is
+suspect. The same applies to a counted promise ("दो छोटी बातें") followed by three questions.
+
+**Fix direction.** **Reorder so the promise stays true** — put the new turn BEFORE the one that claims
+finality, and say in the prompt why that order exists, or the next edit will undo it. Rewording the
+promise is second-best: it costs the turn-ending signal that made the caller wait. Never leave the
+contradiction in place and hope the rule wins; the spoken sentence is the stronger instruction.
+(Fixed by reordering to place → pin → landmark; verified on live call `9c9f7e34`, all three turns in
+order.)
+
+**Source.** KKB-Slim, 2026-09-10. Related: D82, D50.
+
+---
+
+## D90 — "the caller's identity is fixed by the dialled number" is worth re-testing before you call a state unfixturable
+
+**Symptom.** A whole class of tests gets recorded as impossible — new-caller paths, draft profiles,
+consent-flag states — on the strength of a documented platform limit. The limit was real for one
+variable and got generalised to another.
+
+**What actually happened.** `/voice-test` §6c had settled that `contact_memory` in `agent_args` never
+reaches the model (true), and said `contact_phone` behaved "the same way" (false). On 2026-09-10 a
+one-call probe showed `${contact_phone}` rendering exactly the fixture value and `get_profile` firing
+against it, while the telephony leg still went to the tester DID. Every "cannot be fixtured" note that
+depended on the caller's identity being pinned to the DID was wrong — including a same-session
+escalation asking the data team to provision records.
+
+**Detection heuristic.** When a test plan says a state is unfixturable, check whether that rests on a
+platform claim about ONE input variable that was then extended to others. Cheapest possible probe: set
+the variable in `agent_args`, place one call, and read the CALL CONTEXT line in the transcript plus the
+tool arguments — those two facts settle it in four minutes. Do this before writing an escalation,
+because an escalation asking for something you can do yourself costs the other team a round trip and
+costs you the credibility of the next one.
+
+**Fix direction.** Build the state through the API on a throwaway number on the instance the bot reads
+from, point `contact_phone` at it, and keep the number in a reserved block that cannot belong to a real
+person. Then write down, per variable, whether args win or the platform wins — the answer is not
+uniform across variables, and assuming it is, is the actual bug.
+
+**Source.** KKB-Slim, 2026-09-10. Related: D52 (count before you theorise), D51.
+
+---
+
+## D91 — `create_profile` on a caller who already has a record mints a duplicate instead of fixing it
+
+**Symptom.** An existing caller whose profile is `draft`/unconsented is taken through the create path;
+the API happily creates a SECOND profile, live, leaving the original behind. The participant now has two
+live seeker profiles — the "duplicate live profile is a hard failure" state the prompt forbids
+everywhere else. Seen on live call `e0e7bbc2`: `create_profile` returned two items, the stale draft
+first and a new live one second.
+
+**Root cause.** The create/update endpoint is the same POST; supplying an `item_id` updates, omitting it
+creates. A flow that reaches for `create_profile` whenever the caller "is not applyable" omits the id
+and therefore creates. The consent case makes this easy to hit, because a draft is not applyable and the
+obvious repair looks like creation.
+
+**Detection heuristic.** For every path that calls a create tool, ask what `get_profile` returned on
+that same call. If it returned ANY item of that type, the correct action is an update against its
+`item_id`, never a create. Also grep the prompt for `items[0]` in the create-response reading — a
+response that carries a stale draft plus the new item will put the draft first, so `items[0]` hands the
+wrong id to the next tool.
+
+**Fix direction.** Give the flow a tool that updates the existing item — for consent, a `record_consent`
+that POSTs the `item_id` plus the compliance array. Verified on the API: sending the consent array
+against a **draft** item both records the consent and turns that item **live**, so the caller becomes
+applyable with no second profile (call `f796df13` did exactly this: tools were `get_profile`,
+`record_consent`, `apply_job` — no create, one profile). Reserve the create tool for a genuinely empty
+fetch, and make the create-response rule say "the item whose `lifecycle_status` is live", never
+`items[0]`.
+
+**Source.** KKB-Slim, 2026-09-10. Related: D86, D51.
+
+---
+
+## D92 — a digit-by-digit spoken number loses a repeated digit unless the count is asserted
+
+**Symptom.** A number the bot must speak one digit at a time comes out one word short, and the missing
+word is always a repeat. Live: the Kannada slim read the pin `580023` as "ಐದು, ಎಂಟು, ಸೊನ್ನೆ, ಎರಡು,
+ಮೂರು" — five words for six digits, one of the two zeros swallowed (`5e3d8c69`). Correct on the two
+neighbouring calls, so it reads as flakiness and is not: it is a missing invariant.
+
+**Why it matters more than it looks.** The bot then asks the caller to CONFIRM what it just said. The
+caller hears a plausible number, says yes, and a wrong pin is stored with a human's agreement attached
+to it. A value read back wrong is worse than one never asked for.
+
+**Detection heuristic.** For every spoken-digit-sequence rule (pin, phone, OTP, account number),
+grep the prompt for a **count** assertion next to the template. If the rule only says "digit by
+digit", it is unprotected. In transcripts, count the comma-separated number words against the source
+value's digit count — a mismatch of exactly one, on a value containing a repeated digit, is this bug.
+
+**Fix direction.** Assert the count at the point of use, with the repeat named: "a pin is exactly SIX
+digit-words, one per digit — six digits in, six words out, both zeros said. About to say five or
+seven? You mis-split it; read it off the source again." The same count mechanism fixed the dropped
+place-word in D87 — count-based checks are answerable from the turn being composed, which is why they
+hold where "carefully" does not.
+
+**Source.** KKB-Slim Kannada, 2026-09-10. Related: D87, D84, D82.
+
+---
+
+## D93 — an empty tool result gets answered with the nearest "we have nothing" line
+
+**Symptom.** A caller with a perfectly good job list is told there is nothing for them and the call is
+closed. Live call `fd01b717`: `${recommendations}` held three real jobs, `get_profile` came back empty
+(a genuinely new caller), and the bot spoke step 0's missing-inventory line — "अभी आपके लिए मुझे जॉब्स
+नहीं मिल रहीं — एक बार फिर से देखकर मैं आपको वापस कॉल करती हूँ" — then went to graceful exit. The
+single most common state on a growth campaign (nobody has a record yet) produced a dead-end call.
+
+**Root cause.** Two different emptinesses, one salient script. The prompt had a strong, quotable line
+for "the job array is empty" and only a quiet prose branch for "the profile fetch is empty". When the
+model needs a sentence for an unexpected empty result, it reaches for the one that exists. Nothing in
+the no-jobs step said what it was NOT about.
+
+**Detection heuristic.** List every "we have nothing / cannot help" line in the prompt and, for each,
+check it names the ONE condition that licenses it and explicitly excludes the others. Then list every
+tool that can return empty and confirm each has its own branch with its own next action. A bot with
+two empty-able tools and one no-content line is one bug waiting. Cheap transcript check: any call where
+a no-content line was spoken while the input array was non-empty.
+
+**Fix direction.** Scope the line to its own trigger by name ("counts `${recommendations}`, the job
+array, and nothing else"), add the negative ("an empty `get_profile` is NOT this case — it means the
+caller is new, which says nothing about what jobs we hold"), and make it expire: if the array had
+entries when you counted, the line is false for the rest of the call whatever a later tool returns.
+Then give the other empty branch an explicit "this is not a reason to close" with its next step.
+Verified fixed on `b91340a8`: empty fetch → pool overview → three location turns → all three jobs
+presented → consent → apply.
+
+**Source.** KKB-Slim, 2026-09-10. Related: D86, D82, D50.
+
+---
+
+## D94 — a shortening rule for one object gets applied to a different object whose value matches the example
+
+**Symptom.** A value that must be spoken in full comes out shortened, and the shortening exactly
+matches an example printed elsewhere in the prompt for a DIFFERENT field. Live call `6ff40ebb`:
+`${location}` was `Keshwapur, Hubballi, 580023` and the bot said only "ಕೇಶ್ವಾಪುರ" — because the
+canonical-spellings section carried *"a job's location: speak the locality and drop the repeated city
+(ಕೇಶ್ವಾಪುರ, not ಕೇಶ್ವಾಪುರ, ಹುಬ್ಬಳ್ಳಿ)"*, the very pair the caller's own location arrived as.
+
+**Root cause.** The rule was correctly scoped in words ("a job's `location`") and incorrectly scoped
+by its example. An example is matched on the VALUE, not on the field name, so a rule about field A
+fires on field B whenever B's value looks like A's example. This defeats an otherwise-correct
+count rule elsewhere in the prompt (here Turn A's "every place word is spoken").
+
+**Detection heuristic.** Collect every transformation example in the prompt and check whether its
+input string could plausibly be the value of a DIFFERENT field. Highest risk: two fields of the same
+type (a caller's place vs a job's place, a caller's phone vs an employer's phone) where one is spoken
+in full and the other abbreviated. Also flag any pair of rules where one says "keep all of X" and
+another says "drop part of Y" and X and Y share a format.
+
+**Fix direction.** Change the EXAMPLE so it cannot collide (use a locality/city pair that never
+appears as caller input), and add the exclusion to the shortening rule in the same breath: "this
+applies ONLY to a job's own location, NEVER to `${location}`, which keeps every place word — that
+count rule wins here." Fixing only the prose leaves the colliding example doing the damage (D50).
+
+**Source.** KKB-Slim Kannada + Hindi, 2026-09-10. Related: D50, D83, D87.
+
+---
+
+## D89 — an upstream field RENAME silently inverts a flag-driven gate
+
+**Symptom.** A gate that reads a boolean out of a tool response starts firing for everybody (or for
+nobody) with no prompt edit behind it. On 2026-09-22 `get_profile` stopped returning
+`user_consent: {terms_accepted, privacy_accepted, has_age}` and started returning
+`compliance: [{key:"user_terms",value:…},{key:"user_privacy",value:…},{key:"has_age",value:…}]`. The
+consent gate read `user_consent.terms_accepted`; its own rule — correctly — treats a missing flag as
+"not given", so from that moment **every caller with a profile was read the full terms disclosure
+again**, including people who had consented days earlier.
+
+**Root cause.** The safe default on a missing field ("absent = not consented") is right for safety and
+wrong for a rename: absence caused by a renamed key is indistinguishable, to the prompt, from absence
+caused by a user who never consented. Nothing in the prompt is wrong; the contract moved.
+
+**Detection heuristic.** For every field a prompt BRANCHES on, assert the field's presence against a
+live response — not just its value. A one-line probe per gate (`print(json.dumps(list(resp.keys())))`
+plus the specific key) catches a rename the same day. Two cheap standing checks:
+(1) a fixture whose flags are known-TRUE must produce a call with NO consent line — if that call
+starts asking, the field moved; (2) log the raw top-level keys of each tool response in the daily
+regression and diff them against the last run. **A gate whose "all clear" branch has not been
+exercised recently is a gate that can silently invert.**
+
+**Fix direction.** Read the new shape, keep the old name as a documented fallback, and say explicitly
+what an absent key means. Where the response is a LIST of `{key, value}` rows rather than an object,
+say "find the row whose `key` is X and read its `value`; an absent key counts as false" — the model
+handles that reliably (verified on `ab98be47` and `8ae650f2`, both branches). Then tell the platform
+team: ask for a deprecation window where both keys ship, because a renamed field here changes what
+citizens hear on a live call.
+
+**Source.** KKB-Slim (both languages), 2026-09-23. Related: D52, D86.
+
+---
+
+## D90 — a redirected log that looks empty is buffering, not a dead process
+
+**Symptom.** A test run's log file is 0 bytes minutes in, or shows only early "Pending" polls, so the
+run is declared hung/failed — when it is actually running fine and completes normally.
+
+**What it cost.** On 2026-09-23 two harness calls were read as "nothing connects" off an unflushed
+log; the conclusion was reported to the owner as a blocked harness, and a **shared DID belonging to
+another team's bot was reassigned** to work around a problem that did not exist. The calls
+(`8ae650f2`, `ab98be47`) had completed — 248s and 254s, 41 and 39 turns — and carried exactly the
+evidence being chased.
+
+**Root cause.** Python block-buffers stdout when it is a file rather than a tty, so `tail` shows a
+stale or empty file. Nothing in the pipeline is broken; the writes are sitting in a 4-8KB buffer.
+
+**Detection heuristic.** Never infer a run's state from its redirected log alone. **Ask the
+authoritative source** — for a Raya call that is `GET /api/call?agent_id=…`, which shows
+`outcome`/`dur`/`turns` regardless of any log. Treat "log is empty AND the process is alive" as
+"buffered", not "hung": `ps` showing the process plus a 0-byte log is the signature. And when a
+conclusion from a log would trigger an expensive or shared-resource action, verify it against the API
+first — that is the moment the check is worth most.
+
+**Fix direction.** `sys.stdout.reconfigure(line_buffering=True)` at import time in any script whose
+output gets redirected (done in `scripts/raya_testrun.py`), or run it with `python3 -u`.
+
+**Source.** Prompt Tuner harness, 2026-09-23. Related: D52 (count before you conclude).
+
+---
+
+## D91 — a REQUIRED tool parameter can be asserted falsely; it constrains what the model SAYS, not what it DID
+
+**Symptom.** A precondition is moved into the tool schema as a required enum (D-ladder rung 4, the
+`duplicate_check` pattern), and the model fills it in with the compliant value while the precondition
+is plainly unmet in the same transcript.
+
+**The case.** `record_consent` writes a caller's acceptance of the platform terms. On Maya Inbound the
+five-element disclosure was never spoken, the caller was asked only "क्या मैं अभी इस जॉब के लिए आपकी
+तरफ़ से अप्लाई कर दूँ?", and the tool fired anyway — a consent record for terms the caller never heard
+(`9df94781`). A required `terms_check` enum was added, whose compliant value is
+`disclosure-read-and-agreed-this-call`. On the retest the disclosure was **again** never spoken and the
+model sent **`terms_check: "disclosure-read-and-agreed-this-call"`** (`bdae75d6`). 2/2 fabricated.
+
+**Root cause.** `duplicate_check` works because the model can verify its value against something in
+front of it — its own call history this turn. A parameter that asks "did you perform action X earlier"
+is a **self-report about a turn the model did not take**, and the compliant value is the one the
+surrounding prose says it should be able to give. The schema makes the claim mandatory, not true.
+
+**Detection heuristic.** For any assertion parameter, ask: **is the fact checkable from the turn being
+composed, or is it a memory of an earlier turn?** Only the first kind holds. Then verify it the only
+way that counts — grep the transcript for the thing the parameter claims happened, and compare against
+the argument the model sent. A regression detector should treat
+`terms_check == "disclosure-read-..."` **AND** no disclosure text in the transcript as a hard failure,
+because that combination is exactly a laundered fabrication.
+
+**Fix direction, in order.** (1) **Remove the capability, don't forbid its misuse** — with
+`record_consent` off the agent, a skipped disclosure records nothing (the pre-feature status quo)
+instead of writing a false consent. Verified safe on `7c24f130`: no consent written, and no duplicate
+profile either. (2) **Then fix the reason the step was skipped.** Here it was the router: the prompt's
+DECISIVE ROUTER numbered its turns and sent the model to the named branch headings, and the consent
+gate sat *between* the router and those headings — so the route passed over a section that was never
+entered. Making it **step 3 of the router itself** is what got the disclosure spoken, in its own turn
+(`7c24f130`). A section the route does not name is a section the model can skip, however emphatic its
+own prose.
+
+**Source.** Maya Inbound, 2026-09-23. Related: D88 (a gate the route never reaches), D82.
+
+## D95 — a multi-turn sequence stated only in prose is skipped about half the time once the model has announced its next action
+
+**Symptom.** The prompt declares an ordered block of turns — "Order: A confirm the place → B the pin
+code → C one finer detail → step 6", "**Every path arrives here; no route to step 6 skips it**",
+"FOUND ONE → SKIP. FOUND NONE → YOU MUST ASK" — and the bot still fetches jobs after only turn A.
+Measured on kkb-hi-signals-slim, 2026-09-23, across every live call that reached the location block
+and had no landmark already on record (the one legitimate skip, `28704be3`, excluded): the pin was
+read back on **13 of 16** and the landmark asked on **6 of 16**. Khushboo's UAT report
+("pincode is missing, only city name is asked or confirmed"; "nearby landmark is not being asked")
+was this, and it survived two rounds of sharpening the prose.
+
+**Root cause.** A mixed ratio means the wrong output is still available (see the escalation ladder).
+Two things made it available. First, an earlier CLOSED TEMPLATE made a promise about the very next
+action — "ठीक है, [नया role] की जॉब्स देखती हूँ।" (*I'll look at [role] jobs now*) — after which three
+more questions read as a detour from something the bot has already told the caller it is doing. Second
+and more general: **nothing downstream depended on the answers.** The turns produced conversational
+values that no later step consumed, so skipping them cost the model nothing.
+
+**Detection heuristic.** For any ordered block of turns, ask what BREAKS if a turn is skipped. If the
+answer is "nothing, the next step runs anyway", the block is decorative and will be skipped at a rate
+prose cannot fix — flag it regardless of how forceful the wording is. Then count: pull every call that
+reached the block and score each turn separately. A **mixed** ratio is this pattern; `0/N` is D51/D52
+(unreachable), not this.
+
+**Fix attempted and REVERTED — do not recommend it.** The obvious ladder-rung-4 move is to make the
+next tool depend on the values: `get_jobs` and `get_recommended_jobs` were given `caller_pin_code` and
+`caller_landmark` as **required** parameters, absent from `payload_template` so the backend never
+received them, with the permitted values being a real one or `not-known` / `declined` / `anywhere` —
+deliberately **no value meaning "I did not ask"**.
+
+**It failed on the first live call, and failed WORSE than the bug it replaced.** On `6ae79885` the
+model called `get_recommended_jobs` with `caller_pin_code: "110045"` (lifted from the injected
+`${location}` string) and `caller_landmark: "not-known"` — **and then asked the location and pin
+questions afterwards.** So the tool ran before the turns it was supposed to gate, the landmark was
+still never asked, and the skip now came with a parameter **asserting** it had been asked. That is a
+laundered skip: harder to detect than the plain miss, and the same failure D91 records. The
+parameters were removed and the tools restored the same night.
+
+**The lesson, which generalises.** A required parameter is only an enforcement when the model cannot
+produce a plausible value without doing the work. `profile_id` qualifies — it comes from a prior tool
+result. A landmark does not: the model can always type a word. **Carrying "caller data, not a
+self-assertion" is not enough of a safeguard** — `not-known` is caller data in form and an assertion
+in substance. Prefer a value the model must have *received* over one it must have *elicited*.
+
+**Regression detector (still worth having if such a parameter ever exists).** A value appearing
+nowhere in a user turn and not in the contact context is a hard failure, and so is a locality or city
+name ("Ghaziabad", "Muradnagar") — that is what the model reaches for when it has not asked.
+
+**Where this bug actually stands.** Unfixed, at 6/16. The prose has been sharpened twice and the
+schema route is closed, so the next attempt should target the thing that made skipping free: give the
+answers a downstream consumer that genuinely needs them (proximity ranking done bot-side on the pin,
+for instance), rather than another guard or another parameter.
+
+**Source.** KKB Slim Hindi, 2026-09-23. Related: D91 (false assertion in a required param), D51/D52
+(move the decision into the tool schema), D25/D47/D49/D50 (don't re-word a guard that failed twice).
+
+## D96 — a pre-close checklist that names ONE owed item silently excuses every other owed item
+
+**Symptom.** Step 13 says the services offer fires "on EVERY call where the caller engaged, however
+the job part ended — applied (succeeded or failed) … 'They did not apply' is never a reason to skip."
+It fires reliably after a successful apply (`45490ef6`, `511171cf`, `28704be3`, `d70126e8`) and never
+after a failed one: `c883aa34` and `670cbb12` both went from the apply-failure line straight to
+Goodbye with `services_pitched: No`.
+
+**Root cause.** Two competing instructions, both nearer the decision than step 13 was. (1) The failure
+branch read "**On FAILURE the turn ends on the offer of another job and NOTHING follows it** — no
+service-provider pitch, no wrap-up, no goodbye" — scoped to *the turn* by intent, read as scoped to
+*the path*. (2) The second-failure line ended "Then Graceful Exit", routing failure past step 13
+explicitly. And the exit step's own pre-close checklist asked exactly one question — "has the Need
+Capture offer been made?" — which **implies the list is complete**: an owed item absent from the
+checklist is an item the exit does not believe it owes.
+
+**Detection heuristic.** Find every pre-close / pre-exit checklist and enumerate what it checks.
+Any step elsewhere in the prompt that claims to be owed "on every call" but is NOT an item in that
+checklist is a latent skip — flag it. Separately, grep the prompt for `NOTHING follows`, `nothing
+else`, `Then Graceful Exit` and similar terminal phrases and ask, for each, whether it is scoped to a
+turn or to a path; if a turn, it must say "in this turn".
+
+**Fix direction.** Scope the prohibition to the turn *and say where the item is still owed* ("no
+service-provider pitch **in this turn** … it is still owed, at step 13"); replace the bypassing route
+("Then Graceful Exit") with the full route ("Then step 13, then Graceful Exit"); and **add the item to
+the exit checklist**, where the decision is actually taken, rather than restating the rule in its own
+section a third time.
+
+**Source.** KKB Slim Hindi, 2026-09-23. Related: D91/D88 (a section the route never names),
+D89 (a line promising finality kills the turns after it).

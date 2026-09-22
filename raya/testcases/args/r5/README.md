@@ -75,3 +75,25 @@ changed nothing.
 Corroborated independently on Maya: `d15a8f9b` produced a specific callback claim — *"पिछली बार हमारी
 बात एक जॉब में अप्लाई करने के बारे में हुई थी"* — that was **not** in the `contact_memory` sent to it.
 Two bots, two mechanisms of the same kind. See `ESCALATION-litwiz.md` §4(a).
+
+## named-error-row2a.json — triggers the D80 Row 2a line
+One job carrying a well-formed but nonexistent `job_id` (`00000000-dead-4bee-8fff-000000000001`).
+The backend answers `apply_job` with `TARGET_ITEM_NOT_FOUND`, a NAMED non-duplicate error, which
+must route to the new row and produce "अप्लाई अभी पूरा नहीं हो पाया" — NOT the Row 2 technical-issue
+line and NOT the Row 1 already-applied line. Use it to verify D80 on any seeker bot. Safe: it only
+ever touches the tester profile, and a nonexistent job cannot create a real application.
+
+## already-applied.json — reachable on HINDI ONLY
+
+Uses `a8155bee`, which returns `ACTION_LIMIT_REACHED` for the HINDI tester profile (`588a907f`)
+because that profile genuinely holds an application to it. Proven on `45e2cb3b`, `764cba1d`,
+`6caf1fbe`.
+
+**On Kannada it does NOT reach the condition.** `cf781998` ran the same fixture on kkb-kn-signals
+and got `TARGET_ITEM_NOT_FOUND` — the Kannada tester is a different profile and has never applied
+to that job. To test the already-applied line on Kannada, first make a successful apply from the
+Kannada tester and then reuse that job id here.
+
+This matters because the already-applied line is the 45-of-60 defect
+(`ESCALATION-litwiz.md` §1) and the baseline rate is 4 of 34 (12%) — see
+`raya/regression/already_applied_rate.py`.

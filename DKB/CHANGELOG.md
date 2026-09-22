@@ -267,3 +267,88 @@ read and judged clean by eye. That is the argument for the detector existing.
   mine to do — so it is left as-is and reported.
 - **Status:** deployed. Documentation-only; nothing spoken changed, so there is nothing to verify by
   call beyond DKB Hindi Signals' standing sanity run.
+
+## 2026-09-09 — slash spoken aloud: rule missing on 9 bots, and point-of-use missing on the rest
+- **Feedback/bug:** tracker items "Slash is said out loud" were CLOSED, and the behaviour has
+  regressed: **28 of 438 cached calls** emit a literal "/" inside a spoken line. Most common is the
+  array role "Computer Operator / Data Entry" read verbatim (21 calls). Bots affected: dkb-kn-out,
+  trrain-hi-out, kkb-hi-in-signals, maya-hi-out, maya-hi-in, maya-hi-in-signals.
+- **Root cause, two halves.** (1) The "## Slash ( / ) symbol" section existed in the 12 KKB/Maya
+  prompts but was ABSENT from all 6 DKB, both TRRAIN and slim — and dkb-kn-out and trrain-hi-out are
+  among the offenders, so for them there was no rule at all. (2) On the bots that DO have the rule,
+  it sits in its own section far from the template that speaks `[role]`. Same point-of-use failure
+  as the location conversion, the `[company]` script fix and the never-invent guard.
+- **Change:** ported the Slash section to the 9 prompts missing it (Kannada adapted: "ಅಥವಾ", not
+  "या"), and added a one-line rule AT the job-presentation template in all 13 KKB/Maya/slim prompts —
+  a `[role]` containing "/" is spoken with "या"/"ಅಥವಾ" in its place, naming "Computer Operator / Data
+  Entry" as the worked case since it is the one that actually leaks.
+- **Files:** 6 DKB + 2 TRRAIN + slim (new section); 12 KKB/Maya + slim (point-of-use line).
+- **Status:** DEPLOYED to all 19 conversation targets, all verified in sync. **NOT VERIFIED** — needs
+  a call presenting a slash-bearing role.
+
+## 2026-09-09 — DKB Kannada read a Latin business name aloud, and read the recap back in digits
+- **Feedback/bug:** live sweep call `3e9590d2` (dkb-kn-signals) carried
+  `company_name: "Sharma Traders"` and the bot asked **"ನೀವು Sharma Traders ನಿಂದ ಮಾತಾಡ್ತಾ ಇದ್ದೀರಾ?"** —
+  the right business, read out in Latin letters on a Kannada call. The Hindi twin passes the same
+  test (`b187ffeb` → "वैन्स ट्रेडिंग कंपनी"). Separately, the same call spoke the working hours and the
+  vacancy count correctly in words while collecting them ("ಒಂಬತ್ತು ಗಂಟೆಯಿಂದ ಸಂಜೆ ಆರು", "ಇಬ್ಬರು") and
+  then read the pre-consent recap back as "12,000 ರೂಪಾಯಿ", "10ನೇ ತರಗತಿ", "9 ರಿಂದ ಸಂಜೆ 6".
+- **Root cause, both halves is placement.** (1) The Hindi prompt carries an explicit clarification
+  that "VERBATIM" is about WHICH business, not about which script — Kannada never got it, so the
+  VERBATIM emphasis read as "do not change the letters". This is sync drift: the Kannada file has
+  the guard that fixed the *substitution* bug (`9cf80aa5`, `829e5eb7`) but not the script
+  clarification that came later. (2) The numbers-in-words rule is stated at the field templates, and
+  the recap is a sentence the bot COMPOSES rather than a template it reads, so nothing carried the
+  rule there.
+- **Change:** mirrored the Hindi script clarification into `DKB Kannada Signals.md` and
+  `DKB Kannada.md`, worded so the identity guard is untouched — "you may not substitute a DIFFERENT
+  business's name, but that does not mean reading Latin letters aloud", with Kannada worked examples.
+  Added a recap rule at the consent step of all 6 DKB prompts. `DKB Inbound Kannada.md` gets the
+  recap rule but NOT the company-name one: inbound receives no `${company_name}` at all.
+- **Files:** `DKB Kannada Signals.md`, `DKB Kannada.md` (company name); all 6 DKB prompts (recap).
+- **Status:** DEPLOYED to dkb-hi-signals, dkb-kn-signals, dkb-hi-out, dkb-kn-out. DKB inbound has no
+  Raya agent, so nothing to deploy there. **NOT VERIFIED.**
+
+## 2026-09-09 — DKB announced a posting built from the number rule's own example values
+- **Feedback/bug:** live sweep call `714ebfc0` (dkb-hi-out). Every job field arrived as
+  "Not Available" — `job_role`, `salary`, `num_vacancies`, `qualification`, `job_id`, `location` —
+  and `contact_memory` was the "No Old Memory" sentinel. The bot still opened with
+  **"आपकी एक posting है — Helper, दो vacancies, सैलरी बारह हज़ार रुपये। क्या यह अभी भी चालू है?"** and then
+  ran the whole existing-posting flow against a job that does not exist.
+- **Root cause:** "दो" and "बारह हज़ार" are the two worked examples in the number rule printed on the
+  line IMMEDIATELY BELOW that template (`2` is "दो", `12000` is "बारह हज़ार"). With no real values to
+  substitute, the model took the nearest thing that looked like values — the illustrations. Same
+  class as the KKB generic-trades leak: an example sitting at the point of use gets read as data.
+- **Change:** a precondition ABOVE the template — check `${job_role}` first; if it is
+  "Not Available", NULL, absent or an unsubstituted token there is NO posting to confirm, skip the
+  step and go to Phase 3 — plus an explicit line that the values below are illustrations of the
+  number rule, never the posting. Also added the missing script rule for `[job_role]` /
+  `[company_name]` (Latin in, Devanagari/Kannada out), which no DKB prompt had stated: the same call
+  said "Helper" in Latin letters. The English loanwords already in these lines ("posting",
+  "vacancies") are deliberately left alone.
+- **Files:** 4 DKB outbound prompts. The 2 inbound prompts have no single-job sample and receive no
+  job arguments, so neither change applies to them.
+- **Status:** DEPLOYED to all 4 live DKB targets. **NOT VERIFIED.**
+
+## 2026-09-09 — three more from the live sweep: digits in the posting line, and an invented business
+- **`290d8e5c`** — `salary: '14000'`, `num_vacancies: '3'`, and the bot said "हेल्पर, **3** vacancies,
+  सैलरी **14,000** रुपये". The conversion rule was printed on the very NEXT line, with worked examples.
+  The slots were named `[num_vacancies]` and `[salary]` — i.e. named for the raw argument — so the raw
+  argument is what went in. **Renamed the slots for the spoken form** (`[वैकेंसी शब्दों में]`,
+  `[सैलरी शब्दों में]`; Kannada `[ವೇಕೆನ್ಸಿ ಪದಗಳಲ್ಲಿ]`, `[ಸಂಬಳ ಪದಗಳಲ್ಲಿ]`), the same mechanism that fixed the
+  location slot. The `[job_role]` script rule added earlier tonight DID hold on this call — it said
+  "हेल्पर", not "Helper".
+- **`bd60c6b0`** — no `company_name` was sent at all and the bot greeted the owner as
+  "वैन्स ट्रेडिंग कंपनी". That is the worked example that had been printed directly under the greeting
+  template (added earlier tonight as part of the script-conversion fix). With no real value to
+  substitute, the model took the nearest business-shaped string on the page. The no-name branch was
+  present and correct; it just lost to an adjacent example. **Kept the rule at the point of use and
+  moved the examples out**; there is now no substitutable business name anywhere in any DKB prompt.
+- **Same bug was already documented and recurring** — the prompt cited `2ea06509` doing exactly this,
+  and the citation itself printed the leaking name. Removed (D81: a guard that prints the forbidden
+  output supplies it).
+- **Also cleaned:** the Kannada prompts carried a HINDI evidence citation containing the old template
+  verbatim — both a language leak and a printed substitutable template. Rewritten as a description.
+- **Files:** 6 DKB prompts. **Status:** DEPLOYED to all 4 live DKB targets. **NOT VERIFIED.**
+- **Verified on the same sweep:** DKB Hindi business-name conversion works — `290d8e5c` said
+  "वैन्स ट्रेडिंग कंपनी" for `VANS TRADING COMPANY`.

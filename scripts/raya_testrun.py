@@ -62,9 +62,69 @@ def req(method, path, body=None, tries=4):
             time.sleep(4)
 
 
+# Unbuffered stdout. When this script's output is redirected to a file, Python block-buffers it, so
+# `tail -f run.log` shows an EMPTY file while the call is running and a stale one after it finishes.
+# On 2026-09-23 that cost a wrong conclusion: two calls that completed fine (8ae650f2, ab98be47) were
+# read as "nothing connects" off a log that had not been flushed, and a shared DID was reassigned on
+# the strength of it. Reconfigure immediately -- before any print in this module runs.
+try:
+    sys.stdout.reconfigure(line_buffering=True)
+except Exception:
+    pass
+
+
+def preflight_did(tester, to, bot=None):
+    """Refuse to dial a DID that is not bound to the tester agent.
+
+    Why: DIDs are shared and get rebound. On 2026-09-23 the long-standing tester DID 7946350285 had
+    been reassigned as the `in_did` of Purple-dots-with-APIs-V2-Inbound, so every "test" call reached
+    that bot instead of our tester -- two agents talked past each other and the transcript looked like
+    a bot bug. Later the tester's own new number (911204404272) accepted nothing at all: every poll
+    returned outcome='Pending', dur=0, turns=0. Both failures are invisible in the dump unless you
+    already suspect them, so check the binding BEFORE burning four minutes on a call.
+    """
+    # REVERSE-DIRECTION TEST: when the dialling agent IS the tester, the tester is the CALLER and the
+    # bot under test is the receiver -- so the DID being dialled is the BOT's in_did, not the tester's.
+    # Check that instead. (This guard blocked the first inbound run on 2026-09-23: it assumed the
+    # tester always answers, which is only true for the outbound direction.)
+    if bot and bot == tester:
+        st, d = req("GET", "/api/agent/" + tester)
+        d = (d or {}).get("data", d) or {}
+        want = str(to).lstrip("+")[-10:]
+        owner = None
+        for off in (0, 50):
+            s2, page = req("GET", f"/api/agent?limit=50&offset={off}")
+            for a in (page.get("agents") or page.get("data") or []):
+                s3, ad = req("GET", "/api/agent/" + a["id"])
+                ad = (ad or {}).get("data", ad) or {}
+                if str(ad.get("in_did") or "").endswith(want):
+                    owner = ad.get("name"); break
+            if owner:
+                break
+        if not owner:
+            print(f"!! PREFLIGHT: nothing answers on {to} -- no agent has it as an in_did. Refusing to dial.")
+            sys.exit(2)
+        print(f"[preflight] reverse test: tester dials {to} -> answered by {owner!r}  OK")
+        return
+    st, d = req("GET", "/api/agent/" + tester)
+    d = (d or {}).get("data", d) or {}
+    in_did = str(d.get("in_did") or "")
+    want = str(to).lstrip("+")
+    if not in_did:
+        print(f"!! PREFLIGHT: tester {d.get('name')!r} has NO in_did -- it cannot receive a call. "
+              f"Bind one, or pass the DID that actually rings it.")
+        sys.exit(2)
+    if not in_did.endswith(want[-10:]):
+        print(f"!! PREFLIGHT: you are dialling {to}, but tester {d.get('name')!r} answers on {in_did}. "
+              f"That call would reach whichever agent owns {to} -- not the tester. Refusing to dial.")
+        sys.exit(2)
+    print(f"[preflight] {to} -> in_did {in_did} on {d.get('name')!r}  OK")
+
+
 def main():
     bot, to, args_path, tester = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
     label = sys.argv[5] if len(sys.argv) > 5 else "test"
+    preflight_did(tester, to, bot)
     agent_args = json.load(open(args_path, encoding="utf-8"))
     body = {"agent_id": bot, "to_number": to, "agent_args": agent_args,
             "country_code": "91", "timezone": "Asia/Kolkata"}  # out_did omitted on purpose

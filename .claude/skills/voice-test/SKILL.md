@@ -368,8 +368,59 @@ Both have happened. State the facts is not enough; this is a procedure.
    id. Where a DID carries several live records, expect the choice to follow completeness, and record
    the observed `profile_id` in the manifest case so the next run does not have to rediscover it.
 
-6c. **SETTLED 2026-09-01: `contact_memory` sent in `agent_args` does NOT reach the model. The
-   platform substitutes its own stored memory.** This is the `contact_phone` pattern — the value you
+6c-0. **CORRECTED 2026-09-10 — `contact_phone` sent in `agent_args` DOES reach the model, and that
+   changes what is testable.** The note below said `contact_phone` was substituted by the platform
+   like `contact_memory`; that is wrong for `contact_phone`. **Proof (call `e0e7bbc2`, KKB-Slim
+   Hindi):** the fixture carried `contact_phone: 918888888888`, the CALL CONTEXT line rendered
+   `${contact_phone} = 918888888888`, and `get_profile` was called with exactly that number — while
+   the call itself was dialled to the tester DID `917946350285`. Reconfirmed on `f796df13`
+   (`918888888885`) and on the Kannada twin.
+
+   **What this unlocks.** The backend record under test is no longer nailed to the tester DID, so any
+   profile state can be fixtured by BUILDING it through the API on a throwaway number and pointing
+   `contact_phone` at it: a caller with no profile at all (the new-caller/`create_profile` path), a
+   `draft` profile, a profile with consent flags false, one with a field missing. All of those were
+   previously recorded as unfixturable. It also sidesteps the tester DID's `PROFILE_LIMIT_REACHED`
+   cap (5 seeker profiles, no DELETE route on the API).
+
+   **Two cautions.** (1) The **dialled** number still decides the telephony leg, so `${contact_phone}`
+   and the real caller diverge — never assert anything about the caller's own number from such a
+   call. (2) Use a number that cannot belong to a real person (we use the `9188888888xx` block on the
+   test Signals instances) and build the fixture on the **same instance the bot points at** — the
+   Hindi slim reads `gzb-signals`, the Kannada slim reads `dharwad-signals`, so a fixture on the wrong
+   host is invisible to the bot.
+
+6c-1. **Recipe — build a backend fixture for any profile state (Signals bots).** Four steps, ~5
+   minutes, and it replaces every "this state cannot be tested" note:
+
+   1. **Pick the instance the bot actually reads.** Resolve it from the bot's OWN live tool config,
+      never from another bot's: `get_profile`'s `api_details.url`. The Hindi slim reads
+      `gzb-signals`, the Kannada slim reads `dharwad-signals`. A fixture on the wrong host is
+      invisible to the bot and the test looks like a fetch failure.
+   2. **Pick a number that cannot be a real person.** We use the `9188888888xx` block. Never a
+      number that could be dialled, and never a real user's (see memory: never-test-on-user-numbers).
+   3. **POST the state you want** to `/api/v1/admin/participant` with that `phone_number`:
+      - *new caller* — post nothing at all; the fetch comes back empty
+      - *draft / unconsented* — post the profile with `compliance` **omitted** (zero consent rows:
+        `user_consent` terms+privacy false, item `draft`, `profile_consent_accepted` false)
+      - *consented but no profile-creation consent* — `compliance` with `user_terms` + `user_privacy`
+        only (they must be sent together, else `400 USER_LEVEL_INCOMPLETE`)
+      - *live and complete* — `compliance` all three true, plus a top-level `age`
+      - *a missing field* — post the profile without it
+      Consent is **write-once-true**: any `false` value is refused (`400 CONSENT_DECLINED`), so build
+      the state you want up front — you cannot walk a record backwards. Age must be an integer.
+   4. **Point the call at it:** set `contact_phone` (and a matching `contact_name`) in the args
+      fixture and dial the tester DID as usual. Confirm in the transcript that the CALL CONTEXT line
+      shows your number and `get_profile` was called with it — if it shows the DID instead, stop and
+      re-check, because everything after that is testing the wrong record.
+
+   **Assert the outcome on the BACKEND, not only the transcript.** Re-read the record after the call:
+   for a consent test, "the item is now `live` with `profile_consent_accepted: true` and there is
+   exactly ONE seeker item" is the assertion that catches a duplicate-profile bug the transcript
+   cannot show you (that is how `create_profile` minting a second live profile was found).
+
+6c. **SETTLED 2026-09-01 (still true for `contact_memory`): `contact_memory` sent in `agent_args`
+   does NOT reach the model. The platform substitutes its own stored memory.** The value you
    send is faithfully recorded in `agent_args` and is not what `${contact_memory}` resolves to.
    **Proof (call `c2ffe9fb`):** the fixture carried `last_conversation_summary` = "Seeker asked about
    WELDING jobs in Meerut on the previous call and gave Chand Tara Cinema as the nearest landmark",
@@ -378,9 +429,10 @@ Both have happened. State the facts is not enough; this is a procedure.
    and then asked the landmark question anyway. Nothing from the fixture was voiced. Two earlier calls
    (`9cb137ed` sent "No Old Memory…", `a111ed52` sent a Sahibabad summary) point the same way.
 
-   **What this forbids.** Do NOT express any precondition the prompt reads out of `${contact_memory}`
-   as an args fixture: a returning-caller state, `jobs_applied` for a duplicate-application test, a
-   stored `nearest_landmark` for a "never ask twice" test. Such a case is `fixture_blocked`, not a
+   **What this forbids** — and note this is now scoped to `${contact_memory}` ALONE, not to
+   `contact_phone` (see 6c-0). Do NOT express any precondition the prompt reads out of
+   `${contact_memory}` as an args fixture: a returning-caller state, `jobs_applied` for a
+   duplicate-application test, a stored `nearest_landmark` for a "never ask twice" test. Such a case is `fixture_blocked`, not a
    pass or a fail — and a test that reports FAIL on one is reporting a fiction. Two real tests were
    almost miscounted this way on 2026-09-01 before the discriminator was run.
 

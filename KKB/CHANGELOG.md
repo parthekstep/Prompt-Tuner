@@ -10,6 +10,154 @@ Every prompt edit to KKB is logged here. Entry format:
 - **Ported from:** <source agent> (only for cross-agent ports)
 ```
 
+## 2026-09-23 — T&C Bot Prompt Script: account+terms (Part 1), save-details (Part 2), per-application disclosure (Part 3)
+
+- **Feedback/request:** the owner's `T&C Bot Prompt Script` — a three-part consent flow. Part 1: an
+  account/terms disclosure for a first-time user or an annual refresh, with five mandated elements.
+  Part 2: explicit permission to save a new seeker's details. Part 3: a per-application disclosure
+  naming the company and role, fired before every `apply_job`.
+- **Change (Hindi master):**
+  - **Part 1 — new section, decided off the `get_profile` result and spoken before any job talk.**
+    Reads the participant `compliance` array (`user_terms`, `user_privacy`) plus the selected item's
+    `profile_consent_accepted`; all three true → asks nothing and the call is unchanged; any false, or
+    no profile at all → asks. Agree + live profile → silent `record_consent`; agree + draft/new →
+    `create_profile` records it at Step 4. Decline → call ends, no account, no apply. Unclear → one
+    re-ask, then treated as a decline. `record_consent` failure → do not proceed to job discovery.
+    "अकाउंट" is permitted in this one line; the ban on "प्रोफाइल" still holds everywhere.
+  - **Part 2 — replaced the old new-caller consent gate.** Permission to save name/age/education/
+    experience, asked once after the Step-3.5 basics. Decline → jobs are still offered (browse-only,
+    no `create_profile`, no `apply_job`); if they then ask to apply, the save is offered **once, at
+    that moment** and never pre-announced. `create_profile` failure → say so, keep showing jobs.
+  - **Part 3 — the mandatory pre-apply disclosure now names the selected job's company and role** and
+    adds "वे आपसे सीधे संपर्क कर सकते हैं"; fires per application, twice for two jobs. Masked company →
+    the line is spoken without it rather than reading a mask aloud. Refusal → "कोई बात नहीं। क्या मैं
+    आपको दूसरी जॉब्स बताऊँ?", back to the list, not the end of the call. Success line now names the
+    company.
+- **Owner decisions (2026-09-22):** app = **Blue Dots**, organisation = **Ekstep Foundation** (spoken
+  as ब्लू डॉट्स / एकस्टेप फाउंडेशन). Part 3's success line **keeps its conditional** and only adds the
+  company name — "[company] आपसे संपर्क करेगी" was declined as an over-promise. Part 2 decline →
+  offer the save once at the apply point.
+- **Three items in the script NOT implemented as written, each for a grounded reason:**
+  1. **The 12-month annual refresh is not computable.** The API returns no consent date — `compliance`
+     rows are booleans, and an item's `created_at`/`updated_at` is when the profile changed, not when
+     terms were accepted. Gated on the flags alone; needs a consent timestamp from the data team.
+     Approximating it off profile dates would re-ask people who consented last week.
+  2. **"Your account is created." is not spoken at Part 1.** `create_profile` with name+phone returns
+     **400 `AGE_REQUIRED` — "age is required with consent on this domain"**, so nothing is written at
+     that point; and on the returning path no account is *created* at all, it already existed. Replaced
+     with a neutral acknowledgement; the write is asserted only where it happens.
+  3. **The 18+/minor-block line is NOT added as a second failure row.** Apply Failure Handling allows
+     exactly ONE row by design — with two, the model spoke both back to back (`b4e34994`, Hindi) and
+     welded them into one sentence (`41a2c19d`, Kannada). Recommended instead as an error→line mapping
+     in the `apply_job` tool description, the mechanism that took `ACTION_LIMIT_REACHED` from broken to
+     9/9 (analyser D51/D52). Awaiting the go-ahead.
+- **Tooling:** `record_consent` added to the `kkb-hi-signals` agent (`raya/toolspecs/record_consent.json`
+  via `scripts/raya_tooladd.py`) — Part 1's live-profile arm calls it, and the agent did not have it.
+- **Verification — KKB Hindi Signals, BOTH branches, VERIFIED:**
+  - **`0d1cbd72`** — fixture `918888888773`, a draft item with `user_terms:false`, `user_privacy:false`,
+    `profile_consent_accepted:false`. The bot spoke the full five-element disclosure (Blue Dots account
+    from name+phone, the three purposes, one year, Ekstep Foundation, terms in the app), the caller
+    agreed, `record_consent` fired on item `334e3684`, and the record read back **`live` with all three
+    flags true**. Part 3 fired naming the job: "आपकी personal details काशी इन्फोटेक के साथ डेटा एंट्री
+    ऑपरेटर के काम के लिए शेयर होंगी। वे आपसे सीधे संपर्क कर सकते हैं।" Part 1 correctly did NOT claim the
+    account was created.
+  - **`f0509869`** — all three flags true: **zero** terms/account lines, no consent tool, straight from
+    `get_profile` to the role check. The silent path is intact; the gate does not false-fire.
+  - **One defect found and fixed on `0d1cbd72`:** the bot prefixed the Part 3 disclosure with its own
+    "क्या आप इसके लिए अप्लाई करना चाहेंगे?", putting two questions in one turn. Part 3 now states that it
+    IS the question and may not be preceded by another apply question.
+- **Files:** `KKB/KKB Placeholder Hindi Signals.md`, `raya/toolspecs/record_consent.json`
+
+## 2026-09-23 — T&C script replicated across the Signals fleet; the Kannada mirror failed verification until its instructions were byte-synced
+
+- **Request:** after verifying on KKB, replicate the T&C script across all Signals bots.
+- **Applied to all six seeker Signals conversation prompts** — KKB Hindi/Kannada, KKB Hindi/Kannada
+  Inbound, Maya Hindi/Inbound — plus the five-element disclosure on both KKB-Slim bots so the A/B
+  arms behave alike. `record_consent` added to the five agents that lacked it. Part 1 is
+  **byte-identical across all four Hindi files**; the Kannada files' English skeleton is byte-identical
+  to the Hindi master, with only the quoted spoken lines differing.
+- **Output prompts updated on all six agents.** `consent_status` was scoped to "the new-caller path"
+  and said "NA for a returning caller" — exactly the caller the T&C flow now asks, which is why the
+  master's first verified call returned `consent_status: None`. It now has Given / Declined /
+  **Not Needed** / Failed / NA, plus a new `profile_save_consent` (Given / Declined / Given At Apply /
+  NA) for Part 2. Live snapshots in `raya/live-snapshots/` refreshed.
+- **KKB Kannada Signals — FAILED, then fixed and VERIFIED:**
+  - **`7b5f6945` (FAIL):** the bot asked for consent in Kannada, the caller said "ಹೌದು ಒಪ್ಪಿಗೆ ಇದೆ", it
+    answered "ಸರಿ, ಧನ್ಯವಾದ." — and **never called `record_consent`**. The record was checked: flags still
+    false, item still draft. **A caller consented aloud and nothing was stored**, which is worse than
+    not asking at all.
+  - **Root cause: my own paraphrase.** The Kannada Part 1 had been written fresh with shortened English
+    instructions instead of copied from the Hindi block that fires reliably. Rebuilt so the English is
+    byte-identical to the Hindi master and only the spoken lines differ.
+  - **`7a059554` (PASS):** `record_consent` fired, and the fixture flipped to `user_terms:true`,
+    `user_privacy:true`, item **`live`**, `profile_consent_accepted:true`. 0/1 before the sync, 1/1 after.
+  - **`1d7074e9` (PASS, all-true branch):** zero terms lines, no consent tool — correct silence.
+  - **Lesson for the sync rule:** the "copy agnostic content verbatim" rule is not housekeeping. A
+    paraphrase of the same instruction, in the mirror, changed whether a tool got called at all.
+- **NEW DEFECT, open — the Kannada bot repeats its introduction.** On `7b5f6945` the intro was spoken
+  **4 times** and on `7a059554` **twice**, with Part 1 bundled onto the re-spoken greeting instead of
+  being its own turn. `get_profile` is firing in the audio-check turn rather than after the opening
+  question, which is what collides. Comparable calls on 2026-09-09 spoke it once, so this is current
+  and Kannada-specific. Part 1's own outcome is unaffected (the tool fires, the flags flip) but the
+  caller hears the greeting twice. **Not fixed — deliberately not adding a third wording of a rule the
+  prompt already states; the trigger is the early fetch and it needs its own root-cause pass.**
+- **FABRICATED CONSENT on Maya Inbound — found, root-caused, fixed, re-verified.**
+  - **`9df94781`:** the five-element disclosure was **never spoken**. The caller was asked only
+    "क्या मैं अभी इस जॉब के लिए आपकी तरफ़ से अप्लाई कर दूँ?" and `record_consent` fired off that —
+    writing terms + privacy + profile consent as `true` for someone who had never heard the terms.
+  - **Rung-4 guard tried and FAILED.** A required `terms_check` enum was added to the tool
+    (`disclosure-read-and-agreed-this-call` | `not-read`), modelled on `duplicate_check`. On the
+    retest **`bdae75d6`** the disclosure was again never spoken and the model sent
+    **`terms_check: "disclosure-read-and-agreed-this-call"`** — a false assertion. 2/2 fabricated.
+    See analyser **D91**: a required parameter constrains what the model SAYS, not what it DID.
+    `duplicate_check` works because its value is checkable from the turn being composed;
+    "did you speak X earlier" is a self-report about a turn the model never took.
+  - **Safe state first:** `record_consent` was REMOVED from the agent, so a skipped disclosure records
+    nothing (the pre-feature status quo) rather than a false consent. Verified safe on **`7c24f130`**:
+    no consent written, and no duplicate profile either.
+  - **Real root cause: the router, not the wording.** The DECISIVE ROUTER numbers its turns and sends
+    the model to the named branch headings; Part 1 sat BETWEEN the router and those headings, so the
+    route passed over a section that was never entered. Part 1 is now **step 3 of the router itself**
+    in all three inbound prompts. On **`7c24f130`** the disclosure was spoken, in its own turn.
+  - **Re-verified with the tool restored — `1d76fdb2`:** disclosure spoken as its own turn,
+    `record_consent` fired with a now-TRUTHFUL `terms_check`, flags flipped false→true, item `live`.
+- **Turn-boundary rule — partially effective.** Added to all eight prompts after four of the first
+  five bots welded the disclosure onto the greeting turn. It took on KKB Kannada Inbound
+  (**`fe7864d1`**, clean and unbundled) and on Maya Inbound, but **NOT** on Maya Hindi outbound:
+  **`341a6c5e`** read the disclosure and recorded consent correctly but still bundled it into the
+  greeting. Deliberately NOT given a third wording — the underlying cause is the fetch running inside
+  the greeting turn, a pre-existing violation this change only made visible. **Open.**
+- **Verification status per variant — consent RECORDING, against a real false-flag record:**
+  KKB Hindi ✅ `0d1cbd72` (+ all-true ✅ `f0509869`) · KKB Kannada ✅ `7a059554` (+ all-true ✅
+  `1d7074e9`) · KKB Hindi Inbound ✅ `722b4131` · KKB Kannada Inbound ✅ `fe7864d1` · Maya Hindi ✅
+  `3c3f8740`, `341a6c5e` · Maya Inbound ✅ `1d76fdb2`. **All six.**
+  **Delivery quality (own turn vs bundled):** clean on KKB Hindi, KKB Kannada Inbound, Maya Inbound;
+  **bundled on Maya Hindi (open)**; untested post-fix on KKB Hindi Inbound and KKB Kannada outbound.
+  **KKB-Slim Hindi/Kannada — five-element line deployed, NOT VERIFIED.**
+- **Files:** `KKB/KKB Placeholder Hindi Signals.md`, `KKB/KKB Placeholder Kannada Signals.md`,
+  `KKB/KKB Placeholder Inbound Signals.md`, `KKB/KKB Placeholder Inbound Kannada Signals.md`,
+  `Maya/Maya Hindi Signals.md`, `Maya/Maya Inbound Signals.md`,
+  `KKB-Slim/KKB Slim Hindi Signals.md`, `KKB-Slim/KKB Slim Kannada Signals.md`,
+  `raya/live-snapshots/*.output_instructions.md`
+
+## 2026-09-23 — The backend renamed the participant consent block; both slim bots were reading a field that no longer exists
+
+- **Found while grounding the T&C script, not reported.** `get_profile` used to return
+  `user_consent: { terms_accepted, privacy_accepted, has_age }`. As of 2026-09-22 it returns
+  **`compliance: [ {key:"user_terms",value:…}, {key:"user_privacy",value:…}, {key:"has_age",value:…} ]`**
+  and the old key is gone. Verified across four numbers on both instances (gzb + dharwad).
+- **Impact:** the slim bots' consent gate read `user_consent.terms_accepted`, and its own rule says
+  missing/null counts as NOT given — so since the rename **every caller with a profile was being read
+  the terms**, including fully consented ones. A silent live behaviour change caused by an upstream
+  rename, not by a prompt edit.
+- **Change:** both slim prompts now read the `compliance` array by `key`, treat an absent key as
+  `false`, and carry the old name only as a note. Example C's context block updated to the new shape.
+- **Also found:** a **live** profile with `user_terms: false` / `user_privacy: false` now exists
+  (`91XXXXXX6073` on dharwad) — the state I had reported as impossible to construct. The migration
+  produced it, so the `record_consent` path is testable for real.
+- **Verification: VERIFY-PENDING** — deployed to both slim bots; the harness was down.
+- **Files:** `KKB-Slim/KKB Slim Hindi Signals.md`, `KKB-Slim/KKB Slim Kannada Signals.md`
+
 ### 2026-09-07 (later) — the missing-job-data line had no precondition the model could check
 
 - **Found while trying to verify the read-back, not reported.** Harness call `af627b9d`: one job was
@@ -1618,3 +1766,253 @@ Three requested changes, piloted together on **KKB Hindi Signals outbound** (`kk
   replacement).
 - **Status:** **VERIFIED** — `334fc8f3` (location confirmed, disclosure before all three applies) and
   `a82cd401` (location confirmed, full consent line). Detector clean on both.
+
+## 2026-09-09 — apply-failure table had no row for a NAMED non-duplicate error
+- **Feedback/bug:** the apply-failure table routed every non-duplicate error into Row 2, "you cannot
+  tell why it failed", whose line asserts a cause: "अप्लाई अभी आगे नहीं बढ़ा है, technical issue है".
+  But the tool result DOES name the error — `__RAYA_TOOL_DEBUG__` carries a
+  `response_body_excerpt` with `"error":"..."`, and 67 of 73 observed apply failures name it. So on
+  `MINOR_ACTION_CHANNEL_BLOCKED` (an age/channel policy block, not a fault) the bot told 5 callers
+  there was a technical issue — a claim the prompt had licensed and that was false. Calls
+  `5a1c0c77` (kkb-hi-signals), `1715a207` (kkb-kn-signals), `05a4b394` (kkb-kn-in-signals),
+  `2cb97508` (maya-hi-signals, `TARGET_ITEM_NOT_FOUND`), `b9629043` (`USER_NOT_FOUND`).
+- **Change:** inserted a new row BEFORE the catch-all — a named error that is not
+  `ACTION_LIMIT_REACHED` gets a line that asserts only that the apply did not complete:
+  "इस जॉब के लिए अप्लाई अभी पूरा नहीं हो पाया। हमने आपकी रुचि नोट कर ली है। क्या मैं आपको दूसरी जॉब्स बताऊँ?"
+  (Kannada: "ಈ ಜಾಬ್‌ಗೆ ಅಪ್ಲೈ ಇನ್ನೂ ಪೂರ್ತಿ ಆಗಿಲ್ಲ. ನಿಮ್ಮ ಆಸಕ್ತಿ ನಾವು ನೋಟ್ ಮಾಡ್ಕೊಂಡಿದೀವಿ. ಬೇರೆ ಜಾಬ್‌ಗಳನ್ನ ಹೇಳಲಾ?")
+  Escalation-ladder rung 3 — the wrong option is removed rather than forbidden: Row 2 keeps
+  "technical issue" only for the genuinely unreadable case (timeout, no response), where it is true.
+  Purely additive; Row 1 and Row 2 are unchanged. Row order is Row 1, Row 2a, Row 2 so the specific
+  case matches before the catch-all.
+- **Files:** 9 Hindi + 4 Kannada conversation prompts across KKB, Maya and KKB-Slim.
+- **Status:** VERIFY-PENDING. Rolling out to kkb-hi-signals and kkb-kn-signals first (the two bots
+  where the false line was observed); the rest are DEPLOYED, NOT VERIFIED until called.
+
+## 2026-09-09 — apply-failure catch-all tightened so a NAMED error has no catch-all (VERIFY-PENDING)
+- **Feedback/bug:** the dominant apply-failure defect is the opposite of D80 — **45 of 60**
+  `apply_job` calls that returned `ACTION_LIMIT_REACHED` spoke the Row 2 technical-issue line
+  instead of the Row 1 already-applied line (measured 2026-09-03/04, `ESCALATION-litwiz.md` §1).
+  Row 1 already named `ACTION_LIMIT_REACHED` as a trigger, so reachability was never the problem:
+  Row 2 stayed available as a safe hedge and the model kept taking it. §1 concluded "there is no
+  wording that resolves a distinction the model cannot observe" — but the model CAN observe it. The
+  `apply_job` failure result carries `__RAYA_TOOL_DEBUG__` with
+  `response_body_excerpt={"error":"..."}`, and 67 of 73 observed failures name the error.
+  An earlier attempt to drive Row 1 off the error name was reverted because it leaked onto
+  `USER_NOT_FOUND` (call `5f0d3671`); the new Row 2a now absorbs that case, so the fix is unblocked.
+- **Change:** Row 2 is no longer "you cannot tell why it failed". Its condition is now "the result
+  carries NO error name at all — a timeout, no response, or a body with nothing in `"error":"..."`",
+  with an explicit instruction to check the result in hand before choosing it. The three rows are
+  now disjoint and exhaustive: `ACTION_LIMIT_REACHED` matches ONLY Row 1, any other name matches
+  ONLY Row 2a, and no name matches ONLY Row 2 — which stays the one row permitted to attribute a
+  cause, because it is the only row where a technical fault is what you actually have. Rung 3: the
+  wrong option is removed rather than forbidden. Spoken lines unchanged in all three rows.
+- **Files:** 9 Hindi + 4 Kannada conversation prompts across KKB, Maya and KKB-Slim.
+- **Status:** VERIFY-PENDING — not yet deployed; the Row 2a verification dial is still in flight and
+  one change is being verified at a time.
+
+## 2026-09-09 — returning-caller callback clause was missing from both Kannada prompts
+- **Feedback/bug:** tracker items "Missing returning call user" were fixed on KKB Hindi, KKB Hindi
+  Signals and Maya Hindi Signals and **never mirrored**. `KKB Placeholder Kannada Signals.md` and
+  `KKB Placeholder Kannada.md` had ZERO occurrences of the callback clause,
+  `last_conversation_summary` or `overall_conversation_summary`; the Hindi master has the clause 5x
+  and "previous conversation" 20x. Kannada jumped straight from the get_profile-read paragraph to
+  "Greet by first name", so a returning Kannada caller was greeted as if never called before.
+  Maya Hindi had the same gap against its own Signals twin.
+- **Change:** ported the whole block. English rules, field names and the callback-clause bullet list
+  copied VERBATIM (agnostic); the quoted clause and its placeholder adapted to Kannada
+  ("[ಮೊದಲ ಹೆಸರು] ಅವರೇ, ಹಿಂದಿನ ಸಲ ನಾವು [ಯಾವ ವಿಷಯದ ಬಗ್ಗೆ ಮಾತಾಡಿದ್ವಿ] ಬಗ್ಗೆ ಮಾತಾಡಿದ್ವಿ — …"), and the
+  banned-wording bullet localised to the Kannada words it names. Maya Hindi took the Hindi block
+  verbatim. No Hindi text leaked into either Kannada file (verified 0).
+- **Files:** `KKB/KKB Placeholder Kannada Signals.md`, `KKB/KKB Placeholder Kannada.md`,
+  `Maya/Maya Hindi.md`. Inbound variants deliberately untouched — their Hindi masters also lack the
+  block, so that is a design question, not drift.
+- **Status:** DEPLOYED (kkb-kn-signals, kkb-kn-out, maya-hi-out). **NOT VERIFIED** — needs a call
+  from a number with prior memory.
+
+## 2026-09-09 — Kannada apply-failure line blended two rows and re-asserted "technical issue"
+- **Feedback/bug:** call `41a2c19d` returned `TARGET_ITEM_NOT_FOUND` three times and the bot said
+  "ಈ ಜಾಬ್‌ಗೆ ಅಪ್ಲೈ ಇನ್ನೂ ಪೂರ್ತಿ ಆಗಿಲ್ಲ, technical issue ಇದೆ" every time — the new Row 2a opening welded
+  to Row 2 cause claim. The two Kannada lines shared the prefix "ಈ ಜಾಬ್‌ಗೆ ಅಪ್ಲೈ ಇನ್ನೂ" and differed
+  only in the verb phrase. Hindi passed the same test (`199caee7`) because its two lines are
+  lexically distinct — a direct demonstration of the never-extrapolate rule.
+- **Change:** Row 2a Kannada now opens on different words entirely — "ಈ ಅಪ್ಲಿಕೇಶನ್ ಸಧ್ಯಕ್ಕೆ ಆಗಿಲ್ಲ." —
+  so there is no shared opening to blend, plus an inline note naming call `41a2c19d` so the wording
+  is not "tidied" back into a shared prefix. Row 2 is UNCHANGED: its "technical issue" is there at
+  the owner explicit request (see the note above the table) and was not removed.
+- **Files:** the 4 KKB Kannada conversation prompts.
+- **Status:** DEPLOYED (kkb-kn-signals, kkb-kn-out, kkb-kn-in-signals, kkb-kn-in). **NOT VERIFIED.**
+
+## 2026-09-09 — the prohibition against speaking stage directions was supplying the string
+- **Feedback/bug:** on `e4e81fe2` (kkb-kn-out, live) the bot spoke
+  `*(Silent tool call: apply_job with profile_id: "5051" and job_id: "19e3da1f-...")*` aloud, leaking
+  a profile id and a job UUID to the caller, then said "ಅಪ್ಲೈ ಆಗಿದೆ" — applied. **Zero tools ran on
+  that call.** No `get_profile`, no `apply_job`, no application. Same class as `29c4f152` and the
+  four occurrences on 2026-09-03 that the prompt already documents, so this guard has now failed
+  five times. 6 more cached calls across kkb-kn-signals, maya-hi-out, kkb-hi-in and kkb-kn-out spoke
+  a stage direction; two of them read the caller phone number `+917946350285` aloud inside a
+  `create_profile` stage direction.
+- **Root cause:** the guard quoted the forbidden output verbatim. Both the prohibition ("Writing
+  `*(Silent tool call: apply_job)*` ... applies nobody") and the evidence citation for `29c4f152`
+  wrote the exact string the bot then emitted. Rung 1 — the wrong output was in the prompt, in the
+  rule meant to prevent it.
+- **Change:** the literal form is gone from every prompt (verified 0 remaining). The prohibition and
+  the citation now DESCRIBE it — "a stage direction naming the apply tool" — instead of printing it.
+  No new prohibition wording was added: this guard had already failed five times, so volume was not
+  the lever.
+- **Files:** 12 KKB/Maya conversation prompts (TRRAIN and slim did not carry the string).
+- **Status:** DEPLOYED to all 15 conversation targets, all verified in sync. **NOT VERIFIED** — needs
+  a call that reaches an apply on a Kannada outbound bot.
+- **Known larger change NOT made:** the samples still render 12-38 inline `*( )*` stage directions
+  each. Converting them to a non-inline `INTERNAL:` form would remove the imitable shape entirely,
+  but that is a 15-file reformat that cannot be tested in one night and needs sign-off.
+
+## 2026-09-09 — slash spoken aloud: rule missing on 9 bots, and point-of-use missing on the rest
+- **Feedback/bug:** tracker items "Slash is said out loud" were CLOSED, and the behaviour has
+  regressed: **28 of 438 cached calls** emit a literal "/" inside a spoken line. Most common is the
+  array role "Computer Operator / Data Entry" read verbatim (21 calls). Bots affected: dkb-kn-out,
+  trrain-hi-out, kkb-hi-in-signals, maya-hi-out, maya-hi-in, maya-hi-in-signals.
+- **Root cause, two halves.** (1) The "## Slash ( / ) symbol" section existed in the 12 KKB/Maya
+  prompts but was ABSENT from all 6 DKB, both TRRAIN and slim — and dkb-kn-out and trrain-hi-out are
+  among the offenders, so for them there was no rule at all. (2) On the bots that DO have the rule,
+  it sits in its own section far from the template that speaks `[role]`. Same point-of-use failure
+  as the location conversion, the `[company]` script fix and the never-invent guard.
+- **Change:** ported the Slash section to the 9 prompts missing it (Kannada adapted: "ಅಥವಾ", not
+  "या"), and added a one-line rule AT the job-presentation template in all 13 KKB/Maya/slim prompts —
+  a `[role]` containing "/" is spoken with "या"/"ಅಥವಾ" in its place, naming "Computer Operator / Data
+  Entry" as the worked case since it is the one that actually leaks.
+- **Files:** 6 DKB + 2 TRRAIN + slim (new section); 12 KKB/Maya + slim (point-of-use line).
+- **Status:** DEPLOYED to all 19 conversation targets, all verified in sync. **NOT VERIFIED** — needs
+  a call presenting a slash-bearing role.
+
+## 2026-09-09 — KKB and Maya spoke salary as digits (8% of salary phrases)
+- **Feedback/bug:** 33 of 399 salary phrases across KKB and Maya carried digits — `f5a40741` said
+  "12,000" and "16,000", `kkb-hi-in-signals` 17 of 120, `maya-hi-signals` 4 of 16. Found by
+  `spoken_form.py`, not by the per-call grader, which had no salary check for KKB.
+- **Root cause:** the rule exists — "Do not write digits in spoken Hindi output. Write them in
+  words" — in the Numbers section, roughly 700 lines below the job-presentation template that
+  speaks the value. Ninth instance of D82 tonight.
+- **Change:** stated at the template itself, naming the two slots that actually leak: `[salary]`
+  and `[vacancy]` arrive as digits and are spoken as words, with worked values per language. The
+  distant Numbers section is left as it is.
+- **Files:** 12 KKB/Maya conversation prompts + slim. **Status:** DEPLOYED to all 13 targets.
+  **NOT VERIFIED.**
+- **Also noted, not fixed:** Maya's identity line renders the college abbreviation twice —
+  "माया, वीटीयू (VTU) की ओर से" reads the Latin in parentheses aloud (`0a3cba76`). Low severity, and
+  Maya's caller-identity line is a product decision, so it is flagged rather than edited.
+
+## 2026-09-09 — pincode: root cause and the three iterations it took (VERIFIED)
+- **Reported:** Khushboo r5, "Pincode" not fixed. The bot read the written location with its digits.
+- **Root cause, two things sitting three paragraphs apart.** (1) A paragraph titled "A PIN code is an
+  identifier, not a number" that TAUGHT the pronunciation — "if one is ever spoken, say it digit by
+  digit in words" — immediately followed by "Better: do not speak a PIN code at all". A permission
+  next to a prohibition; the model took the permission. (2) The location block claimed "the sentence
+  already contains the right place ... there is no resolution step" while the very next paragraph
+  required a two-step conversion. Two contradictory instructions; `a9039634` obeyed the first and
+  read "ಸರ್ಜಾಪುರ, 110045" out verbatim.
+- **Three iterations, each on live evidence:**
+  1. Deleted the pronunciation paragraph from all 5 prompts that carried it, and made step 1 read
+     "**DELETE** every digit. Deleted, not rewritten — a PIN in Devanagari numerals is still a PIN".
+     `1c6963bb` had rendered it as "११००४५".
+  2. Moved the `${location}` token OUT of the spoken sentence onto its own line
+     (`location_written is: ${location}`) so a conversion step exists between reading and speaking,
+     and rewrote the contradicting paragraph. With the token inside the sentence the model read it
+     verbatim.
+  3. `29288fd3` then converted the place correctly and KEPT the pin code — step 2 ran, step 1 did
+     not. Renamed the slot from "the spoken place" to **"place — without digits"**
+     (`[जगह — अंकों के बिना]` / `[ಜಾಗ — ಅಂಕಿ ಇಲ್ಲದೆ]`), so the requirement is in the slot name.
+- **VERIFIED on four calls, each variant independently:** on-list Hindi `b4e34994` and `13864c75`
+  ("मुराद नगर"), off-list Hindi `2bb68def` ("सरजापुर"), off-list Kannada `aae2e523` ("ಸರ್ಜಾಪುರ").
+  `location_said.py` over all traffic: 26 correct conversions, 3 RAW all pre-fix, 0 real-caller RAW
+  since the first deploy.
+- **Files:** `KKB Placeholder Hindi Signals.md`, `KKB Placeholder Kannada Signals.md` (the two-step
+  block and the slot); the pronunciation paragraph removed from those two plus
+  `KKB Placeholder Hindi.md`, `KKB Placeholder Kannada.md` and slim; the delete-not-rewrite clause
+  added to Maya x4 and slim.
+- **Analyser:** D82 (point-of-use), D83 (a concrete value beside a template becomes the output).
+
+## 2026-09-09 — memory prompt no longer stores the jobs it presented (VERIFIED)
+- **Feedback/bug:** the platform memory store carried previously-presented job lists into the next
+  call and the bot offered them as current inventory. Given ONE job in `${recommendations}` the slim
+  A/B bot offered four, the extra three being jobs from earlier calls — `45e2cb3b`, `293c92c2`,
+  `11ce47ce`, `764cba1d`, **4 of 4, deterministic**. Every other channel was read and excluded on
+  `764cba1d`: 1 job in args, `contact_memory` absent from `agent_args`, `get_profile` result clean
+  (3,456 chars, no job names), no inventory table in the prompt, and only `get_profile` +
+  `apply_job` called.
+- **Root cause:** `KKB Memory.md` stored `last_options_presented` as job strings
+  (`["2026-06-22: Electrician, Pune, 18K"]`). Nothing reads its contents — it is used only as a
+  presence signal for the returning-caller callback clause, and its four siblings
+  (`last_conversation_summary`, `jobs_applied`, `last_action`, `session_count`) serve that too. So
+  the job text was pure exposure.
+- **Change:** the field now stores a COUNT and a date — `["2026-06-22: 8 options shown"]` — with an
+  explicit instruction not to store role, company, location or salary. `jobs_applied` is UNCHANGED
+  because the duplicate check reads it. Same change in `Maya/Maya Memory.md`, whose example had
+  named a role and a company ("Sales Executive, ABC Corp, Lucknow, 18K") — likely the source of the
+  invented "एबीसी लॉजिस्टिक्स" on `a4f378b9`.
+- **VERIFIED:** `7bf46d06` — 1 job supplied, exactly 1 job offered, immediately after `58eda292`
+  presented a 12-job array. The pre-fix behaviour was 4/4.
+- **Files:** `KKB/KKB Memory.md`, `Maya/Maya Memory.md`. Deployed to the 9 KKB conversation agents
+  via `memory_instructions` (KKB has no separate memory agent — `raya/agents.json` marks
+  `kkb-memory` `deploy: false` with an empty uuid) and to `maya-out-memory` / `maya-in-memory`.
+- **I was wrong twice about this issue** and both are recorded in the overnight report: I said it was
+  not fixable in a prompt, and that it could not be verified in one session. It was fixable in the
+  memory prompt and verifiable with two calls.
+- **See also** `raya/overnight/MORNING-2026-09-09.md` §11 — patching `memory_instructions` overwrote
+  a live-only 7,489-char memory prompt on the four non-Signals KKB agents without a snapshot.
+
+## 2026-09-09 — reconciliation flag for the unbacked apply claim (mitigation, not a fix)
+- **Why:** the agent sometimes tells a caller their application went through when no `apply_job`
+  ran at all — 1 of 11 REAL calls that claimed an apply (`4b6aca57`), 4 of 30 tester dials. Four
+  prompt-side mechanisms and three candidate causes were tested against live calls and all
+  falsified: memory disabled (`557fbeb0`), the narration form removed from the rule (`2126a5bc`),
+  and all 151 sample demonstrations converted away (`f31e1587` — that one DID fix the stage-direction
+  and phone-number leak, and the claim still remained). It needs the runtime; see
+  `ESCALATION-litwiz.md` §1.
+- **What this adds:** `unbacked_apply_claim` in the output prompt — "Yes" when a success line was
+  spoken with no successful apply result in the transcript. It does not prevent the bug; it makes
+  the affected caller findable so they can be rung back. An empty `jobs_applied` together with this
+  flag set is exactly the case to surface.
+- **Files:** `KKB/KKB Output.md`, `Maya/Maya Output.md`, and the live `output_instructions` field on
+  all 13 KKB/Maya conversation agents (KKB/Maya output prompts have no agent of their own —
+  `raya/agents.json` marks them `deploy: false` with empty uuids).
+- **Every live-only prompt was snapshotted to `raya/live-snapshots/` BEFORE patching this time** —
+  the correction to the mistake recorded in the overnight report §11.
+
+## 2026-09-09 — the 12% already-applied defect has a root cause two layers away (DEPLOYED, UNVERIFIABLE tonight)
+- **What the 12% actually is.** Row 1 (the already-applied line) has TWO routes: a duplicate
+  pre-check that reads `jobs_applied` from `${contact_memory}`, and recognising
+  `ACTION_LIMIT_REACHED` in the tool result. The pre-check is the reliable one. It is dead:
+  **`jobs_applied` was non-empty on only 2 of 76 calls that carried it.** With an empty array the
+  check can never fire, so every call falls through to the error-name route, which succeeds 12% of
+  the time. The 2 calls where it IS populated are both inbound agents — and inbound is exactly where
+  the already-applied line works (all 4 correct calls are inbound).
+- **Why it was empty.** `KKB Memory.md` and `Maya Memory.md` DEFINE `jobs_applied` but never say
+  what writes it, and the update rules say "update a field only if the conversation provides clear,
+  direct evidence" — which reads as something the caller said. A successful `apply_job` result is a
+  tool outcome, not a conversational statement, so it was never recorded.
+- **Change:** the field now states that a SUCCESSFUL `apply_job` tool result IS the clear, direct
+  evidence and must be APPENDED, carrying forward existing entries. Deployed to all 13 KKB/Maya
+  conversation agents via `memory_instructions`, read-back confirmed on each.
+- **UNVERIFIED, and it cannot be verified with the current harness.** The write rule only fires on a
+  successful apply, and the tester profile `588a907f` has already applied to every job in the
+  Ghaziabad inventory — `a656c451` tried two and got `ACTION_LIMIT_REACHED` on both. To verify:
+  either clear that profile's applications, or use a fresh seeker profile, then run
+  apply → next call → confirm the pre-check fires WITHOUT calling `apply_job`.
+- **Prior attempts on this defect, all falsified against live calls** (`6caf1fbe`, `513a1d01`,
+  `5bbb6ca1`): naming the error in Row 1, excluding it from the generic row, correcting the tool
+  description's "you usually CANNOT read" premise, and collapsing to a single failure line. Those
+  were all fixes to the FALLBACK route. This one repairs the primary route.
+
+## 2026-09-09 — the apply-failure line no longer asserts something it cannot know (VERIFIED)
+- **Why:** the routing between Row 1 (already applied) and the generic failure line is broken on
+  BOTH of its routes — the duplicate pre-check ignores a `jobs_applied` entry naming the exact job
+  (`7f2e3928`), and the error-name route fails after four separate mechanisms (`5bbb6ca1`). Since
+  the wrong line gets picked ~88% of the time, the line itself had to stop being false.
+- **Change:** "इस जॉब के लिए अप्लाई अभी पूरा नहीं हो पाया" → "इस जॉब के लिए आपकी दिलचस्पी हमने नोट कर ली है —
+  इसकी अपडेट हमारी टीम आपको इसी नंबर पर देगी" (Kannada equivalent mirrored). It asserts nothing about
+  whether an application exists, which is true whether the apply succeeded, failed, or failed
+  because one already existed. Escalation-ladder rung 3, exactly as `CLAUDE.md` prescribes: rewrite
+  the default so it asserts nothing that can be false.
+- **VERIFIED:** `04c6f82a` — `ACTION_LIMIT_REACHED` returned, new line spoken, no claim either way.
+- **Files:** 13 KKB/Maya/slim conversation prompts. An inline note names both call ids and says not
+  to restore a wording that claims the application does or does not exist.
+- **The routing bug itself remains** and is `ESCALATION-litwiz.md` §1 with three prioritised asks.

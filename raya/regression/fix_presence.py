@@ -181,6 +181,217 @@ FIXES = [
       and "Placeholder Kannada.md" not in os.path.basename(f)],
      ["CHECK IT ON THE TURN YOU ARE COMPOSING"], []),
 
+    ("apply-failure-row-excludes-duplicate", "the single failure row explicitly EXCLUDES "
+                                             "ACTION_LIMIT_REACHED and the duplicate case -- when "
+                                             "the merged row said \"any error\" it swallowed the "
+                                             "case Row 1 owns, and 6caf1fbe told a caller who "
+                                             "really did already have the application that the "
+                                             "apply had not gone through",
+     [f for f in all_conv() if os.path.basename(f).startswith(("KKB Placeholder", "Maya", "KKB Slim"))
+      and "Memory" not in f and "Output" not in f],
+     ["Those go to Row 1 and this row does NOT apply"],
+     []),
+
+    ("apply-failure-single-row", "there is exactly ONE apply-failure line and it claims no cause -- "
+                                 "with two rows available the bot spoke both back to back "
+                                 "(b4e34994) and welded them into one sentence (41a2c19d), and the "
+                                 "cause-claiming half was false on policy blocks and on 45 of 60 "
+                                 "ACTION_LIMIT_REACHED calls",
+     [f for f in all_conv() if os.path.basename(f).startswith(("KKB Placeholder", "Maya", "KKB Slim"))
+      and "Memory" not in f and "Output" not in f],
+     ["do NOT re-add a second"],
+     ["technical issue"]),
+
+    ("location-token-outside-sentence", "the location sentence takes a DERIVED slot, with the "
+                                        "${location} token on its own line above -- with the token "
+                                        "inside the sentence the bot read \"Sarjapur, 110045\" out "
+                                        "verbatim (a9039634), and the paragraph claiming there was "
+                                        "\"no resolution step\" contradicted the conversion rule",
+     ["KKB/KKB Placeholder Hindi Signals.md", "KKB/KKB Placeholder Kannada Signals.md"],
+     ["location_written is:"],
+     ["there is no resolution step, no comparison"]),
+
+    ("pincode-never-spoken", "no prompt explains HOW to pronounce a PIN code -- the instruction "
+                             "\"say it digit by digit\" sat three paragraphs from \"drop every "
+                             "digit\" and was taken as permission (1c6963bb spoke it in Devanagari "
+                             "numerals)",
+     [f for f in all_conv() if "Memory" not in f and "Output" not in f],
+     [],
+     ["digit by digit in words** exactly like a phone number", "is an identifier, not a number"]),
+
+    ("dkb-argument-beats-memory", "the DKB posting template says the ARGUMENT wins over remembered "
+                                  "values -- 965f9d06 had salary=30000 and spoke a figure carried "
+                                  "over from an earlier call; DKB memory stores budget_per_hire",
+     [f for f in all_conv() if os.path.basename(f).startswith("DKB")
+      and "Inbound" not in f and "Memory" not in f and "Output" not in f],
+     ["The ARGUMENT wins over anything you remember"],
+     []),
+
+    ("dkb-posting-precondition", "the existing-posting template is guarded by a job_role check, and "
+                                 "says its worked values are illustrations -- 714ebfc0 announced "
+                                 "\"Helper, दो vacancies, सैलरी बारह हज़ार\" with every job field "
+                                 "\"Not Available\", using the number rule's own examples as data",
+     [f for f in all_conv() if os.path.basename(f).startswith("DKB")
+      and "Inbound" not in f and "Memory" not in f and "Output" not in f],
+     ["ILLUSTRATIONS OF THE NUMBER RULE"],
+     []),
+
+    ("dkb-no-substitutable-business-name", "no DKB prompt PRINTS a business name that could be "
+                                           "substituted when company_name is absent -- bd60c6b0 "
+                                           "greeted an owner with the worked example printed under "
+                                           "the greeting template, and 2ea06509 did the same; D82",
+     [f for f in all_conv() if os.path.basename(f).startswith("DKB")
+      and "Memory" not in f and "Output" not in f],
+     [],
+     ["VANS TRADING COMPANY", "YOGITA CLOTH EMPORIUM"]),
+
+    ("dkb-number-slots-named-for-speech", "the posting template's number slots are named for the "
+                                          "SPOKEN form -- with them named for the raw argument, "
+                                          "290d8e5c said \"3 vacancies, salary 14,000\" with the "
+                                          "conversion rule on the very next line",
+     [f for f in all_conv() if os.path.basename(f).startswith("DKB")
+      and "Inbound" not in f and "Memory" not in f and "Output" not in f],
+     ["named for the SPOKEN form on purpose"],
+     ["[num_vacancies] vacancies"]),
+
+    ("dkb-role-name-script", "DKB states that [job_role] and [company_name] arrive in Latin and are "
+                             "spoken in the target script -- no DKB prompt said this, and 714ebfc0 "
+                             "said \"Helper\" in Latin",
+     [f for f in all_conv() if os.path.basename(f).startswith("DKB")
+      and "Inbound" not in f and "Memory" not in f and "Output" not in f],
+     ["a role or a business name never does"],
+     []),
+
+    ("dkb-kn-business-name-script", "the DKB Kannada prompts say VERBATIM is about WHICH business, "
+                                    "not which script -- 3e9590d2 asked \"Sharma Traders\" in Latin "
+                                    "on a Kannada call while the Hindi twin converts",
+     ["DKB/DKB Kannada Signals.md", "DKB/DKB Kannada.md"],
+     ["Converting the script is your job"],
+     []),
+
+    ("dkb-recap-numbers-in-words", "the consent step says the RECAP obeys the number rule too -- "
+                                   "3e9590d2 said the hours and vacancy count in words while "
+                                   "collecting them, then recapped them as digits",
+     [f for f in all_conv() if os.path.basename(f).startswith("DKB")
+      and "Memory" not in f and "Output" not in f],
+     ["recap is a sentence you build"],
+     []),
+
+    ("slash-rule-present", "every conversation prompt has the Slash ( / ) section -- it was absent "
+                           "from all DKB, both TRRAIN and slim, and dkb-kn-out and trrain-hi-out "
+                           "both spoke a literal slash",
+     [f for f in all_conv() if "Memory" not in f and "Output" not in f],
+     ["## Slash"],
+     []),
+
+    ("no-spoken-stage-direction-form-in-samples", "the samples do NOT demonstrate a speech-shaped "
+                                                  "stage direction. 151 *(NOT SPOKEN ...)* "
+                                                  "annotations were converted to INTERNAL: lines; "
+                                                  "three rule-wordings had failed first and "
+                                                  "f31e1587 was clean after the demonstrations went",
+     [f for f in all_conv() if os.path.basename(f).startswith(("KKB Placeholder", "Maya"))
+      and "Memory" not in f and "Output" not in f],
+     [],
+     ["*(NOT SPOKEN", "phone: +91"]),
+
+    ("not-spoken-marker-is-a-marker", "the marker rule names the *(NOT SPOKEN ...)* form too -- "
+                                      "557fbeb0 read one out loud INCLUDING the caller's phone "
+                                      "number and profile fields; the rule had named [ ], *( ) and "
+                                      "INTERNAL but not this one",
+     [f for f in all_conv() if os.path.basename(f).startswith(("KKB Placeholder", "Maya"))
+      and "Memory" not in f and "Output" not in f],
+     ["has actually been read out loud"],
+     []),
+
+    ("no-quoted-bad-output-in-evidence-notes", "no prompt QUOTES a sentence the bot wrongly said. "
+                                               "A note quoting the fabricated DKB posting was "
+                                               "reproduced character-for-character on five calls "
+                                               "while three other fixes were tried; D81b",
+     [f for f in all_conv() if "Memory" not in f and "Output" not in f],
+     [],
+     ["announced \"आपकी एक posting है", "बारह हज़ार रुपये\" —"]),
+
+    ("no-concrete-values-beside-templates", "no template block PRINTS a concrete value -- an "
+                                            "example next to a template becomes the output. Three "
+                                            "times tonight: generic trades became offerable jobs, a "
+                                            "business name became the greeting (bd60c6b0), and a "
+                                            "salary figure became the spoken salary (cc1b0ecc said "
+                                            "\"twelve thousand\" when salary was 30000). D82",
+     [f for f in all_conv() if "Memory" not in f and "Output" not in f],
+     [],
+     ["`12000` is", "`14000-20000` is", "`14000` is", "`3` is \"तीन\"", "`3` is \"ಮೂರು\""]),
+
+    ("native-numerals-are-not-words", "the number rule says explicitly that Devanagari/Kannada "
+                                      "numerals are still digits -- twice tonight the model "
+                                      "re-rendered digits in the target script to satisfy \"in "
+                                      "words\": 1c6963bb spoke a pin code as \"११००४५\" and 6e400995 "
+                                      "spoke a salary as \"१२,००० से १६,०००\"",
+     [f for f in all_conv() if os.path.basename(f).startswith(("KKB Placeholder", "Maya", "KKB Slim"))
+      and "Memory" not in f and "Output" not in f],
+     ["Words, not native-script digits"],
+     []),
+
+    ("no-jobs-line-has-no-role-branch", "the no-matching-role line has a branch for when the "
+                                        "caller never named a role -- ea4972de had only been asked "
+                                        "about location, so [role] had nothing to fill and the bot "
+                                        "spoke the marker itself to the caller",
+     [f for f in all_conv() if "की जॉब अभी नहीं है" in open(f, encoding="utf-8").read()],
+     ["this sentence does NOT apply"],
+     []),
+
+    ("salary-in-words-at-point-of-use", "[salary] and [vacancy] are required in WORDS at the job "
+                                        "template itself -- the rule lived ~700 lines away in the "
+                                        "Numbers section and 33 of 399 salary phrases across KKB "
+                                        "and Maya carried digits (f5a40741 said \"12,000\"); D82",
+     [f for f in all_conv() if os.path.basename(f).startswith(("KKB Placeholder", "Maya", "KKB Slim"))
+      and "Memory" not in f and "Output" not in f],
+     ["spoken as WORDS.**"],
+     []),
+
+    ("slash-rule-at-point-of-use", "the slash rule is ALSO stated at the template that speaks "
+                                   "[role] -- 21 of 28 leaks were the array role \"Computer "
+                                   "Operator / Data Entry\" on bots that already had the section",
+     [f for f in all_conv() if os.path.basename(f).startswith(("KKB Placeholder", "Maya", "KKB Slim"))
+      and "Memory" not in f and "Output" not in f],
+     ["in place of the slash"],
+     []),
+
+    ("no-verbatim-stage-direction", "no prompt PRINTS the stage-direction form it forbids -- the "
+                                    "guard quoted `*(Silent tool call: apply_job)*` and the bot "
+                                    "emitted exactly that on e4e81fe2 with zero tools called, "
+                                    "fabricating an application; D81",
+     [f for f in all_conv() if "Memory" not in f and "Output" not in f],
+     [],
+     ["*(Silent tool call"]),
+
+    ("returning-caller-callback-clause", "the returning-caller callback clause exists in every "
+                                         "OUTBOUND seeker prompt -- it was fixed on Hindi and Maya "
+                                         "Signals and never mirrored, leaving both Kannada prompts "
+                                         "with zero occurrences (tracker: Missing returning call "
+                                         "user)",
+     ["KKB/KKB Placeholder Hindi Signals.md", "KKB/KKB Placeholder Hindi.md",
+      "KKB/KKB Placeholder Kannada Signals.md", "KKB/KKB Placeholder Kannada.md",
+      "Maya/Maya Hindi Signals.md", "Maya/Maya Hindi.md"],
+     ["Callback-clause rules:"],
+     []),
+
+    ("kn-failure-line-asserts-nothing", "the Kannada failure line asserts NOTHING about whether the "
+                                       "application exists -- the routing between it and Row 1 is "
+                                       "broken on both routes (7f2e3928, 5bbb6ca1), so the line "
+                                       "itself must be true in every case it is reached for",
+     [f for f in all_conv() if "Kannada" in os.path.basename(f)
+      and os.path.basename(f).startswith("KKB Placeholder")
+      and "Memory" not in f and "Output" not in f],
+     ["ನಿಮ್ಮ ಆಸಕ್ತಿ ನಾವು ನೋಟ್ ಮಾಡ್ಕೊಂಡಿದೀವಿ"],
+     ["ಸಧ್ಯಕ್ಕೆ ಆಗಿಲ್ಲ", "ಮುಂದೆ ಹೋಗಿಲ್ಲ"]),
+
+    ("slim-neverinvent-deep-dive", "the deep-dive template block itself says a job absent from the "
+                                   "array has no deep dive, so its salary/vacancy/qualification "
+                                   "cannot be supplied; D79",
+     ["KKB-Slim/KKB Slim Hindi Signals.md"],
+     ["has no deep dive"],
+     []),
+
     ("phase2-bridge-claims-nothing", "the Phase-2 bridge does NOT assert the apply succeeded — "
                                      "e75bf95f and 7e586f14 told real callers \"ಅಪ್ಲೈ ಆಗಿದೆ\" after "
                                      "two 422s, via this line rather than the guarded success line",
@@ -247,6 +458,10 @@ def main():
             text = cache[f]
             # must_contain is satisfied by ANY of the tokens: a fix may be worded per language, and
             # the point is that the fix is present, not that one exact spelling is.
+            # NOTE: `must` is ANY-of, not all-of. That is deliberate: a fix mirrored across
+            # languages has a different spoken string per language, and a given file can only
+            # contain its own. A row needing TWO things present in the SAME file cannot be
+            # expressed here -- split it into two rows instead. (2 of 31 rows are multi-token.)
             if must and not any(t in text for t in must):
                 missing.append((os.path.basename(f), must[0][:60]))
             for t in must_not:
