@@ -440,7 +440,7 @@ worth more than any prompt rule we can write, because the prompt is guessing at 
 
 ---
 
-## 13. PLEASE DELETE — five seeker records on gzb-signals that should not exist (2026-09-23)
+## 13. PLEASE DELETE — four seeker records on gzb-signals that should not exist (2026-09-23)
 
 There is no DELETE route on `/api/v1/admin/participant` (`404 Route not found`), so we cannot remove
 these ourselves. All are **live** seeker profiles, so they can surface in employer-side searches.
