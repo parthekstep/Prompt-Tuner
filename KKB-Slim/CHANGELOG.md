@@ -55,8 +55,23 @@ are about. Not a language variant, so `/sync-check` must not treat it as a mirro
   - **The pin misses share this root cause.** Of the three, the two clear ones (`d70126e8`,
     `2b529ea1`) were both *role change + populated `${location}`*; the two role-change calls whose
     `${location}` was empty (`612eda02`, `8ae650f2`) asked both turns normally, because they had to.
-    So a populated `${location}` explains the landmark misses and the pin misses alike. `344182e7`
-    exercises that combination and passes.
+    So a populated `${location}` explains the landmark misses and the pin misses alike.
+  - **Tier 2 — the role-change path, verified on `d4dd4668-da68-4667-b9ff-e99c20afec45`** (120s).
+    This is a byte-for-byte repro of `d70126e8`, the call that lost BOTH turns: same fixture, same
+    `${location}`, the caller says *"मुझे पढ़ाने का काम चाहिए, टीचर की जॉब"*, `update_profile` fires,
+    and the bot merges the role line into Turn A exactly as before — *"ठीक है, टीचर की जॉब्स देखती
+    हूँ। हमारे पास आपकी जॉब की लोकेशन मुराद नगर है — क्या यह सही है?"* On `d70126e8` the pin and the
+    landmark were both skipped from here. Now both fire: the pin is read back as six digit-words and
+    the landmark is asked before `get_jobs`. The rest of the call is also correct — no teaching jobs
+    exist, so the no-match line ran and no unrelated job was offered, then `get_services` named
+    ट्रेन ट्रस्ट.
+  - **Minor, noted not fixed:** on `d4dd4668` the no-match line and the services lead-in shared one
+    turn (*"अभी आपके लिए मुझे जॉब्स नहीं मिल रहीं — … जॉब्स के अलावा हमारे पास कुछ और मदद भी है…"*).
+    Step 13 asks for the offer in its own turn. The offer itself was made correctly with
+    `get_services` behind it, so this is a packaging deviation, not a miss.
+
+  **Repro condition now passing 4 of 4** (`462e2425`, `344182e7`, `88c8ecdd`, `d4dd4668`), against
+  2 of 12 before.
   - **Kannada — verified on `88c8ecdd-ff35-4b7e-b593-a02afea5f177`** (207s), tested independently per
     the test-every-variant rule. `${location}` was `Keshwapur, Hubballi, 580023` — the same area+pin
     condition — and all three turns ran: Turn A confirmed ಕೇಶ್ವಾಪುರ, ಹುಬ್ಬಳ್ಳಿ (the full area, not
