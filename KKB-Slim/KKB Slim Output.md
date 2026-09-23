@@ -134,6 +134,10 @@ If a value is not present, use "NA" for strings, [] for arrays, or 0 for counts.
     Record it when the caller CONFIRMED the pin we already held, or gave one themselves — six
     digits, digits only (e.g. "110098"). "NA" if the pin was never settled: they did not know it,
     refused, were never asked, or the turn was skipped.
+    **To check the length, write the confirmed pin as digit words, one per digit, and count the
+    WORDS** — not the number. Six → record those six digits. Any other count → "NA". Never add, drop or
+    change a digit to make it six: on call 2ad96965 the caller agreed to a five-digit read-back and it
+    was recorded as "110024", with a digit invented.
     **Only what the caller confirmed or said out loud counts.** A pin sitting in the input location
     that the caller never confirmed is "NA" — the point of this field is that a human agreed to it.
     Never fill it from a job's location, the stored profile, or your own knowledge of the city, and

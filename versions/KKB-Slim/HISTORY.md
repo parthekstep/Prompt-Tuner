@@ -23,3 +23,11 @@
 - **2026-09-23_141835** — `pre-save-at-step13` — save_location bundled with the fetch dropped the location block from 4/4 to ~2/7 _(3 files)_
 - **2026-09-23_151835** — `pre-remove-save-location` — post-call writer 6/6 on target; in-call save 2/8 _(3 files)_
 - **2026-09-23_153129** — `pre-latest-location-wins` — bot ignored a mid-call move and read back the old area _(3 files)_
+- **2026-09-23_192323** — `pre-six-digit-pin` — 5-digit pin read back as valid (04365ced); wrong-length pins were accepted on retry _(3 files)_
+- **2026-09-23_192406** — `pre-deploy-kkb-kn-signals-slim-2026-09-23_192406` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(3 files)_
+- **2026-09-23_194654** — `pre-split-then-count` — count-the-digits failed 0/2 on 5-digit input: models misjudge a number's length _(3 files)_
+- **2026-09-23_194714** — `pre-deploy-kkb-kn-signals-slim-2026-09-23_194714` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(3 files)_
+- **2026-09-23_200120** — `pre-demonstrate-ask-path` — ask branch 0/41: never demonstrated; bot copied demo PIN 110045 when input had none _(3 files)_
+- **2026-09-23_200157** — `pre-deploy-kkb-kn-signals-slim-2026-09-23_200157` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(3 files)_
+- **2026-09-23_201831** — `pre-decouple-example-pins` — Muradnagar welded to 110045 in examples; no-pin input 1/2 fabricated it _(3 files)_
+- **2026-09-23_202022** — `pre-deploy-kkb-kn-signals-slim-2026-09-23_202022` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(3 files)_

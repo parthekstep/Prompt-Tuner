@@ -5,6 +5,38 @@ output prompts; the ONLY difference is the conversation prompt — a ground-up r
 against the master's ~224k. It exists to test whether prompt size is what the latency complaints
 are about. Not a language variant, so `/sync-check` must not treat it as a mirror.
 
+## 2026-09-23 — PINs must be six digits; the bot no longer invents one (Hindi + Kannada)
+
+- **Feedback/bug:** Khushboo's UAT call `04365ced` carried `${location}` = `Delhi, 11024` (five digits)
+  and the bot read it back as a pin. Owner's rule: every captured pin is six digits, or the caller is
+  asked to check and repeat it.
+- **What investigating it found — a worse, older bug.** Across 41 live calls the "ask for the pin"
+  branch had fired **0 times**. Whenever `${location}` carried no pin the bot read one back anyway, and
+  it was always **110045** — the pin in the prompt's worked examples, which pair it with Muradnagar
+  (D102). Reproduced on a never-registered number with no memory (`ff13bfaa`), ruling out stored data.
+  **Correction:** this morning's inbound pass `2027e477` was one of these — its `${location}` was empty,
+  so the 110045 it read back was fabricated. It was scored as a pass; it was not.
+- **Attempts:** a rule, then a split-then-count procedure — both 0/3 on five-digit input (models misjudge
+  a number's length). Then fixing the demonstrations: worked call B now shows the ASK path, Turn B opens
+  with a side-by-side input → decision table, and every example pin is re-paired with its own place so
+  none can be transplanted (110045 removed from both prompts). The caller-given rule's "then accept
+  whatever comes" ending is replaced with a terminal reject.
+- **Verified (current build):**
+  - **No pin in the data → asks, invents nothing** — `5f73c94d` (Muradnagar, clean number).
+  - **Caller gives five digits → not accepted, asked again, six stored** — `986c0196`, `54c48491`.
+  - **Valid pin → confirmed as before** — `e2952625`, `baa48e78`.
+- **Still unreliable — five-digit pin IN THE DATA:** 1 of 2 (`ee2f7c0d` asked; `d4294874` read back
+  "एक, एक, शून्य, दो, चार", though the caller corrected it and `201206` was stored). This is the model's
+  counting limit, and prose has been tried three ways. A reliable fix needs the decision out of the
+  prompt — see the owner decision in the report.
+- **Output prompt:** the split-and-count check for `pin_code` added; it had recorded a confirmed
+  "11024" as "110024", inventing a digit (`2ad96965`). Not yet re-verified on a five-digit case.
+- **Seen, not caused here, not fixed:** on `c45a7ff3` the bot skipped the pin and landmark turns after
+  an audio hiccup made it repeat Turn A; on `5f73c94d` it said "सैलरी उपलब्ध नहीं" — the absent-field
+  announcement fixed this morning, recurring.
+- **Files:** both slim conversation prompts, `KKB-Slim/KKB Slim Output.md`, analyser D101 + D102,
+  personas `hi-pin-*`, fixtures `tc-pin-*`.
+
 ## 2026-09-23 — the caller's location now reaches the backend and is geocoded (post-call writer)
 
 - **Ask:** geocode the location the caller gives, silently update the backend, don't affect the call;

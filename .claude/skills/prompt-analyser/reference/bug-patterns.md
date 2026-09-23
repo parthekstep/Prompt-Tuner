@@ -2573,3 +2573,74 @@ acknowledge it briefly without re-running the questions. Verified: on `ff922409`
 post-call writer drops a landmark that names the caller's old area when their final area differs.
 
 **Source.** KKB Slim Hindi, 2026-09-23. Related: D95 (a test that accepts a weaker fact), D50.
+
+## D101 — a validation rule whose remedy assumes the input is well-formed, or ends in "accept whatever comes"
+
+**Symptom.** A production UAT call (`04365ced`, KKB Slim Hindi) carried `${location}` = `Delhi, 11024` —
+five digits, a data typo. The bot read it back as a pin, *"एक, एक, शून्य, दो, चार"*, five digit-words,
+and the caller agreed. The prompt already said, two lines up, *"A 5-digit or other malformed run is NOT
+a pin: treat it as absent and ask."*
+
+**Root cause — two escape hatches, each defeating the rule.**
+1. **A remedy that assumes good input.** The digit-count guard said *"If you are about to say five or
+   seven, you have mis-split the number: read it off `${location}` again digit by digit."* That is the
+   right remedy when the input has six digits and the model dropped one. When the input genuinely has
+   five, re-reading yields five again, the rule has no next step, and the model speaks what it has. The
+   remedy turned "this is not a pin" into "this is a pin I mis-read" — a competing instruction (rung 2).
+2. **A validation that ends in acceptance.** For a pin the CALLER gives, the rule was *"if what you heard
+   is not 6 digits, say so once … and then accept whatever comes."* So a wrong-length pin was rejected
+   once and accepted the second time. A validation with an unconditional accept at the end is not a
+   validation.
+
+**Detection heuristic.** For every format or length check, find its failure branch and follow it to
+the end. (a) Does the remedy assume the input is well-formed ("you mis-read", "read it again")? Then ask
+what happens when the INPUT is the problem — if re-applying the remedy returns the same bad value, the
+branch has no exit. (b) Does any branch end in "accept whatever comes", "use what they said", or
+"move on with it"? That is an unconditional accept, and the check is decorative.
+
+**Fix direction.** Decide validity FIRST, by count, before any read-back: exactly six → confirm; anything
+else → it is not a pin, never read it back, ask with a dedicated line. Make the remedy branch on the
+input ("if it really has six, you mis-split; if it does not, it was never a pin"). Replace the
+unconditional accept with a terminal reject: ask once to check and repeat; still wrong → no read-back,
+nothing confirmed, treated as not known. State the invariant once, plainly: *a pin that is not exactly
+six digits is never read back, never confirmed and never saved.* The output prompt already recorded
+`pin_code` as NA for non-six-digit values, so the stored record was safe — the damage was a caller
+agreeing, out loud, to a wrong number.
+
+**Source.** KKB Slim Hindi + Kannada, 2026-09-23 (Khushboo's UAT call). Related: D95, D97, D99.
+
+## D102 — a branch that is never demonstrated is never taken, and the demonstrated branch's VALUES get reused as fabrications
+
+**Symptom — the bot invents caller data.** KKB Slim's Turn B has two branches: confirm the pin when
+`${location}` holds one, ask for it when it does not. Across 41 live calls the ASK branch fired **0
+times**. On every call whose `${location}` carried no pin, the bot read one back anyway — and it was
+always **110045**, the pin used in the prompt's worked examples: `2027e477` (inbound, `${location}`
+absent), `d9111476` and `ff13bfaa` (`${location}` = `Muradnagar`, the last on a never-registered number
+with no memory, which rules out any stored value). A caller hearing "आपका पिन कोड एक, एक, शून्य, शून्य,
+चार, पाँच है — सही?" may well say हाँ to a number that was never theirs.
+
+**Root cause.** Both worked calls demonstrated the CONFIRM branch with the same concrete pin, word for
+word; the ASK line appeared once, in rule prose, and in no worked call. The model performs the Turn B
+it has seen performed. With no pin in the input it does not switch branches — it fills the familiar
+template with the familiar digits. D50 applied to a VALUE, not a phrase: a concrete example value is
+itself a demonstration, and it is what fills the slot when the real value is missing.
+
+**How it hid.** The grader scored "a pin was read back" as a pass. On calls whose input had a pin that
+was correct; on calls whose input had none it was a fabrication, counted as success. **A pass condition
+must compare against the input, not just check that the behaviour occurred** — "read back the pin" and
+"read back THE INPUT'S pin" are different checks, and only the second one catches this.
+
+**Detection heuristic.** (1) For every multi-branch step, check that EACH branch is demonstrated in at
+least one worked example — a branch only described in rule prose is suspect, and one never demonstrated
+is likely unreachable. Run D1 on it: count how often it has ever fired. (2) Grep every concrete example
+value used in a demonstration (pins, phone numbers, names, ids, amounts) against real transcripts from
+calls whose input LACKED that field. A demo value appearing there is a fabrication. (3) Distrust a demo
+value repeated across examples — 110045 appeared 12 times.
+
+**Fix direction.** Demonstrate every branch: one worked call per branch, with the INPUT shown and the
+branch chosen because of it. Add a compact side-by-side table of input → decision for the step (not a
+read-back to copy — use a separator like ` · ` so the split cannot be spoken verbatim). Vary the example
+values so no single one dominates, and state that a value may only be read back if it came out of THIS
+call's input. When grading, assert against the input.
+
+**Source.** KKB Slim Hindi + Kannada, 2026-09-23. Related: D50, D101, D95.
