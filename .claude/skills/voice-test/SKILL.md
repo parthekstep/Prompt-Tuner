@@ -69,6 +69,20 @@ contract). The runner does no grading. A dump that looks like a report is not a 
 10. **Target ids are instance-scoped.** A stale id yields a not-found error and looks like a bot bug.
 11. **Payloads have arrived TRUNCATED at exactly 1023 chars** (analyser `D42`) from the campaign
     layer. Check the delivered args before blaming the bot.
+12. **A `Completed` call can read `dur=0` with a full transcript.** Duration is filled in late. On
+    2026-09-23 a 300 s, 56-turn call (`b989416d`) read `outcome=Completed dur=0` and was classified
+    "dropped". **Judge whether a call happened by its transcript turns, never by `call_duration`.**
+13. **Stopping your runner does not stop the call.** Killing the local script leaves the Raya call
+    running; a new test then shares the single tester (its persona PATCHed mid-call) and both calls
+    write to the same record. This contaminated two batches on 2026-09-23 (`9c0aeb63` overlapping
+    `9a6c87b4`). **Before starting ANY call — including a retry inside one scenario — wait until the
+    bot agent has no `Pending` call.** Rules 12 and 13 compound: a misread "drop" triggers a retry
+    that overlaps the still-live call.
+14. **`call_output` lags further than the transcript.** A consumer that reads it straight after the
+    call sees nulls; one that then falls back to a pre-call input writes stale data (`6c12ef52`
+    wrote the caller's OLD area). Read it only once the field you need exists.
+15. **macOS filenames are case-insensitive.** `PHONE.log` and `phone.log` are the same file, so a
+    runner and its log clobber each other. Never distinguish two files by case alone.
 
 ## Concurrency (for running a batch faster)
 

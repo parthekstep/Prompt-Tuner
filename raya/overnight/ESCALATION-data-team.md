@@ -437,3 +437,40 @@ worth more than any prompt rule we can write, because the prompt is guessing at 
 - **One service row is test data** ("Temp - PS", `costToBeneficiary: Free`, serves MSMEs only). The bot
   skips MSME-only rows, but it would be cleaner not to have it live.
 - `natureOfJob` is `"Not Available"` on a large share of rows.
+
+---
+
+## 13. PLEASE DELETE — five seeker records on gzb-signals that should not exist (2026-09-23)
+
+There is no DELETE route on `/api/v1/admin/participant` (`404 Route not found`), so we cannot remove
+these ourselves. All are **live** seeker profiles, so they can surface in employer-side searches.
+
+| user / item | phone | how it got there |
+|---|---|---|
+| user `b2683040-9490-4858-b63b-f8383636ba7e`, item `6c340287-a80f-4468-9643-86f177ea5a4d` | `91918888888790` | **A bot bug, not a test.** The bot doubled the country code on `update_profile`; your endpoint finds-or-creates by phone, so it created a new user. Call `482ea2e2`. Duplicate of a real test profile named Ramesh. |
+| item `391aa220…` | `918888777101` | our geocoding probe, name "Geo Probe" |
+| item `8c2c4568…` | `918888777102` | our geocoding probe, name "Geo Probe" |
+| item `5a681768…` | `918888777103` | our geocoding probe, name "Geo Probe" |
+
+**Also worth knowing — this is a class, not a one-off.** Because `POST /admin/participant` creates
+rather than fails when the phone is not found, any malformed phone from any client silently makes a
+new person. We have fixed the cause on one bot and have seven more to fix. **A cheap backend guard
+would stop the whole class:** reject a `phone_number` that starts with `9191` and is longer than 12
+digits, or reject an update carrying an `item_id` whose owner's phone differs from the one sent
+(today that returns `403` only *after* the phantom has already been created by an earlier write).
+
+## 14. For information — you already geocode, and it works
+
+Not an ask; recording it because it changed our plan. We were about to add Google's geocoding API to
+turn caller locations into coordinates. Testing showed **your backend already geocodes the profile's
+`location` string** into `item_locations` on every write, and does it well:
+
+| `location` written | resolved to |
+|---|---|
+| `Ghaziabad, Uttar Pradesh, India` | Ghaziabad city centre `(28.6699, 77.4544)` |
+| `Muradnagar, Ghaziabad, Uttar Pradesh, India` | Muradnagar — **12.4 km** away, correct |
+| `Muradnagar Bus Stand, Muradnagar, Ghaziabad, Uttar Pradesh 201206, India` | a further ~140 m |
+
+So the job on our side is only to send a more specific `location` string — no external service. One
+question: **which geocoder is behind it, and does it have a quota we could exhaust?** If every call
+starts writing a location, your geocoding volume goes up by roughly the call volume.

@@ -15,3 +15,11 @@
 - **2026-09-23_103735** — `pre-deploy-kkb-kn-signals-slim-2026-09-23_103735` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(3 files)_
 - **2026-09-23_112501** — `pre-services-turn-split` — step 13 positional rule permits merging the offer into a statement _(3 files)_
 - **2026-09-23_112547** — `pre-deploy-kkb-kn-signals-slim-2026-09-23_112547` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(3 files)_
+- **2026-09-23_132846** — `pre-location-write` — location captured in Turns A-C never reaches the backend (0/10) _(3 files)_
+- **2026-09-23_133423** — `pre-restore-2026-09-23_133423` — auto-saved before restoring 'pre-location-write' _(3 files)_
+- **2026-09-23_133701** — `pre-phone-normalise` — tool schema said prepend 91, prompt said never; each right in one direction _(3 files)_
+- **2026-09-23_134504** — `pre-save-location` — dedicated save_location tool; 0/10 locations ever reached the backend _(3 files)_
+- **2026-09-23_140700** — `pre-confirm-routes-to-location` — confirm branch never named the location turn; 1/3 skipped on v3 _(3 files)_
+- **2026-09-23_141835** — `pre-save-at-step13` — save_location bundled with the fetch dropped the location block from 4/4 to ~2/7 _(3 files)_
+- **2026-09-23_151835** — `pre-remove-save-location` — post-call writer 6/6 on target; in-call save 2/8 _(3 files)_
+- **2026-09-23_153129** — `pre-latest-location-wins` — bot ignored a mid-call move and read back the old area _(3 files)_

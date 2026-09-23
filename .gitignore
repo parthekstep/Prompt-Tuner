@@ -40,3 +40,4 @@ control-center/**/__pycache__/
 
 # regression email build artifact
 digest.html
+raya/location-writeback-state.json

@@ -2367,6 +2367,18 @@ same section as both "skip if" and "persisted as".
 **Source.** KKB Slim Hindi + Kannada, 2026-09-23. Related: D91 (false assertion in a required param),
 D96 (a pre-close checklist naming one owed item), D50 (a demonstration becomes the output).
 
+**The same pattern, written into a TOOL's trigger — same day, same author.** A new `save_location` tool
+was described as *"call it right after the location questions are finished (area confirmed, pin
+confirmed or asked, landmark asked or skipped)"*. Every clause of that was satisfiable before a single
+question was asked: `${location}` already held an area and a pin, so "confirmed" read as "held", and
+"or skipped" discharged the landmark. On `28f4cf52` the bot saved and fetched straight from the role
+turn and **all three location questions vanished** — a worse regression than the bug being fixed. A
+tool's trigger condition is a guard like any other, and it is read at the moment of use, so it
+outranks the prompt's own ordering. **Apply this check to every tool description that says "after X"
+or "once Y is done"**: can the model satisfy X or Y from data already in context, without the event
+having happened? If yes, name the event in the caller's terms ("after the caller has ANSWERED…") and
+exclude the context value by name. Never write "(or skipped)" without listing the skip reasons.
+
 ## D96 — a pre-close checklist that names ONE owed item silently excuses every other owed item
 
 **Symptom.** Step 13 says the services offer fires "on EVERY call where the caller engaged, however
@@ -2485,3 +2497,79 @@ tested with an empty array.
 
 **Source.** KKB Slim Kannada, 2026-09-23. Related: D95 (permission too broad), D97 (prohibition too
 narrow), D50 (louder wording is not a mechanism).
+
+## D99 — a tool description that states an OPERATION instead of a TARGET FORMAT, on an input whose shape varies
+
+**Symptom — silent data corruption.** On `482ea2e2` (KKB Slim Hindi, outbound) `update_profile` was
+sent `phone: "91918888888790"` — the country code doubled. The participant endpoint finds-or-creates
+by phone, so the wrong number was not found and **a phantom user was created in production**
+(`b2683040`, response `user_existed: False`). The next write in the same call reused that phone
+against the real caller's profile and failed `403` on the ownership mismatch. Nothing was spoken
+about any of it; the caller heard a normal call.
+
+**Root cause — two instructions, each correct for one input shape.** `${contact_phone}` arrives as
+**12 digits** on outbound (`918888888790`) and **10 digits** on inbound (`1204404272`). The tool
+parameter description said *"= 91 + the 10-digit ${contact_phone}"* — an OPERATION, correct inbound,
+wrong outbound. The prompt said *"12-digit 91-prefixed, never prepend another 91"* — correct outbound,
+wrong inbound. Tool descriptions are read at the moment of use, so on the outbound calls where the
+model followed the schema over the prose, it doubled. **D1: 2 of 20 writes; D2: both on one outbound
+call.** It stayed rare only because the model usually followed the prompt.
+
+**The tell was already in the same agent.** `get_profile` never doubled, in either direction. Its
+description states the **target format** — *"with the 91 country-code prefix and NO plus sign, e.g.
+919876543210"* — so the model normalises from whichever shape arrives. An operation ("91 + X") is
+only right for one shape of X; a target format is right for all of them.
+
+**How it hid.** This is residue of an earlier fix (CD6, 2026-08-01) that corrected the PROMPT text and
+left the TOOL descriptions saying "91 +". The fix was declared resolved and recorded as resolved. A
+fix that edits one of two sources of the same rule is half a fix, and the half left behind is the
+stickier one.
+
+**Detection heuristic.** Grep every tool parameter description for arithmetic on an input variable —
+`"= 91 +"`, `"prefix with"`, `"prepend"`, `"add the"`, `"append"`. For each, ask **whether that
+variable's shape is the same in every direction/campaign/language** — check a real inbound and a real
+outbound call's CALL CONTEXT. If the shape varies, the operation is wrong somewhere. Then diff the
+tool description against the prompt's own description of the same value: any disagreement is a live
+competing instruction, and the tool side wins at the moment of use. Also flag any write endpoint
+documented as find-or-create by an identifier the model constructs — a malformed id there does not
+fail, it creates.
+
+**Fix direction.** Describe the target, not the transformation: *"12 digits beginning with 91 — send
+it unchanged if it already is; if it is 10 digits, put 91 in front. A number starting 9191 is always
+wrong."* Anchor to a value the model has already produced correctly (*"the SAME value you sent to
+get_profile"*). Then bring the prompt's own wording into line so no two sources disagree. When
+closing out such a bug, grep **every** place the rule is stated — prompt, each tool description, each
+agent that shares the tool — before calling it resolved.
+
+**Source.** KKB Slim Hindi, 2026-09-23. Fleet exposure at time of writing: 8 Signals agents × 3 tools.
+Related: D91 (a required parameter constrains what the model says), D98 (silence vs observable
+absence), CD6 (the earlier half-fix).
+
+## D100 — a slot defined by the TURN that filled it goes stale when the caller updates the value later
+
+**Symptom.** Mid-call, a caller said *"मैं अब मोदीनगर में रहता हूँ, मोदीनगर बस स्टैंड के पास"* ("I now
+live in Modinagar"). Later the bot read their details back — *"…एरिया मुराद नगर — सब सही?"* — the old
+place. They said yes, and the old place became the recorded one (`a8281e55`). On a call where no
+read-back happened (`6c12ef52`) the move survived, which is the whole difference between the two.
+
+**Root cause.** The read-back's area slot was defined as *"the landmark turn's stop, station or
+landmark"*. A slot defined by WHICH TURN filled it keeps that turn's answer for the rest of the call, so
+any later correction is invisible to it. Nothing told the bot a later statement supersedes an earlier
+one. The same shape defeated the output prompt's `nearest_landmark` twice: its first line anchored it to
+"the Location step's answer", and an appended "their FINAL answer" paragraph lost to it both times.
+
+**Detection heuristic.** Grep for slots or fields defined by a turn or step — "the X turn's answer",
+"as settled at step N", "what they said at the location step". For each, ask whether the caller can
+legitimately CHANGE that value later in the call (location, role, availability, a preference). If they
+can, the definition must say the latest statement wins — in the definition's own first clause, not in a
+paragraph appended after it.
+
+**Fix direction.** Define the slot by recency: *"the LATEST thing the caller told you about where they
+live — normally the landmark turn's answer, but if they later said they moved, that new place"*. Add one
+general rule that a later statement supersedes an earlier one for the rest of the call, and have the bot
+acknowledge it briefly without re-running the questions. Verified: on `ff922409` the bot said *"मैं समझ
+गई कि आप अब मोदीनगर में रहते हैं"* and the recorded area was Modinagar. **Where prose does not bind**
+(the output prompt's `nearest_landmark`, 0/3 on move calls after two edits), enforce it in code: the
+post-call writer drops a landmark that names the caller's old area when their final area differs.
+
+**Source.** KKB Slim Hindi, 2026-09-23. Related: D95 (a test that accepts a weaker fact), D50.

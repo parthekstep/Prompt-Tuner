@@ -109,12 +109,21 @@ If a value is not present, use "NA" for strings, [] for arrays, or 0 for counts.
     — never from what the caller said they wanted.
 
 15d. nearest_landmark — Did the caller name a nearest bus stop, railway/metro station, or
-    well-known landmark near where they live? This is the Location step's Turn B answer.
+    well-known landmark near where they live? Normally the Location step's answer — BUT if later
+    in the call they say they have moved or live somewhere else and name a stop or landmark near the
+    NEW place, that later one REPLACES it. Always the landmark for where they live NOW.
     Extract it in the caller's own terms, transliterated to English/Latin script
     (e.g. "Nashik Road station", "near Sabzi Mandi", "Sahibabad station").
     "NA" if they were never asked (because it was already known from a previous call) or
     gave no usable answer. Never fill it from the input location, a job's location, or the
     stored profile — only from what the caller said on THIS call.
+    **Their FINAL answer, exactly as for home_area.** If, later in the call, they say they have
+    moved or live somewhere else and name a stop or landmark near the NEW place, record THAT one —
+    not the one they gave first. The two fields must describe the same place: on call c0e479e9 the
+    caller moved from Muradnagar to Modinagar mid-call, home_area correctly became "Modinagar", and
+    this field kept "Muradnagar bus stand" — a landmark in one town paired with an area in another.
+    If they say they moved but name no new landmark, this is "NA": the old landmark no longer
+    describes where they live.
     **If the BOT supplied the landmark rather than the caller, this is "NA".** That has happened:
     on call d3521a89 the bot asked for the nearest station, the caller answered "जी बताइए"
     (a non-answer), and the bot said "साहिबाबाद स्टेशन है।" itself. Nothing was learned on that
@@ -136,6 +145,15 @@ If a value is not present, use "NA" for strings, [] for arrays, or 0 for counts.
     "Role" if they turned them down because it was not the kind of work they want;
     "NA" if they did not reject the jobs, or applied, or gave no reason.
     Exactly one value — if they objected on both, use the one the bot actually acted on.
+
+15f. home_area — The area, locality or town the caller LIVES in, as settled on THIS call, in
+    English/Latin script (e.g. "Muradnagar", "Raj Nagar Extension", "Vaishali"). Their FINAL answer:
+    if they corrected it at the Location step, or later said they had moved or live somewhere else,
+    record the LATEST place they gave. Record it when the caller confirmed the area read back to
+    them, or named one themselves. "NA" if it was never settled. Only what the caller confirmed or
+    said out loud counts — never fill it from a job's location, and never with a city or state
+    alone when they named something more specific. This is where they LIVE, not where they want to
+    work: that is preferred_location.
 
 16. services_pitched — Was a support-service offer actually spoken to the caller on this call
     (section S, wherever it fired — early because they were not looking for work, after a no-match,
@@ -272,6 +290,7 @@ to_number / out_did. Any inbound-vs-outbound metric is computed there, not here.
   "input_location_had_jobs": "No",
   "nearest_landmark": "Sahibabad station",
   "pin_code": "110098",
+  "home_area": "Sahibabad",
   "services_pitched": "Yes",
   "service_interest": "Yes",
   "service_offered": "TRRAIN Trust",

@@ -5,6 +5,62 @@ output prompts; the ONLY difference is the conversation prompt — a ground-up r
 against the master's ~224k. It exists to test whether prompt size is what the latency complaints
 are about. Not a language variant, so `/sync-check` must not treat it as a mirror.
 
+## 2026-09-23 — the caller's location now reaches the backend and is geocoded (post-call writer)
+
+- **Ask:** geocode the location the caller gives, silently update the backend, don't affect the call;
+  test with 5–6 bus-stop scenarios; and "will it re-geocode every time a user updates their location?"
+- **No geocoding service needed.** The Signals backend already geocodes the profile's `location` string
+  into `item_locations` on every write. Nine direct scenarios on a probe profile: agrees with
+  OpenStreetMap within **0.15–0.76 km** wherever OSM has a reference (Modinagar Bus Stand, Vaishali
+  Metro, Sahibabad Railway Station); handles a typo ("Bas Stand"), Devanagari, and an unknown shop (falls
+  back to the locality, invents no point). **Every update re-geocodes.** For the record, Google's
+  Geocoding API would have been 10,000 free/month then $5 per 1,000, billing account required.
+- **The actual gap:** the location a caller gave reached the backend on **0 of 10** calls. The only write
+  instruction sat in step 12 (successful apply only), and skipped when an area was "already captured".
+- **Three in-call designs failed — do not retry them:**
+  - *`update_profile` with `location`* — sent `role` instead of `location` (`482ea2e2`).
+  - *A dedicated `save_location` riding the job fetch* (v2–v4) — the bot skipped the location questions:
+    **4/4 asked before the tool existed, ~2/7 with it** (`28f4cf52`, `ea133066`, `9c0aeb63`). Its trigger
+    ("after the questions are finished … or skipped") was satisfiable by `${location}` merely being in
+    context — D95 written into a tool. Three wordings, same collapse.
+  - *`save_location` riding the services step* (v5) — questions protected **6/6**, but the save fired on
+    **2 of 8** calls: lost when the call ended early, forgotten when it did not (`793df52c` reached
+    `get_services` and still skipped it).
+- **What shipped:**
+  - **`scripts/location_writeback.py`** — after the call, reads the call record and writes
+    `"<landmark>, <area>, <City>, <State>, India"`. Nothing runs in the call. Safety: the phone is the
+    one the bot used for `get_profile`, normalised in code; it never writes unless that phone resolves to
+    an EXISTING user with a live profile (the endpoint finds-or-creates by phone); it waits until the
+    post-call summary exists; and it drops a landmark that names the caller's old area after a move.
+  - **Output prompt:** new `home_area` field (the caller's FINAL area); `nearest_landmark` now takes the
+    final answer too, stated in the field's first line rather than an appended paragraph.
+  - **Conversation prompt:** the confirm-role branch now routes to the location turn, as the
+    change-of-role branch always did; `save_location` removed entirely (tool and prompt).
+- **Verified — the writer on six real calls, each a different place, all 0.00 km from target:** Muradnagar
+  Bus Stand `a09ad28a` (12.6 km from the city centre), Modinagar Bus Stand `c3eb8d17` (21.4 km), Vaishali
+  Metro `793df52c` (11.5 km), Sahibabad Railway Station `f8108db8` (8.9 km), Shipra Mall `33873466`
+  (9.2 km), no landmark known `9d87be89` (Raj Nagar Extension, 4.4 km). Three of those are calls where the
+  in-call save had failed.
+- **Mid-call move** (`6c12ef52`): caller confirmed Muradnagar, then said they had moved to Modinagar. The
+  first write used the stale pre-call area (the summary was read too early) — fixed by the readiness
+  check; re-run lands on **Modinagar**, 0.43 km from the bus stand they named.
+  - **The bot ignored the move** (`a8281e55`): its step-12 read-back still said "एरिया मुराद नगर", the
+    caller agreed, and the old place was recorded. Fixed with a "latest word on where they live wins"
+    rule and a recency-defined read-back slot (analyser D100). **Verified on `ff922409`:** the bot said
+    *"मैं समझ गई कि आप अब मोदीनगर में रहते हैं"*, `home_area` = Modinagar, and the writer landed on
+    Modinagar, 21.3 km from the city centre. **The read-back path itself is VERIFY-PENDING** — that
+    call's apply did not succeed, so step 12 never ran.
+  - **`nearest_landmark` still keeps the pre-move stop (0 of 3 move calls)** after two prose edits. Not
+    reworded a third time; the writer's code guard drops a landmark naming the old area, so the result
+    is locality-level — Modinagar, 0.43 km from the named bus stand — rather than exact.
+- **Location questions without any in-call save:** all three asked on `6c12ef52`.
+- **NOT deployed as a running service.** The writer is proven but runs on demand. Where it runs after
+  every call — the existing `kkb-dashboard` webhook (recommended; production, other repo) or a scheduled
+  job here — is the owner's decision.
+- **Files:** `KKB-Slim/KKB Slim Hindi Signals.md`, `KKB-Slim/KKB Slim Output.md`,
+  `scripts/location_writeback.py`, `raya/toolspecs/save_location.json` (retired), personas
+  `hi-geo-g1..g7`, fixtures `tc-geo-g1..g7`.
+
 ## 2026-09-23 — NEW BUG FOUND, NOT FIXED: KKB Slim Kannada invents jobs when the array is missing
 
 **Severity: high. Reproduced 2/2. Recommend keeping kkb-kn-signals-slim out of UAT until fixed.**
