@@ -41,12 +41,31 @@ are about. Not a language variant, so `/sync-check` must not treat it as a mirro
   fix is agnostic and was mirrored verbatim; only the worked example is localized (`Muradnagar,
   110045` → `Keshwapur, 580023`). Section parity re-checked. No divergence entry needed — this change
   lands in every language of the family.
-- **Status: DEPLOYED, NOT VERIFIED.** Both agents deployed and read-back verified. Tier-1 calls could
-  not be completed: from 21:58 onwards the tester agent stopped receiving legs altogether — the bot
-  side answers and speaks its first line normally (`bd7f84ea`, `216ae2c5`, both 8s), and no tester leg
-  is created at all. DIDs were re-checked and are unchanged from the configuration that ran ~25 calls
-  earlier tonight, so this is telephony-side, not the prompt. **Needs a Tier-1 call on a fixture whose
-  `${location}` carries an area and a pin, on BOTH languages, before it can be called fixed.**
+- **Status: VERIFIED on both languages.**
+  - **Hindi — verified twice, both on the area+pin repro condition (`${location}` = `Muradnagar,
+    110045`), the exact input that produced 2/12 before.**
+    - **`462e2425-6e80-459c-bcb5-4ba726b991f6`** (179s): all three turns in order — Turn A confirmed
+      मुराद नगर, Turn B read the pin back as six digit-words, Turn C asked *"आखिरी सवाल, फिर सीधे
+      जॉब्स पर आती हूँ — आपके घर के सबसे नज़दीक कौन सा बस स्टॉप, रेलवे या मेट्रो स्टेशन है?"* and the
+      caller answered "मुरादनगर बस स्टैंड पास है।" Jobs fetched only after that.
+    - **`344182e7-b9a3-45d0-b3cf-618abeb16791`** (186s) is the stronger one: it **merged the role line
+      into Turn A** ("ठीक है, डेटा एंट्री ऑपरेटर की जॉब्स देखती हूँ। हमारे पास आपकी जॉब की लोकेशन मुराद
+      नगर है — क्या यह सही है?"), which is precisely the compression that cost BOTH turns on
+      `d70126e8` and `2b529ea1` — and it still asked the pin and the landmark.
+  - **The pin misses share this root cause.** Of the three, the two clear ones (`d70126e8`,
+    `2b529ea1`) were both *role change + populated `${location}`*; the two role-change calls whose
+    `${location}` was empty (`612eda02`, `8ae650f2`) asked both turns normally, because they had to.
+    So a populated `${location}` explains the landmark misses and the pin misses alike. `344182e7`
+    exercises that combination and passes.
+  - **Kannada — verified on `88c8ecdd-ff35-4b7e-b593-a02afea5f177`** (207s), tested independently per
+    the test-every-variant rule. `${location}` was `Keshwapur, Hubballi, 580023` — the same area+pin
+    condition — and all three turns ran: Turn A confirmed ಕೇಶ್ವಾಪುರ, ಹುಬ್ಬಳ್ಳಿ (the full area, not
+    just the first word), Turn B read the pin as six Kannada digit-words *"ಐದು, ಎಂಟು, ಸೊನ್ನೆ, ಸೊನ್ನೆ,
+    ಎರಡು, ಮೂರು"* = 580023 with both zeros spoken, and Turn C asked *"ಕೊನೆ ಪ್ರಶ್ನೆ, ಆಮೇಲೆ ನೇರವಾಗಿ
+    ಜಾಬ್‌ಗಳಿಗೆ ಬರ್ತೀನಿ — ನಿಮ್ಮ ಮನೆಗೆ ಹತ್ರದಲ್ಲಿ ಯಾವ ಬಸ್ ಸ್ಟಾಪ್, ರೈಲ್ವೆ ಅಥವಾ ಮೆಟ್ರೋ ಸ್ಟೇಷನ್ ಇದೆ?"*
+  - Telephony note: the first two Hindi attempts died at 8s with no tester leg created at all
+    (`bd7f84ea`, `216ae2c5`) while the bot answered and spoke normally. DIDs were unchanged
+    throughout; the third attempt went through untouched. Carrier-side, not the prompt.
 
 ## 2026-09-23 — the services offer now survives a failed apply (VERIFIED); the location-turn fix was attempted and REVERTED
 
