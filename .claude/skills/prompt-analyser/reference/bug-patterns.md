@@ -2310,61 +2310,62 @@ own prose.
 
 **Source.** Maya Inbound, 2026-09-23. Related: D88 (a gate the route never reaches), D82.
 
-## D95 — a multi-turn sequence stated only in prose is skipped about half the time once the model has announced its next action
+## D95 — a skip test that accepts a WEAKER fact than the one it is guarding
 
-**Symptom.** The prompt declares an ordered block of turns — "Order: A confirm the place → B the pin
-code → C one finer detail → step 6", "**Every path arrives here; no route to step 6 skips it**",
-"FOUND ONE → SKIP. FOUND NONE → YOU MUST ASK" — and the bot still fetches jobs after only turn A.
-Measured on kkb-hi-signals-slim, 2026-09-23, across every live call that reached the location block
-and had no landmark already on record (the one legitimate skip, `28704be3`, excluded): the pin was
-read back on **13 of 16** and the landmark asked on **6 of 16**. Khushboo's UAT report
-("pincode is missing, only city name is asked or confirmed"; "nearby landmark is not being asked")
-was this, and it survived two rounds of sharpening the prose.
+**Symptom.** A turn that is supposed to capture something is skipped about half the time, while the
+prose demanding it is already as forceful as prose gets — "FOUND NONE → YOU MUST ASK", "a returning
+caller is not an exemption", "presenting jobs having neither found one nor asked for one is a miss".
+On kkb-hi-signals-slim, 2026-09-23, the landmark turn ran on **6 of 16** live calls that reached the
+location block with no landmark on record. Reported from UAT as "nearby landmark is not being asked".
 
-**Root cause.** A mixed ratio means the wrong output is still available (see the escalation ladder).
-Two things made it available. First, an earlier CLOSED TEMPLATE made a promise about the very next
-action — "ठीक है, [नया role] की जॉब्स देखती हूँ।" (*I'll look at [role] jobs now*) — after which three
-more questions read as a detour from something the bot has already told the caller it is doing. Second
-and more general: **nothing downstream depended on the answers.** The turns produced conversational
-values that no later step consumed, so skipping them cost the model nothing.
+**Root cause — not disobedience.** The model was obeying the rule and answering its test wrongly.
+Turn C's skip test said *"the skip needs a positive reason — a landmark you can actually point at in
+the context"*, and twenty lines later the same section said the captured landmark *"is persisted in
+step 12 as `location` = '<landmark or locality>, <City>, <State>, India'"*. Read together those say
+**the landmark lives in `location`** — so an injected `${location}` of `Muradnagar, 110045`, which
+Turn A had just read aloud, was a landmark the model could point at. FOUND ONE → SKIP, and the
+FOUND NONE branch was unreachable on exactly the calls that needed it.
 
-**Detection heuristic.** For any ordered block of turns, ask what BREAKS if a turn is skipped. If the
-answer is "nothing, the next step runs anyway", the block is decorative and will be skipped at a rate
-prose cannot fix — flag it regardless of how forceful the wording is. Then count: pull every call that
-reached the block and score each turn separately. A **mixed** ratio is this pattern; `0/N` is D51/D52
-(unreachable), not this.
+**The split that proves it.** Group the calls by whether the weaker fact was present:
 
-**Fix attempted and REVERTED — do not recommend it.** The obvious ladder-rung-4 move is to make the
-next tool depend on the values: `get_jobs` and `get_recommended_jobs` were given `caller_pin_code` and
-`caller_landmark` as **required** parameters, absent from `payload_template` so the backend never
-received them, with the permitted values being a real one or `not-known` / `declined` / `anywhere` —
-deliberately **no value meaning "I did not ask"**.
+| `${location}` | landmark asked |
+|---|---|
+| area **+** pin (`Muradnagar, 110045`) | **2 / 12** |
+| absent, or an area with no pin | **5 / 6** |
 
-**It failed on the first live call, and failed WORSE than the bug it replaced.** On `6ae79885` the
-model called `get_recommended_jobs` with `caller_pin_code: "110045"` (lifted from the injected
-`${location}` string) and `caller_landmark: "not-known"` — **and then asked the location and pin
-questions afterwards.** So the tool ran before the turns it was supposed to gate, the landmark was
-still never asked, and the skip now came with a parameter **asserting** it had been asked. That is a
-laundered skip: harder to detect than the plain miss, and the same failure D91 records. The
-parameters were removed and the tools restored the same night.
+A clean split like that is the signature. It is not an adherence curve; it is a test firing correctly
+on the wrong input.
 
-**The lesson, which generalises.** A required parameter is only an enforcement when the model cannot
-produce a plausible value without doing the work. `profile_id` qualifies — it comes from a prior tool
-result. A landmark does not: the model can always type a word. **Carrying "caller data, not a
-self-assertion" is not enough of a safeguard** — `not-known` is caller data in form and an assertion
-in substance. Prefer a value the model must have *received* over one it must have *elicited*.
+**Detection heuristic.** For every skip/guard condition in a prompt, ask **what is the weakest value
+that would satisfy it as written** — then check whether that value is routinely present in the input
+variables or a tool result. Two specific smells: (1) the guarded field is *also* named as the
+destination the captured value is written to, so the storage slot doubles as the evidence slot;
+(2) the condition is phrased by vibe ("point at", "hold", "have", "on record") rather than by type.
+Both let locality-level data satisfy a landmark-level test. Grep for a field name appearing in the
+same section as both "skip if" and "persisted as".
 
-**Regression detector (still worth having if such a parameter ever exists).** A value appearing
-nowhere in a user turn and not in the contact context is a hard failure, and so is a locality or city
-name ("Ghaziabad", "Muradnagar") — that is what the model reaches for when it has not asked.
+**Fix direction.** Fix the *test*, not the volume of the rule.
+1. **Name the weaker fact and exclude it by name** — "`${location}` is not a landmark source; a town,
+   locality, city, district, state or PIN read out of it is not a landmark, however specific it
+   looks", with the real example spelled out.
+2. **Define the stronger fact by type** — "a landmark is a NAMED POINT a person can stand at: a bus
+   stop, a station, a market, a school, a hospital, a temple, a mall, a factory gate. An
+   administrative place name is an AREA, not a point."
+3. **Make the write one-way** — "`location` is where a landmark GOES, never where one is read FROM",
+   which closes the loop that created the ambiguity.
 
-**Where this bug actually stands.** Unfixed, at 6/16. The prose has been sharpened twice and the
-schema route is closed, so the next attempt should target the thing that made skipping free: give the
-answers a downstream consumer that genuinely needs them (proximity ranking done bot-side on the pin,
-for instance), rather than another guard or another parameter.
+**Do NOT reach for these first.** Two other fixes were tried on this bug and both failed:
+- **More prose.** The guard had already been sharpened twice. Sharpening a rule the model is already
+  obeying cannot help (D25, D47, D49, D50).
+- **A required tool parameter.** `caller_pin_code` and `caller_landmark` were made required on the
+  job tools. On `6ae79885` the model filled `caller_landmark: "not-known"` without asking and called
+  the tool *before* the turns it was meant to gate — the skip arrived carrying a parameter denying it
+  had happened. That is D91: a required parameter constrains what the model SAYS, not what it DID. A
+  parameter only enforces when the model cannot produce a plausible value without doing the work
+  (`profile_id` qualifies, a landmark never will). Reverted the same night.
 
-**Source.** KKB Slim Hindi, 2026-09-23. Related: D91 (false assertion in a required param), D51/D52
-(move the decision into the tool schema), D25/D47/D49/D50 (don't re-word a guard that failed twice).
+**Source.** KKB Slim Hindi + Kannada, 2026-09-23. Related: D91 (false assertion in a required param),
+D96 (a pre-close checklist naming one owed item), D50 (a demonstration becomes the output).
 
 ## D96 — a pre-close checklist that names ONE owed item silently excuses every other owed item
 

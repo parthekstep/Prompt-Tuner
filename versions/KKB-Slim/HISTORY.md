@@ -11,3 +11,5 @@
 - **2026-09-22_205728** — `pre-deploy-kkb-kn-signals-slim-2026-09-22_205728` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(2 files)_
 - **2026-09-23_013336** — `pre-deploy-kkb-kn-signals-slim-2026-09-23_013336` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(2 files)_
 - **2026-09-23_014159** — `pre-deploy-kkb-kn-signals-slim-2026-09-23_014159` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(2 files)_
+- **2026-09-23_103618** — `pre-turnc-skip-test` — Turn C skip test satisfied by locality-level ${location}; landmark asked 6/16 _(3 files)_
+- **2026-09-23_103735** — `pre-deploy-kkb-kn-signals-slim-2026-09-23_103735` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(3 files)_

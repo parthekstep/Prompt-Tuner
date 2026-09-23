@@ -5,6 +5,49 @@ output prompts; the ONLY difference is the conversation prompt — a ground-up r
 against the master's ~224k. It exists to test whether prompt size is what the latency complaints
 are about. Not a language variant, so `/sync-check` must not treat it as a mirror.
 
+## 2026-09-23 — the landmark turn's skip test accepted an AREA as a landmark (Hindi + Kannada)
+
+- **Feedback/bug:** Khushboo's UAT report, "nearby landmark is not being asked or confirmed at the
+  end". Measured at **6 of 16** live calls that reached the location block with no landmark already on
+  record. Two earlier attempts had failed to move it (see the previous entry).
+- **Root cause — the bot was obeying the rule and answering its test wrongly.** Turn C's skip test
+  read *"the skip needs a positive reason — a landmark you can actually point at in the context"*,
+  while the same section, twenty lines down, said the captured landmark *"is persisted in step 12 as
+  `location` = '<landmark or locality>, <City>, <State>, India'"*. Together those say the landmark
+  lives in `location` — so an injected `${location}` of `Muradnagar, 110045`, which Turn A had just
+  read aloud, counted as a landmark it could point at. FOUND ONE → SKIP, and the **FOUND NONE → YOU
+  MUST ASK** branch was unreachable on exactly the calls that needed it. The split is clean:
+
+  | `${location}` | landmark asked |
+  |---|---|
+  | area **+** pin | 2 / 12 |
+  | absent, or an area with no pin | 5 / 6 |
+
+- **Change (Turn C, agnostic — identical English in both languages):**
+  - `${location}` is named as **not** a landmark source: a town, locality, city, district, state or
+    PIN read out of it is not a landmark, however specific it looks, and having just said that value
+    aloud in Turn A is not the same as holding their landmark.
+  - A landmark is defined by **type** — a named point a person can stand at (bus stop, railway or
+    metro station, market, school, hospital, temple or mosque, mall, factory gate). An administrative
+    place name is an AREA, not a point.
+  - The step-12 write is made **one-way**: `location` is where a landmark goes, never where one is
+    read from.
+  - The genuine skip is untouched — a caller who really did give us their bus stop before is still
+    never asked again.
+- **Files:** `KKB-Slim/KKB Slim Hindi Signals.md`, `KKB-Slim/KKB Slim Kannada Signals.md`,
+  `.claude/skills/prompt-analyser/reference/bug-patterns.md` (D95 rewritten — its earlier text named
+  the wrong cause).
+- **Sync:** the Kannada twin carried this section **word for word**, so it had the identical bug. The
+  fix is agnostic and was mirrored verbatim; only the worked example is localized (`Muradnagar,
+  110045` → `Keshwapur, 580023`). Section parity re-checked. No divergence entry needed — this change
+  lands in every language of the family.
+- **Status: DEPLOYED, NOT VERIFIED.** Both agents deployed and read-back verified. Tier-1 calls could
+  not be completed: from 21:58 onwards the tester agent stopped receiving legs altogether — the bot
+  side answers and speaks its first line normally (`bd7f84ea`, `216ae2c5`, both 8s), and no tester leg
+  is created at all. DIDs were re-checked and are unchanged from the configuration that ran ~25 calls
+  earlier tonight, so this is telephony-side, not the prompt. **Needs a Tier-1 call on a fixture whose
+  `${location}` carries an area and a pin, on BOTH languages, before it can be called fixed.**
+
 ## 2026-09-23 — the services offer now survives a failed apply (VERIFIED); the location-turn fix was attempted and REVERTED
 
 - **Feedback/bug:** two defects found by counting live calls rather than by reading the prompt.
