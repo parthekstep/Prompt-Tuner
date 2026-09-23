@@ -5,6 +5,94 @@ output prompts; the ONLY difference is the conversation prompt — a ground-up r
 against the master's ~224k. It exists to test whether prompt size is what the latency complaints
 are about. Not a language variant, so `/sync-check` must not treat it as a mirror.
 
+## 2026-09-23 — NEW BUG FOUND, NOT FIXED: KKB Slim Kannada invents jobs when the array is missing
+
+**Severity: high. Reproduced 2/2. Recommend keeping kkb-kn-signals-slim out of UAT until fixed.**
+
+- **What happens.** With no `${recommendations}` in `agent_args`, the bot invents jobs and reads them
+  out as real. On `24e5dabd` it offered *ಎಬಿಸಿ ಸೊಲ್ಯೂಷನ್ಸ್* and *ಗ್ಲೋಬಲ್ ಟೆಕ್*; on `7fa799eb`,
+  *ಗ್ಲೋಬಲ್ ಸೊಲ್ಯೂಷನ್ಸ್* and *ಟೆಕ್ ಸೊಲ್ಯೂಷನ್ಸ್* — **different names each call**, so it is generating
+  them, not reading a stale list. It also invented salaries, qualifications and position counts, then
+  answered follow-up questions about the invented job.
+- **It goes as far as applying.** On `7fa799eb` it invented a job UUID
+  (`7316715d-5900-479e-b873-195034636384`) and called `apply_job` with it; on `24e5dabd` it passed the
+  **profile id as the job id**. Both returned `422` from dharwad-signals. **The backend's rejection is
+  the only thing that stopped a real write.** The bot then told the caller their interest was noted and
+  the team would call back — so the caller ends the call believing they applied to a job that does not
+  exist.
+- **Also on the same call:** a `*( )*` stage direction spoken aloud, which the prompt forbids outright.
+- **Root cause (D98) — not missing guards.** The Kannada slim prompt carries **seven** "never invent a
+  job" prohibitions, the same as its Hindi twin, which does not do this. Three things combine: the
+  greeting promises jobs before anything knows whether any exist; there is no job tool on this agent,
+  so a missing array is *silence* rather than an empty tool result the model must react to; and the
+  escape line is guarded against misuse (*"more than zero and you may NOT say this line"*) but is
+  **never made obligatory when the count is zero**. A promise, no observable absence, and no mandatory
+  way to say "there are none".
+- **Why Hindi is not exposed.** It fetches through `get_jobs` / `get_recommended_jobs`, so nothing
+  arrives as an empty tool RESULT. Verified correct on `d70126e8` and `4dfcc12f`, which both said
+  no-jobs and moved to services.
+- **Fleet exposure — untested, assume present.** Every bot on the injected-array design shares the
+  same two conditions. The non-slim Signals prompts carry only **2** never-invent guards against
+  slim's 7, so they are less protected. Each needs one call with an empty array.
+- **NOT FIXED.** This is a Kannada-slim prompt bug, outside the Hindi scope set by the owner, and the
+  fix direction (make the zero path mandatory and terminal, or tie naming a job to quoting its
+  `job_id`) is a behaviour change that needs its own approval and its own verification calls.
+
+## 2026-09-23 — the services offer gets a turn of its own, even when what preceded it was a statement (Hindi + Kannada)
+
+- **Feedback/bug:** on `d4dd4668` the bot delivered the no-match line and the services lead-in in one
+  breath — *"अभी आपके लिए मुझे जॉब्स नहीं मिल रहीं — एक बार फिर से देखकर मैं आपको वापस कॉल करती हूँ।
+  जॉब्स के अलावा हमारे पास कुछ और मदद भी है…"* Telling someone there is no work for them and pitching
+  something else in the same breath reads as hurrying past the bad news.
+- **This was the first bug run through the new diagnosis phase** (root `CLAUDE.md` → D1-D3, added the
+  same day). It paid for itself twice over:
+  - **D1 (count)** — my first count measured the wrong turn and reported 0/11 bundled, because I
+    checked the *offer* turn, which is clean on every call. Re-counting the turn that actually carries
+    the no-match line gave **1/3**.
+  - **D2 (segment)** — the two clean calls (`d70126e8`, `4dfcc12f`) are the same scenario as the
+    bundled one and both split it into two turns, so there was no input that discriminated. That
+    ruled out a condition-on-input bug and pointed at the guard.
+  - **D3 (read the guard)** — found the actual cause, and a second defect nobody had reported.
+- **Root cause.** The rule read *"Never in the same turn as another **question**."* **The no-match line
+  is a statement, not a question**, so the prohibition as written never covered it. The bot was not
+  breaking the rule; the rule had a gap.
+- **Second defect, found by D3, not reported by anyone.** The same clause still said the offer could be
+  *"folded into the success turn per step 11"* — which step 11 had been changed to forbid outright the
+  previous night. A cross-reference goes stale the moment the section it points at changes. Deleted.
+- **Change (agnostic, identical English in both languages):**
+  - The positional rule now reads: the offer gets a turn of its OWN, and **nothing else may share it —
+    not another question, and not a statement either**, with the no-match case named explicitly.
+  - The stale "folded into the success turn" clause is deleted.
+  - A pointer added at the **point of composition** — beside the no-match line in the No-Match
+    Fallback — saying that line ends its turn and the services move belongs to the next one. Same
+    placement that fixed the `'Any'` leak; the rule states the constraint, the pointer catches it
+    where the sentence is actually built.
+- **Files:** `KKB-Slim/KKB Slim Hindi Signals.md`, `KKB-Slim/KKB Slim Kannada Signals.md`,
+  `.claude/skills/prompt-analyser/reference/bug-patterns.md` (D97).
+- **Sync:** both languages carried the identical rule and the identical stale clause; fixed verbatim in
+  both. No divergence entry — the change lands in every language of the family.
+- **Status: Hindi VERIFIED. Kannada verification in flight.**
+  - **Hindi — `e8b6de81-ffbc-4bf7-a5d9-cbfe139705d5`** (123s), the direct repro: same fixture and same
+    persona as `d4dd4668`, caller wants teaching work, none exists. The no-match line now ends its
+    turn, the caller answers ("अच्छा, ठीक है"), and the services lead-in opens the NEXT turn — with
+    *"कोई बात नहीं।"* in front of it, acknowledging the bad news before moving on, which is precisely
+    what the rule exists for. Three clean turns: no-match → wait → lead-in → wait → `get_services`
+    and the named offer.
+  - **Kannada — first attempt did NOT test the fix; re-run in flight.** `aaa2e470` (211s) never
+    reached the no-match branch: the fixture carried a `${recommendations}` array, so the bot showed
+    jobs, applied, and arrived at the services offer by a different route. The turn separation held on
+    that route, but it is not the path that was changed. Re-running on `kn-slim-nojobs.json` (the same
+    fixture with the array removed), which forces the empty-array no-match line.
+- **Known gap the Kannada attempt exposed — not caused by this change, not fixed here.** The Kannada
+  slim agent has **no `get_services` tool** (`get_profile`, `create_profile`, `apply_job`,
+  `update_profile`, `record_consent` only); it is still wholly on the pre-2026-09-23 services design.
+  On `aaa2e470` it therefore used the retired generic pitch — *"ಜಾಬ್ ಸಿಗುವ ಚಾನ್ಸ್ ಇನ್ನೂ ಹೆಚ್ಚಿಸೋಕೆ ನಮ್ಮ
+  ಹತ್ರ ಕೆಲವು ಸರ್ವಿಸ್ ಪ್ರೊವೈಡರ್‌ಗಳಿದ್ದಾರೆ… ನೀವು ಇಂಟರೆಸ್ಟೆಡ್ ಇದ್ದೀರಾ?"* — and named no organisation,
+  which is exactly the wording step 13 calls retired because it asks people to consent to something
+  undescribed. **The shared step-13 text now instructs the Kannada bot to do something it has no tool
+  to do.** The services redesign was scoped to Hindi by the owner, so this is a consequence of that
+  scope, not a regression; it needs either the tool ported to Kannada or the shared section split.
+
 ## 2026-09-23 — the landmark turn's skip test accepted an AREA as a landmark (Hindi + Kannada)
 
 - **Feedback/bug:** Khushboo's UAT report, "nearby landmark is not being asked or confirmed at the

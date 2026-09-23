@@ -13,3 +13,5 @@
 - **2026-09-23_014159** — `pre-deploy-kkb-kn-signals-slim-2026-09-23_014159` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(2 files)_
 - **2026-09-23_103618** — `pre-turnc-skip-test` — Turn C skip test satisfied by locality-level ${location}; landmark asked 6/16 _(3 files)_
 - **2026-09-23_103735** — `pre-deploy-kkb-kn-signals-slim-2026-09-23_103735` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(3 files)_
+- **2026-09-23_112501** — `pre-services-turn-split` — step 13 positional rule permits merging the offer into a statement _(3 files)_
+- **2026-09-23_112547** — `pre-deploy-kkb-kn-signals-slim-2026-09-23_112547` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(3 files)_

@@ -2397,3 +2397,91 @@ section a third time.
 
 **Source.** KKB Slim Hindi, 2026-09-23. Related: D91/D88 (a section the route never names),
 D89 (a line promising finality kills the turns after it).
+
+## D97 — a prohibition scoped to one KIND of thing silently permits every other kind
+
+**Symptom.** A rule says a turn must stand alone, and the bot merges something into it anyway. Step 13
+of KKB Slim read *"Never in the same turn as another **question**."* On `d4dd4668` the bot said the
+no-match line and the services lead-in in one breath — *"अभी आपके लिए मुझे जॉब्स नहीं मिल रहीं — एक
+बार फिर से देखकर मैं आपको वापस कॉल करती हूँ। जॉब्स के अलावा हमारे पास कुछ और मदद भी है…"*
+
+**Root cause.** The bot did not break the rule. **The no-match line is a statement, not a question,**
+so the prohibition as written did not cover it. A guard phrased against one category leaves every
+other category permitted, and the model will find the gap — not maliciously, but because the gap is
+genuinely there.
+
+This is the same family as D95 (a skip test accepting a weaker fact) seen from the other side: D95 is
+a permission that is too broad, D97 is a prohibition that is too narrow. Both are fixed by reading the
+condition and asking what it actually ranges over, never by saying it louder.
+
+**A second smell found in the same rule.** The clause also still said the offer could be *"folded into
+the success turn per step 11"* — which step 11 had been changed to forbid outright the night before.
+**A rule that cross-references another section is stale the moment that section changes.** When you
+fix a positional rule, grep the prompt for references to the position you just changed.
+
+**Detection heuristic.** For every prohibition, name the category it ranges over — "another question",
+"a tool call", "a second job", "a stage direction" — then ask **what else could occupy that slot that
+the category does not name.** A statement, a hold phrase, a wrap-up, a lead-in, an apology. If the
+answer is "quite a lot", the guard is scoped too narrowly. Then grep for cross-references (`per step
+N`, `see section X`) and check each still says what it is quoted as saying. Counting helps but will
+not find this on its own: the ratio here was **1/3**, small and mixed, and the cause was still fully
+determined by the text.
+
+**Fix direction.** Widen the category to cover the slot, not the volume of the rule: *"Nothing else
+may share that turn — not another question, and not a statement either"*, with the specific case
+named so it cannot be read past. Then put a pointer at the **point of composition** — beside the
+no-match line itself, where that turn is actually written — saying the line ends its turn. The rule
+states the constraint; the pointer catches it where the sentence is built (the same placement that
+fixed the `'Any'` leak).
+
+**Source.** KKB Slim Hindi + Kannada, 2026-09-23. Related: D95 (permission too broad), D50 (fix it at
+the point of composition), D89 (a line that promises finality kills the turns after it).
+
+## D98 — an unfilled promise with no MANDATORY escape gets filled with invention
+
+**Symptom — the worst failure class this fleet has.** Given no `${recommendations}` array, KKB Slim
+Kannada invented two jobs, with company names, salaries, qualifications and position counts, then
+invented a job UUID and called `apply_job` with it. Reproduced **2/2** with *different* fabricated
+companies each time (`ABC Solutions` / `Global Tech`, then `Global Solutions` / `Tech Solutions`), so
+it is generative, not a stale cached list. Calls `24e5dabd` and `7fa799eb`. Both applies were rejected
+`422` by the backend — **that rejection is the only thing that prevented a real write** — after which
+the bot told the caller their interest was noted and the team would update them. The caller hangs up
+believing they applied to a job that does not exist.
+
+**Root cause — NOT missing guards.** The prompt carries **seven** separate "never invent a job"
+prohibitions, the same number as its Hindi twin, which does not do this. Volume was never the issue.
+Three things combine:
+
+1. **The greeting has already promised jobs** — *"I'm calling to tell you about some good jobs in your
+   area"* — before anything knows whether any exist. The obligation is created first.
+2. **There is no tool, so the absence is SILENT.** The Hindi twin fetches through `get_jobs` /
+   `get_recommended_jobs`, so "nothing" arrives as an empty tool result the model must react to. On the
+   injected-array design, a missing array is simply nothing at all — no event, no result, no signal.
+3. **The escape line is guarded against USE, not mandated.** The rule reads *"Count the valid entries
+   first: more than zero and you may NOT say this line."* That forbids a FALSE no-match. **Nothing
+   anywhere makes the no-match line obligatory when the count is zero**, and nothing forbids naming a
+   job when there is no array to name one from. So the model has a promise to keep, no permitted way
+   to say "there are none", and a blank where the inventory should be.
+
+**Detection heuristic.** For every "do not invent X" rule, find the path where X is legitimately
+absent and ask: **is the honest alternative MANDATORY and terminal there, or merely permitted?** A
+prohibition without a compulsory escape is an instruction to improvise. Two specific checks: (a) does
+an earlier line promise the thing before its availability is known; (b) does absence arrive as an
+observable event (an empty tool result) or as silence (a variable that simply is not there). Silence
+plus a promise is the dangerous combination. Also grep for guards phrased "you may NOT say this line"
+— they protect against the false positive and usually leave the false negative wide open.
+
+**Fix direction.** Do NOT add an eighth prohibition (D25, D47, D49, D50). Make the zero path
+mandatory, terminal and checkable: zero valid entries → the no-match line is the ONLY permitted next
+utterance, no job may be named for the rest of the call, and `apply_job` is forbidden. Better still,
+remove the wrong option: a job may only be named if its `job_id` can be quoted from the array, which
+makes invention impossible rather than forbidden — the model cannot produce an id it never read.
+Consider also moving the greeting's promise behind the count.
+
+**Fleet exposure.** Every bot on the injected-array design shares condition (2) and (3). The non-slim
+Signals prompts (`KKB Placeholder Hindi/Kannada Signals`) carry only **2** never-invent guards against
+slim's 7, on the same design — so they are less protected, not more. Assume exposure until each is
+tested with an empty array.
+
+**Source.** KKB Slim Kannada, 2026-09-23. Related: D95 (permission too broad), D97 (prohibition too
+narrow), D50 (louder wording is not a mechanism).

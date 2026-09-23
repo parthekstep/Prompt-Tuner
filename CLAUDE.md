@@ -263,16 +263,45 @@ error, with byte-identical tool results, produces the right line on one call and
 the next, the fix is not good enough yet — and the reason is almost always that **the wrong output
 is still available to the model.**
 
+### FIRST localize the cause. The ladder below is a list of REMEDIES.
+
+**Rungs 1-5 are cures for one disease — the model declining to follow a rule it was given. Applying
+one before you know that is the disease is how you make a bug worse.** Do D1-D3 first, every time.
+On 2026-09-23 the landmark turn was "fixed" twice without them: once by a theory about why the model
+skipped, once by moving the constraint into the tool schema (rung 4). The second attempt shipped a
+regression — the model filled the required parameter falsely and the skip arrived carrying a claim it
+had not happened. Both were remedies for a disease the bug did not have.
+
+**D1 — Count how many times the right branch has EVER been taken.** Pull every call where the
+condition actually occurred and count. **`0/N` is not flakiness — it is unreachability**, and no
+sentence will fix it: either the branch's trigger never arrives (a tool-error string the model is not
+given), or a dangling label means the rule cannot bind to it, or a nearer competing line always wins.
+On 2026-09-01 this count turned "the already-applied line is intermittent" into "the model has never
+once received the error name" — 8/8, then 9/9 with the mapping in the tool description (D52, D51).
+Any other ratio: continue to D2, and **do not call it adherence yet.**
+
+**D2 — Segment by input. An aggregate ratio lies.** Split those calls by every candidate
+discriminator — the value or SHAPE of each injected variable, the shape of each tool result, which
+earlier branch was taken, language, direction — and compare the rate in each group. **A near-clean
+split means this is NOT adherence: it is a condition evaluating correctly on an input you had not
+identified.** Stop the ladder and go read that condition; the rungs below cannot help you. On
+2026-09-23 the landmark turn scored **6/16** — textbook "mixed, therefore adherence" — and one split
+by `${location}` gave **2/12** where it carried an area+pin against **5/6** where it did not. That is
+a branch condition, and it had already survived three adherence remedies.
+
+**D3 — If the step is governed by a guard, read the guard before concluding disobedience.** A step
+that did not happen may have been correctly SKIPPED. For every skip / skip-unless / "only when"
+clause, ask: **what is the WEAKEST value that satisfies this as written, and is that value routinely
+present in the inputs?** Two smells that this is your bug: (a) the field the guard tests is also named
+elsewhere as the destination the captured value is written to, so the storage slot doubles as the
+evidence slot; (b) the condition is phrased by vibe — "hold", "have", "on record", "point at" —
+rather than by type. Fix the test, not the volume of the rule: name the weaker fact and exclude it,
+define the stronger fact by type, and make any write into the tested field one-way (analyser D95).
+
+**Only when the behaviour is still mixed WITHIN a single input segment is it adherence.** Then:
+
 The escalation ladder, in order. Do not stop before the end of it:
 
-0. **Count how many times the right branch has EVER been taken.** Before you touch a word, pull every
-   call where the condition actually occurred and count. A **mixed** ratio is an adherence problem and
-   the rungs below apply. **`0/N` is not flakiness — it is unreachability**, and no sentence will fix
-   it: either the branch's trigger never arrives (a tool-error string the model is not given), or a
-   dangling label means the rule cannot bind to it, or a nearer competing line always wins. On
-   2026-09-01 this single count turned "the already-applied line is intermittent" into "the model has
-   never once received the error name" — 8/8, then 9/9 with the mapping in the tool description
-   itself (analyser D52, D51). Do this first; it costs one script and it decides everything below.
 1. **Grep the bot's wrong output verbatim against the whole prompt** (analyser D50). A hit inside a
    sample conversation is the cause, and it is proof, not a theory. Fix the demonstration.
 2. **Find the competing instruction and delete or scope it.** A prohibition sitting next to a
@@ -285,7 +314,12 @@ The escalation ladder, in order. Do not stop before the end of it:
    **Make the worst case truthful rather than trying to make the wrong case unreachable.**
 4. **Move the decision out of prose.** Tool parameter descriptions, `required` fields, enums, and
    payload templates are read at the moment of use and are far stickier than rules paragraphs. A
-   constraint expressible in the tool schema belongs in the tool schema.
+   constraint expressible in the tool schema belongs in the tool schema. **Known failure mode — check
+   before reaching for this:** a required parameter constrains what the model SAYS, not what it DID,
+   so it only enforces when the model cannot produce a plausible value without doing the work.
+   `profile_id` qualifies — it comes from a prior tool result. A landmark, a pin, a "yes I read the
+   disclosure" never will: the model types a value and the skip is now laundered behind a claim that
+   it did not happen, which is harder to detect than the plain miss (D91, D95).
 5. **Only if 1-4 are genuinely exhausted** may you escalate to the platform — and then you must
    state exactly what you tried, what the evidence is, and what change you are asking for. "The
    model ignores it" is not an escalation; "the same tool result yields two different lines and here

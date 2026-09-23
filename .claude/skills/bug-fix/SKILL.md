@@ -11,7 +11,7 @@ Ties together `scripts/gsheets.py` (sheet R/W), the Raya call + agent APIs, `/ra
 ## THE SEQUENCE (do these in order — do not skip, do not reorder, summary is ALWAYS last)
 
 1. **Find** — pull every OPEN issue for the target owner from the sheet.
-2. **Root-cause with the real call** — for EACH issue, pull the actual Raya transcript and find what truly happened. **No fix without a transcript** (see rule below).
+2. **Root-cause with the real call** — for EACH issue, pull the actual Raya transcript and find what truly happened. **No fix without a transcript** (see rule below). For any "it does this sometimes" report, one transcript is not root cause: run **D1-D3** from root `CLAUDE.md` -> "'Intermittent' is not a result" before choosing a fix. **Count** the branch across every call where the condition occurred; **segment** those calls by each injected variable's value/shape, tool-result shape, earlier branch, language and direction — a near-clean split means a condition bug, not adherence, and the remedy ladder will not help; and where the step has a skip/guard, **read the guard first**, because a step that did not happen may have been correctly skipped under a too-generous condition. Diagnosis precedes remedy: 2026-09-23's landmark bug ate two failed fixes, one of them a regression, because a remedy was applied before the segmentation was run.
 3. **Classify** — prompt-fixable | backend | runtime/tool-adherence | no-repro | verbiage | ops. Only *prompt-fixable* gets a prompt edit (see the classification table).
 4. **Fix** the genuine prompt gaps (via `/update-prompt`), surgically.
 5. **Propagate** — check the sibling bots; if the SAME bug/gap is present there, port the fix (via `/port-feature`). Don't assume — verify presence.

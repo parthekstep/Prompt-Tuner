@@ -83,8 +83,11 @@ a real job inventory with placeholders). `deploy` also refuses any prompt still 
    the others. Untested changes are labelled **DEPLOYED, NOT VERIFIED** in all three places.
    See root `CLAUDE.md` → "The word 'fixed' requires a call id".
 12. **If the tested behaviour is inconsistent, the fix is NOT finished.** Never close out a change
-   as "works sometimes", "flaky", or "runtime adherence". Walk the ladder in root `CLAUDE.md` →
-   "'Intermittent' is not a result": grep the wrong output verbatim against the prompt (analyser
+   as "works sometimes", "flaky", or "runtime adherence". Go to root `CLAUDE.md` → "'Intermittent' is
+   not a result" and run **D1-D3 (count → segment by input → read the guard) BEFORE any remedy** — a
+   near-clean split by an input variable means it is a condition bug and the remedy rungs will make it
+   worse, and a step that did not happen may have been correctly skipped. Only once the behaviour is
+   mixed *within one input segment* do you walk the ladder: grep the wrong output verbatim against the prompt (analyser
    D50 — a hit in a sample conversation IS the cause), delete the competing instruction, then
    **remove the wrong option rather than forbidding it** — a default that asserts something false
    will be chosen for the cases it is false about however firmly it is banned, so make the worst
