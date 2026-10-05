@@ -5,6 +5,35 @@ output prompts; the ONLY difference is the conversation prompt — a ground-up r
 against the master's ~224k. It exists to test whether prompt size is what the latency complaints
 are about. Not a language variant, so `/sync-check` must not treat it as a mirror.
 
+## 2026-10-05 — Kannada slim ported to the live job/services APIs; now answers the Kannada INBOUND number
+- **Feedback/bug:** same request (Operation Rozgar inbound readiness). The Kannada slim still read a
+  campaign-injected `${recommendations}` list and had no job/services tools, so it could not serve
+  inbound calls; its phone tool params still said "91 + 10 digits" (doubles on outbound).
+- **Change:** `KKB Slim Kannada Signals.md` re-mirrored to the Hindi master throughout (one bot both
+  directions, no direction branching; jobs via `get_recommended_jobs`/`get_jobs`; section S + step 13
+  services offer; jobs-interest gate; worked call D; phone target-format rule; today's step-3.5
+  new-caller consent fix). Spoken lines in Kannada, examples re-set in Hubballi/Dharwad, persona
+  ಮಾಯಾ kept (registered divergence). Tools added on Dharwad (`raya/toolspecs/get_recommended_jobs.json`,
+  `raya/toolspecs/kn/get_jobs.json`, `raya/toolspecs/get_services.json`); phone param of
+  create_profile/update_profile/record_consent set to the target-format description; output
+  prompt now `KKB Slim Output.md` (previous live one saved in `raya/live-snapshots/`).
+  in_did `918037006352` moved from `kkb-kn-in-signals` to `kkb-kn-signals-slim` (state saved in
+  `raya/live-snapshots/inbound_move_2026-10-05.json`).
+- **Verification:**
+  - `1a565768` (bot dialled the tester, cold): get_jobs "CNC Operator" → Orione Hydraulics, Basava
+    Industries, Pavan Drives (Dharwad) → apply_job SUCCESS → profile completed → get_services empty →
+    no service invented → close. CONFIRMED.
+  - `887d1acf` (tester dialled +91 80 3700 6352, real inbound): routed to the Kannada slim, returning
+    caller recognised, PIN read back, live jobs; apply 422 because the same profile had applied to the
+    same job on `1a565768` — failure line made no claim. CONFIRMED (routing + flow).
+  - New-caller path on Kannada: NOT_EXERCISED.
+- **Known:** Dharwad has 0 service providers (gzb has 8) — the services offer always ends "not
+  available"; worked call B still shows a new caller with no step-3.5 ask (both languages; copied from
+  the master); the master's leftover "Need Capture" references and law 1 "never call get_jobs" were
+  copied for parity — fix in both via /update-prompt.
+- **Files:** `KKB-Slim/KKB Slim Kannada Signals.md`, `raya/toolspecs/kn/get_jobs.json`,
+  `raya/live-snapshots/*`, `raya/testcases/args/kn-slim-cold.json`.
+
 ## 2026-10-05 — Slim Hindi now answers the production Hindi INBOUND number; new-caller consent fix (Hindi)
 - **Feedback/bug:** Aryan (Operation Rozgar thread, 2026-10-02) asked for the Hindi and Kannada inbound bots
   to be ready for team testing from 2026-10-05. Investigation: the inbound Signals bots

@@ -13,5 +13,19 @@
    "out_did": 911204404274
   }
  },
- "saved_at": "2026-10-05T12:44:32+0530"
+ "saved_at": "2026-10-05T12:44:32+0530",
+ "kannada_before": {
+  "kkb-kn-signals-slim": {
+   "name": "KKB Slim- Kannada Signals API (A/B)",
+   "in_did": null,
+   "out_did": 918037006352,
+   "id": "bd4dfd44-a0c5-4d37-9b49-f8c186c901c1"
+  },
+  "kkb-kn-in-signals": {
+   "name": "KKB Kannada Inbound Signals",
+   "in_did": 918037006352,
+   "out_did": 918037006352,
+   "id": "f38da775-c572-4a50-9340-fe1f42c43901"
+  }
+ }
 }
