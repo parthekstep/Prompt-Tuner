@@ -5,6 +5,37 @@ output prompts; the ONLY difference is the conversation prompt — a ground-up r
 against the master's ~224k. It exists to test whether prompt size is what the latency complaints
 are about. Not a language variant, so `/sync-check` must not treat it as a mirror.
 
+## 2026-10-05 — Slim Hindi now answers the production Hindi INBOUND number; new-caller consent fix (Hindi)
+- **Feedback/bug:** Aryan (Operation Rozgar thread, 2026-10-02) asked for the Hindi and Kannada inbound bots
+  to be ready for team testing from 2026-10-05. Investigation: the inbound Signals bots
+  (`kkb-hi-in-signals`, `kkb-kn-in-signals`) never call the job API — they read a hardcoded 4-job list,
+  and the prose around it still described the pre-cutover Bengaluru inventory, so live calls offered an
+  invented "AC Technician, Krishna Enterprises, Bengaluru" job (`98a684b9`, `0edced72`; analyser D105).
+  Parth chose to move the inbound numbers to the Slim bots, which fetch live jobs.
+- **Change 1 (config):** in_did `911204404274` moved from `kkb-hi-in-signals` to `kkb-hi-signals-slim`.
+  Prior state saved in `raya/live-snapshots/inbound_move_2026-10-05.json` (slim had `917946350283`, which
+  is not provisioned for inbound; the old inbound agent keeps its out_did and is a fallback).
+- **Change 2 (prompt):** step 3.5 — a brand-new caller (no seeker item; the backend still returns the
+  `compliance` rows, all false) now gets the consent ask and, on yes, calls NO tool; `create_profile`
+  records consent at step 10. `record_consent` only when a seeker item exists; an error from it is never
+  read as a "no". Root cause (D1–D3): since the 2026-09-23 terms change, 7 of 10 new-caller calls sent
+  `record_consent` with an invented all-zero `profile_id` (400); on `475f5cbb` the bot then said goodbye
+  to a caller who had just agreed. The exclusion existed only in the Tools section, far from the
+  step-3.5 "Agree" bullet that mandated the call.
+- **Verification (real inbound calls on +91 120 440 4274, tester dialling in):**
+  - routing + live jobs + apply: `b17a3bf2` — get_jobs "data entry operator" → 3 Ghaziabad jobs →
+    apply_job success (Bottmac India) → get_services → TRRAIN Trust offered → close. CONFIRMED.
+  - new-caller consent: `ce679ec3` — consent agreed, NO record_consent, call continued to get_jobs,
+    PIN, landmark, jobs read out. CONFIRMED (1/1; N≥3 still owed). create_profile + apply on the
+    new-caller path NOT_EXERCISED (the tester's audio dropped at turn 29).
+  - bug reproduction before the fix: `475f5cbb`.
+- **Open (found today, not fixed):** stage directions spoken aloud on 3/52 calls (e.g. "*(Fetching
+  services for the closing offer)*" on `b17a3bf2`) — copied from the worked examples' `*( )*` notes;
+  PIN/landmark skipped for a returning caller (`b17a3bf2`); Turn A spoke "आपकी जॉब की लोकेशन है" with no
+  place for a new inbound caller (`ce679ec3`); bad-line close promises a call-back on inbound calls.
+- **Files:** `KKB-Slim/KKB Slim Hindi Signals.md`, `raya/live-snapshots/inbound_move_2026-10-05.json`,
+  `raya/personas/hi-inbound-*.md`, `.claude/skills/prompt-analyser/reference/bug-patterns.md` (D105).
+
 ## 2026-09-23 — PINs must be six digits; the bot no longer invents one (Hindi + Kannada)
 
 - **Feedback/bug:** Khushboo's UAT call `04365ced` carried `${location}` = `Delhi, 11024` (five digits)

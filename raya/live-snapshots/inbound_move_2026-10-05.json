@@ -1,0 +1,17 @@
+{
+ "hindi_before": {
+  "kkb-hi-signals-slim": {
+   "id": "140d13ca-c80f-47c4-9454-5edb3fd38c96",
+   "name": "KKB Slim- Hindi Signals API (A/B)",
+   "in_did": 917946350283,
+   "out_did": 911204404274
+  },
+  "kkb-hi-in-signals": {
+   "id": "3f521174-574d-43ca-a9be-081849373c18",
+   "name": "KKB Hindi Inbound Signals",
+   "in_did": 911204404274,
+   "out_did": 911204404274
+  }
+ },
+ "saved_at": "2026-10-05T12:44:32+0530"
+}

@@ -31,3 +31,4 @@
 - **2026-09-23_200157** — `pre-deploy-kkb-kn-signals-slim-2026-09-23_200157` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(3 files)_
 - **2026-09-23_201831** — `pre-decouple-example-pins` — Muradnagar welded to 110045 in examples; no-pin input 1/2 fabricated it _(3 files)_
 - **2026-09-23_202022** — `pre-deploy-kkb-kn-signals-slim-2026-09-23_202022` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(3 files)_
+- **2026-10-05_130226** — `pre-newcaller-consent-fix` — — _(3 files)_
