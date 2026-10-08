@@ -214,6 +214,7 @@ additions or ports of already-working behaviour.
 | Build ONE bot's own test suite — scenarios from its flow/tools/audience/reported issues + the learned bug patterns → test manifest, tester personas, bot checklist with explicit pass/fail detection ("what should we test on this bot") | `/generate-test-cases` |
 | Onboard a new user/customer bringing a voice bot (or point at an existing repo bot) | `/onboard` |
 | Register a new bot — or a new language/direction variant — so every skill and script resolves it: folder + prompt files + `CHANGELOG.md`, path-map rows, `raya/agents.json` target(s) with hand-copied uuids, regression fleet entry ("wire up Purple Dots", "add a Tamil variant") | `/register-bot` |
+| Shrink a long conversation prompt into a "slim" variant without losing behaviour, on its own A/B agent, proven by a coverage table + live calls before any traffic moves ("slim this prompt", "compress the prompt") | `/slim-prompt` |
 
 **The end-to-end map is `docs/WORKFLOW.md`** — how these skills chain together from intake to the
 standing daily regression, plus a decision table for every real situation, three worked scenarios,
@@ -397,6 +398,22 @@ Not every reported bug is a prompt bug — **push back before fixing; sometimes 
 Only genuine prompt gaps get a prompt edit. When the inputs were wrong, say "the prompt is fine, the inputs were wrong" out loud instead of editing. (A proactive safeguard the user explicitly asks for — e.g. an empty-`${recommendations}` fallback line — is a chosen feature, not a blind fix, and is fine to add.)
 
 The tracker tab is **`All Issues`** (id `1cqT9EVk_vap16wJ3fQM7txLklf-kbMDHdYWsiHImbHU`). If the sheet key at `~/Downloads` is TCC-blocked, decode it from `kaam-ki-baat/.env.local` (`GOOGLE_SERVICE_ACCOUNT_JSON_BASE64`) into `secrets/gsheets-sa.json` (git-ignored).
+
+## Push by default (this repo is PUBLIC)
+
+**Every commit is pushed to GitHub straight away.** `git config core.hooksPath .githooks` (set once per
+clone) installs two hooks: `post-commit` pushes the branch in the background (log:
+`.git/autopush.log`; skip once with `NO_AUTOPUSH=1 git commit ...`), and `pre-push` runs
+`scripts/push_guard.py`, which BLOCKS the push if the new lines carry a secret from `raya/.env` or
+`secrets/`, a key-shaped string, a Raya tool snapshot, or a phone number that is not one of our test
+lines and is not already public. Pushes go out as `parthekstep` (`gh auth token --user parthekstep`).
+
+- When the guard blocks: mask the number at the source (`XXXXXX1234`) and amend; never `--no-verify`
+  unless the finding was reviewed as a false positive.
+- Never paste a real caller's or colleague's phone number into a changelog, report or fixture; cite the
+  call uuid instead, and use the `9188888888xx` block for fixtures.
+- History before 2026-10-08 was pushed after a scan: two third-party numbers were masked across the
+  165 unpushed commits (so their commit ids changed; old ids in chat history no longer resolve).
 
 ## Deploying to live agents (Raya) + the feedback loop
 
