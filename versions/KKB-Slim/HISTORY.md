@@ -32,3 +32,9 @@
 - **2026-09-23_201831** — `pre-decouple-example-pins` — Muradnagar welded to 110045 in examples; no-pin input 1/2 fabricated it _(3 files)_
 - **2026-09-23_202022** — `pre-deploy-kkb-kn-signals-slim-2026-09-23_202022` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(3 files)_
 - **2026-10-05_130226** — `pre-newcaller-consent-fix` — — _(3 files)_
+- **2026-10-05_193901** — `pre-deploy-kkb-kn-signals-slim-2026-10-05_193901` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(3 files)_
+- **2026-10-12_081528** — `pre-oct12-consent-recs` — — _(3 files)_
+- **2026-10-12_081820** — `pre-deploy-kkb-kn-signals-slim-2026-10-12_081820` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(3 files)_
+- **2026-10-12_084345** — `pre-deploy-kkb-kn-signals-slim-2026-10-12_084345` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(3 files)_
+- **2026-10-12_094741** — `pre-pin-loop-fix` — PIN loop: guard re-evaluated ${location} after caller answered _(3 files)_
+- **2026-10-12_094748** — `pre-deploy-kkb-kn-signals-slim-2026-10-12_094747` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(3 files)_

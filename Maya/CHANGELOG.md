@@ -10,6 +10,13 @@ Every prompt edit to Maya is logged here. Maya is Hindi-only (KKB spinoff). Entr
 - **Ported from:** <source agent> (only for cross-agent ports)
 ```
 
+## 2026-10-12 - MPL competition removed from all Ghaziabad Maya bots
+- **Feedback/bug:** Aryan (email, 2026-10-12): "Remove MPL completely from the GZB bots next week onwards." Real calls showed Maya inbound pitching MPL on 5/25 calls, sometimes before the job flow was done.
+- **Change:** the MPL Competition section, its offer lines, its routing and every reference removed from all four Maya conversation prompts; output fields 18 `mpl_registration` and 19 `mpl_presented` removed; MPL references removed from the memory prompt. Live output/memory patched per agent in place (the Signals output carries an extra `profile_save_consent` field the repo file does not).
+- **Files:** `Maya/Maya Hindi.md`, `Maya/Maya Inbound.md`, `Maya/Maya Hindi Signals.md`, `Maya/Maya Inbound Signals.md`, `Maya/Maya Output.md`, `Maya/Maya Memory.md`. Snapshots `versions/Maya/*pre-mpl-removal` and `raya/live-snapshots/maya-*.pre-mpl-removal.md`.
+- **Verified:** 0 MPL mentions on `5a0366de` (maya outbound) and `0ac19800` (maya inbound). The two Signals variants: DEPLOYED, NOT VERIFIED by call.
+- **Still open (not fixed here):** Maya inbound reads stale Bengaluru inventory (EV roles etc., D105 class); Maya consent has the same later-step persistence gap fixed today on KKB Slim.
+
 ### 2026-09-08 (night) — my opener fix FAILED, and the diagnosis behind it is refuted by experiment
 
 **The fix did not work.** `d15a8f9b` (post-deploy, 15:51 UTC, `college_name: "VMLG College"`) opened

@@ -2644,3 +2644,193 @@ values so no single one dominates, and state that a value may only be read back 
 call's input. When grading, assert against the input.
 
 **Source.** KKB Slim Hindi + Kannada, 2026-09-23. Related: D50, D101, D95.
+
+## D103 — a mandated disclosure that lives in ONE turn is lost on every exit reachable before that turn
+
+**Symptom.** A neighbour answered the demo bot's audio check with *"मैं पड़ोसन बोल रही हूँ, घर वाले
+बाज़ार गए हैं। क्या बात है?"*. The bot correctly kept the child's absence private — and closed without
+ever saying who was calling, that it is a computer voice, or that the call may be recorded. 0 of 2
+calls on that path carried the disclosure (`27808754`, `ed1014fe`); every call that reached Turn 2 did.
+
+**Root cause.** The AI + recording disclosure was written into Turn 2 only. The proxy branch was
+defined as "close politely", and it was reachable from the Turn 1 reply — before Turn 2 had run. So the
+branch was correct about *what not to say* and silent about *what must still be said*. The worked
+example for the proxy path started after the introduction, so the early branch was never demonstrated
+(D102).
+
+**Detection heuristic.** For every mandated disclosure (AI, recording, consent), list the turn that
+carries it, then list every exit branch that can fire BEFORE that turn — wrong number, proxy, busy,
+do-not-call, "can't hear", a caller who speaks first. Each such exit's spoken line must either carry
+the disclosure or state why none is owed. A disclosure check graded only on calls that reached the
+main flow will never see this — grade it on the early-exit personas too.
+
+**Fix direction.** Give each early exit its own "before the introduction" line that carries the
+disclosure and nothing private, and demonstrate that branch with a worked example. Do not move the
+disclosure earlier into the audio check — the audio check must stay alone (generic §15).
+Verified on `181c23d5` (neighbour speaks first → identity + computer voice + recording, no child
+named); Tier 2 in `demo/evidence/REPLAYS.md`.
+
+**Source.** Shiksha Saathi (the `/demo` bot), 2026-09-23 — found by the mechanical grader on the bot's
+first live call, not by a report. Related: D60 (bundled disclosure loses a half), D10 (mandatory step
+skipped by a direct jump to the close), D102.
+
+## D104 — "reassure them, in your own words" turns a forbidden threat into an unkeepable promise
+
+**Symptom.** A worried father asked three times whether his daughter's name would be struck off the
+school register. The prompt forbade any talk of consequences and, to stop a verbatim-repeat defect,
+told the bot to answer later worries "in a few different words". Pressed, the bot said *"पूजा के स्कूल
+में रहने या नाम कटने जैसी कोई बात नहीं है"* ("there is no question of her name being struck off")
+(`58df39a9`) — a statement of school policy it has no way to know.
+
+**Root cause.** The prohibition covered the threat ("her name will be struck off") but not its
+negation ("her name will not be struck off"). An open instruction to rephrase gave the model licence to
+generate new content, and under repeated pressure the most satisfying new content is the reassuring
+fact the caller wants. Fixing the repetition (B1) by inviting paraphrase opened the fabrication.
+
+**Detection heuristic.** For every forbidden claim about a consequence or outcome, check that the
+prompt also forbids the NEGATED claim ("will not", "nothing will happen", "don't worry, that won't
+happen") — both are claims of fact. Flag any instruction that lets the model reword a sensitive
+reassurance freely ("in your own words", "say it differently", "reassure them") without supplying the
+exact fallback line.
+
+**Fix direction.** Rung 3: give the repeat case its own fixed line that defers and asserts nothing
+("…इस बारे में वही सही बता पाएँगे"), and state the rule by type: never say whether the outcome will or
+will not happen — not yes, and not no. Partly verified on `adf9fb96`: across three worries the bot
+made no claim about the child's place either way (the promise is gone), but on the repeat worry it
+also did not speak the fixed deferring line — the worry went unacknowledged. The promise half is
+proven; the fallback-line half is not yet.
+
+**Source.** Shiksha Saathi (the `/demo` bot), 2026-09-24 — found on a Tier 2 call after the v2.1 fix
+for B1. Related: B1, D46, D89 (finality promises), and the CLAUDE.md escalation ladder rung 3.
+
+## D105 — a hardcoded list was replaced, but the prose around it still describes the old list
+
+**Symptom.** The bot offers roles, companies or cities that are not in its own list. On the KKB
+inbound Signals bots a Ghaziabad caller was offered **"AC Technician, Krishna Enterprises, Bengaluru"**
+(`98a684b9`, `0edced72`, 2026-09-28/30) — a job that exists nowhere in the bot's inventory.
+
+**Root cause.** At the 2026-08-28 Signals cutover only the JSON block of the inbound Job Inventory was
+swapped (Bengaluru → Ghaziabad for Hindi, Hubballi for Kannada). Everything that DESCRIBED the list
+was left on the old one: the "What's available" summary line ("Data Entry Operator, Remote Customer
+Support Executive, EV Charging Technician, and AC Technician. Locations are Bengaluru and Remote"), the
+role-synonym map (old companies), the technician-family rule, the spoken "kinds of work" line, a rule
+that "every job is in Bengaluru or Remote", and every worked example — 28 Bengaluru mentions in the
+Hindi file, 20 in Kannada. The model followed the prose and the examples over the JSON (D50, D102):
+five places agreed on the old list and one block of data disagreed.
+
+**Detection heuristic.** For every hardcoded list in a prompt (job inventory, services, places),
+collect its entity values (role, company, location). Then grep the REST of the prompt for entities of
+the same kind that are NOT in the list — company names in examples, cities in rules, role names in
+summary lines. Any hit is stale. In a diff: when a list block changes, grep the whole file for every
+value that was REMOVED from it; a survivor outside the list is this bug.
+
+**Fix direction.** Prefer removing the hardcoded list: fetch live from the job API (done 2026-10-05 —
+the production inbound numbers now go to the KKB Slim bots, which call `get_jobs` /
+`get_recommended_jobs`). If a list must stay, derive every summary line from it or delete the summary,
+and re-set the worked examples on entries that are actually in the list.
+
+**Source.** KKB Hindi + Kannada Inbound Signals, found 2026-10-05 while readying the inbound bots for
+Operation Rozgar testing. Related: D50, D102.
+
+## D106: consent heard at one step but only written at a later one is lost whenever the call ends in between
+
+**Symptom.** Callers agree to the terms on the call, yet the backend still shows their consent as false.
+2026-10-06 KKB Slim campaigns: 10 new callers said yes and none of their consent reached the backend;
+on existing unconsented profiles the save fired on 1 of 5 (`6414e585`, `f6882d0b`, `f718e7c2`,
+`61705722` skipped it).
+
+**Root cause.** For a new caller the yes was only written by `create_profile`, which runs at the
+apply step; any call that ended before an apply lost it. For an existing profile the save was a
+"silent tool in the same turn" as a spoken line, and the model kept the line and dropped the tool.
+
+**Detection heuristic.** For every consent or agreement the prompt asks for, find the tool that
+writes it. If that tool runs at a LATER step than the ask, or only on one branch (e.g. only when a
+profile exists), the yes is lost on every early exit. If the prompt says to call a silent tool "in the
+same turn" as a spoken line, expect the tool to be skipped.
+
+**Fix direction.** Write the yes at the moment it is given, on every branch: a separate tool for a
+caller with no record (`record_consent_new`: name + age, creates the record), and make the save the
+whole of the reply to the yes ("your reply is the tool call alone"). Verify on the backend, not the
+transcript. Verified 2026-10-12: `6560f39e`, `3e3f7d69` (Hindi), `d9154118`, `930a8667` (Kannada).
+
+**Source.** KKB Slim Hindi + Kannada, 2026-10-12. Related: D95, D101.
+
+## D107: a default search value for undecided callers gives every undecided caller the same wrong jobs
+
+**Symptom.** Callers who say "कोई भी चलेगा" (anything) all hear helper and labourer jobs. 14 of 63 searches
+in the 2026-10-06 ITI and Polytechnic campaigns were the literal query `"helper"`, sent to trained
+electricians, fitters and diploma engineers.
+
+**Root cause.** The undecided-caller branch said "use their words if any, otherwise `\"helper\"`". The
+fallback value became the answer for the most common reply.
+
+**Detection heuristic.** Grep tool-argument guidance for a quoted default value ("otherwise X",
+"default to X", "if nothing, use X"). Any default that is a real search term will be sent for every
+caller who reaches that branch.
+
+**Fix direction.** No default. Ask ONE question that yields the caller's own search term (their trade
+or training), and if that still yields nothing, capture the preference instead of searching a guess.
+Verified 2026-10-12: `6560f39e` ("electrician"), `d9154118` ("fitter").
+
+**Source.** KKB Slim Hindi + Kannada, 2026-10-12. Related: D50.
+
+## D108: an offer that ends on a statement, plus a "clear yes" list containing a backchannel, records acknowledgements as acceptance
+
+**Symptom.** Interest is recorded for callers who were only saying "I heard you". TRRAIN: 35 of 53
+recorded "interested" (66%) were not a real yes; KKB Slim services: 17 of 45 unconfirmed.
+
+**Root cause.** The TRRAIN offer ended "if you are interested, their team will call you" (a statement,
+no question), so the natural reply is "ठीक है / ओके". The prompt's "Clear yes" list contained exactly
+those tokens, and the worked example showed "हाँ जी, ठीक है" recorded as Yes. The output prompt keyed on
+the agent's own acceptance line, not the caller's words.
+
+**Detection heuristic.** Find every offer line: if its last sentence has no question, flag it. Find
+the acceptance rule: if it lists a backchannel token (ठीक है / हाँ / ओके / जी / ಸರಿ / ಹೌದು) as sufficient on
+its own, flag it. Check the output prompt's interest field reads the CALLER's words.
+
+**Fix direction.** End the offer on a real question; treat a bare agreement as "heard" and ask ONE
+confirmation that needs a specific answer (a callback time); only a named answer is Yes; filler is
+Maybe with a close that promises nothing; record the caller's evidence words in the output.
+
+**Source.** TRRAIN Hindi + Kannada and KKB Slim services, 2026-10-12. Related: D95, D50.
+
+## D109: a worked example's input value is supplied as the real value when the call's input is empty
+
+**Symptom.** With no location input, the bot confirmed "हमारे पास आपकी जॉब की लोकेशन सरजापुर है" to a
+caller who never mentioned it (`6560f39e`). Sarjapur was the `${location}` of worked call B.
+
+**Root cause.** The only example of the location turn carried a concrete place. When the real input
+was empty, the model filled the slot from the example (D102's mechanism, on an input variable).
+
+**Detection heuristic.** For every input variable that can arrive empty, check that a worked example
+demonstrates the EMPTY case. If every example shows a filled value, expect that value to be reused.
+
+**Fix direction.** Demonstrate the empty case (the bot asks, the caller supplies the value), and give
+the "no input" branch a line that carries no slot to fill.
+
+**Source.** KKB Slim Hindi + Kannada, 2026-10-12. Related: D102, D50.
+
+## D110: a guard that tests an injected variable is re-run after the caller answers, so the question loops
+
+**Symptom.** The bot asks for a value, the caller gives a valid one, and the bot asks again with the
+same line, over and over. Test call `fad874e4`: the caller said "201002" twenty times and heard
+"हमारे पास आपका पिन कोड पूरा नहीं है" twenty times until the call hit its maximum duration. Real
+calls showed the milder form: valid six-digit pins said in chunks ("27, 72, 11", "20, 12, 0, 4")
+rejected two to four times, and 24/32 pin turns using the incomplete-pin line when `${location}`
+had no digits at all.
+
+**Root cause.** The pin turn said "before you say anything about the pin, do these three steps
+silently, every time" and the steps split `${location}`. An injected variable never changes during a
+call, so after every answer the check re-ran on the same digitless value, found "no pin", and chose
+the ask line again. The caller's answer was never the thing being evaluated.
+
+**Detection heuristic.** For every "every time / before you speak" check, ask what it evaluates.
+If it reads an input variable (`${...}`) and the turn it guards ASKS the caller for that same fact,
+the check must stop applying once the caller answers. Also look for a missing hard cap on any
+re-ask ("once" in prose is not a cap the model counts).
+
+**Fix direction.** Scope the variable check to the FIRST sentence of the turn; from the caller's
+first answer on, evaluate only their answer (join chunked digits before counting); add a counted cap
+("at most twice after the first ask, then move on").
+
+**Source.** KKB Slim Hindi + Kannada, 2026-10-12. Related: D95 (storage slot doubles as evidence slot).

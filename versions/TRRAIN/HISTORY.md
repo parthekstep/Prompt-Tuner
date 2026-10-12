@@ -20,3 +20,10 @@
 - **2026-09-08_201455** — `pre-deploy-trrain-kn-out-2026-09-08_201455` — auto snapshot before Raya deploy of TRRAIN/TRRAIN Kannada.md _(4 files)_
 - **2026-09-09_011423** — `pre-deploy-trrain-hi-out-2026-09-09_011423` — auto snapshot before Raya deploy of TRRAIN/TRRAIN Hindi.md _(4 files)_
 - **2026-09-09_011425** — `pre-deploy-trrain-kn-out-2026-09-09_011425` — auto snapshot before Raya deploy of TRRAIN/TRRAIN Kannada.md _(4 files)_
+- **2026-10-12_083030** — `pre-fp-fix` — — _(4 files)_
+- **2026-10-12_083035** — `pre-deploy-trrain-hi-out-2026-10-12_083035` — auto snapshot before Raya deploy of TRRAIN/TRRAIN Hindi.md _(4 files)_
+- **2026-10-12_083035** — `pre-deploy-trrain-kn-out-2026-10-12_083035` — auto snapshot before Raya deploy of TRRAIN/TRRAIN Kannada.md _(4 files)_
+- **2026-10-12_083036** — `pre-deploy-trrain-hi-output-2026-10-12_083036` — auto snapshot before Raya deploy of TRRAIN/TRRAIN Output.md _(4 files)_
+- **2026-10-12_083036** — `pre-deploy-trrain-kn-output-2026-10-12_083036` — auto snapshot before Raya deploy of TRRAIN/TRRAIN Output.md _(4 files)_
+- **2026-10-12_092733** — `pre-deploy-trrain-hi-output-2026-10-12_092733` — auto snapshot before Raya deploy of TRRAIN/TRRAIN Output.md _(4 files)_
+- **2026-10-12_092733** — `pre-deploy-trrain-kn-output-2026-10-12_092733` — auto snapshot before Raya deploy of TRRAIN/TRRAIN Output.md _(4 files)_

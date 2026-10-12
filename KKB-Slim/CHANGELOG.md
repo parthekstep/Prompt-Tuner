@@ -5,6 +5,25 @@ output prompts; the ONLY difference is the conversation prompt — a ground-up r
 against the master's ~224k. It exists to test whether prompt size is what the latency complaints
 are about. Not a language variant, so `/sync-check` must not treat it as a mirror.
 
+## 2026-10-12 - Aryan's GZB review: consent lost for new callers, irrelevant recommendations, unconfirmed service yeses
+- **Feedback/bug:** Aryan's email with `KKB_Oct06_Dropoff_Analysis.xlsx` (issues 2-4). Grounded in 85 real calls on `kkb-hi-signals-slim` before any edit.
+  - Consent: 10 new callers said yes to the disclosure but consent was only written later by `create_profile`, so every drop before that step lost it; existing callers with no consent got `record_consent` 1/5 times. (25 more calls hit `get_profile` 400 `U18_NOT_ALLOWED`: backend, see below.)
+  - Recommendations: 14/63 searches used the query `"helper"`, which was the prompt's own default for an undecided caller; results read out "ITI (Other)" (a qualification, not a role) and duplicate rows; the OPEN location ask spoke a literal "[city]"; worked call B carried a Sarjapur example that the bot reused when `${location}` was empty.
+  - Services: 17/45 "Yes" were bare "हाँ"/"ठीक है" backchannels to a statement, never a real yes.
+  - Callback promises the team cannot keep ("एक-दो दिन में", "हम आपको कॉल करेंगे") on no-jobs and bad-line exits.
+- **Change (Hindi master, Kannada mirrored):**
+  - Step 3.5: yes from a caller with a seeker item = `record_consent` alone; with no item = name + age, then the new `record_consent_new` tool (writes consent at once); under 18 = no call. Step 9 never calls `create_profile` after `record_consent_new`; step 10 uses `update_profile` on that item.
+  - Undecided caller: no default query; ask the trade/qualification instead. 6a cleaning drops qualification-as-role rows and keeps one row per role + company.
+  - OPEN ask is a neutral question with no slot. Worked call B now starts with `${location}` empty.
+  - Section S: only a reply to the offer counts; bare agreement gets ONE time question, a named time = Yes + `service_callback_slot`, filler = Maybe, unclear closes with "ठीक है, कोई बात नहीं।" No callback promises anywhere (no-jobs line and bad-line close rewritten).
+  - Output: field 17 `service_interest` redefined on the caller's own words; new 17a `service_callback_slot`.
+- **Files:** `KKB-Slim/KKB Slim Hindi Signals.md`, `KKB-Slim/KKB Slim Kannada Signals.md`, `KKB-Slim/KKB Slim Output.md`, `raya/toolspecs/record_consent_new.json` (applied to both slim agents). Snapshots in `versions/KKB-Slim/` (`pre-oct12-consent-recs`) and `raya/live-snapshots/*.output_instructions.pre-2026-10-12.md`.
+- **Verified (live calls, test numbers only):** new-caller consent written before profile, Hindi `6560f39e` (backend shows terms/privacy true) and Kannada `d9154118`; existing caller `record_consent` alone, Hindi `3e3f7d69`, Kannada `930a8667`; undecided caller asked the trade and searched "electrician" (`6560f39e`) / "fitter" (`d9154118`), no "helper"; bad-line close without a callback promise, Hindi `6296a5be`, Kannada `c85dc5b7`; returning-caller regression clean `444480ed`.
+- **VERIFY-PENDING:** service-confirmation question (tester went silent before the offer on `bfb02c5e`/`8877a6fb`; see the final batch); no-jobs line on a real empty search.
+- **Not prompt bugs (flagged, not fixed):** every `apply_job` 422 since ~Oct 6 (backend rejects the consent field it also requires); `U18_NOT_ALLOWED` on about half the ITI/Poly contacts; job inventory quality (duplicates, "na"/"Any" roles, Karnataka rows on gzb, masked locations, scores 0.45-0.6).
+- **Analyser:** D106 (consent written at a later step), D107 (default search value), D108 (offer ending on a statement), D109 (example input value reused when the input is empty).
+- **PIN loop (found by today's retest, same day):** test call `fad874e4` asked for the pin 20+ times while the caller kept saying "201002" (call hit max duration). Cause: the pin check said "every time, split `${location}`", and `${location}` never changes, so every answer was judged "no pin". Real calls had the milder form (valid chunked pins rejected 2-4 times; 24/32 pin turns used the incomplete-pin line with a digitless `${location}`). Fix: `${location}` decides only the first pin sentence; after that only the caller's answer is split (chunks joined); hard cap of two re-asks. Snapshot `pre-pin-loop-fix`. Analyser D110. **Verified:** Hindi `c6f1efa1` (chunked "20:10, 02" joined, read back once, moved on), Kannada `a0eada1b` ("580021" read back once, moved on).
+
 ## 2026-10-05 — Kannada slim ported to the live job/services APIs; now answers the Kannada INBOUND number
 - **Feedback/bug:** same request (Operation Rozgar inbound readiness). The Kannada slim still read a
   campaign-injected `${recommendations}` list and had no job/services tools, so it could not serve

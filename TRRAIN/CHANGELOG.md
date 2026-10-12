@@ -1,5 +1,13 @@
 # TRRAIN — Changelog
 
+## 2026-10-12 - False positives: the offer now ends on a question, and only a named time counts as Yes
+- **Feedback/bug:** Aryan (email, 2026-10-12): "the TRRAIN bot is creating a lot of false positives ... adding more friction so that we get positive affirmations." Across the real calls, 35/53 Yes (66%) were a backchannel "हाँ"/"जी" to an offer that ended on a statement, or a caller who thought it was a job offer.
+- **Change (Hindi master, Kannada mirrored):** the offer ends on a direct question and says "यह किसी जॉब का ऑफ़र नहीं है"; a yes is followed by one confirmation asking WHEN the team should call; only a named time routes to Yes (stored in `callback_slot`); filler, silence or a job question closes neutrally ("ठीक है, धन्यवाद। आपका दिन शुभ हो। Goodbye") as Maybe; examples rewritten to match. Output: field 7 `trrain_interest` redefined on the caller's own words, new 7a `callback_slot`, 7b `interest_evidence`; `partner_named` and `callback_requested` defined; silence or no reply is never "No" (it is Maybe).
+- **Files:** `TRRAIN/TRRAIN Hindi.md`, `TRRAIN/TRRAIN Kannada.md`, `TRRAIN/TRRAIN Output.md`. Snapshot `versions/TRRAIN/*pre-fp-fix`.
+- **Verified:** offer ends on the question, silence gets one re-ask, and no false Yes on `f4a60b72` (Hindi), `e1c974b8` (Hindi), `a1923256` (Kannada). Those calls stored "No" for silence; the output fix for that is DEPLOYED, NOT VERIFIED.
+- **VERIFY-PENDING:** the full yes -> time -> Yes path (the tester agent goes silent after the long offer turn on about half the calls).
+- **Note:** no production TRRAIN calls since 2026-09-18 (Hindi); Kannada has never run in production.
+
 ## 2026-08-24 — Tracker r94: Kannada brought up to Hindi on the service answer
 - **Feedback/bug:** r94 (TRRAIN Hindi, P1) "Needs capture should be in details — rn upon asking it tells what kind of service this is". Reconciling before editing showed the team had **already fixed this on the live console** after our 2026-08-12 deploy: live Hindi now names the partner aloud and gives a full answer (what their team does, and that it is free). That live version was adopted into the repo first, unedited (commit `33e4aea`). Kannada had neither the detail nor the naming — a sync gap, not a reported bug.
 - **Change:** brought TRRAIN Kannada up to Hindi on the substance of the answer — the team talks to you, works out which work suits you, and can teach new skills through training and courses, at no cost — in the FAQ rule **and both worked examples** (an updated rule with stale examples is a half-fix; see analyser E1). The "ONE short sentence" guidance was relaxed to one or two, since the new answer is two.
