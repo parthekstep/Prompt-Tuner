@@ -2834,3 +2834,87 @@ first answer on, evaluate only their answer (join chunked digits before counting
 ("at most twice after the first ask, then move on").
 
 **Source.** KKB Slim Hindi + Kannada, 2026-10-12. Related: D95 (storage slot doubles as evidence slot).
+
+## D111: an enum list in the prompt disagrees with the tool schema, and the prompt wins
+
+**Symptom.** Profile saves fail with HTTP 400 `INVALID_ITEM_STATE`. KKB Slim and Maya sent
+`educationCategory: "Polytechnic / Diploma"` and `"ITI / Other Vocational Trainings"` (8 of 8 rejected),
+and Maya sent `otherHelpNeeded: ["Training"]`; the live tool schemas said `Diploma`, `ITI` and two
+`otherHelpNeeded` values. Tracker r113, r114 (2026-10-12).
+
+**Root cause.** The prose listed old labels "byte-exact". The model follows the longer, nearer prose
+over the parameter description.
+
+**Detection heuristic.** For every enum-valued field, diff the values quoted in the prompt against the
+live tool schema's description/enum. Any value in one and not the other is this bug. Also grep for
+mapping lines ("X → `Value`") whose right-hand side is not in the schema.
+
+**Fix direction.** Make the prompt quote exactly the schema's values (or point at the schema and quote
+none). Source: KKB Slim, Maya Signals, KKB Signals (4 prompts), 2026-10-13.
+
+## D112: example VALUES in the prompt are copied into calls where the real value is absent
+
+**Symptom.** The bot reads back a PIN the caller never gave (22 calls: 201009, 201014, 110035,
+201015, 110098, all from the prompt's own tables and worked calls), saves an age nobody said (25, 28),
+names companies from the names table (SARA ENTERPRISES, GLOBAL CHEMICALS) as jobs, sends a
+`12345678-1234-...` id. Tracker r122, r123, r124, r125, r127 (2026-10-12). Generalises D102 and D109.
+
+**Root cause.** A required slot with no real value is filled from the nearest concrete example. Every
+realistic example value is a candidate answer, including values in input-format tables that are
+never meant to be spoken.
+
+**Detection heuristic.** List every concrete value in the prompt that has the SHAPE of a caller fact or
+an id: six-digit numbers, ages, UUID-like strings, company names, place names. Each is a copy risk
+wherever the matching input can be empty. Search worked calls, tables and "e.g." clauses.
+
+**Fix direction.** Replace example values with typed placeholders (`<pin>`, "the years the caller
+said"), demonstrate the empty case, and in tool descriptions name the only legal source of the value.
+Source: KKB Slim Hindi/Kannada, Maya Signals, 2026-10-13.
+
+## D113: a stage direction or "stay silent" instruction is spoken aloud
+
+**Symptom.** DKB said "(Wait silently)" as its whole turn on 24 calls; KKB Slim spoke
+"*(Silent `get_profile` for 91XXXXXX3380)*", "*(Step 13: Services offer)*", "*(Wait for confirmation)*"
+on 10 calls, one of them with the caller's phone number; 4 wrote a tool call as text and then
+invented jobs. Tracker r132, r133.
+
+**Root cause.** The platform needs SOME output each turn, so "do not speak" leaves the model the
+instruction itself as the only text to emit. Worked-call notes written inside the dialogue block,
+in the same `> ` quote format as the spoken lines, look like lines to say.
+
+**Detection heuristic.** Grep for "wait silently", "do not speak", "say nothing" without a sanctioned
+line next to it; grep worked calls for `> *(` notes and "Silent `tool`" phrasing.
+
+**Fix direction.** Give a short sanctioned line instead of silence ("जी, ज़रूर।"); write notes outside
+the quote block as "Note (not spoken): ...". Source: DKB Signals, KKB Slim, 2026-10-13.
+
+## D114: a routing keyword appears inside the WRONG row's exception text
+
+**Symptom.** `apply_job` returned `ACTION_LIMIT_REACHED` 5 times; the already-applied line was said
+0 of 5 times. Tracker r118.
+
+**Root cause.** The generic failure row named `ACTION_LIMIT_REACHED` three times (as an exception,
+plus case history), and a paragraph said this row also covers the already-applied case. The keyword's
+nearest, most frequent context was the wrong row.
+
+**Detection heuristic.** For each routing table, grep every trigger token; if it occurs more often in
+a row other than the one it routes to, expect misrouting.
+
+**Fix direction.** State the token only in its own row; make the other row's condition "any other
+result" with no mention of it. Source: KKB Slim, 2026-10-13.
+
+## D115: "after the tool completes, say done" with no failure branch
+
+**Symptom.** DKB told an employer "हो गया" twice while `create_job` returned 409
+`PROFILE_LIMIT_REACHED` (call `121bebdf`); DKB also told employers it had removed a posting with no
+tool that can remove one (`06d0224d`, `4a597bc7`). Tracker r130, r131.
+
+**Root cause.** "Completes" is true of an errored call too, and an action with no tool had no
+sanctioned truthful line, so the model claimed it.
+
+**Detection heuristic.** Every success line must be gated on the RESULT ("only when the result returned
+the item"), with a failure line beside it. For every action a caller can request, check that a tool
+exists; if not, there must be a truthful "noted" line and an explicit "never say you have done it".
+
+**Fix direction.** Result-gated success line plus a cause-free failure line; a "noted" line for
+actions with no tool. Source: DKB Signals Hindi/Kannada, 2026-10-13.

@@ -10,6 +10,13 @@ Every prompt edit to DKB is logged here. Entry format:
 - **Ported from:** <source agent> (only for cross-agent ports)
 ```
 
+## 2026-10-13 - Tracker r130, r131, r133: false "done", false "removed", spoken stage direction
+- **Feedback/bug:** tracker rows dated 12/10, grounded in 713 DKB Signals campaign calls (Oct 8).
+- **Change (DKB Hindi Signals and DKB Kannada Signals):** `create_job` success line only when the result returned the item, with a truthful failure line and no further posting after `PROFILE_LIMIT_REACHED` (`121bebdf` said "हो गया" on two 409s); a filled or unwanted posting gets "ठीक है, मैंने नोट कर लिया कि यह पोस्टिंग अब नहीं चाहिए।" and the bot may never say it closed, removed or paused a posting (`06d0224d`, `4a597bc7`); hold requests get "जी, ज़रूर।" instead of an instruction to stay silent, which was spoken as "(Wait silently)" on 24 calls.
+- **Not prompt (flagged):** r115 job_posting schema has no salary/qualification/experience fields; r116 no update/close API; r120 5-profile cap; r145 pitch drop-off (53% hang up on the 258-char pitch: proposed A/B of a shorter line, needs sign-off).
+- **Files:** `DKB/DKB Hindi Signals.md`, `DKB/DKB Kannada Signals.md`. Snapshot `pre-oct13-tracker`.
+- **Verified:** r131 on `8cf101ad`. r130 and r133: DEPLOYED, NOT VERIFIED (see session report).
+
 ## 2026-08-10 — Audio-check turn added ahead of Turn 1 (ported from the KKB pilot)
 - **Feedback/bug:** Fleet-wide intro change: outbound bots were launching into their opening line while the person who just picked up was still saying "hello, who is this?" — so the opening was talked over. Requested that outbound bots first ask a short "can you hear me?" and only continue once the person confirms.
 - **Change:** Added `## Turn 0 — Audio check` immediately before the existing `Turn 1 — Opening`, in all four DKB **outbound** prompts. It speaks only the audio check ("हैलो, मेरी आवाज़ आ रही है?" / "ಹಲೋ, ನನ್ನ ಧ್ವನಿ ಕೇಳಿಸ್ತಾ ಇದೆಯಾ?"), then waits; branches for confirm / cannot-hear (ONE slower repeat, then a polite close) / silence. `Turn 1` was renamed from "spoken immediately when call connects" to "spoken once the caller has confirmed they can hear you" — its business-owner question, the `${company_name}` / `${job_role}` branching, and every later turn are untouched. **Numbered Turn 0 deliberately** so the existing Turn 1 / Turn 2 / Turn 3 cross-references throughout the prompt stay valid — a renumber would have been a far larger and riskier diff. `say_hello` set to **false** on the four outbound agents.

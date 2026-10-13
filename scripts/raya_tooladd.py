@@ -16,6 +16,7 @@ object to disk: Raya tool snapshots embed live API keys and this repo is public
 Usage:
   python3 scripts/raya_tooladd.py plan  <target> <spec.json>
   python3 scripts/raya_tooladd.py apply <target> <spec.json>
+  python3 scripts/raya_tooladd.py remove <target> <spec.json>   # takes the spec's tool off the agent
 
 <spec.json>:
   {
@@ -93,6 +94,20 @@ def main():
             sys.exit(f"WRONG TARGET GUARD: live name {live.get('name')!r} lacks {tok!r}")
     tools = copy.deepcopy(live.get("tools") or {})
     llm = tools.setdefault("llm_tools", [])
+
+    if mode == "remove":                      # take ONE tool off the agent; everything else untouched
+        keep = [t for t in llm if (t.get("function") or {}).get("name") != name]
+        if len(keep) == len(llm):
+            print(f"{target}: tool {name!r} not present — nothing to remove"); return
+        tools["llm_tools"] = keep
+        s2, r2 = raya("/api/agent/" + uuid, "PATCH", {"tools": tools})
+        s3, d3 = raya("/api/agent/" + uuid)
+        d3 = d3.get("data", d3)
+        match = json.dumps(d3.get("tools"), sort_keys=True) == json.dumps(tools, sort_keys=True)
+        print(f"PATCH={s2}  readback_matches={match}  tools now: {[(t.get('function') or {}).get('name') for t in keep]}")
+        if s2 != 200 or not match:
+            sys.exit(1)
+        return
 
     donor = next((t for t in llm if (t.get("function") or {}).get("name") == spec["clone_api_from"]), None)
     if donor is None:

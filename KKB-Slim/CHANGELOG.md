@@ -5,6 +5,36 @@ output prompts; the ONLY difference is the conversation prompt — a ground-up r
 against the master's ~224k. It exists to test whether prompt size is what the latency complaints
 are about. Not a language variant, so `/sync-check` must not treat it as a mirror.
 
+## 2026-10-13 - Tracker r111-r146 (Gaurav's Oct 6/8 campaign review) and Aryan's test sheet (KI-02, KI-12)
+- **Feedback/bug:** 36 new tracker rows dated 12/10 plus Aryan's KKB Inbound + Slim test results (2 PARTIAL). Every row was grounded in the downloaded Oct 6-12 calls (1,139 calls over 20s) before any edit; the calls ran on the pre-2026-10-12 prompt.
+- **Change (Hindi master, Kannada mirrored; English instructions byte-identical except the registered region list):**
+  - r113 education values: `ITI` and `Diploma` (the backend rejected `ITI / Other Vocational Trainings` 5/5 and `Polytechnic / Diploma` 3/3); `otherHelpNeeded` mapped to the two values the API accepts.
+  - r118 already-applied: `ACTION_LIMIT_REACHED` now appears only in the already-applied row (was said 0/5); already-applied rows are dropped in 6a.
+  - r119 wrong ids: no `apply_job` after a failed `create_profile`; a phone, user id or job id is never a `profile_id`.
+  - r122 invented age: the age row and `record_consent_new` tool description now allow only an age the caller said or the stored one.
+  - r124/N1 invented jobs: removed "Never call `get_jobs`" from law 1; company examples are word-level, not whole names.
+  - r125/r127 example values copied: every example PIN replaced by `<pin>`; worked calls no longer contain a PIN read-back; a digitless `${location}` gets the open ask, never the incomplete-pin line; Sarjapur removed from the names table.
+  - r126 slots: dead "[city]" and "[शहर]" quotes removed; ambiguous role pick asks by company.
+  - r128: rows that survive cleaning but do not match go to No-Match, never "no jobs".
+  - r111/r117: stale "city is masked" fact corrected; 6a drops out-of-region rows (Kannada: outside Karnataka / Hubballi-Dharwad, registered divergence `kkb-slim-6a-region-list`) and test/placeholder companies.
+  - r132: 27 worked-call notes rewritten as "Note (not spoken): ..." outside the quote block.
+  - r134: "didn't catch the greeting" gets a short re-intro instead of the full greeting (was replayed on 112/729 calls).
+  - r135: a yes to the role check no longer counts as naming new work (recommendations used instead of text search).
+  - r136: unrecorded promises removed (closing "हमारी टीम फिर संपर्क करेगी", apply-failure callbacks).
+  - r137: bare yes to the deep-dive question no longer repeats the deep dive.
+  - r138: "call me later" asks a time once; output field 12a `callback_requested`.
+  - r140: `hold_message` "एक मिनट" only on the four lookup tools; empty on writes and apply.
+  - r141: off-topic requests declined in one line; three-sentence cap, no markdown.
+  - r144: no sentence about a missing salary; a salary question gets "यह कंपनी से बात होने पर पता चलेगा।"
+  - KI-02: mid-call "can't hear" gets one slower repeat before the bad-line close. KI-12: the 6b gate also requires the pin turn.
+- **Not changed (decision needed):** r146 (move PIN/landmark after the first jobs; conflicts with KI-12), U18 callers who say they are adults.
+- **Files:** `KKB-Slim/KKB Slim Hindi Signals.md`, `KKB-Slim/KKB Slim Kannada Signals.md`, `KKB-Slim/KKB Slim Output.md`, `raya/toolspecs/record_consent_new.json`, `raya/divergences.json`, `scripts/location_writeback.py`. Snapshots `pre-oct13-tracker`.
+- **Follow-ups found by today's retests (same day):** (1) the consent save went out with an invented age or not at all after the age answer (`d795ee9a`, `9dd4f1c9`, `80ad26b5` invented; `da19618e` asked but never saved): the age is now asked before the consent question, the save is the sole reply to the age answer, and worked call B demonstrates that order (it previously showed a new caller with no consent ask at all); (2) step 0 still said "no jobs" covers irrelevant rows, contradicting the r128 fix (`2bfa078e`); (3) a qualification request ("mechanical diploma") now counts the trade's jobs as relevant (`f063e40c`); (4) Kannada worked call B's caller answer "ಹುಬ್ಬಳ್ಳಿ, ಕೇಶ್ವಾಪುರ" was read back as the caller's location (`da19618e`): example place answers are now neutral; (5) output field 12a came back as a timestamp: renamed `call_later_request` with text values.
+- **Verified (live test calls, test numbers):** consent saved with the spoken age, Hindi `29771cd5`, Kannada `162a489b`; r128 trade jobs offered `29771cd5`; no invented place or PIN `162a489b`, `29771cd5`; r134 no greeting replay `2bfa078e`, `29771cd5`; r138 time asked `4451e954`; r140 no hold on saves `29771cd5`; PIN asked (KI-12) `29771cd5`, `162a489b`.
+- **DEPLOYED, NOT VERIFIED:** r113 education save, r118, r119, r135, r137, r141, r144, KI-02 mid-call, output field `call_later_request` (short calls produced no output record).
+- **New, minor:** since the last Hindi deploys the bot wraps its lines in quote marks (`f063e40c`, `29771cd5`); not yet traced.
+- **Analyser:** D111-D115.
+
 ## 2026-10-12 - Aryan's GZB review: consent lost for new callers, irrelevant recommendations, unconfirmed service yeses
 - **Feedback/bug:** Aryan's email with `KKB_Oct06_Dropoff_Analysis.xlsx` (issues 2-4). Grounded in 85 real calls on `kkb-hi-signals-slim` before any edit.
   - Consent: 10 new callers said yes to the disclosure but consent was only written later by `create_profile`, so every drop before that step lost it; existing callers with no consent got `record_consent` 1/5 times. (25 more calls hit `get_profile` 400 `U18_NOT_ALLOWED`: backend, see below.)

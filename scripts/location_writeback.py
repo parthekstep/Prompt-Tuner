@@ -79,18 +79,27 @@ def km(p, q):
 def city_state(stored):
     """The last two place names before 'India' in the stored location — the city and the state."""
     parts = [p.strip() for p in str(stored or "").split(",") if p.strip()]
-    if parts and parts[-1].lower() == "india":
+    while parts and parts[-1].lower() in ("india", "भारत"):
         parts = parts[:-1]
+    parts = [re.sub(r"\s*\b\d{6}\b", "", p).strip() for p in parts]   # a stored PIN is re-added once
+    parts = [p for p in parts if p]
     return parts[-2:] if len(parts) >= 2 else parts
 
 
-def compose(landmark, area, stored):
+def compose(landmark, area, stored, pin=None):
+    """One address string, because the DPG profile has ONE location field (agreed 2026-10-13):
+    '<landmark>, <area>, <City>, <State> <PIN>, India'. The PIN goes in only when it is exactly six digits."""
     out, seen = [], set()
-    for p in [title(landmark) if usable(landmark) else "", title(area) if usable(area) else "",
-              *city_state(stored), "India"]:
-        if p and p.lower() not in seen:
+    pieces = []
+    for v in [title(landmark) if usable(landmark) else "", title(area) if usable(area) else ""]:
+        pieces += [x.strip() for x in v.split(",")]           # "Loni, Ghaziabad" is two places
+    for p in [*pieces, *city_state(stored), "India"]:
+        if p and p.lower().replace(" ", "") not in seen:
             out.append(p)
-            seen.add(p.lower())
+            seen.add(p.lower().replace(" ", ""))
+    pin = re.sub(r"\D", "", str(pin or ""))
+    if len(pin) == 6 and len(out) >= 2 and pin not in ", ".join(out):
+        out[-2] = f"{out[-2]} {pin}"
     return ", ".join(out)
 
 
@@ -159,7 +168,10 @@ def main():
             print(f"{tag}  skip — could not determine the caller's phone safely"); continue
 
         q = gp["api_details"]["url"] + "?" + urllib.parse.urlencode({"phone_number": phone})
-        prof = json.load(urllib.request.urlopen(urllib.request.Request(q, headers=GH), timeout=40))
+        try:
+            prof = json.load(urllib.request.urlopen(urllib.request.Request(q, headers=GH), timeout=40))
+        except urllib.error.HTTPError as e:      # e.g. 400 U18_NOT_ALLOWED: no writable profile
+            print(f"{tag}  skip — profile lookup refused ({e.code})"); continue
         if not prof.get("user_id"):
             print(f"{tag}  skip — {phone} is not an existing user (writing would CREATE one)"); continue
         live = [i for i in prof.get("items") or []
@@ -168,7 +180,7 @@ def main():
             print(f"{tag}  skip — no live seeker profile for {phone}"); continue
         it = live[0]; st = it.get("item_state") or {}
         stored = st.get("location") or ""
-        new = compose(landmark, area, stored)
+        new = compose(landmark, area, stored, out.get("pin_code"))
         if new.lower() == stored.lower():
             print(f"{tag}  skip — already current: {stored}"); continue
         before = (it.get("item_locations") or [{}])[0]

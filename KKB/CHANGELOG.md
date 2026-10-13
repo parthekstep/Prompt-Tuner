@@ -10,6 +10,11 @@ Every prompt edit to KKB is logged here. Entry format:
 - **Ported from:** <source agent> (only for cross-agent ports)
 ```
 
+## 2026-10-13 - Education and other-help values the backend accepts (Signals prompts)
+- **Feedback/bug:** tracker r113: profile saves rejected with 400 `INVALID_ITEM_STATE` for `ITI / Other Vocational Trainings` and `Polytechnic / Diploma`; the live tool schema says `ITI` / `Diploma`.
+- **Change:** the four KKB Signals prompts now quote `ITI` / `Diploma` and map `otherHelpNeeded` to the two values the API accepts. No other change. These agents carry no live traffic now (numbers moved to KKB Slim); kept correct so they never regress.
+- **Files:** `KKB/KKB Placeholder Hindi Signals.md`, `KKB/KKB Placeholder Kannada Signals.md`, `KKB/KKB Placeholder Inbound Signals.md`, `KKB/KKB Placeholder Inbound Kannada Signals.md`. DEPLOYED, NOT VERIFIED (no traffic).
+
 ## 2026-09-23 — T&C Bot Prompt Script: account+terms (Part 1), save-details (Part 2), per-application disclosure (Part 3)
 
 - **Feedback/request:** the owner's `T&C Bot Prompt Script` — a three-part consent flow. Part 1: an

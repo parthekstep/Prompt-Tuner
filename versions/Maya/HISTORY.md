@@ -392,3 +392,15 @@
 - **2026-10-12_082113** — `pre-deploy-maya-hi-in-2026-10-12_082113` — auto snapshot before Raya deploy of Maya/Maya Inbound.md _(6 files)_
 - **2026-10-12_082113** — `pre-deploy-maya-hi-signals-2026-10-12_082113` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
 - **2026-10-12_082114** — `pre-deploy-maya-hi-in-signals-2026-10-12_082114` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-10-13_122046** — `pre-oct13-tracker` — before Oct 13 tracker fixes _(6 files)_
+- **2026-10-13_124213** — `pre-deploy-maya-hi-signals-2026-10-13_124213` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-10-13_124216** — `pre-deploy-maya-hi-in-signals-2026-10-13_124216` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-10-13_132019** — `pre-oct13-age-first` — before age-before-consent _(6 files)_
+- **2026-10-13_132034** — `pre-deploy-maya-hi-signals-2026-10-13_132034` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-10-13_132037** — `pre-deploy-maya-hi-in-signals-2026-10-13_132037` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-10-13_133650** — `pre-deploy-maya-hi-signals-2026-10-13_133650` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-10-13_134453** — `pre-deploy-maya-hi-signals-2026-10-13_134453` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-10-13_134456** — `pre-deploy-maya-hi-in-signals-2026-10-13_134456` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-10-13_135907** — `pre-consent-port-revert` — with record_consent_new port (0/4 correct) _(6 files)_
+- **2026-10-13_135912** — `pre-deploy-maya-hi-signals-2026-10-13_135912` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-10-13_135918** — `pre-deploy-maya-hi-in-signals-2026-10-13_135918` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_

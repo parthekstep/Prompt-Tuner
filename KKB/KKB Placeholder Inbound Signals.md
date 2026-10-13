@@ -1487,12 +1487,12 @@ obeyed; a different line carried the same claim. A line that cannot be false can
 
 2. **Highest qualification / training — if missing → `educationCategory` (+ ONE conditional follow-up).**
    Ask: "आपकी सबसे ऊँची पढ़ाई या ट्रेनिंग क्या है — स्कूल, कॉलेज, आई.टी.आई, डिप्लोमा, कोई सर्टिफिकेट, या कुछ और?"
-   Map the answer to EXACTLY one `educationCategory`: `School` | `College` | `ITI / Other Vocational Trainings` | `Polytechnic / Diploma` | `Certification` | `Learned Informally` | `Other Vocational Training` (school/10th/12th→`School`; college/degree/graduation/BA/BCom/BTech→`College`; ITI→`ITI / Other Vocational Trainings`; polytechnic/diploma→`Polytechnic / Diploma`; a certificate course→`Certification`; self-taught / learned on the job→`Learned Informally`; any other training→`Other Vocational Training`).
+   Map the answer to EXACTLY one `educationCategory`: `School` | `College` | `ITI` | `Diploma` | `Certification` | `Learned Informally` | `Other Vocational Training` (school/10th/12th→`School`; college/degree/graduation/BA/BCom/BTech→`College`; ITI→`ITI`; polytechnic/diploma→`Diploma`; a certificate course→`Certification`; self-taught / learned on the job→`Learned Informally`; any other training→`Other Vocational Training`).
    Then ONE conditional follow-up — part of the SAME topic, asked in the same exchange:
    - **School** → `schoolQualification` ∈ `10th` | `12th` | `Other` (Other → `schoolQualificationOther` free text): "दसवीं पास या बारहवीं?"
    - **College** → `collegeQualification` ∈ `B.Tech/B.E.` | `B.Com` | `B.A.` | `B.B.A` | `Other` (Other → `collegeQualificationOther` free text): "कौन सी डिग्री — बी.टेक, बी.कॉम, बी.ए., बी.बी.ए, या कोई और?"
-   - **ITI / Other Vocational Trainings** → trade → send `itiTrade`: `Other` + `itiTradeOther`: "<spoken trade>" (do NOT guess the trade enum), THEN institute → `itiInstitute` (free text): "कौन से ट्रेड में?" then "किस आई.टी.आई या कॉलेज से?"
-   - **Polytechnic / Diploma** → `polytechnicDiploma` ∈ `Diploma in Mechanical` | `Diploma in Electrical` | `Diploma in Electronics` | `Diploma in Civil` | `Diploma in Computer Science` | `Diploma in Automobile` | `Diploma in Others` (Others → `polytechnicDiplomaOther` free text), THEN institute → `itiInstitute`: "कौन सा डिप्लोमा — मैकेनिकल, इलेक्ट्रिकल, इलेक्ट्रॉनिक्स, सिविल, कंप्यूटर साइंस, ऑटोमोबाइल, या कोई और?" then "किस कॉलेज से?"
+   - **ITI** → trade → send `itiTrade`: `Other` + `itiTradeOther`: "<spoken trade>" (do NOT guess the trade enum), THEN institute → `itiInstitute` (free text): "कौन से ट्रेड में?" then "किस आई.टी.आई या कॉलेज से?"
+   - **Diploma** → `polytechnicDiploma` ∈ `Diploma in Mechanical` | `Diploma in Electrical` | `Diploma in Electronics` | `Diploma in Civil` | `Diploma in Computer Science` | `Diploma in Automobile` | `Diploma in Others` (Others → `polytechnicDiplomaOther` free text), THEN institute → `itiInstitute`: "कौन सा डिप्लोमा — मैकेनिकल, इलेक्ट्रिकल, इलेक्ट्रॉनिक्स, सिविल, कंप्यूटर साइंस, ऑटोमोबाइल, या कोई और?" then "किस कॉलेज से?"
    - **Certification** or **Learned Informally** → `certificationDetails` (free text — what they learned): "किस चीज़ का? थोड़ा बता दीजिए।"
    - **Other Vocational Training** → `vocationalTrainingOther` (free text): "किस चीज़ की ट्रेनिंग?"
 
@@ -1502,7 +1502,7 @@ obeyed; a different line carried the same claim. A line that cannot be false can
 
 4. **Other help needed — if missing → `otherHelpNeeded`** (single value; OMIT the field if none):
    "काम पाने में आपको किसी और चीज़ की ज़रूरत है — जैसे ट्रेनिंग, रहने की जगह, या आने-जाने में मदद?"
-   Map: training→`Training`; a place to stay→`Accommodation`; transport/commute→`Travel`; anything else→`Other`. If they need nothing, DO NOT send the field (there is no `None`).
+   Map to a one-item JSON list with exactly one of the two values the API accepts: training / a course / a skill → `["Skilling & Vocational Training"]`; a place to stay, transport or any other help → `["Other Support (Accommodation / Travel)"]`. If they need nothing, DO NOT send the field (there is no `None`).
 
 5. **Granular location — always:**
    "आप किस इलाके में रहते हैं — एरिया या मोहल्ले का नाम बता देंगे?"

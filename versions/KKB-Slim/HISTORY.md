@@ -38,3 +38,11 @@
 - **2026-10-12_084345** — `pre-deploy-kkb-kn-signals-slim-2026-10-12_084345` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(3 files)_
 - **2026-10-12_094741** — `pre-pin-loop-fix` — PIN loop: guard re-evaluated ${location} after caller answered _(3 files)_
 - **2026-10-12_094748** — `pre-deploy-kkb-kn-signals-slim-2026-10-12_094747` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(3 files)_
+- **2026-10-13_122046** — `pre-oct13-tracker` — before Oct 13 tracker fixes _(3 files)_
+- **2026-10-13_124605** — `pre-deploy-kkb-kn-signals-slim-2026-10-13_124605` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(3 files)_
+- **2026-10-13_132019** — `pre-oct13-age-first` — before age-before-consent _(3 files)_
+- **2026-10-13_132031** — `pre-deploy-kkb-kn-signals-slim-2026-10-13_132031` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(3 files)_
+- **2026-10-13_133617** — `pre-deploy-kkb-kn-signals-slim-2026-10-13_133617` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(3 files)_
+- **2026-10-13_133954** — `pre-deploy-kkb-kn-signals-slim-2026-10-13_133954` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(3 files)_
+- **2026-10-13_134450** — `pre-deploy-kkb-kn-signals-slim-2026-10-13_134450` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(3 files)_
+- **2026-10-13_135341** — `pre-deploy-kkb-kn-signals-slim-2026-10-13_135341` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(3 files)_

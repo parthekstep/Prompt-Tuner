@@ -10,6 +10,13 @@ Every prompt edit to Maya is logged here. Maya is Hindi-only (KKB spinoff). Entr
 - **Ported from:** <source agent> (only for cross-agent ports)
 ```
 
+## 2026-10-13 - Tracker r114, r123, r142, r143: rejected education value, invented age, grammar, double opening
+- **Feedback/bug:** tracker rows dated 12/10, grounded in 68 Maya Signals campaign calls (Oct 6/8).
+- **Change (Maya Hindi Signals and Maya Inbound Signals):** education labels `ITI` / `Diploma`; `otherHelpNeeded` mapped to the two API values (`9a425a9f` was rejected for `["Training"]`); age only as said or stored, never an example value (`7cacd94e` sent 25 and a made-up `profile_id`); consent question said once at the end. Signals only: opening grammar "हम ... कर रही हूँ" fixed (45/45 calls) and "की स्टूडेंट" -> "के स्टूडेंट"; the audio-check reply no longer triggers `get_profile` in the greeting turn (8/8 double openings); `get_profile` tool description repeats the rule (raya/toolspecs/desc/maya-get_profile-after-greeting.txt).
+- **Tried and REVERTED the same day:** saving a new caller's consent at once with `record_consent_new` (the KKB Slim fix). On Maya it was 0 of 4: the age was invented three times (`4d92db17` 22, `462a2c2c` 20, `b02805da` 22, never asked) and once asked but the save never sent (`4e31d584`). Writing invented ages into consent records is worse than the old behaviour, so the prompt port and the tool were removed; consent is again written by `create_profile` at apply (snapshot `pre-consent-port-revert` keeps the attempt). Open: Maya consent is still lost when a new caller hangs up before applying.
+- **Verified:** no double opening and the corrected grammar on `4e31d584`, `b02805da` (after the trigger fix); double opening still seen once on `462a2c2c` before the tool-description change. Education value, age guard on `create_profile`: DEPLOYED, NOT VERIFIED (the tester went silent before every apply).
+- **Files:** `Maya/Maya Hindi Signals.md`, `Maya/Maya Inbound Signals.md`. Snapshot `pre-oct13-tracker`.
+
 ## 2026-10-12 - MPL competition removed from all Ghaziabad Maya bots
 - **Feedback/bug:** Aryan (email, 2026-10-12): "Remove MPL completely from the GZB bots next week onwards." Real calls showed Maya inbound pitching MPL on 5/25 calls, sometimes before the job flow was done.
 - **Change:** the MPL Competition section, its offer lines, its routing and every reference removed from all four Maya conversation prompts; output fields 18 `mpl_registration` and 19 `mpl_presented` removed; MPL references removed from the memory prompt. Live output/memory patched per agent in place (the Signals output carries an extra `profile_save_consent` field the repo file does not).

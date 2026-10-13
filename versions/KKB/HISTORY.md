@@ -781,3 +781,14 @@
 - **2026-10-12_081819** — `pre-deploy-kkb-hi-signals-slim-2026-10-12_081819` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Hindi Signals.md _(10 files)_
 - **2026-10-12_084344** — `pre-deploy-kkb-hi-signals-slim-2026-10-12_084344` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Hindi Signals.md _(10 files)_
 - **2026-10-12_094747** — `pre-deploy-kkb-hi-signals-slim-2026-10-12_094747` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Hindi Signals.md _(10 files)_
+- **2026-10-13_122101** — `pre-oct13-edu-labels` — before education label fix _(10 files)_
+- **2026-10-13_124219** — `pre-deploy-kkb-hi-signals-2026-10-13_124219` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
+- **2026-10-13_124223** — `pre-deploy-kkb-kn-signals-2026-10-13_124223` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada Signals.md _(10 files)_
+- **2026-10-13_124226** — `pre-deploy-kkb-hi-in-signals-2026-10-13_124226` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Signals.md _(10 files)_
+- **2026-10-13_124233** — `pre-deploy-kkb-kn-in-signals-2026-10-13_124233` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada Signals.md _(10 files)_
+- **2026-10-13_124602** — `pre-deploy-kkb-hi-signals-slim-2026-10-13_124602` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Hindi Signals.md _(10 files)_
+- **2026-10-13_132028** — `pre-deploy-kkb-hi-signals-slim-2026-10-13_132028` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Hindi Signals.md _(10 files)_
+- **2026-10-13_133614** — `pre-deploy-kkb-hi-signals-slim-2026-10-13_133614` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Hindi Signals.md _(10 files)_
+- **2026-10-13_133951** — `pre-deploy-kkb-hi-signals-slim-2026-10-13_133951` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Hindi Signals.md _(10 files)_
+- **2026-10-13_134447** — `pre-deploy-kkb-hi-signals-slim-2026-10-13_134447` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Hindi Signals.md _(10 files)_
+- **2026-10-13_135338** — `pre-deploy-kkb-hi-signals-slim-2026-10-13_135338` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Hindi Signals.md _(10 files)_

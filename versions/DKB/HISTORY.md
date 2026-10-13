@@ -101,3 +101,6 @@
 - **2026-09-09_060515** — `pre-deploy-dkb-kn-signals-2026-09-09_060515` — auto snapshot before Raya deploy of DKB/DKB Kannada Signals.md _(8 files)_
 - **2026-09-09_060516** — `pre-deploy-dkb-hi-out-2026-09-09_060516` — auto snapshot before Raya deploy of DKB/DKB Hindi.md _(8 files)_
 - **2026-09-09_060518** — `pre-deploy-dkb-kn-out-2026-09-09_060518` — auto snapshot before Raya deploy of DKB/DKB Kannada.md _(8 files)_
+- **2026-10-13_122653** — `pre-oct13-tracker` — before r130/r131/r133 _(8 files)_
+- **2026-10-13_124205** — `pre-deploy-dkb-hi-signals-2026-10-13_124205` — auto snapshot before Raya deploy of DKB/DKB Hindi Signals.md _(8 files)_
+- **2026-10-13_124208** — `pre-deploy-dkb-kn-signals-2026-10-13_124208` — auto snapshot before Raya deploy of DKB/DKB Kannada Signals.md _(8 files)_

@@ -231,6 +231,47 @@
     "maya-hi-signals",
     "maya-hi-in-signals"
    ]
+  },
+  {
+   "id": "kkb-slim-6a-region-list",
+   "bot": "KKB-Slim",
+   "sync_family": "KKB-Slim · outbound · signals (Hindi/Kannada slim pair)",
+   "targets": [
+    "kkb-hi-signals-slim",
+    "kkb-kn-signals-slim"
+   ],
+   "master_language": "hi",
+   "languages_affected": [
+    "kn"
+   ],
+   "direction": "mirror-only",
+   "scope": [
+    {
+     "section": "6a step 1 region list",
+     "kind": "rule",
+     "what": "The out-of-region drop in step 6a step 1 names each bot's own region. Hindi keeps rows in Uttar Pradesh, Delhi or Haryana and the Ghaziabad, Delhi and Noida area (examples dropped: Kanpur, Bengaluru, Hubballi, Gandhinagar). Kannada serves Hubballi-Dharwad on the Dharwad backend, so it keeps rows in Karnataka and the Hubballi-Dharwad area (examples dropped: Ghaziabad, Delhi, Noida, Kanpur, Gandhinagar).",
+     "contains": [
+      "names a state other than",
+      "Uttar Pradesh, Delhi or Haryana",
+      "Karnataka",
+      "Ghaziabad, Delhi and Noida area",
+      "Hubballi-Dharwad area"
+     ]
+    }
+   ],
+   "why": "Each slim twin runs on a different regional job backend (Hindi: Ghaziabad; Kannada: Dharwad), and jobProviderLocation is now a raw address, so the region filter has to name the region that bot actually serves. Mirroring the Hindi region list verbatim would make the Kannada bot drop every local Hubballi-Dharwad row.",
+   "approved_by": "Parth (bug-fix 2026-10-13, tracker r111)",
+   "approved_on": "2026-10-13",
+   "changelog_ref": "KKB-Slim/CHANGELOG.md, 2026-10-13 GZB review / tracker r111 entry",
+   "still_must_match": "The structure of the step 6a step 1 'Also drop' rule (drop by state, drop by city outside the area, the order of the three drops), the already-applied drop (role + company in `jobs_applied` or applied earlier this call) and the test/placeholder company drop, all verbatim. Everything else in the slim pair is audited normally.",
+   "not_applied_to": [
+    "kkb-hi-signals",
+    "kkb-kn-signals",
+    "kkb-hi-in-signals",
+    "kkb-kn-in-signals",
+    "maya-hi-signals",
+    "maya-hi-in-signals"
+   ]
   }
  ]
 }

@@ -55,6 +55,13 @@ If a value is not present, use "NA" for strings, [] for arrays, or 0 for counts.
     "Hung up mid-call", "Already employed", "Frustrated with repeated apply failures". 
     NA if the call completed normally.
 
+12a. call_later_request: Did the CALLER ask to be called back later ("बाद में कॉल करना", "अभी busy हूँ",
+    "ನಂತರ ಕಾಲ್ ಮಾಡಿ")? "Yes: <the time they named, in English, or 'no time given'>" or "NA".
+    Only the caller's own request counts; a bot promise is never a call-later request.
+    The value is TEXT in exactly one of these shapes: "Yes: evening", "Yes: tomorrow morning",
+    "Yes: no time given", or "NA". Never a date, a clock time you did not hear, or a timestamp: the
+    call's own time is not the callback time.
+
 13. final_summary — A 2-3 sentence factual summary of the call in English. 
     Cover: (1) whether the seeker was interested in jobs, (2) what role/location/
     salary they discussed, (3) whether they applied or tried to apply. 
@@ -318,6 +325,7 @@ to_number / out_did. Any inbound-vs-outbound metric is computed there, not here.
   "job_no_match": "No",
   "asked_job_location": "No",
   "drop_reason": "NA",
+  "call_later_request": "NA",
   "final_summary": "Seeker was actively looking for work and engaged in a detailed conversation about three roles. Successfully applied to Electrician and Machine Operator positions but the third application (Solar Energy Consultant) failed due to a profile not found error."
 }
 

@@ -15,11 +15,11 @@
   "properties": {
    "name": {
     "type": "string",
-    "description": "The caller's name as already stored on the profile (the API requires it on every write). English / Latin script."
+    "description": "The caller's name: a usable ${contact_name}, or the name they said aloud this call. English / Latin script."
    },
    "age": {
     "type": "integer",
-    "description": "The caller's age as already stored on the profile (the API requires it on every write). Send as a NUMBER, not a string."
+    "description": "The age in years the caller SAID ALOUD this call in answer to the age question. Send as a NUMBER, not a string. Never an estimate, never an example value, never guessed: if they have not said it, ask and wait, and do not call this tool."
    },
    "phone": {
     "type": "string",

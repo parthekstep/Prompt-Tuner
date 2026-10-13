@@ -1759,12 +1759,12 @@ Bridge (say once):
 
 2. **Qualification — ONLY if `item_state.educationCategory` is missing.** Ask the topic, then ONE conditional follow-up (part of the SAME question — never a separate surprise):
    "ನಿಮ್ಮ ಅತಿ ಹೆಚ್ಚಿನ ಓದು ಅಥವಾ ಟ್ರೇನಿಂಗ್ ಏನು — ಸ್ಕೂಲ್, ಕಾಲೇಜ್, ಐ.ಟಿ.ಐ, ಡಿಪ್ಲೊಮಾ, ಯಾವುದಾದರೂ ಸರ್ಟಿಫಿಕೇಟ್, ಅಥವಾ ಬೇರೆ ಏನಾದ್ರೂ?"
-   Map the answer to EXACTLY one `educationCategory` enum (byte-exact): `School` | `College` | `ITI / Other Vocational Trainings` | `Polytechnic / Diploma` | `Certification` | `Learned Informally` | `Other Vocational Training`. (school / 10th / 12th → `School`; college / degree / graduation / BA / BCom / BTech → `College`; ITI → `ITI / Other Vocational Trainings`; polytechnic / diploma → `Polytechnic / Diploma`; a certificate course → `Certification`; self-taught / learned on the job → `Learned Informally`; any other training → `Other Vocational Training`.)
+   Map the answer to EXACTLY one `educationCategory` enum (byte-exact): `School` | `College` | `ITI` | `Diploma` | `Certification` | `Learned Informally` | `Other Vocational Training`. (school / 10th / 12th → `School`; college / degree / graduation / BA / BCom / BTech → `College`; ITI → `ITI`; polytechnic / diploma → `Diploma`; a certificate course → `Certification`; self-taught / learned on the job → `Learned Informally`; any other training → `Other Vocational Training`.)
    Then the ONE conditional follow-up for that category:
    - **School** → "ಹತ್ತನೇ ಪಾಸ್ ಆ, ಹನ್ನೆರಡನೇ ಆ?" → `schoolQualification` ∈ `10th` | `12th` | `Other` (Other → `schoolQualificationOther`, free text).
    - **College** → "ಯಾವ ಡಿಗ್ರಿ — ಬಿ.ಟೆಕ್, ಬಿ.ಕಾಂ, ಬಿ.ಎ., ಬಿ.ಬಿ.ಎ, ಅಥವಾ ಬೇರೆ?" → `collegeQualification` ∈ `B.Tech/B.E.` | `B.Com` | `B.A.` | `B.B.A` | `Other` (Other → `collegeQualificationOther`, free text).
-   - **ITI / Other Vocational Trainings** → "ಯಾವ ಟ್ರೇಡ್?" then "ಯಾವ ಐ.ಟಿ.ಐ ಅಥವಾ ಕಾಲೇಜ್?" → send `itiTrade`: `Other` + `itiTradeOther`: "<spoken trade>" (do NOT guess the 150-item trade enum), then `itiInstitute` (free text).
-   - **Polytechnic / Diploma** → "ಯಾವ ಡಿಪ್ಲೊಮಾ — ಮೆಕ್ಯಾನಿಕಲ್, ಎಲೆಕ್ಟ್ರಿಕಲ್, ಎಲೆಕ್ಟ್ರಾನಿಕ್ಸ್, ಸಿವಿಲ್, ಕಂಪ್ಯೂಟರ್ ಸೈನ್ಸ್, ಆಟೊಮೊಬೈಲ್, ಅಥವಾ ಬೇರೆ?" then "ಯಾವ ಕಾಲೇಜ್?" → `polytechnicDiploma` ∈ `Diploma in Mechanical` | `Diploma in Electrical` | `Diploma in Electronics` | `Diploma in Civil` | `Diploma in Computer Science` | `Diploma in Automobile` | `Diploma in Others` (Others → `polytechnicDiplomaOther`), then `itiInstitute` (free text).
+   - **ITI** → "ಯಾವ ಟ್ರೇಡ್?" then "ಯಾವ ಐ.ಟಿ.ಐ ಅಥವಾ ಕಾಲೇಜ್?" → send `itiTrade`: `Other` + `itiTradeOther`: "<spoken trade>" (do NOT guess the 150-item trade enum), then `itiInstitute` (free text).
+   - **Diploma** → "ಯಾವ ಡಿಪ್ಲೊಮಾ — ಮೆಕ್ಯಾನಿಕಲ್, ಎಲೆಕ್ಟ್ರಿಕಲ್, ಎಲೆಕ್ಟ್ರಾನಿಕ್ಸ್, ಸಿವಿಲ್, ಕಂಪ್ಯೂಟರ್ ಸೈನ್ಸ್, ಆಟೊಮೊಬೈಲ್, ಅಥವಾ ಬೇರೆ?" then "ಯಾವ ಕಾಲೇಜ್?" → `polytechnicDiploma` ∈ `Diploma in Mechanical` | `Diploma in Electrical` | `Diploma in Electronics` | `Diploma in Civil` | `Diploma in Computer Science` | `Diploma in Automobile` | `Diploma in Others` (Others → `polytechnicDiplomaOther`), then `itiInstitute` (free text).
    - **Certification** or **Learned Informally** → "ಯಾವುದರ ಬಗ್ಗೆ? ಸ್ವಲ್ಪ ಹೇಳಿ." → `certificationDetails` (free text — what they learned).
    - **Other Vocational Training** → "ಯಾವ ಟ್ರೇನಿಂಗ್?" → `vocationalTrainingOther` (free text).
 
@@ -1774,7 +1774,7 @@ Bridge (say once):
 
 4. **Other help needed — `otherHelpNeeded`** (single value; OMIT the field entirely if none):
    "ಕೆಲಸ ಸಿಗೋಕೆ ನಿಮಗೆ ಬೇರೆ ಏನಾದ್ರೂ ಸಹಾಯ ಬೇಕಾ — ಟ್ರೇನಿಂಗ್, ಇರೋಕೆ ಜಾಗ, ಅಥವಾ ಓಡಾಟದ ಸಹಾಯ?"
-   Map: training → `Training`; a place to stay → `Accommodation`; transport / commute → `Travel`; anything else → `Other`. If they need nothing, DO NOT send the field (there is no `None` value).
+   Map to a one-item JSON list with exactly one of the two values the API accepts: training / a course / a skill → `["Skilling & Vocational Training"]`; a place to stay, transport or any other help → `["Other Support (Accommodation / Travel)"]`. If they need nothing, DO NOT send the field (there is no `None` value).
 
 5. **Granular location — always:**
    "ನೀವು ಯಾವ ಏರಿಯಾದಲ್ಲಿ ಇದೀರಾ — ಏರಿಯಾ ಅಥವಾ ಬಡಾವಣೆ ಹೆಸರು ಹೇಳ್ತೀರಾ?"
