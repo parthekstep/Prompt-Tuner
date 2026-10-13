@@ -33,6 +33,13 @@ are about. Not a language variant, so `/sync-check` must not treat it as a mirro
 - **Verified (live test calls, test numbers):** consent saved with the spoken age, Hindi `29771cd5`, Kannada `162a489b`; r128 trade jobs offered `29771cd5`; no invented place or PIN `162a489b`, `29771cd5`; r134 no greeting replay `2bfa078e`, `29771cd5`; r138 time asked `4451e954`; r140 no hold on saves `29771cd5`; PIN asked (KI-12) `29771cd5`, `162a489b`.
 - **DEPLOYED, NOT VERIFIED:** r113 education save, r118, r119, r135, r137, r141, r144, KI-02 mid-call, output field `call_later_request` (short calls produced no output record).
 - **New, minor:** since the last Hindi deploys the bot wraps its lines in quote marks (`f063e40c`, `29771cd5`); not yet traced.
+- **Location write-back switched on (r121, approved by Parth 2026-10-13):** `scripts/location_writeback.py` now writes ONE address
+  string, `<landmark>, <area>, <City>, <State> <PIN>, India`, into the profile's single `location` field (agreed on the 13/10 call,
+  since the DPG schema has one field). Backfilled 55 campaign profiles (0 failures); runs every 15 minutes for both KKB Slim
+  bots via launchd (`org.ekstep.location-writeback`, `scripts/location_writeback_cron.sh`, log `raya/location-writeback.log`).
+  Fixed on the way: calls are processed oldest first so a caller's latest answer wins (newest-first let an older call
+  overwrite it; 5 callers re-run), and a refused profile lookup (U18) is skipped instead of crashing. Limit: it runs only
+  while this Mac is on; a missed window is caught up only for calls still in the latest 100.
 - **Analyser:** D111-D115.
 
 ## 2026-10-12 - Aryan's GZB review: consent lost for new callers, irrelevant recommendations, unconfirmed service yeses

@@ -140,11 +140,16 @@ def main():
         lst = raya(f"/api/call?agent_id={a.agent}&limit={a.limit}")
         uuids = [c["uuid"] for c in lst.get("calls") or [] if c.get("outcome") == "Completed"]
 
+    # OLDEST FIRST, so when one caller has several calls the latest location is the one that stays.
+    # (The list API is newest-first; processing it as-is let an older call overwrite a newer address.)
+    todo = []
     for u in uuids:
-        tag = u[:8]
         if u in state["processed"] and a.mode == "apply":
-            print(f"{tag}  skip — already processed"); continue
-        c = raya("/api/call/" + u)
+            print(f"{u[:8]}  skip — already processed"); continue
+        todo.append((u, raya("/api/call/" + u)))
+    todo.sort(key=lambda x: x[1].get("created_at") or "")
+    for u, c in todo:
+        tag = u[:8]
         out = c.get("call_output") or {}
         # READINESS: the output prompt runs AFTER the call and lags. Reading it too early gives nulls,
         # and falling back to the pre-call ${location} then writes where the caller USED to live
