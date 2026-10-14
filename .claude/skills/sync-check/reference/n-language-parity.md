@@ -1,164 +1,192 @@
-# N-language parity — master + N mirrors
+# N-language parity: one master, N mirrors
 
-Mechanics for `/sync-check` when a bot has **more than two** languages. Two languages
-(Hindi ↔ Kannada) is the special case of this, not the model. Nothing here enumerates a language
-list: the language set is always **discovered** from `raya/agents.json`, so taking a bot into an
-eighth language requires no edit to this file or to `SKILL.md`.
+Mechanics for `/sync-check`. Two languages (Hindi and Kannada) is the special case of this, not the
+model. Nothing here lists languages: the language set is always **discovered** from `raya/agents.json`
+(each conversation target's `language` code), so taking a bot into another language needs no edit to
+this file or to `SKILL.md`.
 
-Read together with `../../update-prompt/reference/prompt-anatomy.md` (the AGNOSTIC / SPECIFIC /
-MIXED taxonomy) — every parity decision below depends on those tags.
+Read together with `../../update-prompt/reference/prompt-anatomy.md` (the AGNOSTIC / SPECIFIC / MIXED
+taxonomy): every parity decision below depends on those tags.
 
 ---
 
 ## 1. Resolving the family
 
 ### Sync family
-A **sync family** is the set of files that are *the same bot in different languages*. Key it on
-`(bot, direction, backend/variant)`. Files from different families are **not** each other's
-mirrors and must never be diffed against each other — e.g. `KKB Placeholder Kannada.md` (legacy
-Dhiway) is not a mirror of `KKB Placeholder Hindi Signals.md` (Signals DPG), and an outbound
-prompt is not a mirror of an inbound one.
+A **sync family** is the set of files that are *the same bot in different languages*: one bot folder,
+one direction, one backend (Signals or legacy). Files from different families are **not** mirrors of
+each other and are never diffed against each other: `KKB Placeholder Kannada.md` (legacy) is not a
+mirror of `KKB Placeholder Hindi Signals.md` (Signals); an outbound prompt is not a mirror of an
+inbound one; a `<Bot>-Slim/` A/B twin is its own family, never a mirror of the production prompt.
 
-Print every family and its languages straight from the manifest:
+Print every family, its languages and its master straight from the manifests:
 
 ```bash
 cd "/Users/parthbansal/EkStep/Prompt Tuner"
-python3 -c "
+python3 - <<'PY'
 import json, collections
-targets = json.load(open('raya/agents.json'))['targets']
-fam = collections.defaultdict(dict)
+targets = json.load(open("raya/agents.json"))["targets"]
+try:
+    fleet = {b["file"]: b.get("master_language") for b in json.load(open("raya/regression/fleet.json"))["bots"]}
+except Exception:
+    fleet = {}
+fam = collections.defaultdict(list)
 for t in targets:
-    if t.get('kind') != 'conversation':      # memory/output prompts have no language twin
+    if t.get("kind") != "conversation":          # memory/output prompts have no language twin
         continue
-    variant = 'signals' if (t.get('signals') or 'Signals' in t['file']) else 'legacy'
-    fam[(t['agent'], t['direction'], variant)][t['language']] = (t['id'], t['file'])
+    folder = t["file"].split("/")[0]             # the bot folder, as the daily suite groups them
+    backend = "signals" if (t.get("signals") or "signals" in t["file"].lower()) else "legacy"
+    fam[(folder, t.get("direction", "?"), backend)].append(t)
 for key in sorted(fam):
-    langs = fam[key]
-    print(f\"{key[0]} · {key[1]} · {key[2]}  ({len(langs)} lang)\")
-    for lang in sorted(langs):
-        tid, f = langs[lang]
-        print(f'    {lang:4} {tid:22} {f}')
-"
+    ts = fam[key]
+    langs = collections.Counter(t.get("language") for t in ts)
+    marked = [t["language"] for t in ts if t.get("master")]
+    master = marked[0] if marked else fleet.get(ts[0]["file"]) or "?"
+    print(f"{' · '.join(key)}  ({len(langs)} lang, master {master}{'' if marked else ' (derived)'})")
+    for t in sorted(ts, key=lambda t: t.get("language") or ""):
+        print(f"    {t.get('language') or '??':4} {t['id']:22} {t['file']}")
+    for lang, n in langs.items():
+        if n > 1:
+            print(f"    !! {n} targets claim language {lang} in one family: fix raya/agents.json before auditing")
+    if len({t.get('agent') for t in ts}) > 1:
+        print(f"    !! targets disagree on 'agent': {sorted({t.get('agent') for t in ts})}")
+PY
 ```
 
-A family with **one** language has nothing to mirror → report and stop.
+It groups by the **bot folder**, not the `agent` field, because the `agent` field is not reliable
+(as of 2026-10-14 `kkb-hi-signals-slim` says `KKB` while its Kannada twin says `KKB-Slim`; grouping by
+`agent` silently paired the slim Hindi file with the production Kannada file and dropped
+`kkb-hi-signals`). Treat any `!!` line as a manifest bug to report before auditing: an audit of a
+wrongly built family compares the wrong files and still "passes".
+
+A family with **one** language has nothing to mirror: report "single-language, nothing to sync" and
+stop.
 
 ### Master language
-Resolution order — first hit wins:
-1. An explicit `master_language` on the project/family block of the standing-regression
-   **fleet manifest** `raya/regression/fleet.json` (not created yet — see `/register-bot`), or a
-   target flagged `"master": true` in the **deploy manifest** `raya/agents.json`.
-2. The `master_language` recorded on a `raya/divergences.json` entry for that family.
-3. The repo default recorded in the root `CLAUDE.md` sync rule for that bot (today: **Hindi**
-   for KKB / DKB / Maya — "the Hindi file is the source of truth").
-4. For a newly onboarded project with none of the above: **ask the owner**, then get it written
-   into the manifest by `/register-bot`. Do not guess, and do not silently treat whichever file
-   is largest as the master.
+First hit wins:
+1. A target in the family flagged `"master": true` in `raya/agents.json` (a recorded decision).
+2. The `master_language` on a `raya/divergences.json` entry for that family.
+3. `master_language` in `raya/regression/fleet.json`. Note: `scripts/build_fleet_manifest.py`
+   **derives** it (Hindi if the family has Hindi, else the first code alphabetically), so it is a
+   default, not a decision; the printer marks it `(derived)`.
+4. The root `CLAUDE.md` sync rule ("the Hindi file is the source of truth") for the Blue Dots bots.
+5. Otherwise, for a newly onboarded project: **ask the owner**, then have `/register-bot` record it
+   as `"master": true`. Never guess, and never treat the largest file as the master.
 
-The master is the baseline for every comparison. Mirrors are compared **against the master**,
-never against each other — that keeps the work O(N) and stops two mirrors from ratifying a shared
-mistake.
+If 1 and 3 disagree, say so in the report: the daily suite resolves the master its own way (Hindi
+first) and will audit the wrong direction for that family.
+
+The master is the baseline for every comparison. Mirrors are compared **against the master**, never
+against each other: that keeps the work O(N) and stops two mirrors from ratifying a shared mistake.
 
 ---
 
 ## 2. What must match, what must differ
 
-This is the false-positive firewall. With 2 languages a spurious flag is noise; with 8 it drowns
-the signal, and the reader stops reading the audit.
+This is the false-positive firewall. With two languages a spurious flag is noise; with eight it drowns
+the signal and the reader stops reading the audit.
 
 | Content | Across languages | Flag when it differs? |
 |---|---|---|
-| **AGNOSTIC** — call flow, phase/step structure, conditions and routing, input-variable names, tool names, JSON payloads and field names, fixed params, enum literals, prohibited-behavior rules, dignity/safety checks, section skeleton | byte-identical | **YES — this is drift** |
-| **MIXED — the rule half** — the English instruction wrapping a spoken line | byte-identical | **YES — this is drift** |
-| **MIXED — the spoken half** — the quoted line inside the rule | adapted per language | **NO** |
-| **SPECIFIC** — spoken lines, greetings, example dialogues, TTS number/money/time word spellings, script rules, tone markers, culturally-adapted banned phrases, place and person names | different by design | **NO — never flag merely for differing** |
+| **AGNOSTIC**: call flow, step structure, conditions and routing, input-variable names, tool names, JSON payloads and field names, fixed params, enum literals, prohibited-behaviour rules, safety and dignity checks, section skeleton | byte-identical | **YES: drift** |
+| **MIXED, the rule half**: the English instruction wrapping a spoken line | byte-identical | **YES: drift** |
+| **MIXED, the spoken half**: the quoted line inside the rule | re-authored per language | **NO** |
+| **SPECIFIC**: spoken lines, greetings, examples, number/money/time words, script rules, everyday-word table, gender rule, insulting-word list, tone markers, adapted banned phrases, place and person names | different by design | **NO, never for merely differing** |
 
 **Never flag a mirror because:**
-- its spoken lines are in a different script or idiom (that is the entire point);
-- its numbers/money/times are spelled as words differently (`ಹದಿನೆಂಟು ಸಾವಿರ` vs `अठारह हज़ार`);
-- its example dialogue uses different place/person names (Bengaluru/Mysuru vs Pune/Ghaziabad);
-- its banned-phrase list is culturally adapted;
-- a section is longer or shorter, or has different line wrapping;
-- **the file has more or fewer heading lines** — count parity is not content parity.
+- its spoken lines are in a different script or idiom (that is the point);
+- its numbers are spelled as different words (`ಹದಿನೆಂಟು ಸಾವಿರ` vs `अठारह हज़ार`);
+- its examples use different place or person names;
+- its banned-phrase list, gender rule or everyday-word table is its own;
+- a section is longer or shorter, or wraps differently;
+- **the file has more or fewer heading lines**: count parity is not content parity.
 
 **Always flag when:**
-- a heading exists in the master and not in the mirror (or vice versa);
-- an AGNOSTIC rule, condition, gate, or ordering exists on one side only;
-- a `${variable}`, tool name, payload field, fixed param or enum literal appears on one side only;
-- a variable/tool/payload name has been **translated or transliterated** in a mirror (always a
-  bug, never a legitimate localization);
-- rule/instruction prose in any file is written in the target language instead of English
-  (a bug in its own right — report it, do not propagate it);
-- the memory-injection block is present but its heading or lead line has been translated or
-  otherwise altered — the block is verbatim English in **every** language (see Pass 4);
-- a required spoken element the master added has **no counterpart at all** in the mirror
-  (a new fallback line, a new TTS category, an example for a newly added branch) — this is a
-  **spoken-content gap**, reported separately from AGNOSTIC drift because the fix is a
-  translation, not a copy.
+- a heading exists on one side only, or the order differs;
+- an AGNOSTIC rule, condition, gate or ordering exists on one side only;
+- a `${variable}`, tool name, payload field, fixed param or enum literal appears on one side only, or
+  has been translated or transliterated (always a bug, never a localisation);
+- rule prose is written in the target language instead of English (a bug of its own: report it, do not
+  propagate it);
+- an English rule in the mirror still tells the bot to speak the master's language (D117);
+- the memory-injection block is missing or altered in any language (Pass 4);
+- a required spoken element the master has (a fallback line, a TTS category, an example for a new
+  branch) has **no counterpart** in the mirror: a **spoken-content gap**, reported separately because
+  the fix is re-authoring, not copying.
 
 ---
 
 ## 3. The five comparison passes
 
-Run all five for each mirror, master-vs-mirror. Passes 1 and 3 are mechanical and cheap — do them
-first; they localize the reading you have to do in passes 2, 4, 5.
+Run all five for each mirror, master against mirror. Passes 1, 3 and 4 are mechanical: do them first;
+they tell you where to read in passes 2 and 5.
 
-### Pass 1 — skeleton (heading sets)
+**Start with the mechanical rows of `language_checks.py`** (one command covers parts of passes 3 and
+4 and the D117 check):
+
 ```bash
-M="KKB/KKB Placeholder Hindi Signals.md"        # master
-X="KKB/KKB Placeholder Kannada Signals.md"     # mirror
-diff <(grep -oE '^#{1,3} .*' "$M") <(grep -oE '^#{1,3} .*' "$X")
+python3 scripts/language_checks.py "$M" "$X" --lang <mirror-iso> --src <master-iso>
 ```
-Headings are English in every language file, so this diff is meaningful across scripts. Lines
-only in the master = **missing sections in the mirror**. Lines only in the mirror = mirror-only
-content (either drift the other way, or a registered divergence). Reordering matters too — the
-step/phase order is AGNOSTIC.
 
-**One expected false positive:** a heading that *names its own script or language* differs by
-design — e.g. the real KKB Signals pair differs only at
-`## English-origin words are allowed only in Devanagari transliteration` vs
-`## … only in Kannada transliteration`. Same section, same rule, correctly localized noun. Match
-headings by **intent**, not string equality, and never "reconcile" a script name.
+| Its row | Use in this audit |
+|---|---|
+| Payload fields untranslated | Pass 3: variables, backticked code values, JSON keys, payload blocks. FAIL = drift or a localised token |
+| Instructions name this language | D117: a copied rule still naming the master language. FAIL = drift |
+| Hangup token | `Goodbye` count differs: a closing branch is missing on one side |
+| Spoken lines all present | FAIL = spoken-content gap (lines dropped) |
+| Structure | coarse (heading **count** and the `${contact_memory}` token only): Pass 1 and Pass 4 below are authoritative |
+| All snippets translated, Questions, Digits, Substitution table, Insulting words, Gender rules, Terms | **language quality, not drift.** Report them as a count with a pointer; older pairs that predate these checks (Oct 2026) fail some by design. Route fixes to `/update-prompt` |
 
-Note that pass 1 will **not** surface a divergence that lives in section *bodies* (the
-2026-08-04 ಮಾಯಾ/Maya persona + opening-line + intro-turn-rule divergence changes no headings).
-The registry is therefore consulted at the section-body level, in passes 2–3.
+It exits 1 on any FAIL, including the quality rows, so read the rows; do not treat the exit code as a
+sync verdict. It truncates each list to four items: use the greps below for the full sets.
 
-### Pass 2 — taxonomy walk (section by section)
-For each heading present on both sides, look up its tag in `prompt-anatomy.md` and apply the
-table in § 2. For MIXED sections, read only the English rule prose and compare that; ignore the
-quoted spoken text. Record per section: tag, status, which side is ahead, what the laggard is
-missing.
+### Pass 1: skeleton (heading sets and order)
+```bash
+M="<master file>"; X="<mirror file>"
+diff <(grep -E '^#{1,4} ' "$M") <(grep -E '^#{1,4} ' "$X")
+```
+Headings are English in every language file, so this diff is meaningful across scripts. Lines only in
+the master = **sections missing from the mirror**; lines only in the mirror = mirror-only content
+(drift the other way, or a registered divergence). Order matters: step order is AGNOSTIC.
 
-### Pass 3 — token census (the N-language workhorse)
-Every machine-readable token must be identical across all languages. This pass finds most real
-drift without reading prose, and is the one to script.
+**One expected false positive:** a heading that names its own script or language differs by design
+(`## English-origin words are allowed only in Devanagari transliteration` vs `... only in Kannada
+transliteration`). Match headings by intent, and never "reconcile" a script name.
+
+Pass 1 does **not** surface a divergence that lives in section bodies (the registered ಮಾಯಾ / Maya
+persona divergence changes no headings), so the registry is consulted at section-body level in
+passes 2 and 3.
+
+### Pass 2: taxonomy walk (section by section)
+For each heading on both sides, look up its tag in `prompt-anatomy.md` and apply § 2. For MIXED
+sections compare only the English rule prose; ignore the quoted spoken text. Record per section: tag,
+status, which side is ahead, what the laggard is missing.
+
+### Pass 3: token census
+Every machine-readable token must be identical in every language. This pass finds most real drift
+without reading prose.
 
 ```bash
-# input variables
-diff <(grep -oE '\$\{[A-Za-z0-9_]+\}' "$M" | sort -u) \
-     <(grep -oE '\$\{[A-Za-z0-9_]+\}' "$X" | sort -u)
+# input variables (broad form: camelCase names such as ${phoneNumber} exist)
+diff <(grep -oE '\$\{[A-Za-z0-9_]+\}' "$M" | sort -u) <(grep -oE '\$\{[A-Za-z0-9_]+\}' "$X" | sort -u)
 
-# tool names + payload field names + fixed params (repo convention: backticked snake_case)
-diff <(grep -oE '`[a-z][a-z0-9_.]{2,}`' "$M" | sort -u) \
-     <(grep -oE '`[a-z][a-z0-9_.]{2,}`' "$X" | sort -u)
+# backticked tool names, field names, fixed params, enums (snake, camel, SCREAMING, dotted)
+diff <(grep -oE '`[A-Za-z_][A-Za-z0-9_.]{1,60}`' "$M" | sort -u) \
+     <(grep -oE '`[A-Za-z_][A-Za-z0-9_.]{1,60}`' "$X" | sort -u)
 
-# enum / fixed-value literals inside tool sections (exact English strings the backend requires)
+# quoted English enum / fixed-value literals (noisy: read it scoped to tool and payload sections)
 diff <(grep -oE '"[A-Za-z][A-Za-z0-9 ./&+-]{2,40}"' "$M" | sort -u) \
      <(grep -oE '"[A-Za-z][A-Za-z0-9 ./&+-]{2,40}"' "$X" | sort -u)
 ```
-Interpretation: any token on one side only is drift **or** a localization bug. The third command
-is the noisiest (English words appear inside prose) — read its output scoped to the tool/payload
-sections, and treat a missing backend enum (`"ITI / Other Vocational Trainings"`,
-`"Polytechnic / Diploma"`, `"3-5 Years"`) as critical, since an inexact enum makes the write fail.
+A token on one side only is drift **or** a localisation bug. A Title-case backticked token is usually a
+place or person name (localised on purpose) and an 8-hex token a call id cited in a note: ignore those.
+A missing backend enum (`"ITI / Other Vocational Trainings"`, `"3-5 Years"`) is critical: an inexact
+enum makes the write fail.
 
-### Pass 4 — standing-rule presence
-Confirm every repo-wide mandatory block is present in **each** language, not just the master —
-most importantly the memory-injection block, which must appear verbatim in every conversation
-prompt of a memory-enabled bot. Check **all three lines as one exact string** — grepping only for
-`{${contact_memory}}` passes a mirror whose `### Contact context` heading or `Here is the caller
-context:` lead line was translated or reworded, which is exactly the failure the rule exists to
-prevent (bug E3):
+### Pass 4: standing-rule presence
+Confirm every repo-wide mandatory block is in **each** language. The memory-injection block must be the
+**exact three lines** (bug E3); checking only `{${contact_memory}}` passes a mirror whose heading or
+lead line was translated:
 ```bash
 python3 - "<file1>" "<file2>" ... <<'PY'
 import io, sys
@@ -171,113 +199,110 @@ for p in sys.argv[1:]:
     print("%-58s memory-block: %s" % (p, state))
 PY
 ```
-`PRESENT BUT ALTERED` and `MISSING` are both bugs, and both are fixed by restoring the exact
-three-line English block — never by translating it to match the mirror.
+`PRESENT BUT ALTERED` and `MISSING` are both bugs, fixed by restoring the exact English block, never by
+translating it. Same treatment for any section the bot's use case requires per
+`../../prompt-analyser/reference/section-checklists.md` (safety interrupt, graceful exit, consent
+gate).
 
-Same treatment for any section the bot's use case requires per
-`../../prompt-analyser/reference/section-checklists.md` (Graceful Exit, consent gate, …).
-
-### Pass 5 — changelog corroboration
-Read `<Bot>/CHANGELOG.md` newest-first. For each entry, check which language files actually
-carry its content. An entry whose change is present in the master and 3 of 7 mirrors names the
-exact languages that were never updated — and gives you the date the drift started. An entry that
-**declares** a divergence with no matching `raya/divergences.json` record is a registry gap.
+### Pass 5: changelog corroboration
+Read `<Bot>/CHANGELOG.md` newest first. For each entry, check which language files carry its content.
+An entry present in the master and 3 of 7 mirrors names the languages that were never updated, and
+the date the drift started. An entry that **declares** a divergence with no `raya/divergences.json`
+record is a registry gap.
 
 ---
 
 ## 4. Report shape
 
-With N languages a prose diff does not scale — lead with the matrix so a reader sees at a glance
-which of 8 languages is behind, then give detail only for the rows that are not clean.
+With N languages a prose diff does not scale: lead with the matrix, then detail only for rows that are
+not clean. The verdict words below are labels for the record and for `/update-prompt`; to a person,
+say the same thing in plain words first (SKILL.md → step 8).
 
 ### Headline (one line)
 ```
-KKB · outbound · signals — master hi · 8 languages: 5 CURRENT, 2 LAGS, 1 UNCERTAIN · 3 differences suppressed as registered divergences
+KKB · outbound · signals: master hi · 8 languages: 5 CURRENT, 2 LAGS, 1 UNCERTAIN · 3 differences matched registered divergences
 ```
 
-### Table 1 — per-language status (one row per mirror; the master is the baseline)
+### Table 1: per-language status (one row per mirror; the master is the baseline)
 
 | Language | In sync? | Missing AGNOSTIC content | Spoken-content gaps | Registered divergences | Verdict |
 |---|---|---|---|---|---|
-| kn (`kkb-kn-signals`) | ✗ | Step 3.5 conditional-qualification block; `otherHelpNeeded` payload field | — | 1 (`kkb-kn-signals-maya-name`) | **LAGS (2)** |
-| te (`kkb-te-signals`) | ✓ | — | TTS number-words missing for lakh/crore | 0 | **CURRENT (spoken gap)** |
-| ta (`kkb-ta-signals`) | ✓ | — | — | 0 | **CURRENT** |
-| mr (`kkb-mr-signals`) | ? | intro-turn rule differs — deliberate or drift? | — | 0 | **UNCERTAIN** |
-| bn (—) | — | file not created | — | 0 | **MISSING** |
+| kn (`kkb-kn-signals`) | ✗ | Step 3.5 conditional-qualification block; `otherHelpNeeded` payload field | none | 1 (`kkb-kn-signals-maya-name`) | **LAGS (2)** |
+| te (`kkb-te-signals`) | ✓ | none | TTS number words missing for lakh/crore | 0 | **CURRENT (spoken gap)** |
+| mr (`kkb-mr-signals`) | ? | intro-turn rule differs: deliberate or drift? | none | 0 | **UNCERTAIN** |
+| bn (none) | | file not created | | 0 | **MISSING** |
 
-Verdict vocabulary (use these words exactly, so the report is greppable):
-- **CURRENT** — no AGNOSTIC drift. Add `(spoken gap)` if a translation is owed.
-- **LAGS (n)** — n AGNOSTIC drift items; the master is ahead. This is the actionable state.
-- **AHEAD** — the mirror carries AGNOSTIC content the master lacks. Escalate to the master
-  first via `/update-prompt`, then fan out; never mirror-to-mirror.
-- **DIVERGED (registered)** — the only differences found are covered by the registry. Not drift.
-- **UNCERTAIN** — a difference that could be deliberate. Ask; do not guess.
-- **MISSING** — no file for this language yet (a `/translate-prompt` job, not a sync job).
+Verdict vocabulary (use these words exactly, so reports are greppable):
+- **CURRENT**: no AGNOSTIC drift. Add `(spoken gap)` if re-authoring is owed.
+- **LAGS (n)**: n AGNOSTIC drift items; the master is ahead. The actionable state.
+- **AHEAD**: the mirror has AGNOSTIC content the master lacks. Escalate to the master via
+  `/update-prompt`, then fan out; never mirror to mirror.
+- **DIVERGED (registered)**: every difference found is covered by the registry. Not drift.
+- **UNCERTAIN**: a difference that could be deliberate. Ask; do not guess.
+- **MISSING**: no file for this language yet (a `/translate-prompt` job, not a sync job).
 
-### Table 2 — drift detail (only for rows that are not CURRENT)
+### Table 2: drift detail (only rows that are not CURRENT)
 
 | Language | Section | Tag | Status | Ahead | Missing from laggard |
 |---|---|---|---|---|---|
-| kn | Step 3.5 — Phase 1 | MIXED | **AGNOSTIC DRIFT** | master (hi) | conditional-qualification follow-up rule |
-| kn | Introduction / Intro-turn rules | MIXED | EXPECTED (registered `kkb-kn-signals-maya-name`) | — | — |
-| te | TTS Normalization Rules | SPECIFIC | spoken gap | master (hi) | lakh/crore number-words |
+| kn | Step 3.5, Phase 1 | MIXED | **AGNOSTIC DRIFT** | master (hi) | conditional-qualification follow-up rule |
+| kn | Introduction / intro-turn rules | MIXED | EXPECTED (registered `kkb-kn-signals-maya-name`) | | |
+| te | TTS Normalization Rules | SPECIFIC | spoken gap | master (hi) | lakh/crore number words |
 
-Then, per laggard, the proposed reconciliation (verbatim copy vs translate-and-adapt), and the
-snapshot label you will take before writing.
+Then, per laggard: the proposed reconciliation (copy verbatim vs re-author) and the snapshot label you
+will take before writing.
 
 ---
 
 ## 5. Registry — `raya/divergences.json`
 
 ### Why this location
-It lives next to `raya/agents.json` because it is **fleet data**, not skill prose: `/sync-check`,
-`/update-prompt`, `/port-feature` and the daily static suite (`raya/regression/`) all need to load
-it, it must be git-tracked and reviewable in a diff, and it must be readable by a Python check
-without parsing markdown. Putting it inside a skill folder would hide fleet truth inside one
-skill's private reference material.
+It sits next to `raya/agents.json` because it is **fleet data**, not skill prose: `/sync-check`,
+`/update-prompt`, `/port-feature` and the daily suite need to load it, it must be git-tracked and
+reviewable in a diff, and a Python check must read it without parsing markdown. The file carries its
+own field notes under `_schema`.
 
 ### Schema
-Top level: `schema_version`, `_note`, `_schema` (self-documenting field notes), `divergences: []`.
-
-Each entry:
+Top level: `schema_version`, `_note`, `_schema`, `divergences: []`. Each entry:
 
 | Field | Required | Meaning |
 |---|---|---|
 | `id` | yes | stable kebab-case key, cited verbatim in audit reports |
-| `project` / `bot` | yes | the bot the divergence belongs to (e.g. `KKB`) |
-| `sync_family` | yes | `bot · direction · variant` — scopes the entry to one family |
-| `targets` | yes | `raya/agents.json` target ids the divergence applies to |
+| `bot` | yes | the bot the divergence belongs to (e.g. `KKB`) |
+| `sync_family` | yes | `bot · direction · variant`: scopes the entry to one family |
+| `targets` | yes | `raya/agents.json` target ids it applies to |
+| `files` | no | the prompt files, for a human reader |
 | `master_language` | yes | the family's master at the time of approval |
 | `languages_affected` | yes | the language codes that legitimately differ |
-| `direction` | yes | `mirror-only` (mirror has content the master lacks), `master-only`, or `both-differ` |
-| `scope[]` | yes | the sections/lines that legitimately differ — each with `section` (heading, matched by intent), `kind` (`persona` / `spoken-line` / `rule`), `what` (plain English), and `contains[]` (tokens a script can match in the actual delta) |
+| `direction` | yes | `mirror-only`, `master-only` or `both-differ` |
+| `scope[]` | yes | the sections or lines that differ: `section` (heading, matched by intent), `kind` (`persona` / `spoken-line` / `rule`), `what` (plain English), `contains[]` (tokens a script can match in the actual delta) |
 | `why` | yes | the owner's reason, in plain English |
-| `approved_by` | yes | the human who decided (name + how: "explicit instruction", "email approval") |
+| `approved_by` | yes | who decided, and how ("explicit instruction", "email approval") |
 | `approved_on` | yes | `YYYY-MM-DD` |
 | `changelog_ref` | yes | the `CHANGELOG.md` entry that records the edit |
-| `still_must_match` | yes | everything the entry does **not** excuse — audited normally |
+| `still_must_match` | yes | everything the entry does **not** excuse, audited normally |
 | `not_applied_to` | no | sibling targets deliberately left alone (stops scope creep) |
-| `review_on` | no | date after which the entry must be re-confirmed; past-due → registry gap |
+| `review_on` | no | after this date the entry must be re-confirmed; past due = registry gap |
 | `expires` | no | hard expiry; after it the divergence is drift again |
 
-### Matching rule (how a check uses it)
+### Matching rule
 A difference is **EXPECTED (registered divergence)** only if **all** hold:
 1. the file's target id is in `targets` (and its family matches `sync_family`);
 2. the file's language is in `languages_affected`;
 3. the differing section matches a `scope[].section` (by intent, not exact string);
-4. the actual delta text contains at least one of that scope item's `contains` tokens.
+4. the actual delta contains at least one of that scope item's `contains` tokens.
 
-Anything else — a different section, a different language, a delta with none of the tokens — is
-**UNREGISTERED** and gets flagged as drift. A registry entry is a narrow carve-out, never a
-blanket "this language is allowed to differ".
+Anything else is **UNREGISTERED** and is flagged. An entry is a narrow carve-out, never "this language
+may differ".
 
 ### Staleness
-If an entry's `contains` tokens are **no longer present** in the files it covers, the divergence
-was undone (probably by a naive sync). Report it as a **registry gap / possible silent revert**
-and ask the owner — do not quietly delete the entry, and do not quietly re-apply it.
+If an entry's `contains` tokens are **no longer present** in the files it covers, the divergence was
+undone (probably by a naive sync). Report a **registry gap / possible silent revert** and ask the
+owner: do not delete the entry and do not silently re-apply it. Same for a `review_on` date that has
+passed.
 
 ### Who writes entries
-`/update-prompt` and `/port-feature` — in the same change as the prompt edit and the changelog
-entry — whenever they knowingly apply a change to some languages of a family and not others, or
-otherwise suspend the mirror rule. `/sync-check` only **reads** the registry, except in step 10,
-where it may add the entry for a divergence the owner just confirmed during reconciliation.
+`/update-prompt`, `/port-feature` and `/translate-prompt`, in the same change as the prompt edit and
+the changelog entry, whenever they knowingly leave some languages of a family different. `/sync-check`
+only **reads** the registry, except when the owner confirms, during a reconciliation, that a difference
+should stay: then the entry is added in that same `/update-prompt` change.

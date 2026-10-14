@@ -13,7 +13,7 @@
 #   scripts/prompt-version.sh restore <agent> <label>            # roll back to a snapshot
 #   scripts/prompt-version.sh tag     <agent> <label> [note...]   # git tag the current HEAD
 #
-#   <agent> ∈ KKB | DKB | Maya   (case-insensitive)
+#   <agent> = any bot folder (a top-level dir with CHANGELOG.md + a prompt), case-insensitive
 #   <label> is a short kebab slug, e.g. stable-2026-07-15 or pre-inbound-build.
 #
 # Notes:
@@ -143,7 +143,7 @@ cmd_tag() {
   [ $# -ge 2 ] || die "usage: tag <agent> <label> [note...]"
   local agent label note tagname
   agent="$(resolve_agent "$1")"; label="$2"; shift 2; note="${*:-stable marker}"
-  tagname="${agent,,}-${label}"
+  tagname="$(printf '%s' "$agent" | tr '[:upper:]' '[:lower:]')-${label}"  # bash 3.2 (macOS) has no ${x,,}
   git -C "$REPO_ROOT" rev-parse --git-dir >/dev/null 2>&1 || die "not a git repo"
   if ! git -C "$REPO_ROOT" diff --quiet || ! git -C "$REPO_ROOT" diff --cached --quiet; then
     echo "note: working tree has uncommitted changes — this tag marks the last COMMIT, not the current files." >&2

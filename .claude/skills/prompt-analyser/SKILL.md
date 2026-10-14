@@ -1,116 +1,158 @@
 ---
 name: prompt-analyser
-description: Pre-flight audit of a voice-agent conversation prompt for latent gaps and bug-prone patterns BEFORE it runs live. Detects missing critical sections for the prompt's use case, and flags the recurring failure classes we've learned from past bugs — skipped mandatory steps, one-time actions spoken/asked repeatedly, modality leaks (outbound bot inviting callbacks), hard-Hindi/TTS vocabulary drift, missed tool calls, language/gender inconsistency, and payload/data bugs. Analysis-only by default (flags, does not fix). Use when the user shares a new or edited prompt and asks "what could go wrong / find the gaps / check before we run", when onboarding a new agent, or as a review gate before /update-prompt.
+description: Read-only check of a voice bot's conversation prompt, in any language and any project, for the problems that break live calls, BEFORE they reach a caller. Finds missing parts the prompt needs (consent, safety interrupt, closing, per-language speech rules), and the failure patterns learned from past bugs - skipped steps, lines repeated, tools not called or called with wrong values, examples that teach the wrong thing, words callers will not understand, Hindi left in a translation, a prompt too big for its bot. Flags and explains; does not fix. Use when the user says "check this prompt before we go live", "what could go wrong with this prompt", "find the gaps", "audit / review the prompt", "is the Marathi (or any) translation OK", "is this prompt too big", when a new bot is registered, before translating a master, or as a review before /update-prompt.
 ---
 
 # Prompt Analyser
 
-A **read-only pre-flight review** of a voice-agent conversation prompt. Its job is to catch
-the gaps that cause live failures *before* a call is placed — the same failure classes we
-have repeatedly fixed after the fact in KKB, DKB, and Maya. It **flags**; it does not edit.
-Hand confirmed fixes to `/update-prompt` (or `/port-feature` / `/update-memory` /
-`/update-output`) separately.
+**What it produces:** one report a non-specialist can read. First, in plain words, the problems a caller
+could run into, most serious first, each with what to do next; then the technical detail (section,
+line, pattern id, fix direction) for whoever makes the fix. It **flags**; it never edits a prompt.
 
-## When to use
-- A new or edited prompt is shared and the user wants gaps flagged before running it.
-- Onboarding a new agent (may not yet live in the repo — accept a pasted prompt or any path).
-- As a review gate ahead of `/update-prompt`, or to triage a batch of reported live issues
-  against the prompt text.
+**Fast path:**
+1. Resolve the file and its target (path map in root `CLAUDE.md`, `raya/agents.json`). Is it a master
+   or a mirror?
+2. Run the mechanical checks: size, and the language checks if it is a mirror.
+3. List the prompt's sections against `reference/section-checklists.md`.
+4. Sweep `reference/bug-patterns.md` family by family, using its **Index**.
+5. Check the prompt's examples against its rules.
+6. Write the report.
 
 ## Inputs
-- The prompt: a file (resolve KKB/DKB/Maya via the path map in repo `CLAUDE.md`; otherwise any
-  path or pasted text) — one language file at a time.
-- Optional: reported live symptoms. If given, root-cause each against the prompt first, then
-  do the full sweep.
-- Optional: the use-case / agent archetype (outbound data-collection, job-matching, employer
-  verification, campus recruitment…). If not given, infer it from the prompt and state the
-  inference.
 
-## References (read before analysing)
-- `reference/bug-patterns.md` — the catalog of failure classes: symptom → root cause →
-  **detection heuristic** → fix direction → the past bug it came from. This is the core of the
-  skill and the thing that compounds — extend it after every new bug (see "Growing the skill").
-- `reference/section-checklists.md` — per-use-case **critical-section checklists** ("what a
-  prompt of this kind must contain"), plus the universal language/script/TTS/payload rule
-  checklist. A missing critical section is a top-severity flag.
-- `../update-prompt/reference/prompt-anatomy.md` — the canonical section taxonomy and
-  AGNOSTIC/SPECIFIC/MIXED tags. Use it to name sections precisely and to know what *should* be
-  present.
-- Repo `CLAUDE.md` — the standing rules a prompt must satisfy (memory-injection block, sync
-  rule, surgical-edit expectations, Maya divergences).
-- The agents' `CHANGELOG.md` files — the ground truth of what has actually broken before.
+- The prompt: a file path (resolve any bot through the path map and `raya/agents.json`, never a
+  hard-coded bot list) or pasted text. One language file per run. For a mirror (non-master language),
+  also load its master: several checks compare the two.
+- Optional: reported live symptoms. Root-cause each against the prompt first, then do the full sweep.
+- Optional: what kind of bot it is (outbound data collection, job matching, employer capture, campus
+  recruitment, ...). If not given, infer it and say what you inferred.
+
+## References
+
+- `reference/bug-patterns.md`: every failure class learned from past bugs (symptom → root cause →
+  **detection heuristic** → fix direction → where it was seen). Over 3,000 lines: **start from the Index
+  at its top**, never by reading it end to end.
+- `reference/section-checklists.md`: what a prompt of each kind must contain (Part 1), and the rule
+  checklist for every prompt, including size, safety, access needs and per-language rules (Part 2).
+  A missing critical section is a high finding.
+- `../update-prompt/reference/prompt-anatomy.md`: section names and which content is agnostic
+  (copied exactly across languages) vs specific (spoken, re-authored per language).
+- Root `CLAUDE.md`: the standing rules (memory block, sync rule, Maya divergences, instructions always
+  in English).
+- `raya/divergences.json`: deliberate language differences. A registered divergence is not a finding.
+- The bot's `CHANGELOG.md`: what has actually broken before.
 
 ## Procedure
 
-1. **Identify use case & inventory sections.** Determine the archetype (state your inference)
-   and extract the prompt's section headings. Compare against the matching checklist in
-   `section-checklists.md` and the taxonomy in `prompt-anatomy.md`. **Missing critical
-   section → flag (high).**
-2. **If live symptoms were reported, root-cause each first.** Locate the exact lines that
-   produce the behaviour; name the failure class from `bug-patterns.md`. Don't stop at the
-   surface rule — check whether an *example*, a *competing action*, or *skip logic* overrides it.
-3. **Run the full bug-pattern sweep.** Walk every pattern in `bug-patterns.md` and apply its
-   detection heuristic to the prompt. Note every hit, including ones the user did not report.
-4. **Run the universal-rules checklist** (language/script, TTS number-words, payload script
-   separation, enum integrity, fixed-param integrity, variable-name well-formedness, tool
-   declared-vs-referenced, few-shot hygiene, memory-block presence).
-5. **Cross-check examples against rules.** Few-shot dialogues are behaviour references — a
-   mandatory step that an example skips, or a canonical line an example contradicts/garbles, is
-   a real defect (models mimic examples over prose). Flag each mismatch.
-6. **Report** (see format). No edits.
+1. **Mechanical checks** (fast, objective; run them before reading):
+   - **Size (every file with a target):** `python3 scripts/prompt_size.py check <file> --target <id>`.
+     BLOCK is a high finding (past the size where this bot already stopped calling tools, D116). WARN
+     means no call has proven this size works: say the first test call must confirm every tool fires.
+     For a master about to be translated: `python3 scripts/prompt_size.py project <master> --lang <iso>
+     --target <id>`.
+   - **Languages (every mirror):** `python3 scripts/language_checks.py <master> <mirror> --lang <iso>
+     [--target <id>] [--config raya/translations/<bot>-checks.json]`. Each FAIL is a high finding, each
+     WARN medium or "please confirm". Its word lists are seeds awaiting a native speaker; say so once.
+   - **Tool schemas (optional, when payloads or enums are in scope):**
+     `python3 scripts/toolschema_parity.py --family <Agent>` reads the live tool schemas (read-only)
+     and flags a bot whose parameters, required fields or enums differ from its family (D111).
+2. **Kind of bot and section inventory.** State the archetype you matched, list the prompt's section
+   headings, and compare them with the matching checklist (match by intent, not heading text). A public
+   bot with no safety interrupt (D121), or a mirror with no per-language speech rules (D117, D120,
+   D123), is a missing critical section.
+3. **Reported symptoms first, if any.** Find the exact lines that produce the behaviour and name the
+   failure class. Do not stop at the surface rule: check whether an example, a competing action or skip
+   logic overrides it.
+4. **Sweep the bug patterns, family by family, from the Index:**
+   - For each family, decide from the one-line names whether the prompt has the surface it needs (no
+     consent step, no tools, a master file). Mark whole families N/A in one line, with the reason.
+   - For every entry that could apply, open it (`grep -n "^#\+ D95\b" reference/bug-patterns.md`, read
+     to the next heading) and apply its **Detection heuristic** as written. Do not work from memory of
+     the entry.
+   - Always apply, whatever the bot: E1 and D50 (examples against rules), D79 and D82 (rule stated far
+     from where it is used), D95 (a skip test that accepts a weaker fact), D47 and D115 (failure lines
+     that claim something false), D109 and D112 (example values copied into calls), E3 (memory block),
+     D116 (size), D121 (safety interrupt).
+   - On a long prompt, fan out one agent per family with the prompt path and that family's ids; each
+     must quote the line for every hit. Merge the results and report one root cause once, listing every
+     pattern id it trips.
+5. **Examples against rules.** Sample calls are behaviour the model copies. A mandatory step an example
+   skips, a value an example supplies, or a canonical line an example garbles is a real defect, usually
+   a stronger cause than any rule (D50).
+6. **Report** (format below). No edits.
 
 ## Root-cause lenses (apply to every flag)
-These are the "why the stated rule didn't hold" checks that past bugs taught us — a rule can be
-present and still fail:
-- **Competing action not forbidden.** The prompt says what to DO but never forbids the rival
-  action, so the rival wins (Maya Experience-Capture gate). → look for a **negative gate**.
-- **One-time action inside a per-entity loop.** A line/consent/tool that should fire once is
-  attached to a "for each X" loop → repeated N times (Maya apply-bridge). → look for an explicit
-  "exactly once" bound.
-- **Silent step with no anchor.** Background tool calls with no spoken cue and no "must run
-  before you may proceed / close" gate get dropped (DKB tool-call reinforcement). → look for a
-  hard sequencing gate.
-- **Skip-forward pressure without backpressure.** Aggressive SKIP-AHEAD/ORDER-FLEX/"move
-  silently" logic with no counterbalancing "you must still do X" makes mandatory steps optional.
-- **Abstract instruction where a list is needed.** "Use simple words" / "don't repeat" under-
-  performs a concrete banned→preferred list or an explicit count.
-- **Example overrides prose.** Examples model the shortcut the rule forbids.
+
+A rule can be present and still fail. Check why it would not hold:
+- **Competing action not forbidden.** The prompt says what to DO but never forbids the rival action,
+  so the rival wins (A1). Look for a negative gate.
+- **One-time action inside a per-item loop.** A line, consent or tool call that should fire once sits
+  inside "for each X" and repeats (B1). Look for an explicit "exactly once".
+- **Silent step with no anchor.** A background tool call with no "must run before you continue or
+  close" gate gets dropped (C1).
+- **Skip pressure without backpressure.** Skip-ahead or "move on silently" logic with no list of steps
+  that are never skipped (A2).
+- **Abstract instruction where a list is needed.** "Use simple words" or "don't repeat" loses to a
+  concrete word list or count (D1, D123).
+- **Example overrides prose.** An example models the shortcut the rule forbids (D50).
+- **Guard tests the wrong fact.** A skip or "only when" clause is satisfied by a weaker value that is
+  usually present (D95).
 
 ## Report format
-Lead with the reported symptoms (root-caused), then the proactive findings. Keep it scannable.
+
+Write the top half in the words of the call, not of the tuner (root `CLAUDE.md` → "Write for someone who
+is not a prompt engineer"): no pattern ids, "payload", "agnostic" or "guard" there. Technical terms
+belong in the detail table.
 
 ```
-## Prompt analysis — <agent / file> (<use case>)
+## Prompt check: <bot, language> (<what kind of bot>)
 
-### Reported symptoms (root-caused)
-- <symptom> → **root cause:** <exact section/lines> · **class:** <pattern> · **better:** <direction>
+**In short:** <N> problems a caller could hit, <M> of them serious. <One sentence on the worst one.>
 
-### Proactive findings
-| # | Severity | Section | Failure class | What's wrong | Direction |
+### What a caller could run into (most serious first)
+1. **<What happens on the call, e.g. "the bot tells the caller their details were saved when nothing
+   was saved">.** Why: <one sentence>. Next: <a sentence the user can type, e.g. "say 'fix the saved
+   line on the Marathi bot'">.
+
+### What caused the problems you reported (if any were reported)
+- <symptom> → <the line(s) that cause it, in plain words>
+
+### Parts the prompt is missing
+- <part> - <what goes wrong on a call without it>
+
+### Checks run
+- Size: <OK / WARN / BLOCK, bytes vs the bot's limit>. Language checks: <N FAIL, N WARN, or "master file,
+  not run">. Families not applicable: <list, one reason each>.
+
+### Technical detail (for whoever fixes it)
+| # | Severity | Section / line | Pattern id(s) | What is wrong | Fix direction |
 |---|---|---|---|---|---|
 
-### Missing / thin critical sections
-- <section> — <why it matters for this use case>
-
-### Verify (uncertain — confirm with user)
+### Not sure, please confirm
 - <item>
 ```
-Severity: **high** = will cause wrong behaviour or a broken/failed tool call; **medium** =
-intermittent/quality; **low** = cosmetic/consistency. Rank high first.
+Severity: **high** = wrong behaviour on a call, a broken or missing tool call, a false claim to the
+caller, or a missing safety part; **medium** = some calls or quality; **low** = cosmetic or consistency.
+High first.
 
 ## Guardrails
-- **Analysis only.** Never edit the prompt from this skill. Propose directions; the user routes
-  fixes to `/update-prompt`. (If they then say "fix these," hand off — do not fix in place here.)
-- **Ground every flag in a line.** Quote or cite the exact section; no vibes-based findings.
-- **Separate real gaps from expected language differences.** A Kannada spoken line differing
-  from Hindi is not a bug (see `prompt-anatomy.md`). Cross-language *logic* gaps are — but note
-  this skill reviews one file; use `/sync-check` for the Hindi↔Kannada parity audit.
-- **Flag, don't guess.** If you can't tell whether something is deliberate, put it under
-  "Verify" and ask.
+
+- **Analysis only.** Never edit the prompt from this skill. Fixes go through `/update-prompt` (or
+  `/port-feature`, `/update-memory`, `/update-output`). If the user says "fix these", hand off.
+- **Ground every flag in a line.** Quote or cite the section and line; no findings without one.
+- **A finding is not yet a bug on a live bot.** For a prompt already running, a finding is fixed only
+  after a call shows it (root `CLAUDE.md` → "No fix without a transcript"); hand it to `/voice-test` to
+  reproduce, or to `/generate-test-cases` as a test case. For a prompt not yet live (a new bot, a
+  master before translation, a slim rewrite), findings go to `/update-prompt` with the user's go-ahead.
+- **Real gaps vs expected language differences.** A mirror's spoken line differing from the master's is
+  not a bug; registered divergences are not findings. A logic difference between languages is, but
+  this skill reviews one file: send parity questions to `/sync-check`.
+- **Flag, don't guess.** If you cannot tell whether something is deliberate, put it under "Not sure".
 
 ## Growing the skill (this is how it compounds)
-Every time a **new** class of live bug is found — here or via `/update-prompt` — add or sharpen
-an entry in `reference/bug-patterns.md` (symptom, root cause, detection heuristic, fix
-direction, source agent+date) and, if it implies a section that should always exist for a use
-case, update `reference/section-checklists.md`. The changelogs are the feed; this catalog is the
-distilled, reusable form.
+
+Every new class of live bug, found here or through `/update-prompt` or `/bug-fix`, gets an entry in
+`reference/bug-patterns.md` (symptom, root cause, detection heuristic, fix direction, source bot and
+date) under the next free id (D124 onward; never reuse a number), plus a row in the Index at the top
+of that file. If it implies a section a prompt of that kind must always have, update
+`reference/section-checklists.md` too. If a script can detect it, say which one in the entry.

@@ -1,161 +1,151 @@
 ---
 name: update-prompt
-description: Create or update a voice agent's conversation prompt and keep the language variants in sync. Apply a feedback item or bug fix to an agent (KKB, DKB, or Maya); the change is made on Hindi (source of truth) and mirrored to Kannada — language-agnostic logic copied verbatim, native-language content translated and adapted. Use whenever the user reports a prompt bug, gives feedback on agent behavior, or wants to change what an agent says or does. Also creates a new conversation prompt or a new language variant from scratch.
+description: Change what a voice bot says or does by editing its conversation prompt, on the master language first and then every other language the bot speaks (read from raya/agents.json), with rules copied exactly and spoken lines re-authored per language. Use when someone reports a bug ("the bot said X, it should say Y", "the bot skipped the consent question", "fix this in the prompt"), gives feedback on a bot's behaviour, or wants a rule, line or step added, removed or changed, for any bot in any project (Blue Dots, Purple Dots, others). Also creates a new conversation prompt from scratch.
 ---
 
 # Update Prompt
 
-Apply a change to an agent's **conversation prompt** and keep every language in sync (master first,
-then each mirror listed in `raya/agents.json`).
+**What it changes:** one bot's **conversation prompt**, in every language of that bot, plus its
+`CHANGELOG.md`, the analyser's bug list (for bug fixes) and, when needed, `raya/divergences.json`.
 
-Resolve files via the path map in the repo root `CLAUDE.md`. Read
-`reference/prompt-anatomy.md` (in this skill's folder) for the section taxonomy and the
-AGNOSTIC / SPECIFIC / MIXED tags, and the Hindi→Kannada localization conventions.
+**Use something else for:** the memory prompt (`/update-memory`), the post-call output prompt
+(`/update-output`), a new language (`/translate-prompt`), moving a feature between bots
+(`/port-feature`), shrinking a prompt (`/slim-prompt`), rolling back (`/prompt-version`).
 
-## Scope
+**Fast path:**
+1. Read the open-issues list; get the call that shows the bug (no transcript, no fix).
+2. Reconcile every target of the family with live, snapshot, run `/sync-check`, take a baseline of
+   the language and size checks.
+3. Decide: wording gap, or a rule the model already has and does not follow.
+4. Edit the master, classify the change, mirror it to every language, re-run the checks.
+5. Changelog (DEPLOYED, NOT VERIFIED until called), divergence entry if partial, analyser entry if a bug.
+6. Deploy each target with `scripts/raya_deploy.py`, then one call per fix per variant.
+7. Report in plain words with the changed lines and the call ids.
 
-- **KKB, DKB** — Hindi + Kannada. Edit Hindi first, mirror to Kannada.
-- **Maya** — Hindi only. No mirror.
+Rules this skill relies on and does not repeat: root `CLAUDE.md` → "Surgical edits only", "Core
+principle: agnostic vs language-specific", "Sync rule", "Maya rule", "Testing is mandatory", "How
+to report back". The section taxonomy is `reference/prompt-anatomy.md`.
 
-## Procedure (update)
+## 0. Which files, which languages
 
-**Reconcile against live FIRST — before step 0.** The live Raya agent can be AHEAD of the repo (the
-team edits it directly — e.g. the real job inventory / `job_id`s). Run `scripts/raya_deploy.py diff
-<agent-target>` (or `/raya-reconcile` if GET is flaky/empty). If **Raya is ahead**, adopt the live prompt
-into the repo with `scripts/raya_deploy.py pull <agent-target>` and commit that reconciliation BEFORE
-editing — never edit a repo file that is behind live (you would clobber live-only content, e.g. overwrite
-a real job inventory with placeholders). `deploy` also refuses any prompt still carrying placeholder
-`job_id`s / a `[PLACEHOLDER]` flag. See `raya/README.md → Reconcile-before-fix`.
+- A bot's files are its **sync families** in `raya/agents.json`: same `agent`, same `direction`,
+  same backend (legacy or Signals). Print them with the snippet in
+  `../sync-check/reference/n-language-parity.md` → "1. Resolving the family". Each family has one
+  **master** (same file, "Master language") and N mirrors, one per other `language` code. A family
+  with one language (Maya today) has nothing to mirror.
+- **Other families of the same bot** (inbound vs outbound, legacy vs Signals, a Slim variant) are
+  not mirrors, but they often carry the same text and the same bug. Grep them for the line you are
+  changing. Where the bug is present, apply the change to that family too, through this same
+  procedure (its own master first). Where it is deliberately not applied, say so in the report.
+- Never take the bot list or language list from this file or from filenames.
 
-**Read the bot's open-issues list first** (the tracker sheet, or the issue table in
-`raya/intake/<bot-id>.md`): know what is already open before you change anything, and update it at the
-end (`/bug-fix` → four habits).
+## 1. Before editing
 
-0. **Snapshot first (rollback safety).** Before editing, checkpoint the target agent:
-   `scripts/prompt-version.sh save <agent> pre-<short-change-slug> "<one-line why>"`. This
-   captures the current stable files so any edit is instantly reversible via
-   `scripts/prompt-version.sh restore <agent> <label>` (see the `/prompt-version` skill).
-   Never skip this — it is the safety net for the surgical-edit rule.
-1. **Sync first.** Run the `/sync-check` procedure for the target agent (read its
-   `SKILL.md`). If the Hindi/Kannada pair has drifted, reconcile it before applying the new
-   change, so the change lands on an aligned base. (Skip for Maya — Hindi only.)
-2. **Locate the change.** From the user's feedback/bug, identify the agent and the target
-   section(s) using the anatomy. Read the relevant section in the **Hindi** file (and its
-   Kannada twin) before editing.
-3. **Edit Hindi (source of truth).** Make the change in the Hindi file, matching the
-   surrounding style.
-4. **Classify the change** using the anatomy tags:
-   - **AGNOSTIC** (logic, conditions, variable names, tool payloads, structure) → will be
-     copied verbatim.
-   - **SPECIFIC** (spoken lines, examples, number-words, tone markers) → will be translated
-     and adapted to Kannada idiom/script.
-   - **MIXED** → split: copy the rule verbatim, adapt the quoted speech.
-5. **Mirror to every other language.** The languages are the master plus every mirror listed for
-   this bot in `raya/agents.json` (Kannada for KKB/DKB today; Marathi, Telugu, Odia and more for other
-   projects). Apply the classified change to each mirror: verbatim for AGNOSTIC; re-authored for
-   SPECIFIC, to the `/translate-prompt` standard (the language's everyday words from
-   `raya/translations/lexicon.json`, never the bookish word; its own gender rule; numbers as words;
-   pinned place names), matching the existing section's phrasing. Then, for each mirror:
-
+1. **Open issues.** Read the bot's open-issues list (the tracker sheet, or the issue table in
+   `raya/intake/<bot-id>.md` when `/onboard` created one). Know what is already open; group issues
+   by cause, one fix per cause (`/bug-fix` → "Four habits").
+2. **Ground it.** Pull the real call and its input args. If the inputs were wrong, the backend
+   failed, or no call reproduces it, do not edit: say "the prompt is fine, the inputs were wrong" (or
+   ask for the call id). Root `CLAUDE.md` → "Feedback-loop operating sequence".
+3. **Reconcile with live, for every target you will touch.**
+   `python3 scripts/raya_deploy.py diff <target-id>`. If live is ahead, adopt it with
+   `python3 scripts/raya_deploy.py pull <target-id>` and commit that before editing. If GET is
+   empty or flaky, use `/raya-reconcile`. Never edit a file that is behind live.
+4. **Snapshot.** `bash scripts/prompt-version.sh save <bot-folder> pre-<slug> "<why>"` (the folder
+   name, e.g. `KKB`, `KKB-Slim`, `TRRAIN`; it snapshots every prompt in that folder).
+5. **Sync first.** Run `/sync-check` on the family. Reconcile any unregistered drift before adding
+   a new change.
+6. **Baseline the checks** (so you can tell new failures from old ones), for each mirror:
    ```bash
-   python3 scripts/language_checks.py "<master>" "<mirror>" --lang <iso> --target <mirror-target-id>
+   python3 scripts/language_checks.py "<master.md>" "<mirror.md>" --lang <iso> --target <mirror-target-id>
+   python3 scripts/prompt_size.py check "<file.md>" --target <target-id>
    ```
+   Add `--src <iso>` to `language_checks.py` when the master is not Hindi.
 
-   A new FAIL that your edit introduced blocks the deploy (a rule that now says "speak Hindi" in the
-   Marathi file, a digit in a new spoken line, a payload value that changed).
-6. **Maya gate (KKB changes only).** If the agent is **KKB** and the change touches shared
-   core logic (anything Maya inherits), **stop and ask** the user whether to also apply it to
-   Maya Hindi. If yes, apply it while preserving Maya's divergences (college identity,
-   `${college_name}`, `hr_contact`/`benefits`, Experience Capture, HR-number sharing,
-   Marketing Masters League, feminine-voice rule — see `CLAUDE.md`). Never overwrite those.
-7. **Changelog.** Append an entry to `<Agent>/CHANGELOG.md` (date, feedback/bug, change,
-   files touched). If Maya was also updated, add an entry to `Maya/CHANGELOG.md` too.
-8. **Register a deliberate divergence (only if the change is NOT landing in every language).** If
-   you knowingly apply this change to some languages of the sync family and not others — or
-   otherwise suspend the mirror rule — add or update the entry in **`raya/divergences.json`** in
-   the SAME change as the prompt edit and the changelog entry. Use the schema in
-   `../sync-check/reference/n-language-parity.md` → "5. Registry — `raya/divergences.json`"
-   (id, bot, sync_family, targets, master_language, languages_affected, direction, scope[] with
-   `contains` tokens, why, approved_by, approved_on, changelog_ref, still_must_match). Without the
-   entry the next `/sync-check` reads the difference as drift and reconciles the deliberate
-   decision away. `/sync-check` is what reads the registry today (the daily static suite does not
-   yet — follow-up), so the entry is the only durable record of the owner's call.
-9. **Feedback loop (bug fixes only).** If this change fixed a bug, teach `/prompt-analyser` to
-   catch it next time: add or sharpen an entry in
-   `../prompt-analyser/reference/bug-patterns.md` (symptom → root cause → detection heuristic →
-   fix direction → source agent + date), and update
-   `../prompt-analyser/reference/section-checklists.md` if the bug implies a section that must
-   always exist. See `CLAUDE.md` → "Bug-fix feedback loop". Skip for pure feature additions.
-10. **Report, in plain words, with the lines that changed.** The reader may not be a prompt
-   engineer. For each fix: one sentence on what the bot did wrong, one on what it will do now, and the
-   changed prompt lines themselves (before → after, a few lines, not the whole section), so the person
-   can see and question the change without opening the file. Name the open issues this change is
-   expected to close (from the bot's open-issues list), and which are still open. Then the
-   structural-parity note (section skeletons still align across every language) and, for MIXED
-   changes, the master line and each mirror's line side by side.
-11. **Verify by CALL, then report — per fix, with a call id.** A change is not fixed until a live
-   call proves it. Before writing "fixed"/"done"/"working" anywhere — changelog, commit message, or
-   message to the user — name the call uuid AND the exact transcript line or tool argument that
-   demonstrates the new behaviour. Deploy + read-back proves the prompt shipped, never that the bot
-   behaves. If you shipped N behaviour changes you owe N call ids: one passing call does not verify
-   the others. Untested changes are labelled **DEPLOYED, NOT VERIFIED** in all three places.
-   See root `CLAUDE.md` → "The word 'fixed' requires a call id".
-12. **Classify before you add words: a wording gap, or a following-instructions problem?** A wording
-   gap is a rule that is missing, ambiguous or contradicted (fix the text). A following-instructions
-   problem is a rule already stated clearly that the model does not keep (ages read as digits after the
-   digits were named as forbidden; consent asked before the search; a safety statement missed). **If a
-   fix does not hold across three calls, stop adding text**: change the mechanism (the ladder below) or
-   escalate with the call ids. Every added paragraph also uses up size budget, and past a bot's size
-   limit the bot stops calling tools without any error (D116): check `scripts/prompt_size.py check`
-   when the prompt grows. Prefer deleting or replacing a line over adding one.
-13. **If the tested behaviour is inconsistent, the fix is NOT finished.** Never close out a change
-   as "works sometimes", "flaky", or "runtime adherence". Go to root `CLAUDE.md` → "'Intermittent' is
-   not a result" and run **D1-D3 (count → segment by input → read the guard) BEFORE any remedy** — a
-   near-clean split by an input variable means it is a condition bug and the remedy rungs will make it
-   worse, and a step that did not happen may have been correctly skipped. Only once the behaviour is
-   mixed *within one input segment* do you walk the ladder: grep the wrong output verbatim against the prompt (analyser
-   D50 — a hit in a sample conversation IS the cause), delete the competing instruction, then
-   **remove the wrong option rather than forbidding it** — a default that asserts something false
-   will be chosen for the cases it is false about however firmly it is banned, so make the worst
-   case truthful instead. Never write a third wording of a guard that has already failed twice.
+## 2. Decide what kind of fix it is
 
-## Procedure (create — new prompt or new language variant)
+- **Wording gap:** the rule is missing, ambiguous, or contradicted by another line or an example.
+  Fix the text. First grep the bot's wrong words verbatim against the whole prompt: a hit in a
+  worked example is the cause (analyser D50); fix the example.
+- **Following-instructions problem:** the rule is already clear and the model does not keep it.
+  Before any remedy, run D1-D3 (count how often the right branch ever happened, split by input,
+  read the guard): root `CLAUDE.md` → "FIRST localize the cause". A clean split by input means it
+  is a condition bug, not disobedience.
+- **Three-call rule:** if a fix does not hold across three calls, stop adding text. Change the
+  mechanism (the ladder in root `CLAUDE.md`: remove the wrong option rather than forbid it; move a
+  constraint into the tool schema only when the model cannot fake the value, D91/D95) or escalate
+  with the call ids. Never write a third wording of a guard that already failed twice.
+- **Size:** every added line costs budget, and past a bot's limit it stops calling tools with no
+  error (D116). Prefer deleting or replacing a line over adding one.
 
-- **New language variant of an existing agent:** use **`/translate-prompt`**, not this skill. It
-  splits the master mechanically so no rule or tool call is ever translated, checks the size first,
-  and runs the language checks before deploy.
-- **New conversation prompt from scratch:** scaffold from the section taxonomy in
-  `reference/prompt-anatomy.md`, filling each section for the new agent's domain. Pull the
-  agent's variables/tools/persona from `../port-feature/reference/agent-schemas.md` (add a new
-  entry there if it's a new agent). Then create both language files via the new-language-variant
-  step above.
+## 3. Edit, classify, mirror
 
-## Test before done (MANDATORY — the change is not DONE until tested)
+1. **Edit the master.** Read the section in the master and in each mirror first. Smallest change,
+   in the surrounding style. Instructions in English; only spoken lines in the call's language.
+2. **Classify** with `reference/prompt-anatomy.md`: AGNOSTIC (copied byte-identical), SPECIFIC
+   (re-authored per language), MIXED (copy the rule, re-author the quoted speech).
+3. **Mirror to every language** of the family. SPECIFIC lines are re-authored to the
+   `/translate-prompt` standard: everyday words from `raya/translations/lexicon.json`, that
+   language's gender rule, numbers as words, pinned place names, matching the existing section's
+   phrasing. Never paste master-language text into a mirror.
+4. **Re-run the checks** from step 1.6. A FAIL that was not in the baseline blocks the deploy (a
+   rule that now names the wrong language, a digit in a spoken line, a changed payload value). A
+   size BLOCK means slim the master first (`/slim-prompt`).
+5. **Maya gate (KKB changes).** If a KKB change touches logic Maya shares, stop and ask whether to
+   apply it to Maya. If yes, apply it without touching Maya's divergences (root `CLAUDE.md` →
+   "Maya rule"; the MPL offer listed there was removed on 2026-10-12, see `Maya/CHANGELOG.md`).
+6. **Read the diff.** It must contain only the intended change, in every file.
 
-A change is NOT done when the files are edited/deployed — only when it has been TESTED and confirmed working, with overall sanity intact. Never report a prompt/agent change as "done", "fixed", or "confirmed" until you have actually tested it. Where a bot cannot be harness-tested (inbound bots — the tester can only receive, not dial in; or telephony is down), do the best available verification (post-deploy transcript review + static sanity) and explicitly mark the residual VERIFY-PENDING — never claim done/confirmed on an untested change. Revert on any regression (see /prompt-version).
+## 4. Record
 
-After deploying a conversation-prompt change, run the **three testing tiers** (repo `CLAUDE.md` →
-"The three testing tiers") — and test **every affected variant independently; never extrapolate**
-("works for Hindi so Kannada is fine" is a recipe for disaster — voice-test Hindi AND Kannada,
-outbound AND inbound, each bot):
-1. **Tier 1 — Fix verification:** `/voice-test` the changed bot(s) on the EXACT scenario the change
-   targets (for a bug, the pre-fix repro) and confirm the NEW behavior in the live transcript, on
-   each language variant.
-2. **Tier 2 — Blast-radius regression:** confirm the change broke nothing adjacent — the whole flow
-   (greet → fetch → present → apply → close) still works, the mirrored twin matches, and any tool
-   payload the change touched is still valid — tested on each variant, not assumed.
-3. **Tier 3 — Daily general regression:** the standing 100+‑case suite (`raya/regression/`) run by
-   the scheduled cloud worker catches longer-tail drift; it does not replace tiers 1–2.
-Only after tiers 1–2 pass on every variant is it DONE. Untestable → best-available verification +
-mark VERIFY-PENDING (never "done").
+1. **Changelog:** append to `<Bot>/CHANGELOG.md` (format in root `CLAUDE.md` → "Changelog rule"),
+   one entry per bot touched. Untested changes say **DEPLOYED, NOT VERIFIED** in the entry.
+2. **Divergence (only if the change does not land in every language of the family):** add or update
+   the entry in `raya/divergences.json` in the same change, using the schema in
+   `../sync-check/reference/n-language-parity.md` → "5. Registry". Without it the next
+   `/sync-check` "fixes" the difference away.
+3. **Analyser (bug fixes only):** add or sharpen the pattern in
+   `../prompt-analyser/reference/bug-patterns.md` (symptom, root cause, detection heuristic, fix
+   direction, source bot + date), and `section-checklists.md` if a section must always exist.
+
+## 5. Deploy and prove
+
+1. **Deploy each target:** `python3 scripts/raya_deploy.py deploy <target-id> --dry-run`, show the
+   diff, then deploy after the user approves (`--yes` only after that approval). The script
+   snapshots, checks the name guard and size limit, and verifies the PATCH response. That proves the
+   prompt shipped, not that the bot behaves.
+2. **Test, three tiers** (root `CLAUDE.md` → "The three testing tiers"), with `/voice-test`:
+   - Tier 1: the exact failing scenario, on **each** changed variant (each language, each
+     direction, each bot). One call id per fix per variant; never extrapolate from one language.
+   - Tier 2: the neighbours of the change (the same section, the mirrored lines, any tool payload
+     touched, the whole flow still completes).
+   - Tier 3: the standing daily check in `raya/regression/` covers the long tail; it does not
+     replace tiers 1 and 2.
+   - **Inbound bots are testable:** give the inbound agent an integer `out_did` and dial the tester
+     (`/voice-test` → Inbound bots). Inbound test data goes on the tester's own number.
+3. If a result is mixed, the fix is not finished: go back to section 2. "Intermittent" is not a
+   result. On a regression, `/prompt-version` restore, then redeploy.
+
+## 6. Report (plain words)
+
+Shape from root `CLAUDE.md` → "How to report back": Fixed (call id + the line that proves it),
+Failed / still open, New bugs, Next. For each fix: one sentence on what the bot did wrong, one on
+what it does now, and the changed prompt lines (before → after, a few lines, master and each
+mirror for MIXED changes). Name the open issues this closes and end with what is still open from
+before. Every fix without a call id is reported as DEPLOYED, NOT VERIFIED.
+
+## Creating a new conversation prompt
+
+- **New language for an existing bot:** `/translate-prompt`, not this skill.
+- **New bot from a supplied prompt:** `/register-bot` files it verbatim as the baseline.
+- **New prompt written from scratch:** scaffold from `reference/prompt-anatomy.md`, take the
+  variables, tools and persona from `../port-feature/reference/agent-schemas.md` (add the bot there),
+  include the memory block if the bot has memory (root `CLAUDE.md` → "Memory injection block"),
+  register it with `/register-bot`, then add languages with `/translate-prompt`.
 
 ## Guardrails
 
-- **Surgical edits only.** Make the smallest change that accomplishes the task; preserve every other line, spoken phrase, variable, tool name, and payload exactly. Prefer additive changes; never reformat or delete unrelated content. The resulting diff should contain only the intended change. See `CLAUDE.md` → "Surgical edits only".
-- Hindi is always the source of truth; never let Kannada lead.
-- **Instructions/rules are written in English; only the agent's spoken lines are in Hindi/Kannada.** When you add or change a rule, write the prose in English and quote any spoken line (e.g. *Offer line (say once): "एक और मौका…"*). Never write instruction/rule prose in Hindi/Kannada. A section whose rules are in Hindi/Kannada is a bug — rewrite the prose to English and keep only the spoken lines translated. This is why the Hindi and Kannada files share the SAME English instructions and differ only in quoted spoken text.
-- Never localize a `${variable}` name, a tool name, or a fixed payload param.
-- Never translate-copy an AGNOSTIC change — it must be byte-identical logic.
-- Never adapt a SPECIFIC change by pasting Hindi text into the Kannada file.
-- When unsure whether something is AGNOSTIC or SPECIFIC, consult the anatomy; if still
-  unclear, ask.
+- The master leads; a mirror never leads.
+- Never localize a `${variable}`, tool name, payload field or fixed param; never translate AGNOSTIC
+  text; never write rule prose in the call's language.
+- When unsure whether a line is AGNOSTIC or SPECIFIC, check the anatomy, then ask.

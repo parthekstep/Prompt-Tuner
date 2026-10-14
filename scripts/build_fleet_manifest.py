@@ -56,7 +56,8 @@ def build():
             problems.append(f"live target '{t.get('id')}' -> '{f}' is NOT covered by the daily "
                             f"suite's discover_prompts()")
             continue
-        project = PROJECTS.get(p["agent"], "unassigned")
+        # agents.json "project" is the source of truth; the table is the fallback for older rows.
+        project = t.get("project") or PROJECTS.get(p["agent"], "unassigned")
         if project == "unassigned":
             problems.append(f"bot folder '{p['agent']}' has no project mapping in PROJECTS")
         entries.append({
@@ -103,6 +104,9 @@ def build():
 
 def main():
     mode = sys.argv[1] if len(sys.argv) > 1 else "--write"
+    if mode not in ("--write", "--check", "--print"):
+        print(__doc__)
+        sys.exit(0 if mode in ("-h", "--help") else 2)
     manifest, problems = build()
     text = json.dumps(manifest, ensure_ascii=False, indent=1) + "\n"
 

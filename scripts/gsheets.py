@@ -139,10 +139,10 @@ def build_parser():
     sub = p.add_subparsers(dest="cmd", required=True)
     sub.add_parser("meta", help="list tabs + gids (proves auth)")
     g = sub.add_parser("get", help="read a range")
-    g.add_argument("range", help="A1 range, e.g. 'Doc 1 Issues'!A1:K100")
+    g.add_argument("range", help="A1 range, e.g. 'All Issues'!A1:K100")
     g.add_argument("--out", help="write CSV to this path instead of printing JSON")
     u = sub.add_parser("update", help="write a range (RAW)")
-    u.add_argument("range", help="A1 range, e.g. 'Doc 1 Issues'!H5")
+    u.add_argument("range", help="A1 range, e.g. 'All Issues'!H5")
     u.add_argument("values", help="2D JSON array, e.g. [[\"Fixed\"]]")
     return p
 

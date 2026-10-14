@@ -1,701 +1,399 @@
 ---
 name: voice-test
-description: Run agent-to-agent voice tests of a Raya bot using a persona "tester" agent, then grade the call MECHANICALLY against a standard grader contract — universal invariants on every call, script-aware matching, scoped prohibitions, fixture-hygiene checks, and call ids read from the run log rather than inferred. Use to reproduce a reported bug, verify a fix end-to-end, or regression-test scenarios before a demo.
+description: Test a live Raya voice bot with real agent-to-agent phone calls (a persona "tester" agent plays the caller) and grade each call mechanically against written pass/fail rules, the universal checks and the bot's checklist, with call ids read from the run rather than guessed. Runs a test-case Google Sheet and fills in Actual Response / Verdict / call ids per row, and adds newly found bugs as rows. Use when someone says "test this bot", "test this fix", "verify the fix", "reproduce this bug", "call the bot", "run this sheet", "run these test cases, 3 calls each, and update the sheet", "run the Smoke rows", "test the inbound bot", "test the Kannada version", or before a demo. Works for outbound and inbound bots in every language.
 ---
 
-# Voice Test — agent-to-agent call testing
+# Voice Test
 
-Test a live Raya voice bot by having a **tester/persona agent** role-play a human, receive a call
-from the **bot under test**, and grading the resulting transcript **against assertions, not
-impressions**. This is how we find bugs ourselves instead of asking the user to place every call by
-hand.
+**What it produces.** Real calls to the bot under test, each graded from its full call record, with a
+call id behind every verdict; the sheet rows filled in when a sheet was given; and a short report
+(Fixed / Failed / New bugs / Next, root `CLAUDE.md` → "How to report back"). Two separate steps,
+always: **run** a call, then **grade** it. A printed transcript is not a grade.
 
-Two halves, and they are separate steps: **running** a call (§Run) and **grading** it (§Grader
-contract). The runner does no grading. A dump that looks like a report is not a report.
+## Fast paths
 
-## The setup (topology)
+| The user says | Do this |
+|---|---|
+| "run this sheet" / "run these test cases, N calls each, update the sheet" | → **Run a test sheet**. |
+| "test this fix" / "verify the fix" | The issue's `R` row (write it first if missing: `/generate-test-cases` → "add a test case for this bug"), **N ≥ 3 calls on every affected variant**, then the blast-radius rows around the change. Report per fix with call ids (→ Report contract). |
+| "reproduce this bug" | One call that recreates the reported inputs and behaviour, read against the original call's `agent_args` first (it may be an input problem, not a bot bug). Report what the call showed, not the possible causes. |
+| "test the inbound bot" | → Run one call → **Inbound bots**. Inbound is testable. |
+| "test before the demo" | The Smoke rows of every variant being shown. |
 
-- **Tester agent** — an INBOUND agent whose single prompt is a *persona* (a human the bot talks to).
-  Current tester: **"Testing Agent- Blue Dots"**, uuid `f60e0899-aa3a-4be7-9b4f-0296bd28ef48`,
-  inbound DID **`917946350285`**. It is set **non-interruptable** and **max_call_duration = 5 min**
-  (bot agents are capped at 15 min by the API; the tester stays at 5 — set 2026-08-01 by Parth,
-  superseding the earlier 4-min cap). Its persona is swapped by PATCHing its `instructions`.
-- **Bot under test** — an OUTBOUND agent (e.g. KKB Hindi Signals `115b38a5-…`). It is *triggered* to
-  place a call to the tester's DID; it runs its real prompt + real tools.
-- We then read BOTH call legs and grade the bot.
+**Before the first call of any session:** read the bot's open-issues list (the tracker sheet, or
+`raya/intake/<bot-id>.md`) and say how many are open. **After the last:** update every issue you
+touched (status, call id, date). Every report ends with what is still open from before.
 
-## Prerequisites
+**Written cases first.** Grade only against written cases: a lint-clean sheet row or a manifest case
+(`raya/testcases/<bot-id>.json`). Without one there is no pass rule, no FAIL signal and no record of what
+was never exercised. If what you are about to test has no row, write it first (`/generate-test-cases`).
 
-- `raya/.env` (RAYA_BASE_URL, RAYA_API_TOKEN) — never commit.
-- `scripts/raya_testcall.py` — `persona` (swap the tester's script), `lang hi|kn` (switch the
-  tester's language+voice), `call` (fire one call), `whoami`.
-- `scripts/raya_testrun.py` — fire ONE call + poll to completion + dump the **RAW** transcript
-  (connect-retry built in). **Grading is a separate, mandatory step** — this script contains no
-  assertions.
-- `scripts/raya_call.py` — read past calls/transcripts for any agent, **including tool-call
-  arguments** (a turn that makes a tool call has `content: null` and the real payload in
-  `tool_calls[].function.arguments`).
-- **A test manifest.** `raya/testcases/<bot-id>.json`, from `/generate-test-cases`. **Refuse to grade
-  a bot that has none** — without it there is no case id, no assertion id, no FAIL SIGNAL, and no
-  record of what was never exercised. Run `/generate-test-cases` first.
-- Personas: `raya/personas/*.md`. Checklists: `reference/checklists/`.
-- Production detectors: `raya/regression/location_integrity.py`, `raya/regression/apply_outcomes.py`
-  — the third grading surface (§Three grading surfaces).
+## Setup
 
-## Platform reality (learned the hard way — respect these or waste calls)
+- `raya/.env` (`RAYA_BASE_URL`, `RAYA_API_TOKEN`), never committed.
+- **The tester agent** ("Testing Agent- Blue Dots", uuid `f60e0899-aa3a-4be7-9b4f-0296bd28ef48`, in_did
+  `911204404272`, so the 10-digit DID to dial is `1204404272`, as of 2026-10-14). It is
+  non-interruptable, capped at 5 minutes, and its persona is swapped by PATCHing its instructions.
+  **DIDs get rebound** (the old `7946350285` now belongs to a Purple Dots bot): confirm with
+  `python3 scripts/raya_testcall.py whoami <tester_uuid>` before a session. `raya_testrun.py` refuses to
+  dial a DID that is not the tester's `in_did`.
+- `scripts/raya_testcall.py`: `whoami <uuid>` · `persona <tester_uuid> <file>` · `lang <tester_uuid>
+  <code>` (language and voice pair from `raya/voices.json` for `RAYA_ACCOUNT`, default `ekstep`) ·
+  `call` (raw POST, rarely needed).
+- `scripts/raya_testrun.py <bot_uuid> <to_10digit> <args.json> <tester_uuid> [label]`: one call, retries
+  the connect (4 tries, 90 s apart), polls to the end, prints the transcript. No grading.
+- `scripts/raya_call.py <agent_uuid> [limit] [offset]`: past calls with full tool arguments (a tool turn
+  has `content: null` and the payload in `tool_calls[].function.arguments`).
+- `scripts/testcase_sheet.py pull | lint | result | add-bug`: the sheet, through the service account.
+- Personas `raya/personas/` (index: `scenario-catalog.md`); fixtures `raya/testcases/args/`; checklists
+  `reference/checklists/` (`generic.md` for every bot, plus the bot's own).
+- Graders over real traffic: `raya/regression/grade_call.py <call-uuid> …` (mechanical checks; SKIP is
+  not PASS), `raya/regression/run_runtime_checks.sh [--since …] [--agent …]` (all transcript detectors),
+  `raya/regression/spoken_form.py --call <uuid>`.
 
-1. **Trigger:** `POST /api/call` with `agent_id` = **bot under test**, `to_number` = the tester's
-   **10-digit** DID (`7946350285`; the `91` is prepended via `country_code`), `agent_args` = the
-   bot's inputs. **OMIT `out_did`** — passing it explicitly gave `Unanswered`; omitting connects.
-2. **Call creation is rate-limited** (~1 per ~13 s → HTTP 429 with `retry_after`). Space fires ≥ ~15 s.
-3. **Bridging is intermittent** — a large fraction of dials fail instantly (`outcome`
-   Failure/Unanswered, `dur=0`, no transcript). Flaky telephony, NOT a bug in the request. **Retry
-   the connect** (the runner does, with a ~45 s cooldown). A burst of rapid calls degrades bridging.
-4. **`GET /api/call/{uuid}` LAGS** after a call — `Pending`/`dur=0` for a while before the transcript
-   + `call_output` finalize. Keep polling (the runner does).
-5. **The tester (callee) receives NO `agent_args`.** `POST` args reach the `agent_id` (the bot) only.
-   You **cannot** select a scenario per call via an arg — pick the persona by PATCHing the tester.
-6. **The bot looks up the DIALED number** (`${contact_phone}` is bound to `to_number`), i.e. the
-   tester DID — *not* whatever phone you pass in `agent_args`. So the backend identity the bot sees is
-   always the tester DID; you cannot choose which record the read tool returns. Provision the record
-   you want under that number. **Signals has no delete route** — a number cannot be reset to "new"
-   once a record exists, so every "new caller" assertion on the shared DID is one-shot forever.
-7. **`contact_memory` is platform-injected** when `memory_enabled` — it is not in `agent_args` and
-   cannot be set per call. Assertions that depend on it are `UNGRADEABLE — input not observable`.
-8. **A TTS tester cannot mumble.** Asked to be unintelligible it either speaks clearly or goes
-   silent. ASR-garble rungs are not voice-testable.
-9. **Each (record, target) action pair is single-use.** A repeat returns the limit error — a gift for
-   the error arm, a blocker for the success arm.
-10. **Target ids are instance-scoped.** A stale id yields a not-found error and looks like a bot bug.
-11. **Payloads have arrived TRUNCATED at exactly 1023 chars** (analyser `D42`) from the campaign
-    layer. Check the delivered args before blaming the bot.
-12. **A `Completed` call can read `dur=0` with a full transcript.** Duration is filled in late. On
-    2026-09-23 a 300 s, 56-turn call (`b989416d`) read `outcome=Completed dur=0` and was classified
-    "dropped". **Judge whether a call happened by its transcript turns, never by `call_duration`.**
-13. **Stopping your runner does not stop the call.** Killing the local script leaves the Raya call
-    running; a new test then shares the single tester (its persona PATCHed mid-call) and both calls
-    write to the same record. This contaminated two batches on 2026-09-23 (`9c0aeb63` overlapping
-    `9a6c87b4`). **Before starting ANY call — including a retry inside one scenario — wait until the
-    bot agent has no `Pending` call.** Rules 12 and 13 compound: a misread "drop" triggers a retry
-    that overlaps the still-live call.
-14. **`call_output` lags further than the transcript.** A consumer that reads it straight after the
-    call sees nulls; one that then falls back to a pre-call input writes stale data (`6c12ef52`
-    wrote the caller's OLD area). Read it only once the field you need exists.
-15. **macOS filenames are case-insensitive.** `PHONE.log` and `phone.log` are the same file, so a
-    runner and its log clobber each other. Never distinguish two files by case alone.
-
-## Concurrency (for running a batch faster)
-
-- **Parallel calls DO bridge** — multiple calls to the tester DID overlap in time (verified).
-- **BUT one tester = one persona at a time** (single prompt, no per-call arg). So you can only run the
-  **same** scenario in parallel on one tester. For **different** scenarios in parallel you need **one
-  tester agent per scenario** (each its own inbound DID + persona), then fan calls across them. K
-  testers turn N serial calls into ~N/K wall-clock — this is the right way to afford a large suite.
-- **Two test waves must never overlap on one tester.** A wave whose wait-loop watched only its own
-  runs once started during another wave's gap and PATCHed the tester's persona out from under an
-  in-flight call. See §Fixture hygiene, clause 5 (persona lock).
-- Default to **sequential** on a single tester (PATCH persona → run → grade → next).
-
-## Run ONE test
+## Run one call
 
 ```bash
-# 1. Load the persona onto the tester (swaps its prompt)
-python3 scripts/raya_testcall.py persona <tester_uuid> raya/personas/<persona>.md
-# 1b. Match the tester's language + voice to the bot under test
-python3 scripts/raya_testcall.py lang <tester_uuid> hi|kn
-# 2. Fire + poll + dump the RAW transcript  (grading is step 3, and it is not optional)
-python3 scripts/raya_testrun.py <bot_uuid> <tester_10digit_DID> <args.json> <tester_uuid> "<case-id>-<target-id>"
+python3 scripts/raya_testcall.py persona <tester_uuid> raya/personas/<lang>-<behaviour>.md
+python3 scripts/raya_testcall.py lang    <tester_uuid> <lang>          # match the bot's language
+python3 scripts/raya_testrun.py <bot_uuid> <tester_10digit_DID> <args.json> <tester_uuid> "<row-id>-<target-id>" \
+  | tee raya/testcases/runs/<run-id>/<row-id>-<target-id>-<n>.log
 ```
 
-`<args.json>` = the bot's `agent_args`, from `raya/testcases/args/` (one fixture per input-state
-equivalence class) or copied from a known-good past call via `scripts/raya_call.py <bot_uuid>`.
+- `<args.json>` is the bot's `agent_args`: a fixture from `raya/testcases/args/` or copied from a known
+  good call (`raya_call.py`). Check job ids with `scripts/validate_fixture_ids.py <args.json>` first.
+- **Always label the call** with the row id and target id: it is what ties the call to the case.
+- **The printed dump is lossy** (turns cut at 600 characters, tool results included; no `agent_args`).
+  Grade from the full call JSON: `GET /api/call/{uuid}` or `raya_call.py <bot_uuid> 3`, saved
+  unmodified as `raya/testcases/runs/<run-id>/<call_uuid>.json`.
+- **Before starting ANY call, including a retry, wait until the bot has no `Pending` call** and no other
+  wave is using the tester (→ Platform reality 6, 7).
 
-**Always pass a real `<case-id>-<target-id>` as the label** — it is the only thing tying the call to
-the manifest.
+### Inbound bots
 
-**The dump is lossy.** `raya_testrun.py` truncates turn content at 600 chars (tool results included,
-so a failure reason code can be cut off) and never prints `agent_args`. **Grade from the full call
-JSON, never from the printed dump:** `python3 scripts/raya_call.py <bot_uuid> 3` or
-`GET /api/call/{uuid}`, and persist it (§Provenance).
+**Inbound bots are testable** (corrected 2026-09-02). PATCH the inbound agent with `{"out_did": <number>}`
+(an **integer**: a string returns 400 `expected number, received string`), then run exactly as above with
+the inbound agent as `<bot_uuid>` and the tester DID as the number. Without an `out_did` the POST 500s.
+Already set: `kkb-hi-in-signals` 911204404274, `kkb-kn-in-signals` 918037006352, `maya-hi-in-signals`
+911204413383 (each its own `in_did`); check the others with `whoami`. **The inbound bot looks up the
+caller's number**, so inbound test data goes on the tester's number. `raya_testrun.py` also supports the
+reverse direction (the tester dials the bot's `in_did`: pass the tester's uuid as `<bot_uuid>` and the
+bot's DID as the number; the tester then needs an `out_did`).
 
-## Run a test sheet ("run these test cases, N calls each, and update the sheet")
+## Run a test sheet
 
-This is how most people will ask for testing: they point at a Google Sheet in the house layout
-(`/generate-test-cases` §9b) and want it run and filled in. Do it without being told the mechanics:
+("run these test cases, N calls each, and update the sheet")
 
-1. **Read the sheet through the service account, not a browser:**
+1. **Read it through the service account, never a browser:**
    `python3 scripts/testcase_sheet.py pull --sheet-id <ID> --tab "<tab>" --out <scratch>.json`. A 403
-   means the sheet is not shared with `kkb-sheets-writer@operation-rozgar.iam.gserviceaccount.com`:
-   ask the owner to add it as an editor (one line), do not try to open the sheet in a browser.
-2. **Lint it** (`testcase_sheet.py lint`). Rows with lint errors (no quoted expected line, vague pass
-   criteria) cannot be graded mechanically: tell the user which ones, and grade them as
-   `INCONCLUSIVE` rather than guessing.
-3. **Plan the run before placing a call**: rows × N calls × variants, at ~10-14 calls per hour per
-   tester. Say the number and the time it will take. Order: Smoke rows first; stop and report if a
-   Smoke row fails (the rest would be noise).
-4. **Run every row N times** (default 3 for any row whose behaviour branches; 1 is not a result for a
-   branching row, §Report contract 4). Each call is one `raya_testrun.py` run with the row id in the
-   label.
-5. **Write each result back to its own row**, found by its `#` id, never by row number:
+   means it is not shared with `kkb-sheets-writer@operation-rozgar.iam.gserviceaccount.com`: ask the
+   owner to add it as an editor (one line).
+2. **Lint it** (`testcase_sheet.py lint <scratch>.json`). A row with lint errors (no quoted expected
+   line, vague pass criteria) cannot be graded mechanically: list those rows for the user and record them
+   `NOT TESTED` with the reason, rather than guessing.
+3. **Plan before the first call**: rows × N × variants at about 10 to 14 calls per hour per tester.
+   Say the number and the time. Order: Smoke rows first; if a Smoke row fails, stop and report (the rest
+   would be noise). Order the rest by what each call writes (Fixtures 4).
+4. **Run every row N times** (default **3** for any row whose behaviour branches; one call is not a
+   result for a branching row). Each call is one `raya_testrun.py` run labelled with the row id.
+5. **Write each result to its own row, found by its `#` id, never by row number:**
    `testcase_sheet.py result --sheet-id <ID> --tab "<tab>" --id DK-07 --verdict FAIL --actual "<what
-   happened, quoting the bot's line>" --calls "3 calls: 2 pass, 1 fail (<id>, <id>, <id>)"`. Actual
-   Response is written in the same plain style as the Purple Dots sheet: verdict, call count, the call
-   ids, and the one line that decided it ("FAIL (8c546b11). The bot ran the whole interview after an
-   empty profile, then …"). A call that never connected is not a result (re-dial).
-6. **A bug the sheet did not have becomes a new row**, marked as a bug:
-   `testcase_sheet.py add-bug --sheet-id <ID> --tab "<tab>" --after-phase "<phase>" ...` with the
-   tester's words and the expected line written as a proper test case, so it is re-run next time.
-7. **Report** with the house format (root `CLAUDE.md` → How to report back): what passed, what
-   failed with call ids, new bugs added as rows, next step. Link the sheet.
+   happened, quoting the bot's line>" --calls "3 calls: 2 pass, 1 fail (<id>, <id>, <id>)"`.
+   Actual Response is plain: verdict, call count, call ids, and the one line that decided it ("FAIL
+   (8c546b11). The bot ran the whole interview after an empty profile, then …").
+   Verdicts the sheet accepts: PASS · FAIL · PARTIAL (some of the N calls passed: also an unresolved
+   result, Report contract 4) · BLOCKED (the harness cannot reach it; say what would) · NOT TESTED.
+   Grader states map as: `VOID` / `INPUT-INVALID` / `NOT_EXERCISED` → re-run, or NOT TESTED with the
+   reason in notes; never PASS or FAIL. A call that never connected is not a result: re-dial.
+6. **Never overwrite a person's verdict.** `result` replaces Actual Response and Verdict (it prints the
+   previous values). If `pull` shows a row already carries a human tester's verdict, do not call
+   `result` on it; tell the user and ask, and put your finding in your report instead.
+7. **A bug the sheet did not have becomes a new row**: `testcase_sheet.py add-bug --sheet-id <ID>
+   --tab "<tab>" --after-phase "<phase>" --scenario … --tester-says … --expected … --language …
+   --direction … --priority P0|P1|P2 [--type …] [--actual … --verdict FAIL --notes "<call id>"]`. The
+   row must itself pass lint (the script refuses otherwise), so it is re-run next time.
+8. **Report** in the house format and link the sheet.
 
-Never overwrite another person's Actual/Verdict text without saying so; if a row already has a
-verdict from a human tester, add yours to the notes column with the date instead.
+## Platform reality
 
-## Harness traps that look like bot bugs (check these before reporting a defect)
+Respect these or waste calls; check this list before calling anything a bot bug.
 
-Each of these was nearly reported as a bot bug by a team using the tuner (Purple Dots, Oct 2026):
+1. **Trigger:** `POST /api/call` with `agent_id` = the bot under test, `to_number` = the tester's
+   **10-digit** DID (`country_code` 91 is added), `agent_args` = the bot's inputs. For an outbound bot,
+   **omit `out_did`** (passing it gave `Unanswered`). Inbound: see above.
+2. **Rate limit:** about 1 call creation per 13 s, then 429 with `retry_after`.
+3. **Bridging fails often** (`Failure` / `Unanswered`, 0 s, no transcript). It is mostly contention on
+   the tester line: bridge rate rises from about 27% when redialled within 30 s to about 62% after 10
+   idle minutes. The runner waits 90 s between tries. A burst of rapid calls makes it worse.
+4. **`GET /api/call/{uuid}` lags**: `Pending` / 0 s for a while. Keep polling.
+5. **`call_output` lags further than the transcript.** Read it only once the field you need exists; a
+   consumer that falls back to a pre-call input writes stale data (`6c12ef52`).
+6. **Stopping your runner does not stop the call.** A new test would share the tester (its persona
+   PATCHed mid-call) and both calls write the same record (`9c0aeb63` overlapping `9a6c87b4`).
+7. **One tester holds one persona at a time.** Parallel calls do bridge, but only for the SAME scenario.
+   Different scenarios in parallel need one tester agent each (own DID, own persona): K testers turn N
+   calls into about N/K wall-clock. **Never overlap two test waves on one tester.** Default: sequential.
+8. **The tester receives no `agent_args`.** Choose the scenario by PATCHing the persona.
+9. **Judge whether a call happened by its transcript turns, never by `call_duration`**: a 300 s,
+   56-turn call read `Completed`, 0 s (`b989416d`) and was nearly retried into an overlap.
+10. **The leading `[user] hello`** in a transcript is a platform seed turn, not the caller.
+11. **Payloads have arrived truncated at exactly 1023 characters** from the campaign layer (D42). Check
+    the delivered args before blaming the bot.
+12. **Target ids are instance-scoped**: a stale job id returns not-found and looks like a bot bug.
+13. **macOS file names are case-insensitive**: `PHONE.log` and `phone.log` are one file. Never tell two
+    files apart by case.
+
+### Harness traps that look like bot bugs
+
+Each was nearly reported as a bot bug by a team using the tuner (Purple Dots, Oct 2026).
 
 | What you see | What it usually is | What to do |
 |---|---|---|
-| Call "failed" at 0 seconds, no transcript | the line never connected (number still switching, bridge flake) | re-dial; never score it |
-| Inbound bot greets the wrong name and hangs up | the inbound bot looks up the **caller's own number**; the test profile was prepared on a different number | prepare inbound test data on the tester's out number |
-| Setup step "succeeded" but the case exits for the wrong reason | the backend refused the setup (e.g. an under-18 profile) and the setup script hid it | setup scripts must stop on any backend refusal; read the response |
-| Empty call report / `call_output` nulls | it arrives some time after the call ends | poll until the field exists (platform reality 4, 14) |
-| A near-miss because the grader looked for one native word | the bot used the English loanword (wheelchair vs its native word) | match through `variants()` (script-aware matching) |
-| Standing checks report only one language | the checker listed files by name | fixed: `static_regression.py` reads languages from `raya/agents.json` |
-| Fluent call, caller told "saved", no tool calls at all | not a harness trap: the prompt is past this bot's size limit (D116) | `scripts/prompt_size.py check`; record the size evidence |
+| Call "failed" at 0 seconds, no transcript | the line never connected | re-dial; never score it |
+| Inbound bot greets the wrong name and hangs up | the inbound bot looks up the **caller's own number**; the test profile was on another number | prepare inbound test data on the tester's number |
+| Setup "succeeded" but the case exits for the wrong reason | the backend refused the setup (e.g. an under-18 profile) and the setup script hid it | setup scripts stop on any backend refusal; read the response |
+| Empty call report / `call_output` nulls | it arrives after the call ends | poll until the field exists |
+| Grader missed a native word | the bot used the English loanword (wheelchair vs its native word) | match through `variants()` (Script-aware matching) |
+| A call reached the wrong bot, two agents talk past each other | the DID was rebound to another agent | `whoami`; the runner's preflight blocks this |
+| Fluent call, caller told "saved", no tool calls at all | not a harness trap: the prompt is past this bot's size limit (D116) | `scripts/prompt_size.py check --target <id> <file>`; record the size evidence |
 
-Never run a test setup script against a real person's number: a setup that marks consent as given or
-fills default values (age 34) would write false data about a real participant. Test numbers only
-(memory: never test on user numbers).
+## Fixtures: what the bot will find
 
----
+0. **A real user's number and profile are READ-ONLY. Always.** No calls, no apply, no update, no
+   "diagnostic" that turns out to write. A probe of which jobs were still free on a QA tester's own
+   number applied her profile to three jobs, because the API answers that only by attempting an apply.
+   If a question can only be answered by a write, read it from past `call_output` or reproduce it on a
+   test number. Setup scripts never run against a real person's number.
+1. **Which record the bot looks up.** With no `contact_phone` in `agent_args`, the bot looks up the
+   dialled number (outbound: the tester DID; inbound: the caller, i.e. the tester). **A `contact_phone`
+   sent in `agent_args` DOES reach the model** (`e0e7bbc2`: the args carried `918888888888`, `get_profile`
+   was called with it, the call was dialled to the tester). So any profile state can be built:
+   1. **Pick the instance the bot reads**, from its OWN live `get_profile` `api_details.url` (e.g. the
+      Hindi slim reads `gzb-signals`, the Kannada slim `dharwad-signals`). A fixture on another host is
+      invisible and looks like a fetch failure.
+   2. **Pick a number that cannot be a real person**: the `9188888888xx` block.
+   3. **POST the state** to `/api/v1/admin/participant` with that `phone_number`: *new caller* = post
+      nothing · *draft / unconsented* = omit `compliance` · *terms only* = `compliance` with `user_terms`
+      + `user_privacy` (together, else `400 USER_LEVEL_INCOMPLETE`) · *live and complete* = all three
+      true plus a top-level integer `age` · *a missing field* = post without it. Consent is
+      write-once-true (`false` returns `400 CONSENT_DECLINED`), so build the state up front.
+   4. **Point the call at it**: `contact_phone` (and a matching `contact_name`) in the args, dial the
+      tester as usual, and check the transcript shows `get_profile` called with your number. If it shows
+      the DID, stop: everything after is testing the wrong record.
+   Never assert anything about the caller's own number from such a call (the telephony leg is still the
+   tester). **Assert the outcome on the backend too**: re-read the record after the call ("one seeker
+   item, now `live`, consent true" catches a duplicate profile the transcript cannot show).
+2. **`contact_memory` sent in `agent_args` does NOT reach the model**; the platform substitutes its own
+   stored memory (`c2ffe9fb`: fixture facts never voiced). Never express a memory precondition
+   (returning caller, `jobs_applied`, a stored landmark) as an args fixture: that case is
+   `fixture_blocked`, and a FAIL on it reports a fiction. The stored memory cannot be read either (no
+   endpoint). What is left: build the state through a real first call and observe a second (inference,
+   say so), and assert extractions on `call_output`. On a bot you have not checked, run the
+   discriminator first: put facts in the fixture that memory cannot hold and see whether they are voiced.
+3. **Which record the bot picks is not `items[0]`.** Determine it empirically (one throwaway call, read
+   the `profile_id` from its tool arguments) and pin the precondition to that id; record it on the case.
+4. **Order a wave by what each call writes**: no-record cases first (one-shot: Signals has no delete
+   route), then draft, then live, then cases that overwrite fields, then action cases (each record and
+   job pair can be actioned once; a repeat returns the limit error). Refuse to fire a no-record case when
+   the pre-state already shows a live record.
+5. **Snapshot the record before and after every call** (read it out of band, not through a call) and
+   store the delta: drift produces both false FAILs and false PASSes (a field skipped because an earlier
+   test wrote it looks like correct "don't re-ask"). A pre-state that does not match the case's declared
+   precondition makes every verdict in it `VOID (fixture-contaminated)`, naming the field.
+6. **Persona lock**: note the persona at fire time and re-read the tester's instructions at the end. A
+   change mid-call makes the case `VOID`, reported, not silently retried.
+7. **Unreachable preconditions are declared**, not dropped: `fixture_blocked: <reason>` plus the
+   substitute route (a production detector, a human call, a platform ask), listed in the report.
 
-## Grader contract — MANDATORY
+## Grader contract (mandatory)
 
-**A grading result produced without this contract is void.** Five clauses.
+A grade produced without this contract is void.
 
-### 1. Assertion form
+1. **Assertion form.** Every checklist item and case is a record with a stable id:
+   `{ id, scope: universal|bot|scenario, source: transcript|tool_args|tool_result|call_output|agent_args,
+   matcher, pass_condition, FAIL_SIGNAL, scope_turns, compare, evidence_required }`. The FAIL_SIGNAL is the
+   literal thing that proves failure (a token, a count, a missing key), not the inverse of the pass rule.
+   An item that cannot be written this way is an **observation**: reported as commentary under the
+   checklist's `## Observations (not graded)`, never PASS or FAIL. Mechanise what can be: "two questions
+   in one turn" = counted question markers with the mandated tag forms allow-listed; "off-topic derail" =
+   N consecutive bot turns with no token from the current step's line set; "verbatim repeat" = normalised
+   equality count with legitimate re-prompts listed.
+2. **Five verdict states**: `PASS` · `FAIL` · `NOT_EXERCISED` (the call never reached the state; a PASS
+   whose evidence is "nothing found" IS this) · `VOID` (contaminated fixture, persona changed mid-call,
+   deployed prompt differs from the graded one) · `INPUT-INVALID` (the inputs failed the pre-checks; the
+   bot is not at fault). A universal invariant is PASS, FAIL or VOID, never NOT_EXERCISED.
+3. **No locator, no verdict.** Every verdict carries `{call_uuid, turn_index, exact_substring}` or
+   `{call_uuid, tool_call_index, tool_name, arg_path, arg_value}`.
+4. **Normalise before matching** (Script-aware matching).
+5. **Results are files.** Per run, `raya/testcases/runs/<run-id>/` holds each call's full JSON and the
+   runner log; where a manifest exists, write `status.<target-id>` per case back into it (`result`,
+   `last_run`, `call_uuid`, `evidence`). The deployed prompt must be the one graded: check with
+   `python3 scripts/raya_deploy.py diff <target>` (or `/raya-reconcile`) before the wave; a run graded
+   against a different prompt is `VOID`.
 
-Every checklist item and every manifest case becomes a record with a **stable id**:
+## Universal invariants: asserted on EVERY completed call
 
-```
-{ id, scope: universal|bot|scenario,
-  source: transcript|tool_args|tool_result|call_output|agent_args,
-  matcher, pass_condition, FAIL_SIGNAL, scope_turns, compare, evidence_required }
-```
+Section-scoped checking is how a missing closing offer survived on apply calls and a doubled question
+on a gathering call. These run on every call, from the machine-readable record:
 
-- **`FAIL_SIGNAL` is the literal thing that proves failure** — a token, a count, a missing key — not
-  the inverse of the pass criterion. Grading is two-sided. A grader that knows only what *should*
-  happen scores a call "pass" when the mandated line appears and misses the forbidden line that
-  appeared alongside it.
-- An item that cannot be written this way is **not a grading item.** It moves to the checklist's
-  `## Observations (not graded)` block, is reported as commentary, and **may never produce PASS or
-  FAIL**. "Nothing implied the caller was a burden", "not an abrupt cut and not an endless tail",
-  "did not derail into an extended off-topic exchange" — these are observations. Honest observation
-  beats a fake PASS, and a run full of impressionistic passes drags the mechanical items down to the
-  same register.
-- Mechanise what can be mechanised: "two questions in one turn" → counted interrogative markers with
-  the mandated tag-question forms on an allow-list; "off-topic derail" → *N consecutive bot turns
-  containing no token from the current step's mandated line set*; "verbatim repeat" → normalised
-  string-equality count with the legitimate re-prompt lines enumerated per bot.
-
-### 2. Verdict states — five, not two
-
-`PASS` · `FAIL` · `NOT_EXERCISED` · `VOID` · `INPUT-INVALID`
-
-- **`NOT_EXERCISED`** — the call never reached the state. A PASS whose evidence is "nothing found"
-  **is** `NOT_EXERCISED`. Folding it into PASS is precisely why untested sections looked green.
-- **`VOID`** — ungradeable (fixture contaminated, persona changed mid-call, prompt sha mismatch). An
-  ungradeable call is **not** a passing call.
-- **`INPUT-INVALID`** — the input pre-assertions failed; the bot is not at fault. This is the
-  mechanical form of the repo's "push back before fixing" rule.
-- A **universal invariant** may return PASS, FAIL or VOID — **never** `NOT_EXERCISED`. If it cannot
-  be evaluated, the call is VOID.
-
-### 3. Evidence — no locator, no verdict
-
-Every emitted verdict carries `{call_uuid, turn_index, exact_substring}` or
-`{call_uuid, tool_call_index, tool_name, arg_path, arg_value}`. A verdict with no locator is not
-emitted. "The bot handled it correctly" is not evidence; `turn 19: "…"` is.
-
-### 4. Normalisation before any match
-
-See §Script-aware matching. A match run on raw strings is not a match.
-
-### 5. Result schema — results are files, not prose
-
-```
-raya/testcases/results/<bot>/<run-id>.json
-{ run_id, bot_target_id, prompt_sha, deployed_sha, started_at,
-  cases: [ { case_id, persona, persona_sha, args_file, call_uuid,
-             fixture_pre, fixture_post, fixture_delta,
-             verdicts: [ { assertion_id, state, evidence } ] } ] }
-```
-
-`prompt_sha` and `deployed_sha` **must match** or the whole run is `VOID` — a run graded against a
-prompt that is not the deployed one is worthless. Roll up to
-`raya/testcases/results/<bot>/coverage.json`: per assertion id — last state, last call uuid, run
-count, consecutive-pass count, `last_exercised_at`. **An assertion with `last_exercised_at: null` is
-the coverage report.** Feed the rollup into the Tier-3 digest so "N assertions not exercised in 30
-days" is mailed rather than discovered in production by a human tester.
-
-> **Tooling status, stated honestly.** `grade_call.py`, `textnorm.py` and `fixture_state.py` do not
-> exist yet; `raya/regression/location_integrity.py` and `apply_outcomes.py` are the working proof
-> that this is buildable in ~150 lines each, and both caught real defects that prose grading missed.
-> Until the scripts land, do every clause of this contract **by hand and write the result JSON
-> anyway** — the artifact is the point. Build them the first time a run needs more than one pass; the
-> normalisation table already exists inside `location_integrity.py` and should be extracted, not
-> re-typed.
-
----
-
-## Universal invariants — asserted on EVERY completed call
-
-Coverage must not be a function of what the grader thinks the scenario is "about". Section-scoped
-checking is how a missing closing offer survived on apply-success calls (the grader was checking the
-apply payload), how a doubled question survived on a gathering-phase call, and how a borrowed
-payload value survived on a location-themed call. **These run on every call, automatically, from
-machine-readable surfaces only.**
-
-1. Turn 1 is the mandated opener alone (the audio check for outbound `say_hello=false` bots); the
-   platform-injected leading `[user] hello` is ignored.
-2. Recording / AI disclosure present, **in its mandated position**.
-3. No `${...}`, `{`, `}`, JSON fragment, field name, tool name or UUID in any spoken turn.
-4. No digits, `₹`, AM/PM, or a literal `/` spoken as "slash" in any spoken turn.
-5. Spoken script == the call's language; no Latin-script rule prose in speech (borrowing allow-list
-   excepted).
-6. No banned machinery token **within its declared scope** (masked per §Required boilerplate).
+1. Turn 1 is the mandated opener alone (the audio check for outbound bots); the platform's leading
+   `[user] hello` is ignored.
+2. The recording / AI disclosure is present, **in its mandated position**.
+3. No `${...}`, `{`, `}`, JSON fragment, field name, tool name, bracketed slot or UUID in any spoken turn.
+4. No digits, `₹`, AM/PM, or a `/` spoken as "slash" in any spoken turn.
+5. Spoken script matches the call's language; no Latin-script rule prose in speech (allow-listed
+   loanwords excepted).
+6. No banned machinery token **within its declared scope** (masked per Required boilerplate).
 7. The read/lookup tool fires exactly once, before any personal detail is spoken.
-8. Every phone-bearing arg is single-prefixed E.164 for that backend; never doubled (`9191…`).
-9. Every tool arg value is Latin script; no Devanagari/Kannada in any payload.
+8. Every phone-bearing arg has a single country prefix in the shape that backend needs; never doubled.
+9. Every tool arg value is Latin script; no Indic script in any payload.
 10. Every enum-typed arg holds a literal from the live enum set, byte-exact.
-11. A create and its dependent action are never in the same turn/batch; the dependent action's
-    identifier arg is non-empty and correctly formatted.
-12. Every identifier arg matches its format contract (e.g. 8-4-4-4-12 with all four hyphens) **and**
-    is present in the delivered `agent_args` inventory — or, for inbound bots, in the prompt's own
-    inventory. Resolve the bot family FIRST (cf. `D46`).
-13. No spoken success claim without a matching successful tool result in the same or a prior turn.
-14. No profile-write value (`location`, `role`, `age`) the caller did not say aloud — script-aware
-    (this is `location_integrity.py`'s rule, and a third party's city is never the caller's city).
-15. Every mandated say-once line occurs **exactly once** (normalised equality).
-16. The mandated closing offer present on any engaged call, absent on do-not-call / never-engaged.
-17. Every mandated pre-goodbye step completed before the closing turn; goodbye last and once.
-18. `call_output.drop_reason` / `call_outcome` consistent with the transcript's terminal event.
-19. Every `call_output` field the output prompt declares is populated or explicitly `NA`; no field
-    populated from an input variable the caller never spoke.
-20. `agent_args` sanity: parses as JSON, **not exactly 1023 chars** (`D42` truncation), no phantom
-    args beyond the declared set, no sentinel values passed through as real ones.
-21. `deployed_sha == prompt_sha`.
-22. Fixture pre/post recorded (§Fixture hygiene).
+11. A create and its dependent action are never in the same turn; the dependent action's identifier is
+    non-empty and correctly formatted.
+12. Every identifier arg matches its format (e.g. 8-4-4-4-12 with all four hyphens) **and** exists in the
+    delivered inventory (or the prompt's own inventory for bots that carry one). Resolve the bot family
+    first (D46).
+13. No spoken success claim without a matching successful tool result in the same or an earlier turn.
+14. No profile value (`location`, `role`, `age`) written that the caller did not say aloud (script-aware;
+    a third party's city is never the caller's).
+15. Every mandated say-once line occurs exactly once (normalised equality).
+16. The mandated closing offer is present on an engaged call and absent on do-not-call / never-engaged.
+17. Every mandated pre-goodbye step happens before the closing turn; goodbye is last and once.
+18. `call_output` end / drop reason matches the transcript's ending.
+19. Every `call_output` field the output prompt declares is filled or explicitly `NA`; none is filled from
+    an input the caller never spoke.
+20. `agent_args` sanity: valid JSON, **not exactly 1023 characters**, no phantom args, no sentinel passed
+    through as a real value.
+21. The deployed prompt is the one being graded.
+22. The record's before and after state is recorded (Fixtures 5).
 
-**Per-scenario assertions** are the only ones allowed to be `NOT_EXERCISED`: the specific branch
-taken, the specific tool error provisioned, the specific line under test, the reported-bug
-reproduction. They carry the `FAIL_SIGNAL` from the manifest case.
+**Per-scenario assertions** are the only ones allowed to be `NOT_EXERCISED`: the branch taken, the tool
+error provisioned, the line under test, the reproduction. They carry the case's FAIL signal.
 
----
+## Script-aware matching
 
-## Script-aware matching (do not skip — this has produced false results in both directions)
+The transcript is in-script, payloads and args are Latin, and prompts use both spellings of borrowed
+words. Bare substring search fails both ways: it misses a Latin-spelled mandated line (a defect stays
+hidden) and finds nothing when comparing Latin args to in-script speech (bogus CRITICALs, D46/D49).
 
-The transcript is in-script, the payloads and `agent_args` are Latin, and the prompt itself uses both
-spellings of the same borrowed word. Bare substring search fails **two** ways, and both are lethal:
-searching the native spelling misses the Latin-spelled mandated line (a real line scored as never
-said → the defect stays hidden), and comparing Latin arg values against in-script speech returns
-zero matches (→ four bogus CRITICALs in one sweep; cf. `D46`/`D49`).
+1. **`norm(s)`**: NFC; strip nuqta variants (गाज़ियाबाद ≡ गाजियाबाद); collapse whitespace, ZWJ/ZWNJ;
+   casefold Latin.
+2. **`variants(term)`**: native-script form, Latin form, and the common Latin-in-native borrowing
+   (`option ⇄ ऑप्शन`, `profile ⇄ प्रोफाइल`). A match on any variant is a match. The table today lives
+   in `raya/regression/location_integrity.py` (`TRANSLIT` / `spoken_forms()`).
+3. **Cross-script comparisons are typed** (`compare: cross_script`). Zero matches on both sides is
+   `INCONCLUSIVE`, never FAIL: it is the signature of a broken matcher, not of a silent bot.
+4. A cross-script FAIL prints both the normalised needle and the haystack window.
 
-Required pre-steps, before **any** match:
+## Required boilerplate: scoped prohibitions
 
-1. **`norm(s)`** — NFC-normalise; strip nuqta variants (गाज़ियाबाद ≡ गाजियाबाद); collapse whitespace,
-   ZWJ/ZWNJ; casefold Latin.
-2. **`variants(term)`** — generate {native-script form, Latin form, common Latin-in-native
-   borrowing}. `option ⇄ ऑप्शन`, `profile ⇄ प्रोफाइल`, `apply ⇄ अप्लाई`, `record ⇄ रिकॉर्ड`. A match
-   against **any** variant is a match. The borrowing table already exists as `TRANSLIT` /
-   `spoken_forms()` in `raya/regression/location_integrity.py` — extract it to
-   `raya/regression/textnorm.py` so there is one table, not two. Its coverage is itself testable:
-   every Latin word appearing inside a quoted spoken line in the prompt must have an entry.
-3. **Cross-script comparisons are TYPED.** Any assertion comparing a payload/arg value to spoken text
-   declares `compare: cross_script` and routes through `variants()`. **A cross-script assertion that
-   finds zero matches on both sides returns `INCONCLUSIVE`, never FAIL** — zero-on-both-sides is the
-   signature of a broken matcher, not of a silent bot. This one rule kills the whole false-positive
-   class.
-4. **Transliteration is evidenced.** A FAIL from a cross-script comparison prints both the normalised
-   needle and the normalised haystack window, so a matcher bug is visible in the report instead of
-   being laundered into a verdict.
+Prohibitions are scoped ("never say X *in these lines*"), and the required and the forbidden often share
+a token (the mandatory disclosure contains `रिकॉर्ड`, banned in acknowledgement lines). Graded globally,
+a scoped rule fails a correct bot.
 
-## Required boilerplate — the prohibition exclusion list
+1. Every prohibition carries `scope_turns`: `intro_turn`, `acknowledgement_lines`, `failure_turn`,
+   `phase2_turns`, `whole_call`. **There is no default `whole_call`**; an unscoped prohibition does not run.
+2. **Mask the required lines first** (disclosure, audio check, consent line, closing offer, read-back,
+   from `raya/testcases/<bot-id>/required-lines.json` when it exists, else from the prompt), then
+   evaluate prohibitions on the masked text only.
 
-Prohibitions in these prompts are **scoped** ("never say X *in these lines*", "never read the memory
-out"), and the required and the forbidden collide on the same token. Grading a scoped prohibition
-globally flags the very line the bot is required to say — e.g. the mandatory recording disclosure
-contains `रिकॉर्ड`, which is banned in the acknowledgement lines. That is a FAIL on a correct bot,
-and it turns every scoped rule in a long prompt into a false-positive generator.
+## Provenance: call ids are read, never inferred
 
-1. **Scope is part of the assertion.** Every prohibition carries `scope_turns`, resolved
-   mechanically: `intro_turn`, `acknowledgement_lines`, `failure_turn`, `phase2_turns`,
-   `whole_call`. **The default is NOT `whole_call`** — an assertion with no declared scope fails
-   validation and does not run.
-2. **Mask the required lines first.** `raya/testcases/<bot-id>/required-lines.json` (generated by
-   `/generate-test-cases` from the prompt, not hand-written) lists every spoken line a rule marks
-   mandatory: disclosure, audio check, consent line, action bridge, closing offer, read-back. Mask
-   every required-line span in the transcript, then evaluate prohibitions **on the masked text only**.
-   The same file drives the positive assertions, so the mandatory set is one source of truth and a
-   token cannot be simultaneously required and banned without the conflict showing as a build error.
-   Regenerate on every prompt change; fail the run if the file is staler than `prompt_sha`.
+Pairing a case to a call by position or recency is banned: under retries it attributes evidence to the
+wrong case, undetectably, and then nobody can say which call changed the record.
 
-## Provenance — call ids are READ, never inferred
+1. **Take the uuid from the run itself.** The runner prints it on the `POST /api/call -> 200 {"uuid": …}`
+   line and again on the `BOT <uuid>` line. Keep each run's output (`tee` as in Run one call) and record
+   `{run_id, row/case id, persona file, args file, target, call_uuid, connect_attempt}` per call.
+   (The runner does not write a run log itself yet.)
+2. **Never** fetch `?agent_id=…&limit=N` and pair by position or time.
+3. **The tester leg by identity**: the runner shows the tester's latest call (`limit=1`), which is wrong
+   when calls overlap. Match by start time inside this call's window and duration; mark it uncertain when
+   more than one matches.
+4. **Keep the full call object** per case, unmodified, and grade from it.
 
-**Pairing a scenario to a call by ordinal position or recency is banned.** Under concurrent or
-retried calls it misattributes evidence, and the failure is undetectable from the report: a
-well-formed verdict citing a real call uuid that belongs to a different scenario looks exactly like a
-correct verdict. It also corrupts the fixture chain — if you cannot say which call ran which persona,
-you cannot say which call mutated the backend record, so every later scenario's interpretation is
-guesswork. And the repo rule "the word *fixed* requires a call id" is unenforceable when the id is
-inferred.
+## Input pre-checks: before behaviour is graded
 
-1. **The runner persists.** `raya_testrun.py` appends one JSON line per attempt to
-   `raya/testcases/runs/<run_id>.jsonl` **at the moment of `POST /api/call`**, before any polling:
-   `{run_id, case_id, persona_file, persona_sha, args_file, args_sha, bot_target_id, tester_uuid,
-   to_number, posted_at, call_uuid_from_post_response, connect_attempt}` — then a second line on
-   terminal state with `outcome`, `duration`, `turns`. The `uuid` in the POST response is the
-   authoritative binding; it is already available in the script and currently only printed.
-2. **The grader reads the log, never the call list.** Resolve the uuid from the jsonl by
-   `--run <run_id> --case <case_id>`. Fetching `?agent_id=…&limit=N` and pairing by position or time
-   is banned outright.
-3. **Tester leg by identity, not `limit=1`.** Search the tester's recent calls for the leg whose start
-   time falls inside this call's window **and** whose duration matches; mark
-   `tester_leg_uncertain: true` when more than one candidate matches rather than silently picking one.
-4. **Persist the full call object** per case at `raya/testcases/runs/<run_id>/<call_uuid>.json`,
-   unmodified — `agent_args`, every turn, every `tool_calls[].function.arguments`, every tool result.
-   Truncation belongs in the human view only, and the human view marks it (`… [+N chars, see JSON]`).
+Failing these makes the call `INPUT-INVALID`, not a bot FAIL: "the prompt is fine, the inputs were
+wrong", computed instead of argued.
 
-## Fixture hygiene — pre-state, drift, and voiding
+- The inventory / recommendations arg parses as JSON and is not exactly 1023 characters long.
+- Every identifier in it resolves on this variant's instance.
+- No phantom args; no sentinel (`"Any"`, `"NA"`, `"Not Available"`, an unsubstituted `${…}`) where a
+  real value belongs. If one is there, the assertion becomes "the bot did not speak it".
+- Assertions that depend on platform-injected, unreadable inputs (`contact_memory`) are marked
+  `UNGRADEABLE: input not observable` in the checklist, so they stop looking like passing checks.
 
-The tester DID's backend record **mutates as tests run**: role, age, location get overwritten by the
-bot under test, so later scenarios silently inherit earlier ones' writes. This is asymmetric and
-therefore dangerous — drift produces **false FAILs** (the bot answered correctly against a record the
-persona doesn't match) *and* **false PASSes** (the bot skipped a question because a previous test had
-already written that field, indistinguishable from correct "don't re-ask known fields" behaviour).
-Both have happened. State the facts is not enough; this is a procedure.
+## Where each assertion is graded
 
-1. **Pre-state, every call, before firing.** Read the record out-of-band (the bot's own read tool via
-   the backend API, *not* via a call) and store the full response as `fixture_pre` with a
-   `fixture_sha`.
-2. **Post-state, every call.** Re-snapshot immediately after terminal state; store `fixture_post` and
-   the computed `fixture_delta` (fields written, by which tool, with which value). The delta is a
-   first-class result — it is how you learn what this call did to the next one.
-3. **Precondition declaration.** Every manifest case declares
-   `requires_fixture: {record_state: none|draft|live, role, gender, location, actioned_targets_excludes: […]}`.
-   Compare it against `fixture_pre` **before** grading. Mismatch → every verdict in that case is
-   `VOID (fixture-contaminated)` with the offending field named. VOID is never reported as FAIL and
-   never as PASS; re-run after restoring the fixture, or reclassify as fixture-blocked.
-4. **Ordering is derived, not remembered.** Sort a wave by fixture destructiveness:
-   `record_state: none` cases **first** (one-shot forever — no delete route), then `draft`, then
-   `live`, then the enrichment cases that overwrite fields, then the action cases (each (record,
-   target) pair is single-use). **Refuse to fire a `record_state: none` case when `fixture_pre`
-   already shows a live record** — firing it and grading the wreckage is worse than skipping it.
-5. **Persona lock.** Record `persona_sha` at fire time; re-read the tester's live `instructions` at
-   terminal state. If the sha changed mid-call, the case is `VOID` (another wave PATCHed over it) —
-   and VOID is *reported*, not silently retried.
-6. **`fixture_blocked` is a declared outcome, not an omission.** When a precondition is unreachable on
-   this harness (new-caller gates on a DID that already has a record, a specific stored value,
-   per-record `contact_memory`), mark the case `fixture_blocked: <reason>` and **name its substitute
-   route** — a production detector, a human call, or a platform ask. List blocked cases explicitly in
-   the report. Silently dropping them is how "cannot test Fix A" became "Fix A untested and
-   unmentioned".
-0. **A REAL USER'S NUMBER AND PROFILE ARE READ-ONLY. ALWAYS.** No calls, no `apply_job`, no
-   `update_profile`, no direct API writes against them — and no "read-only" diagnostic that turns out
-   to write. On 2026-09-03 I probed which of the 8 handover jobs were still free on QA's own number;
-   the Signals API only answers that by ATTEMPTING an apply, so the probe applied her profile to the
-   3 remaining jobs and exhausted her whole fixture. **If a question can only be answered by a write,
-   do not answer it that way** — read it off `call_output.jobs_applied` /
-   `jobs_failed_to_apply` in past transcripts, or reproduce it on the tester DID. When a fixture is
-   exhausted, generate fresh job ids instead of probing which ones are free.
-
-6a. **INBOUND BOTS ARE TESTABLE — give the agent an `out_did` and dial the tester.** Do not record an
-   inbound fix as unverifiable. `POST /api/call` with an inbound agent 500s only because the agent has
-   no outbound route; PATCH `{"out_did": <number>}` onto it first and the same harness works exactly as
-   it does for an outbound bot. **`out_did` is an INTEGER** — sending it as a string returns
-   400 `invalid_type, expected number, received string`, which is what made this look impossible on
-   2026-09-02. Set on that date: `kkb-hi-in-signals` 911204404274, `kkb-kn-in-signals` 918037006352,
-   `maya-hi-in-signals` 911204413383 — each its own `in_did`, so one number serves both directions.
-   `kkb-hi-in` already had one, which is why inbound calls `029783e9` / `64123c15` (2026-08-28) carry
-   `to=+917946350285`. **Check the call history for a counter-example before declaring any harness
-   limit structural.**
-
-6b. **Which record the bot picks is NOT `items[0]` — it is the most COMPLETE live one.** Learned the
-   hard way on 2026-09-01: to force an `ACTION_LIMIT_REACHED` I pre-applied (via the backend API) the
-   pair `(items[0], job)` on the tester DID, on the strength of the prompt's own rule ("the first item
-   whose `lifecycle_status` is `live`"). The call then applied as `items[1]` — the profile carrying a
-   real name, age and role — the duplicate never occurred, and the apply SUCCEEDED. The test proved
-   nothing and looked like a pass. **Before any fixture precondition that names a specific record,
-   determine empirically which record the bot actually selects** (fire one throwaway call and read the
-   `profile_id` out of its `apply_job`/`update_profile` arguments), and pin the precondition to THAT
-   id. Where a DID carries several live records, expect the choice to follow completeness, and record
-   the observed `profile_id` in the manifest case so the next run does not have to rediscover it.
-
-6c-0. **CORRECTED 2026-09-10 — `contact_phone` sent in `agent_args` DOES reach the model, and that
-   changes what is testable.** The note below said `contact_phone` was substituted by the platform
-   like `contact_memory`; that is wrong for `contact_phone`. **Proof (call `e0e7bbc2`, KKB-Slim
-   Hindi):** the fixture carried `contact_phone: 918888888888`, the CALL CONTEXT line rendered
-   `${contact_phone} = 918888888888`, and `get_profile` was called with exactly that number — while
-   the call itself was dialled to the tester DID `917946350285`. Reconfirmed on `f796df13`
-   (`918888888885`) and on the Kannada twin.
-
-   **What this unlocks.** The backend record under test is no longer nailed to the tester DID, so any
-   profile state can be fixtured by BUILDING it through the API on a throwaway number and pointing
-   `contact_phone` at it: a caller with no profile at all (the new-caller/`create_profile` path), a
-   `draft` profile, a profile with consent flags false, one with a field missing. All of those were
-   previously recorded as unfixturable. It also sidesteps the tester DID's `PROFILE_LIMIT_REACHED`
-   cap (5 seeker profiles, no DELETE route on the API).
-
-   **Two cautions.** (1) The **dialled** number still decides the telephony leg, so `${contact_phone}`
-   and the real caller diverge — never assert anything about the caller's own number from such a
-   call. (2) Use a number that cannot belong to a real person (we use the `9188888888xx` block on the
-   test Signals instances) and build the fixture on the **same instance the bot points at** — the
-   Hindi slim reads `gzb-signals`, the Kannada slim reads `dharwad-signals`, so a fixture on the wrong
-   host is invisible to the bot.
-
-6c-1. **Recipe — build a backend fixture for any profile state (Signals bots).** Four steps, ~5
-   minutes, and it replaces every "this state cannot be tested" note:
-
-   1. **Pick the instance the bot actually reads.** Resolve it from the bot's OWN live tool config,
-      never from another bot's: `get_profile`'s `api_details.url`. The Hindi slim reads
-      `gzb-signals`, the Kannada slim reads `dharwad-signals`. A fixture on the wrong host is
-      invisible to the bot and the test looks like a fetch failure.
-   2. **Pick a number that cannot be a real person.** We use the `9188888888xx` block. Never a
-      number that could be dialled, and never a real user's (see memory: never-test-on-user-numbers).
-   3. **POST the state you want** to `/api/v1/admin/participant` with that `phone_number`:
-      - *new caller* — post nothing at all; the fetch comes back empty
-      - *draft / unconsented* — post the profile with `compliance` **omitted** (zero consent rows:
-        `user_consent` terms+privacy false, item `draft`, `profile_consent_accepted` false)
-      - *consented but no profile-creation consent* — `compliance` with `user_terms` + `user_privacy`
-        only (they must be sent together, else `400 USER_LEVEL_INCOMPLETE`)
-      - *live and complete* — `compliance` all three true, plus a top-level `age`
-      - *a missing field* — post the profile without it
-      Consent is **write-once-true**: any `false` value is refused (`400 CONSENT_DECLINED`), so build
-      the state you want up front — you cannot walk a record backwards. Age must be an integer.
-   4. **Point the call at it:** set `contact_phone` (and a matching `contact_name`) in the args
-      fixture and dial the tester DID as usual. Confirm in the transcript that the CALL CONTEXT line
-      shows your number and `get_profile` was called with it — if it shows the DID instead, stop and
-      re-check, because everything after that is testing the wrong record.
-
-   **Assert the outcome on the BACKEND, not only the transcript.** Re-read the record after the call:
-   for a consent test, "the item is now `live` with `profile_consent_accepted: true` and there is
-   exactly ONE seeker item" is the assertion that catches a duplicate-profile bug the transcript
-   cannot show you (that is how `create_profile` minting a second live profile was found).
-
-6c. **SETTLED 2026-09-01 (still true for `contact_memory`): `contact_memory` sent in `agent_args`
-   does NOT reach the model. The platform substitutes its own stored memory.** The value you
-   send is faithfully recorded in `agent_args` and is not what `${contact_memory}` resolves to.
-   **Proof (call `c2ffe9fb`):** the fixture carried `last_conversation_summary` = "Seeker asked about
-   WELDING jobs in Meerut on the previous call and gave Chand Tara Cinema as the nearest landmark",
-   `nearest_landmark` = "चाँद तारा सिनेमा", `home_location` = "Meerut" — facts the tester DID has never
-   discussed. The bot opened with "पिछली बार हमारी बात **कंप्यूटर ऑपरेटर या डेटा एंट्री** के काम के बारे में हुई थी"
-   and then asked the landmark question anyway. Nothing from the fixture was voiced. Two earlier calls
-   (`9cb137ed` sent "No Old Memory…", `a111ed52` sent a Sahibabad summary) point the same way.
-
-   **What this forbids** — and note this is now scoped to `${contact_memory}` ALONE, not to
-   `contact_phone` (see 6c-0). Do NOT express any precondition the prompt reads out of
-   `${contact_memory}` as an args fixture: a returning-caller state, `jobs_applied` for a
-   duplicate-application test, a stored `nearest_landmark` for a "never ask twice" test. Such a case is `fixture_blocked`, not a
-   pass or a fail — and a test that reports FAIL on one is reporting a fiction. Two real tests were
-   almost miscounted this way on 2026-09-01 before the discriminator was run.
-
-   **What is left.** (a) The **production shape**: build the state through a real call (apply to a job,
-   or give a landmark), let the memory prompt write it, then place a second call and observe. This is
-   inference, not verification — you are reading behaviour, not the precondition. (b) `call_output`,
-   which IS readable and is the honest place to assert what a call extracted.
-
-   **Run the discriminator before trusting any memory-gated verdict on a bot you have not checked.**
-   Put facts in the fixture that the stored memory cannot possibly hold and see whether the bot voices
-   them. It costs one call and it is the difference between a verdict and a guess.
-
-6d. **You cannot read the platform's stored contact memory.** There is no endpoint: `/api/contact`,
-   `/api/contact/{phone}` and `/api/memory` all 404 or 500. So for a memory-gated rule you can observe
-   neither the precondition going in nor the value coming out — only the behaviour in between. **Say
-   so in the report** rather than implying the precondition was confirmed. The standing ask is a
-   read-only endpoint for a contact's stored memory; without it, "the bot should skip this because
-   memory already has it" is permanently one inference away from being testable.
-
-7. **Standing escalation.** One DID means one shared history. The ask is **additional tester DIDs,
-   one per fixture class** (never-recorded, live-recorded, draft-recorded). Until then, state in
-   **every** report that new-caller assertions are permanently unreachable on the shared DID.
-
-## Input pre-assertions — run before behaviour is graded
-
-Failing these classifies the call `INPUT-INVALID`; it does **not** produce a bot FAIL. This is
-"the prompt is fine, the inputs were wrong" as a **computed** verdict instead of a judgement call.
-
-- The delivered inventory/recommendations arg parses as JSON, and `len(arg) != 1023` (`D42`).
-- Every identifier in it resolves on **this variant's** region instance.
-- No phantom args beyond the declared set; no sentinel (`"Any"`, `"NA"`, `"Not Available"`,
-  unsubstituted `${…}`) sitting where a real value belongs — and, if one is there, the assertion
-  under test becomes "the bot did not speak it", not "the bot mishandled it".
-- Where a required input is platform-injected and unreadable (`contact_memory`), the affected
-  assertions are marked **`UNGRADEABLE — input not observable`** in the checklist itself, so they stop
-  looking like checks that pass.
-
-## Three grading surfaces
-
-Every assertion declares `graded_by`:
-
-| surface | when | contract |
+| `graded_by` | When | How |
 |---|---|---|
 | `harness` | reachable by a tester call | this skill |
-| `static` | provable by reading the prompt / tool schema | Tier 0; runs **first** and blocks the live run |
-| `production_detector` | precondition unreachable on the harness | a `raya/regression/` script over real traffic — `--since`, exit 1 on violation, prints call uuid + evidence line |
-| `human_call` | genuinely untestable by TTS (garble rungs) | a person dials; say who and when |
+| `static` | provable from the prompt or tool schema | `static_regression.py`, the `/generate-test-cases` static audit; runs first, zero calls |
+| `production_detector` | precondition unreachable on the harness | a `raya/regression/` script over real calls (`run_runtime_checks.sh` runs them all; `--since`, exit 1 on violation, prints call uuid + line) |
+| `human_call` | untestable by a TTS tester (garbled speech) | a person dials; say who and when |
 
-**A blocked assertion with no route is an open gap with its own id, reported — never omitted.** The
-harness limits each silently delete a set of assertions; with no routing rule the deletion is
-invisible and reads identically to a pass.
+**A blocked assertion with no route is an open gap with its own id, reported, never omitted.** Runtime
+detectors do not run in the daily job yet (`raya/regression/README.md`): run them by hand after a
+behaviour change and cite them next to the harness rows (`graded_by`, last run, violations).
 
-`raya/regression/location_integrity.py` (a profile written with a location the caller never gave) and
-`raya/regression/apply_outcomes.py` (which caller-facing line was spoken on each backend failure
-reason) are the two working detectors. Generalise new ones into `raya/regression/detectors/` sharing
-`textnorm.py` and one call-fetch helper — both current scripts duplicate the env loader, the fetcher,
-the target enumeration and the paging loop, so a third should be a 40-line file. **Register every
-detector in the Tier-3 daily job** and cite it in the report next to the harness rows:
-`graded_by: production_detector | last run | violations`. That is what makes "the harness cannot test
-this" an answer rather than an excuse.
+## Grade a call: the walk
 
----
+1. Resolve the call uuid from the run output for this row. Fetch and save the full JSON.
+2. Deployed prompt == graded prompt, persona unchanged → else `VOID`.
+3. Input pre-checks → else `INPUT-INVALID`.
+4. Record before/after state and the precondition match → else `VOID (fixture-contaminated)`.
+5. Mask the required lines; run the 22 universal invariants (`grade_call.py <uuid>` covers many of
+   them mechanically; its SKIP is not PASS).
+6. Run the row's or case's own pass rule and FAIL signal.
+7. Run the checklist items by id: `reference/checklists/generic.md` (every bot) and the bot's own
+   (`reference/checklists/<bot-slug>.md`), each with its scope and compare type. Items cite the bug
+   pattern they guard (`cf. D40`) so a FAIL routes to a known fix direction.
+8. Write the result (sheet row and/or manifest status), then the report.
 
 ## Report contract
 
-### 1. Per-fix rows, never a batch verdict
-
-One row per fix, never per deploy:
-
-```
-| fix_id | state | call_uuid | evidence (exact line or arg) | variant |
-```
-
-`state` ∈ `CONFIRMED | FAILED | VOID | NOT_EXERCISED | FIXTURE-BLOCKED | DEPLOYED, NOT VERIFIED`.
-
-A fix with no `call_uuid` may only be `DEPLOYED, NOT VERIFIED` or `VERIFY-PENDING`. The words
-"fixed", "working", "done", "confirmed", "resolved" are **lexically forbidden** on such a row. The
-same row text goes into the changelog, the commit message, and what you tell the user — the three
-cannot diverge. **When several fixes ship together, each needs its own call id**; one passing call
-does not verify the other three.
-
-### 2. Evidence is the line, not a paraphrase
-
-Quote the exact substring or `arg_path=value`, with the turn index.
-
-### 3. Every variant gets its own row
-
-Hindi and Kannada, outbound and inbound, each bot separately. A variant with no call id of its own is
-`VERIFY-PENDING` — **never inherited from its twin.** "It works for Hindi so Kannada is fine" is a
-recipe for disaster.
-
-### 4. Repeats are mandatory for branching behaviour
-
-Any fix touching a spoken line or a branch runs **N ≥ 3** times on the same persona, same args, same
-fixture class. Report `k/N`.
-
-- `k == N` → `CONFIRMED`
-- `k == 0` → `FAILED`
-- `0 < k < N` → **not a result.** Report
-  `UNRESOLVED — nondeterministic, ladder step reached: <1-5>` and show the ladder walked, in order.
-
-### 5. "Intermittent" is not a result — the escalation ladder (root `CLAUDE.md`)
-
-Never report a behaviour as "works sometimes", "flaky", "intermittent" or "runtime adherence" and
-stop there. That is a description of a defect, not an outcome. If the same prompt, on the same error,
-with byte-identical tool results, produces the right line on one call and the wrong line on the next,
-**the wrong output is still available to the model.** Walk all five:
-
-1. **Grep the bot's wrong output verbatim against the whole prompt** (`D50`). A hit inside a sample
-   conversation is the cause, and it is **proof, not a theory**. Fix the demonstration. This is the
-   single highest-yield diagnostic in the catalogue, and it is what finally made a twice-failed fix
-   pass on the very next call.
-2. **Find the competing instruction and delete or scope it.** A prohibition sitting next to a
-   requirement licenses the model to obey the prohibition.
-3. **Remove the wrong option instead of forbidding it.** A generic fallback that makes a factual
-   claim will be chosen for cases it is false about, however loudly you forbid it. Give every case
-   its own mandatory line with no general default, or rewrite the default so it asserts nothing that
-   can be false. **Make the worst case truthful rather than trying to make the wrong case
-   unreachable.**
-4. **Move the decision out of prose** — tool parameter descriptions, `required` fields, enums and
-   payload templates are read at the moment of use and are far stickier than rules paragraphs.
-5. **Only if 1–4 are exhausted**, escalate to the platform, stating what you tried, the evidence, and
-   the change you are asking for — **with both call ids and the diff of the two tool results proving
-   they were identical.** "The model ignores it" is not an escalation.
-
-The word "intermittent" without a recorded ladder step is a contract violation. And **never add a
-third wording of a guard that has already failed twice** — two failures of the same prohibition is
-the signal to change mechanism, not volume (`D25`, `D47`, `D49`, `D50`).
-
-### 6. `NOT_EXERCISED` is printed, always
-
-The report lists every assertion in the bot's set that no call in the run reached, with a count.
-`NOT_EXERCISED: 51/92` on the front page is the number that prevents a green report over 27% branch
-coverage. **A run cannot be reported green while `NOT_EXERCISED` is non-zero** — it is reported as
-*partial*, with the uncovered assertion ids listed, plus `branch_coverage = arms_taken / arms_total`
-from the manifest.
-
----
-
-## Grade the call — the walk
-
-1. **Resolve the call** from `raya/testcases/runs/<run_id>.jsonl` by case id. Fetch the full JSON.
-2. **Check `deployed_sha == prompt_sha`** and `persona_sha` unchanged → else `VOID`.
-3. **Input pre-assertions** → else `INPUT-INVALID`.
-4. **Fixture pre/post + precondition match** → else `VOID (fixture-contaminated)`.
-5. **Mask required lines**, then run the **22 universal invariants**.
-6. Run the **per-scenario assertions** from the manifest case, each with its `FAIL_SIGNAL`.
-7. Run the bot checklist items with ids, scopes and `compare` types:
-   - **`reference/checklists/generic.md`** — bot-agnostic (off-topic, silence/re-prompt bounds,
-     interruption, ASR mishearing, no-fabrication, language/script, PII/consent, hold-message,
-     graceful exit, verbatim-repeat, "are you AI?"/do-not-call, closing offer). Applies to EVERY bot.
-   - **`reference/checklists/{kkb,dkb,maya,trrain,<bot-slug>}.md`** — bot-specific must-verify items.
-8. **Write the result JSON** and update `coverage.json`. Then write the report per §Report contract,
-   and the per-case `status.<target-id>` back into `raya/testcases/<bot-id>.json`.
-
-Every item cites the analyser bug-pattern it guards (e.g. `cf. D40`) so a FAIL routes straight to a
-known fix direction.
+1. **One row per fix, never per deploy**: `fix · state · call_uuid · the exact line or arg · variant`,
+   `state` ∈ CONFIRMED · FAILED · VOID · NOT_EXERCISED · FIXTURE-BLOCKED · DEPLOYED, NOT VERIFIED. With no
+   call id the only words allowed are **DEPLOYED, NOT VERIFIED** or **VERIFY-PENDING**; "fixed", "working",
+   "done", "confirmed", "resolved" are forbidden there. The same words go in the changelog and the commit.
+   Several fixes shipped together need a call id each.
+2. **Evidence is the line**, quoted with its turn, or `arg_path=value`. Never a paraphrase.
+3. **Every variant gets its own row**: each language, inbound and outbound, each bot. A variant with no
+   call of its own is VERIFY-PENDING, never inherited from its twin.
+4. **Branching behaviour needs N ≥ 3** calls, same persona, same args, same precondition. `k/N`:
+   all pass → CONFIRMED; none → FAILED; anything between is **not a result**: report
+   `UNRESOLVED` and diagnose before any remedy, as root `CLAUDE.md` → "FIRST localize the cause"
+   requires: count how often the right branch was ever taken (0/N is unreachability), split by input
+   (a clean split is a condition, not adherence), read the guard. Only then the remedy ladder, and never
+   a third wording of a rule that failed twice. "Intermittent" with no diagnosis recorded is a contract
+   violation.
+5. **`NOT_EXERCISED` is always printed** with its count. A run with untested assertions is reported as
+   partial, with the ids listed, never green.
+6. **Plain words** (root `CLAUDE.md` → "Write for someone who is not a prompt engineer"): the words of
+   the call, the sheet row and call id they can open, the few prompt lines that changed. Reproduce
+   before reporting: a report made only of "maybe" causes is not finished. End with what is still open
+   from before and the next step as a sentence they could type.
 
 ## From a finding to a fix
 
-- **No fix without a transcript.** Confirm the bug in a real call first (this skill). A static or
-  analyser finding **opens** an item; it never closes one.
-- Route a confirmed **prompt gap** to **`/update-prompt`** (or **`/port-feature`** to carry a proven
-  fix from a sibling bot — prefer porting over reinventing). **Runtime tool-adherence** misses are
-  often better fixed with a **tool-schema lever** (a `required` param) than more prose — `D25`/`D40`.
-- **An example that demonstrates the violation is a prompt bug of its own.** If the wrong output
-  greps to a sample conversation, the fix is an **example edit**, not more prose (`D50`).
-- After fixing: **snapshot → deploy → re-test with this skill (N ≥ 3) → revert on regression.** Then
-  log the changelog + analyser entry (bug-fix feedback loop).
-- Backend / data / true tool-adherence issues are NOT prose-fixable → escalate, don't experiment on
-  the live flow. Say "the prompt is fine, the inputs were wrong" out loud when that is what the args
+- **No fix without a transcript.** A static or analyser finding opens an item; only a call closes it.
+- Check the inputs and the backend before the prompt: wrong args, a 4xx with a well-formed id, a stale
+  job id are not prompt bugs. Say "the prompt is fine, the inputs were wrong" when that is what the args
   show.
+- Grep the bot's wrong words against the whole prompt (D50): a hit in a sample conversation is the cause;
+  the fix is an example edit.
+- Route a confirmed prompt gap to `/update-prompt` (or `/port-feature` for a fix proven on a sibling);
+  the full loop from a tracker is `/bug-fix`. After the fix: snapshot, deploy, re-test here (N ≥ 3 per
+  variant), revert on regression.
+- The three testing tiers (root `CLAUDE.md`): the fix itself, the blast radius around it (same section,
+  shared logic, the mirrored languages, the payload touched), and the daily standing check. Never skip
+  one, never collapse the first two into one happy-path call.
 
-## Testing quality — the three tiers (see repo `CLAUDE.md` → "The three testing tiers")
+## Personas
 
-Every fix is verified in three tiers, in order, and **on every affected variant separately — never
-extrapolate**:
-
-0. **Tier 0 — static gate.** The `/generate-test-cases` static set, including the example audit.
-   Runs first, blocks the live run and the deploy. Zero calls. (Bot-specific static checks do not run
-   in the daily job yet — roadmap G4/G7 — so label Tier 0 as a manual/CI pass in the report.)
-1. **Fix verification** — reproduce the EXACT reported failure; confirm it's gone in a real
-   transcript, per variant, with a call id and the evidence line.
-2. **Blast-radius regression** — the adjacent areas the fix could have broken (same section, shared
-   agnostic logic, mirrored sibling variant, the tool payload touched), on each variant. Catches
-   "fixed X, broke Y".
-3. **Daily general regression** — the standing suite in `raya/regression/` run by the scheduled cloud
-   worker (survives the machine being off), **plus the production detectors**. Not a substitute for
-   tiers 1–2.
-
-## Persona library
-
-`raya/personas/` holds grounded personas (mined from real calls via `scenario-catalog.md`):
-cooperative existing-seeker, not-interested, wants-different-job, silent, off-topic, machinery-bait,
-and a multi-scenario router (kept for reference; the per-call arg it needs does NOT reach the tester,
-so select personas by PATCH). Add new personas as `<lang>-<behavior>.md` with an English instruction
-header + in-language spoken lines, and state the **forcing gate** the persona drives — two cases may
-share a call only if their forcing functions are compatible at every gate the path crosses.
-
-Never write a persona that requires mumbling or unintelligible speech: TTS cannot do it, and the
-persona will either speak clearly or go silent. Route those rungs to `static` + `human_call`.
+`raya/personas/<lang>-<behaviour>.md`, indexed in `raya/personas/scenario-catalog.md`. English
+instruction header, spoken lines in the call's language, and the **forcing gate** the persona drives
+(two cases share a call only if their personas want the same thing at every gate). Never write a persona
+that must mumble: a TTS tester either speaks clearly or goes silent; route those rows to `static` +
+`human_call`. New personas come from `/generate-test-cases`.

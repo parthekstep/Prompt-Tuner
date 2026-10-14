@@ -60,7 +60,7 @@ Add, and treat as critical:
 - **Primary action (apply) + success/failure handling** — bridge line spoken **once** (B1); silent tool call; single result.
 - **Post-action info gathering / profile update** (if the agent completes profile after the action).
 - **Introduction priority rule** — opening line chosen from prior-call memory state.
-- (Maya) its divergences: campus identity/`${college_name}`, `hr_contact`/`benefits`, Experience Capture, HR-number sharing, Marketing Masters League, feminine voice.
+- (Maya) its divergences: campus identity/`${college_name}`, `hr_contact`/`benefits`, Experience Capture, HR-number sharing, feminine voice. (The MPL competition offer was removed from every Ghaziabad Maya bot on 2026-10-12, `Maya/CHANGELOG.md`; a Maya prompt that still pitches it is a finding.)
 
 ### Archetype: Employer / verification & capture bot (DKB)
 Add, and treat as critical:
@@ -97,7 +97,7 @@ Tick each; flag misses. (Each ties to a pattern in `bug-patterns.md`.)
 **Language, script & voice**
 - [ ] A concrete **banned→preferred vocabulary list** exists (not just "use simple words") (D1).
 - [ ] TTS section present AND examples obey it (words for numbers/money/date/time/phone) (D2).
-- [ ] Script boundary stated: Devanagari for TTS, English/Latin for payloads + transliteration rules (D3).
+- [ ] Script boundary stated: the call language's own script for spoken text, English/Latin for payloads, plus transliteration rules (D3).
 - [ ] If persona is gendered, an explicit verb-form rule; no mixed/opposite forms in any line (D4).
 - [ ] If outbound: a closing script + a ban on "call me/us back" phrasing (D5).
 
@@ -108,8 +108,25 @@ Tick each; flag misses. (Each ties to a pattern in `bug-patterns.md`.)
 - [ ] Memory-injection block present verbatim iff memory enabled (else flag Verify) (E3).
 - [ ] Guard sections all present: forbidden topics, dignity/safety, eligibility/age, relevance + functional sanity, scope boundaries (E4).
 
+**Size, safety and access**
+- [ ] The file is within this bot's size limit: `python3 scripts/prompt_size.py check <file> --target <id>`
+  says OK (WARN: the first test call must prove every tool fires; BLOCK: slim the master first) (D116).
+- [ ] A public-facing bot has the safety interrupt from Part 1, worded to apply "even inside an answer to
+  another question", with its own spoken line in this file's language (D121).
+- [ ] Access needs are handled for callers who are slow to answer, ask for a repeat, or hand the phone to
+  someone else: silence is treated as needing time, a repeat is given on request, and the caller's
+  disability is never made the topic of the call (voice-test `generic.md` §14).
+
+**Languages (every non-master file)**
+- [ ] `python3 scripts/language_checks.py <master> <this file> --lang <iso>` has no FAIL. It covers: no
+  master-language text left in speech (D118), rules that name this language and not the master's (D117),
+  the everyday-word table (D123), the gender rule (D120), the insulting-words list, digits, Goodbye
+  token, payload fields and structure.
+- [ ] Every person, place and programme name in speech matches the master's pinned spelling (D122).
+- [ ] Open findings on the master are fixed in the master first, not separately per language (D119).
+
 **Cross-language (pointer)**
-- [ ] Any change that looks AGNOSTIC is noted for a `/sync-check` against the twin (F).
+- [ ] Any change that looks AGNOSTIC is noted for a `/sync-check` against every mirror (F).
 
 ## Seeker bots — the missing-job-data fallback (added 2026-09-04, D66)
 

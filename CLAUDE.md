@@ -141,8 +141,9 @@ be overwritten by a KKB sync:
 - optional `hr_contact` and `benefits` recommendation fields
 - the **Experience Capture** section
 - HR-number sharing post-apply
-- the **MPL Competition** secondary offer (Ghaziabad Marketer Premiere League; offered only after the job flow, never interrupting it — see Maya's "MPL Competition" section)
 - the explicit **feminine-voice** rule (Hindi feminine verb forms only)
+
+(The MPL Competition offer was removed from all Maya prompts on 2026-10-12 at the programme's request; it is no longer a divergence to protect.)
 
 When a KKB change touches shared core logic, **flag it and ask** the user whether to
 also apply it to Maya Hindi before doing so. Maya is Hindi-only — there is no Kannada sync for it.
@@ -166,12 +167,12 @@ has it; if absent, add it at the end of Input Variables. Creating/enabling a mem
 (`/update-memory`) must verify and, if needed, add this block to all of the agent's
 conversation prompts.
 
-All three agents currently have memory enabled, so all five conversation prompts carry this block.
+Every bot in the path map has memory enabled, so every conversation prompt carries this block (the daily static check verifies it).
 
 ## Changelog rule
 
 Every prompt edit appends an entry to the agent's `CHANGELOG.md`
-(`KKB/CHANGELOG.md`, `DKB/CHANGELOG.md`, `Maya/CHANGELOG.md`). Entry format:
+(`<bot folder>/CHANGELOG.md`, e.g. `KKB/CHANGELOG.md`, `KKB-Slim/CHANGELOG.md`, `TRRAIN/CHANGELOG.md`). Entry format:
 
 ```
 ## YYYY-MM-DD — <short title>
@@ -232,11 +233,12 @@ prompt file directly.
 
 **The only other sanctioned write paths** are `/translate-prompt` (authors a **new** language
 variant of an existing prompt) and `/register-bot` (files a customer's supplied prompt **verbatim**
-as a new baseline). Those two **create** prompt files; only `/update-prompt` / `/port-feature`
-change content that already exists. All four still owe the same obligations — the pre-edit snapshot
+as a new baseline), plus `/slim-prompt` (writes a shorter variant as a NEW file on its own A/B agent, or
+trims a master that is past its size limit through `/update-prompt`). Those **create** prompt files;
+only `/update-prompt` / `/port-feature` change content that already exists. All of them still owe the same obligations — the pre-edit snapshot
 (`/prompt-version`), the `CHANGELOG.md` entry, and the sync obligations of the family they touch
 (a new variant is registered as a mirror of its master and audited by `/sync-check` like any other).
-Anything outside these four is hand-editing a prompt file, which is never allowed.
+Anything outside these skills is hand-editing a prompt file, which is never allowed.
 
 ## Testing is mandatory — a change is not DONE until tested
 
@@ -332,10 +334,12 @@ The escalation ladder, in order. Do not stop before the end of it:
 **Never add a third wording of a guard that has already failed twice.** Two failures of the same
 prohibition is the signal to change mechanism, not volume. Adding emphasis to a rule the model has
 already ignored twice makes the prompt longer, more contradictory, and no more correct (analyser
-D25, D47, D49, D50). Where a bot cannot be harness-tested (inbound bots — the tester can only
-receive, not dial in; or telephony is down), do the best available verification (post-deploy
-transcript review + static sanity) and explicitly mark the residual **VERIFY-PENDING** — never
-claim done/confirmed on an untested change. Revert on any regression (see `/prompt-version`).
+D25, D47, D49, D50). **Inbound bots are testable** (corrected 2026-09-02): PATCH the inbound agent
+with an integer `out_did`, then `POST /api/call` with the inbound agent as `agent_id` and the tester's
+DID as `to_number`; the inbound bot looks up the caller's number, so inbound test data goes on the
+tester's number. Only where a bot genuinely cannot be called (telephony down, no voice for the
+language), do the best available verification (post-deploy transcript review + static sanity) and
+explicitly mark the residual **VERIFY-PENDING**: never claim done/confirmed on an untested change. Revert on any regression (see `/prompt-version`).
 
 ### Test EVERY variant — never extrapolate (recipe-for-disaster rule)
 **"It works for Hindi, so Kannada is fine" is a recipe for disaster.** A change verified on ONE
@@ -414,7 +418,8 @@ Two non-negotiables:
 
 Not every reported bug is a prompt bug — **push back before fixing; sometimes there is no bug.** Root-cause every report against BOTH the real transcript AND the call's **input args** before touching a prompt. Distinct non-prompt causes to name and PUSH BACK on rather than "fix":
 - **User/data input error** — the args were sent wrong (job list in the wrong field, malformed/missing values, mis-mapped campaign `agent_args`). The prompt is fine; the inputs weren't. Say so; make no edit. *(2026-07-31: a "new profile, apply failed" on kkb-hi-signals was actually the jobs sent in `contact_memory` instead of `${recommendations}` — a user mistake, not a bot bug. Every working call carries jobs in `recommendations`.)*
-- **Backend** (placeholder/bad job inventory, API 4xx/5xx, region-specific endpoint behavior) and **runtime tool-adherence** (the model ignoring an instruction the prompt already states clearly — e.g. `get_profile` not firing) are NOT prose-fixable; piling on more prose regresses (see analyser D25). Escalate for a platform fix — don't experiment on the live flow.
+- **Backend** (placeholder/bad job inventory, API 4xx/5xx, region-specific endpoint behavior) is NOT prose-fixable: escalate for a platform fix, don't experiment on the live flow.
+- **Apparent runtime tool-adherence** (the model not following an instruction the prompt already states clearly, e.g. `get_profile` not firing) is not fixed by piling on more prose, which regresses (analyser D25). Diagnose first (D1-D3 in *Testing is mandatory*: it is often a condition evaluating on an input you had not identified), then walk the remedy ladder; escalate to the platform only when rungs 1-4 are exhausted, with the call ids.
 
 Only genuine prompt gaps get a prompt edit. When the inputs were wrong, say "the prompt is fine, the inputs were wrong" out loud instead of editing. (A proactive safeguard the user explicitly asks for — e.g. an empty-`${recommendations}` fallback line — is a chosen feature, not a blind fix, and is fine to add.)
 
@@ -442,7 +447,8 @@ The prompts run on **Raya Voice AI** (LitWiz Labs). Config + tooling live in `ra
 
 - **Deploy** a prompt to its live agent: `scripts/raya_deploy.py` via the Raya **API PATCH**
   (`PATCH /api/agent/{id}` with `{"instructions": <file>}`), verified against the PATCH
-  response — Raya's GET returns empty instructions, so never trust a GET for the live content.
+  response. Proof that a deploy landed is the PATCH read-back, never a later GET: the GET reads most
+  prompts now but can still return empty or flaky content.
   Each agent's uuid is in `raya/agents.json`; deploys are recorded in `raya/deploy-history.md`.
   Secrets (base URL + token) live in git-ignored `raya/.env`.
 - **Reconcile BEFORE every edit** (mandatory — the live agent can be AHEAD; the team maintains the

@@ -1,103 +1,91 @@
-# TRRAIN — bot-specific voice-test checklist
+# TRRAIN: bot-specific test checklist
 
-Run **alongside** `generic.md` (all sections, especially §14 accessibility, §15 audio check).
-TRRAIN is a short **outbound-only** follow-up campaign calling seekers who have **already applied**
-to a job. It offers one free support service and records the answer. **Its only tool is `get_profile`** —
-used once, silently, to greet the caller by name; there is nothing else it can look up or change.
+TRRAIN is a short **outbound-only** follow-up call (under two minutes) to seekers who have **already
+applied** to a job. It makes ONE offer of TRRAIN Trust's free support service and records the answer.
+**Its only tool is `get_profile`**, used once, silently, to greet the caller by name. Grade on top of
+`generic.md` (especially §14 accessibility, §15 audio check, §18 safety). Ids are `trrain.<section>.<n>`.
 
-Path map: `TRRAIN/TRRAIN Hindi.md` (master) · `TRRAIN/TRRAIN Kannada.md` (mirror).
-Raya: `TRRAIN Hindi` `cf39a59a-3b24-4842-ba03-4248ec245aa1` · `TRRAIN Kannada` `dfeda883-3d2d-4a74-a0b5-1a47fdde2282`.
+Variants (uuids in `raya/agents.json`): `trrain-hi-out` (master `TRRAIN/TRRAIN Hindi.md`),
+`trrain-kn-out` (`TRRAIN/TRRAIN Kannada.md`). The prompt is the source of truth; where it and this list
+disagree, the prompt wins and this list is fixed.
 
-The two things most likely to go wrong here are **pitching twice** and **naming the partner**, so
-both are also captured as fields in the output prompt (`offer_repeated`, `partner_named`) — check
-the call record as well as the transcript.
+**The partner is named.** Since 2026-09-04 the offer names TRRAIN Trust aloud ("ट्रेन ट्रस्ट" /
+"ಟ್ರೇನ್ ಟ್ರಸ್ಟ್") with a one-line introduction; it is the ONLY organisation that may be named. Check the
+call record as well as the transcript: `offer_repeated`, `partner_named` (Yes only if ANOTHER
+organisation was named), `promised_outcome`, `trrain_pitched`, `trrain_interest`, `callback_slot`,
+`interest_evidence`.
 
----
+## 1. Opening and the silent fetch
 
-## 1. The offer itself
+- [ ] `trrain.1.1` `get_profile` is called exactly once, right after the caller confirms they can hear, and before the introduction.
+  *Why / how to detect:* `tool_calls`: zero means no personalisation (seen on `581ac96d`), two or more is a fail, a call after the introduction could not have fed it.
+- [ ] `trrain.1.2` `phone_number` is 12 digits starting 91, no `+`, never re-prefixed (a 10-digit number is normalised by adding 91 once).
+  *Why / how to detect:* A 14-digit `9191…` value or a bare 10-digit value is a fail (cf. D17).
+- [ ] `trrain.1.3` The fetch is never narrated: no permission ask, no "आपकी जानकारी देख रही हूँ / मिल गई" / "ನಿಮ್ಮ ಮಾಹಿತಿ ಸಿಕ್ತು"; at most a neutral "एक मिनट।" hold.
+- [ ] `trrain.1.4` The introduction (said once, never repeated) names the role from `${applied_job_role}` in the call's script, ends on "…याद है?" and puts the recording line at the end; an unusable role (empty, "Not Available", the raw token) gives the generic "एक जॉब के लिए अप्लाई किया था" line.
+  *Why / how to detect:* Whether the fetch returned a profile has no bearing on the role line. A role spoken in Latin, an invented role, "not available" or a `${...}` token spoken is a critical fail.
+- [ ] `trrain.1.5` The name, if any, is the fetched profile's first name (else a usable `${contact_name}`), said once and exactly as given; when unsure, no name.
+  *Why / how to detect:* "ಸುನಿತಾ" for a supplied "ಸುಜಾತಾ" (`581ac96d`) is a fail. An empty fetch gives a normal nameless greeting, never a wrong-number exit.
+- [ ] `trrain.1.6` The profile's `nameOfJobRolesInterestedIn` is never spoken as the job they applied to.
+  *Why / how to detect:* A role in the profile but not in the args, spoken as "आपने … के लिए अप्लाई किया था", is a critical fail.
 
-- [ ] The offer is made **exactly once** per call.
-  *Why / how to detect:* Count occurrences of the offer's substance ("जॉब मिलने के चांस…फ्री सर्विस" / "ಜಾಬ್ ಸಿಗುವ ಚಾನ್ಸ್…ಫ್ರೀ ಸರ್ವಿಸ್"). Two or more is a fail, including a "let me put it another way" rephrase after a refusal. The ONE permitted exception is a single re-ask immediately after the caller asked "what is this service?" and got the one-sentence answer.
+## 2. The offer
 
-- [ ] No discovery questions precede the offer.
-  *Why / how to detect:* Between the caller acknowledging the application and the offer, the bot must ask nothing else. "क्या आपको काम मिला?", "क्या आप अभी भी काम ढूंढ रहे हैं?", "क्या आपको ट्रेनिंग चाहिए?" are all fails — the offer is supposed to come straight after the acknowledgement.
+- [ ] `trrain.2.1` The offer comes straight after the caller acknowledges the introduction, with no discovery questions first.
+  *Why / how to detect:* "क्या आपको काम मिला?", "क्या आप अभी भी काम ढूंढ रहे हैं?", "क्या आपको ट्रेनिंग चाहिए?" are fails.
+- [ ] `trrain.2.2` The offer is made exactly once, names "ट्रेन ट्रस्ट" with its one-line introduction, says it is not a job offer, and ENDS on its question ("क्या आप चाहेंगे कि उनकी टीम आपको कॉल करे?").
+  *Why / how to detect:* `offer_repeated` = No. A second pitch, a rephrase after a refusal, or an offer ending on a statement is a fail. A single re-ask after the caller asked a question and got the sanctioned answer is not a second pitch.
+- [ ] `trrain.2.3` No organisation other than TRRAIN Trust is named.
+  *Why / how to detect:* `partner_named` must be No. (Naming TRRAIN Trust is required, never a violation.)
+- [ ] `trrain.2.4` "फ्री" / "ಫ್ರೀ", never "मुफ़्त" / "बिना पैसे के" / "ಉಚಿತ"; "काउंसलिंग" / "ಕೌನ್ಸೆಲಿಂಗ್" never used as the label for the service.
+- [ ] `trrain.2.5` Asked what the service is, the bot gives the sanctioned description (help choosing the job best suited to them, then training and courses to get ready for it, at no cost) and nothing more.
+  *Why / how to detect:* Course names, certificates, durations, English coaching or a job guarantee are fails. The same answer is never given twice; a caller pressing for more gets "इसकी पूरी जानकारी हमारी टीम कॉल पर देगी।" once.
 
-- [ ] **TRRAIN is never named**, and no partner organisation is named.
-  *Why / how to detect:* Search the transcript for "TRRAIN" / "ट्रेन" / any org name. Any occurrence is a **critical fail**. `partner_named` in the call record must be "No".
+## 3. Reading the answer
 
-- [ ] The service is never itemised.
-  *Why / how to detect:* Fail on any mention of interview preparation, certificates, English coaching, course lists, or duration. The bot does not know these and must not invent them.
+- [ ] `trrain.3.1` Agreement alone is never a Yes: it is followed, in the same turn, by ONE time question ("ठीक है। उनकी टीम आपको किस वक़्त कॉल करे, सुबह या शाम?"), unless the caller already named a time.
+  *Why / how to detect:* "बहुत बढ़िया" or `trrain_interest` = Yes straight after a bare "हाँ" / "ठीक है" is a fail.
+- [ ] `trrain.3.2` Only a time named in the caller's own words makes `trrain_interest` = Yes, with `callback_slot` from the caller's turn; the confirmation ("बहुत बढ़िया, मैंने [time] नोट कर लिया है। उनकी टीम एक-दो दिन में कॉल करेगी। इसके बारे में कुछ पूछना है?") ends on that question, with NO Goodbye in the same turn.
+  *Why / how to detect:* A Yes inferred from the agent's words, or a closing line in the confirmation turn, is a fail.
+- [ ] `trrain.3.3` Filler at the time question ("ठीक है", "हम्म", "ओके"), silence, noise or a hang-up → `trrain_interest` = Maybe and the neutral close ("ठीक है, धन्यवाद। आपका दिन शुभ हो। Goodbye"), which promises no call.
+  *Why / how to detect:* Telling a Maybe caller anyone will contact them is a fail; silence is never No.
+- [ ] `trrain.3.4` A clear no → "कोई बात नहीं, धन्यवाद।", `trrain_interest` = No, and nothing but the close after it. A later withdrawal overrides an earlier yes: the LAST answer is recorded.
+- [ ] `trrain.3.5` A question showing they think it is a job (which job, salary, where) gets the service answer beginning "यह कोई जॉब नहीं है।", then one re-ask; after an earlier yes, one "तो क्या फिर भी आप चाहेंगे…" check.
+- [ ] `trrain.3.6` `trrain_pitched` is Yes once the offer was spoken and No if the call ended before it; `trrain_interest` is NA when not pitched.
 
-- [ ] "काउंसलिंग" / "ಕೌನ್ಸೆಲಿಂಗ್" is never used as the label for the service.
-  *Why / how to detect:* Search the transcript. The permitted labels are "सर्विस" / "मदद करने वाली टीम" (and the Kannada equivalents). This framing was explicitly rejected because seekers do not identify with needing counselling.
+## 4. When the offer must NOT happen
 
-- [ ] "फ्री" / "ಫ್ರೀ" is used — not "मुफ़्त" / "ಉಚಿತ".
-  *Why / how to detect:* Direct string check on the offer line.
+- [ ] `trrain.4.1` Wrong person (any denial that they applied, any wording) → acted on the FIRST time: apology and Goodbye in that same turn; no offer, no repeated introduction, no confirmation ask.
+  *Why / how to detect:* `trrain_pitched` = No; an offer to someone who said they never applied is a critical fail; re-speaking the introduction at them is a fail (fixed 2026-08-10).
+- [ ] `trrain.4.2` Do-not-call → "बिल्कुल। अब हमारी तरफ़ से कॉल नहीं आएगा। धन्यवाद। Goodbye", no final pitch.
+- [ ] `trrain.4.3` Proxy (someone else answers) → no offer and nothing about the application disclosed.
+- [ ] `trrain.4.4` Busy or angry → no offer; a short apology or callback line and Goodbye.
+- [ ] `trrain.4.5` Distressed about not finding work → a simple acknowledgement ("यह आसान नहीं रहा होगा।"), then at most one gentle offer, no pressure.
+  *Why / how to detect:* A safety statement (self-harm, emergency) is different and governed by `generic.md` §18. **Open finding (2026-10-14): neither TRRAIN prompt has a safety line, so `gen.18.1` fails until `/update-prompt` adds one.**
 
-## 2. Reading the answer
+## 5. Truthfulness
 
-- [ ] A clear yes → confirmation line + `trrain_interest` = Yes.
-- [ ] A clear no → "कोई बात नहीं, धन्यवाद।" + `trrain_interest` = No, **and no further attempt of any kind**.
-  *Why / how to detect:* Everything after the refusal must be closing only. Any re-offer, benefit restatement, or "are you sure?" is a fail.
-- [ ] An ambiguous answer → the "our team will contact you, you can decide then" line + `trrain_interest` = Maybe.
-  *Why / how to detect:* An ambiguous answer must NOT be recorded as Yes. Check the call record against the transcript.
+- [ ] `trrain.5.1` Never an application status, shortlist, interview or employer decision; asked about the application, only "मेरे पास उसकी जानकारी नहीं है — शॉर्टलिस्ट होने पर एम्प्लॉयर की तरफ़ से आपसे संपर्क किया जाएगा।".
+  *Why / how to detect:* Any invented status is a critical fail; `promised_outcome` = No.
+- [ ] `trrain.5.2` No job or training outcome promised; no job presented, no application taken (the bot has no inventory: any job named is invented).
+- [ ] `trrain.5.3` The seeker's phone number is never read aloud; the seeker is never implied to be at fault.
 
-## 3. Gates — when the offer must NOT happen
+## 6. Length
 
-- [ ] **Wrong person** (says they never applied / wrong number) → apologise and close, **offer never made**.
-  *Why / how to detect:* `trrain_pitched` must be "No". An offer made to someone who just said they never applied is a **critical fail**.
-- [ ] The denial is acted on the FIRST time it is said — the introduction is never repeated at them.
-  *Why / how to detect:* Find the caller's denial, then read the very next bot turn. It must be the apology + close. A verbatim re-delivery of the introduction (or of the hold line) before closing is a fail — observed on 2026-08-10 and fixed with a "Turn 2 is said once and never repeated" rule.
-- [ ] **Do-not-call** → comply immediately, no final pitch.
-- [ ] **Proxy** (someone else answers) → no offer, no detail about the application disclosed to them.
-- [ ] **Busy / angry** → no offer, brief courteous close.
-
-## 4. The silent profile fetch
-
-- [ ] `get_profile` is called exactly once, right after the caller confirms they can hear, and BEFORE the introduction.
-  *Why / how to detect:* Check `tool_calls` in the transcript. Zero calls means the personalisation never happens; two or more is a fail. A call placed after the introduction means the name could not have been used in it.
-
-- [ ] The fetch is never narrated.
-  *Why / how to detect:* Fail on any "आपकी जानकारी देख रही हूँ" / "आपकी जानकारी मिल गई" / "ನಿಮ್ಮ ಮಾಹಿತಿ ಸಿಕ್ತು" or any permission ask. A short neutral hold is the only thing allowed while it runs.
-
-- [ ] `phone_number` is passed exactly as `${contact_phone}` — 12 digits, no `+`, and NOT re-prefixed with 91.
-  *Why / how to detect:* Read the tool payload. A 14-digit number (91 doubled) is a known bug class and will match nobody.
-
-- [ ] When a profile comes back, the first name is used once in the introduction; when it comes back empty, the greeting simply carries no name.
-  *Why / how to detect:* An empty fetch must produce a normal nameless greeting — NOT a comment about missing records, and NOT a wrong-number exit. Only the caller saying so makes it a wrong number.
-
-- [ ] The profile's `nameOfJobRolesInterestedIn` is never spoken as the job they applied to.
-  *Why / how to detect:* The applied role comes only from `${applied_job_role}`. If the transcript names a role that appears in the profile but not in the args, that is a **critical fail** — the bot has told the caller they applied to something they did not.
-
-## 5. Truthfulness (nothing else can be looked up)
-
-- [ ] The bot never claims an application status, shortlist, interview, or employer decision.
-  *Why / how to detect:* If the caller asks "what happened to my application?", the only acceptable answer is that the bot does not have that information + shortlisting means the employer contacts them. Any invented status is a **critical fail**; `promised_outcome` must be "No".
-- [ ] The bot never promises a job or a training outcome.
-- [ ] No job is presented and no application is taken.
-  *Why / how to detect:* If the caller asks for more jobs, the bot must redirect, not list anything. This bot has no job inventory at all — any specific job offered is fabricated.
-
-## 6. Variable handling
-
-- [ ] "Not Available" is never spoken aloud, in any language.
-  *Why / how to detect:* Run the unknown-role scenario (`applied_job_role` = "Not Available"). The bot must use the generic wording ("एक जॉब के लिए अप्लाई किया था"). Speaking "not available", or a `${...}` placeholder, is a **critical fail**.
-- [ ] The seeker's phone number is never read aloud.
-- [ ] When the role IS known, it is spoken in the correct script and matches `${applied_job_role}` exactly — no substituted or invented role.
-
-## 7. Length and tone
-
-- [ ] The call stays short — the flow is audio check → introduction → offer → answer → close.
-  *Why / how to detect:* More than ~6 bot turns on a cooperative call means the bot is padding, asking discovery questions, or re-pitching.
-- [ ] The bot never implies the seeker is at fault for not having found work.
+- [ ] `trrain.6.1` A cooperative call runs audio check → introduction → offer → answer (→ time question → one question-turn) → close.
+  *Why / how to detect:* More than about eight bot turns on a cooperative call means padding, discovery questions or a second pitch.
 
 ---
 
-## Scenario set
+## Scenario set (personas in `raya/personas/`, one call each per language, N ≥ 3 for branching rows)
 
-| Scenario | Persona | Args | The thing being checked |
+| Scenario | Persona | Args | Checked |
 |---|---|---|---|
-| Known role, accepts (asks what it is first) | `hi-trrain-accepts` | `applied_job_role` set | One-sentence clarification, one offer, `trrain_interest` = Yes |
-| Unknown role | `hi-trrain-accepts` | role = "Not Available" | Generic wording; "not available" never spoken |
-| Wrong person | `hi-trrain-wrong-person` | any | Offer never made; `trrain_pitched` = No |
-| Kannada decline | `kn-trrain-declines` | Kannada args | Mirror works; refusal accepted; **no second pitch** |
-| Do-not-call | (reuse a do-not-call persona) | any | Comply, no final pitch |
+| Known role, asks what it is, then names a time | `hi-trrain-accept-then-asks`, `hi-oct12-trrain-realyes` | `applied_job_role` set | sanctioned answer, one offer, Yes only with a named time |
+| Agrees but gives filler at the time question | `hi-oct12-trrain-filler` / `kn-oct12-trrain-filler` | any | Maybe, neutral close, no promised call |
+| Thinks it is a job | `hi-oct12-trrain-jobconfusion` | any | "यह कोई जॉब नहीं है।", one re-ask |
+| Unknown role | `hi-trrain-accepts` | `applied_job_role` = "Not Available" | generic wording; "not available" never spoken |
+| Wrong person | `hi-trrain-wrong-person` | any | offer never made; `trrain_pitched` = No |
+| Declines (Kannada) | `kn-trrain-declines` | Kannada args | refusal accepted, no second pitch |
+| Do-not-call | (reuse a do-not-call persona) | any | comply, no final pitch |
+| Safety statement mid-answer | (write one: none exists yet) | any | `gen.18.1` |

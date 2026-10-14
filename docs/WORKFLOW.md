@@ -305,7 +305,7 @@ actually say:
    pass/fail detection — `tool_fired(…)`, `tool_arg(…) matches …`, `spoken_once(…)`,
    `call_output.<field> == …`. "Looks right" is not detection.
 6. **`/voice-test` — live agent-to-agent calls.** The tester agent (**"Testing Agent- Blue Dots"**,
-   uuid `f60e0899-aa3a-4be7-9b4f-0296bd28ef48`, inbound DID `917946350285`, 5-min cap) is
+   uuid `f60e0899-aa3a-4be7-9b4f-0296bd28ef48`, DID `911204404272` (confirm with `raya_testcall.py whoami`: DIDs get rebound), 5-min cap) is
    PATCHed with a persona; the **bot under test dials it**; both legs are graded against
    `generic.md` (13 sections, every bot) plus the bot's own checklist. Run the **smoke set**
    (≤6 cases per variant) before anything else.
@@ -386,7 +386,8 @@ inputs by hand. You cannot place a meaningful test call without one.
 Skills that **never** edit a prompt: `/prompt-analyser`, `/generate-test-cases`, `/sync-check`
 (audit mode), `/raya-reconcile`, `/register-bot`, `/onboard`, `/voice-test`.
 Skills that **do**: `/update-prompt`, `/port-feature`, `/translate-prompt`, `/update-memory`,
-`/update-output`, and `/sync-check` in reconcile mode.
+`/update-output`, `/slim-prompt`. (`/sync-check` only reports; a lagging language is brought up through
+`/update-prompt`.)
 
 ---
 
@@ -414,7 +415,7 @@ repo either: a prior read-only analyser pass on its Hindi prompt sits at the rep
    cd "/Users/parthbansal/EkStep/Prompt Tuner"
    python3 scripts/raya_testcall.py persona f60e0899-aa3a-4be7-9b4f-0296bd28ef48 raya/personas/hi-repro-pd-i01.md
    python3 scripts/raya_testcall.py lang    f60e0899-aa3a-4be7-9b4f-0296bd28ef48 hi
-   python3 scripts/raya_testrun.py <pd_hindi_agent_uuid> 7946350285 raya/testcases/args/pd-hi-out-new.json \
+   python3 scripts/raya_testrun.py <pd_hindi_agent_uuid> 1204404272 raya/testcases/args/pd-hi-out-new.json \
            f60e0899-aa3a-4be7-9b4f-0296bd28ef48 "repro-pd-i01-pd-hi-out"
    ```
    That third argument is the `agent_args` file — write it before you fire, copying the shape from
@@ -461,10 +462,9 @@ repo either: a prior read-only analyser pass on its Hindi prompt sits at the rep
    that promotion and **asks before editing `generic.md`**, because that file grades every bot.
 6. **`/voice-test`** the smoke set (≤6 cases) on `pd-hi-out`, grade, then work the fixes through
    `/update-prompt` → deploy → Tier 1 + Tier 2. Then §5(b) for each new language.
-7. **Tell the truth about the daily net:** until the G4 switch lands (`static_regression.py`
-   reading `fleet.json` instead of its hard-coded 18-file dict), Purple Dots is **in the manifest
-   but not in the daily email** — though the suite's coverage self-check will now name it as a live
-   deploy target it is not checking, which is exactly the loud version of that gap.
+7. **The daily net picks it up by itself:** `static_regression.py` reads every `deploy: true`
+   conversation target in `raya/agents.json`, in every language, so the new bot is in the next
+   morning's email. Check it appears there.
 
 ### (b) Taking an existing bot into a new Indic language — Purple Dots → Telugu
 
@@ -580,9 +580,9 @@ GitHub's shared cron queue delays scheduled runs (observed arrival ~04:20–04:4
 ~3.5 h late): treat it as "each morning", never as a guaranteed clock time. There is also a
 `workflow_dispatch` button for a manual run.
 
-**What it checks.** `python3 raya/regression/static_regression.py` reads **all 18 conversation
-prompts** (8 KKB, 6 DKB, 4 Maya) — still a hard-coded fleet list, but now self-checked against
-`raya/agents.json`: any `kind: conversation`, `deploy: true` target the suite is not reading raises
+**What it checks.** `python3 raya/regression/static_regression.py` reads **every deployable
+conversation prompt listed in `raya/agents.json`** (22 today), in every language, and self-checks
+coverage: any `kind: conversation`, `deploy: true` target the suite is not reading raises
 a **critical** coverage finding instead of vanishing silently. That check exists because it
 happened — `dkb-hi-in` and `dkb-kn-in` were absent from the list until 2026-08-05 and the digest
 reported "16 bots" as if that were the whole fleet. The suite then applies the failure classes we
@@ -643,21 +643,17 @@ it matters.
   are, the standing net is **static-only** — it reads prompt files and never exercises ASR, TTS,
   telephony or runtime tool adherence. When it is built it gets its own job at its own distinct
   cron time (a second cron on the same minute previously caused duplicate Monday emails).
-- **The fleet is hard-coded (gaps G4/G7).** `discover_prompts()` holds an 18-file dict and derives
-  language/direction/backend from filename substrings and role from `agent_dir in ("KKB","Maya")`.
-  A newly registered bot is therefore **invisible to the daily check** until that function is
-  switched to read `raya/regression/fleet.json` — invisible but no longer silent: the coverage
-  self-check names it as an unchecked live target. Acceptance test for that change: with the
-  backfilled manifest, the run must produce a `latest-report.json` **identical** to the pre-change
-  run for the 18 existing bots, plus new findings for the new bot.
-- **`fleet.json` does not exist yet.** The first `/register-bot` run creates it — generate the
-  existing rows with `python3 scripts/build_fleet_manifest.py`, which derives them from
-  `discover_prompts()` so all 18 are covered, then append the new bot. A hand-transcribed partial
-  manifest would drop bots off the daily check, which is worse than having no manifest.
-- **Parity is numeric and two-language (gap G3).** `sync_parity()` requires an `hi`/`kn` pair and
-  compares heading *counts*. It cannot see a third language and has no idea the Maya/Kannada
-  divergence is deliberate. The specification for the fix is in
-  `.claude/skills/sync-check/SKILL.md` → *Relationship to the daily static suite*.
+- **The fleet comes from `raya/agents.json`.** `discover_prompts()` reads every `deploy: true`
+  conversation target, with its language code, direction and backend, so a newly registered bot is
+  checked the day it lands. `raya/regression/fleet.json` is generated from the same source
+  (`python3 scripts/build_fleet_manifest.py`, `--check` in CI); never hand-edit it. Still hard-coded:
+  the role labels (`SEEKER_AGENTS` / `AGENT_BLURB` in `static_regression.py`), and a bot without the
+  `signals` flag is treated as the older Dhiway backend, so a bot on a new backend can get false
+  findings until those are generalised. `deploy: false` targets are not checked.
+- **Parity is per language but still counts headings.** `sync_parity()` compares the master with every
+  mirror language listed for the bot (Hindi is master when present). It compares heading counts only and
+  does not read `raya/divergences.json`; the deeper checks are `/sync-check` and
+  `scripts/language_checks.py`.
 - **A static finding is not a bug.** Tier 3 raises suspicion; a transcript confirms it. Do not
   fix off the digest alone.
 
@@ -702,7 +698,7 @@ Things a newcomer otherwise learns by wasting a day.
   Space fires ≥ ~15 s. Budget **~10–14 completed live calls per hour per tester**.
 - **Telephony bridging is intermittent.** Some dials fail instantly (`Failure`/`Unanswered`,
   `dur=0`, no transcript). **This is flaky telephony, not a bug in your request** — retry the
-  connect (the runner does, with a ~45 s cooldown). A **burst of rapid calls makes bridging
+  connect (the runner does, with a ~90 s cooldown). A **burst of rapid calls makes bridging
   worse**; spacing them out is the fix, not more retries.
 - **`GET /api/call/{uuid}` lags** after a call — `Pending`, `dur=0` for a while before the
   transcript and `call_output` finalize. Keep polling; do not conclude "no transcript".
@@ -712,15 +708,17 @@ Things a newcomer otherwise learns by wasting a day.
   tester's DID, *not* whatever phone you put in `agent_args`. Provision the backend record you
   want under the tester DID. **Signals has no delete route**, so once a profile exists for that
   number it can never be "new" again — run your new-caller cases **first**.
-- **Inbound bots cannot be harness-dialled.** The tester can only receive. Do post-deploy
-  transcript review + static checks and mark the variant **VERIFY-PENDING**.
+- **Inbound bots are testable** (corrected 2026-09-02). PATCH the inbound agent with an integer
+  `out_did` (a string returns 400), then `POST /api/call` with the inbound agent as `agent_id` and the
+  tester's DID as `to_number`. The inbound bot looks up the caller's number, so prepare inbound test
+  data on the tester's number.
 - The tester's standing cap is **5 minutes** (bot agents are capped at 15 by the API).
 
 **Raya platform**
 
-- **Never trust a GET for live content.** Raya's GET can return empty or flaky instructions. The
-  truth is the **PATCH read-back**, or `/raya-reconcile`'s browser pull (which downloads the live
-  prompt to a file so 70 KB never enters the conversation).
+- **Proof of a deploy is the PATCH read-back, never a later GET.** The GET reads most prompts now
+  (that is how `diff` and `pull` work) but can still come back empty or partial: `diff` reports that as
+  UNREADABLE, `pull` refuses unless two GETs agree, and `/raya-reconcile`'s browser path is the fallback.
 - **The live console can be AHEAD of the repo.** Reconcile before every edit; `pull` and commit
   the reconciliation *before* you change anything.
 - **Never edit the live agent in the console** as a deploy mechanism — it clobbers console-only
@@ -739,19 +737,14 @@ Things a newcomer otherwise learns by wasting a day.
 
 **Repo scaffolding that lags the multi-project move**
 
-- `scripts/prompt-version.sh` resolves `<agent>` from a hard-coded `KKB | DKB | Maya` list — add a
-  case for a new bot **before** you try to snapshot it. The failure is loud, not silent:
-  `prompt-version.sh save` exits 1 with `unknown agent '<x>' (expected KKB | DKB | Maya)` — and
-  `raya_deploy.py deploy` then refuses to push, because there is no snapshot. Note that
-  `resolve_agent()` **lowercases its argument**, so a folder name with a space must be matched in
-  the space form (`"purple dots"`), not only as `purple-dots`.
-- `scripts/raya_testcall.py`'s `LANG` dict holds `hi` and `kn` only — a new language needs its
-  `language_id`/`voice_id` pair added, or the tester speaks the wrong language. Get the pair from
-  `python3 scripts/raya_testcall.py whoami <uuid>` run against an agent that **already** runs that
-  language; `raya_deploy.py list` gives you names and uuids to pick from but does **not** return
-  `language_id`/`voice_id`. If no agent runs the language yet, request the pair from LitWiz Labs —
-  until you have it, live testing in that language is BLOCKED: say so and mark the variant
-  VERIFY-PENDING rather than testing on another language's voice.
+- `scripts/prompt-version.sh` finds bot folders by itself (a top-level folder with a `CHANGELOG.md` and a
+  prompt), so a new bot needs no script change. Its argument is matched case-insensitively, with `-`/`_`
+  read as spaces.
+- Language and voice ids live in `raya/voices.json`, per Raya account (`raya_testcall.py` reads it; set
+  `RAYA_ACCOUNT` for a second account). A new language needs its pair recorded there, read with
+  `python3 scripts/raya_testcall.py whoami <uuid>` from an agent that already runs that language. If no
+  agent runs it yet, ask LitWiz for the pair; until then live testing in that language is BLOCKED: say so
+  and mark the variant VERIFY-PENDING rather than testing on another language's voice.
 - `raya/personas/` has `hi-*` and `kn-*` only; `voice-test/reference/checklists/` has `generic`,
   `kkb`, `dkb`, `maya` only. `/generate-test-cases` fills these gaps (G5/G6) per bot and language.
 - `.claude/skills/port-feature/reference/agent-schemas.md` needs an entry for a new bot before
@@ -800,7 +793,7 @@ Consequences, both learned the hard way:
 - A harness call to an inbound agent therefore does **not** reproduce production input. Send only the
   args production sends; extra args are ignored at best and misleading at worst.
 
-**One tester DID means one shared profile history.** `get_profile` on 7946350285 returns MULTIPLE
+**One tester DID means one shared profile history.** `get_profile` on the tester DID returns MULTIPLE
 records (Ramesh, ಪ್ರಕಾಶ್, Aryan, ಸುಜಾತಾ, Parth Bansal, Prakash) because every persona has called
 from it. A bot greeting the caller by a name the current persona never gave is usually **correct
 behaviour reading a real profile record** — not a memory leak. Confirm against the tool result in the

@@ -1,64 +1,67 @@
 ---
 name: port-feature
-description: Carry a feature, section, rule, or behavior from one voice agent's prompt to another — including unrelated agents (e.g. a feature built in KKB extended to DKB or Maya). Re-domains the feature to the target's variables, tools, persona, and audience instead of copying verbatim, applies it to the target's Hindi prompt, then syncs to its Kannada. Use when the user wants to reuse or extend something that exists in one agent across other agents.
+description: Carry a feature, rule, step or fix that already works in one voice bot into another bot, rewritten for the target bot's own variables, tools, persona and callers rather than copied, then mirrored to every language of the target. Use when someone says "do the same in DKB", "give Maya the consent step KKB has", "port this to the Purple Dots bot", "apply this fix to the other bots too", "reuse this feature in <bot>", or wants something from one bot extended to others, in any project.
 ---
 
 # Port Feature
 
-Extend a feature from a **source** agent to one or more **target** agents, re-domaining it
-to each target's schema. Targets may be unrelated agents (KKB → DKB, KKB → Maya, etc.).
+**What it changes:** the conversation prompts of one **target** bot (its master and every mirror),
+plus the target's `CHANGELOG.md` and, when needed, `raya/divergences.json`. One target at a time.
 
-Read `reference/agent-schemas.md` (this skill's folder) for each agent's input variables,
-tools, persona, and the re-domaining cheatsheet. Read
-`../update-prompt/reference/prompt-anatomy.md` for section placement and tags. Resolve files
-via the path map in the repo root `CLAUDE.md`.
+**Use something else for:** a change that exists nowhere yet (`/update-prompt`), the same change
+across the languages of one bot (`/update-prompt` mirrors it), a new language (`/translate-prompt`).
+
+**Fast path:**
+1. Read the feature in the source's master file; list the variables, tools and lines it uses.
+2. Map each to the target (`reference/agent-schemas.md`); stop and ask on any hard gap.
+3. Prepare the target exactly as `/update-prompt` does: open issues, reconcile with live, snapshot,
+   `/sync-check`, baseline checks.
+4. Rewrite the feature for the target's callers, place it, mirror it to every language.
+5. Changelog with `Ported from:`, divergence entry if partial, deploy, one call per target variant.
 
 ## Procedure
 
-1. **Identify** the source agent + the feature (a section, rule, spoken behavior, or flow
-   step) and the target agent(s). Read the feature in the source's Hindi file in full.
-2. **Map the schema gap.** Compare the variables/tools the feature uses against the target's
-   schema (agent-schemas.md). For each:
-   - direct equivalent → remap the name (e.g. KKB `recommendations[].job_id` → DKB `${job_id}`);
-   - no equivalent → **flag it for the user**; do not invent a target variable, tool, or
-     payload field. Pause and confirm how to proceed.
-3. **Re-domain the content.** Rewrite the feature for the target's audience and persona (a
-   seeker-facing line becomes an employer-facing one for DKB; add Maya's feminine voice for
-   Maya). Keep the underlying logic; change only what the domain requires.
-4. **Place it correctly.** Insert the re-domained feature into the matching section of the
-   target's **Hindi** file per the anatomy. If the target lacks that section, add it in the
-   taxonomy-appropriate position.
-5. **Sync languages.** Run the `/update-prompt` mirror step for the target: copy AGNOSTIC
-   parts to the target's Kannada verbatim, adapt SPECIFIC parts. **Skip for Maya (Hindi only).**
-6. **Changelog.** Append to the **target** agent's `CHANGELOG.md` with a
-   `**Ported from:** <source agent>` line in addition to the standard fields.
-7. **Register a deliberate divergence (only if the port does NOT land in every language).** If the
-   ported feature is deliberately applied to some languages of the target's sync family and not
-   others — or the mirror in step 5 is knowingly skipped — add or update the entry in
-   **`raya/divergences.json`** in the SAME change as the prompt edit and the changelog entry,
-   following the schema in `../sync-check/reference/n-language-parity.md` → "5. Registry —
-   `raya/divergences.json`" (id, bot, sync_family, targets, master_language, languages_affected,
-   direction, scope[] with `contains` tokens, why, approved_by, approved_on, changelog_ref,
-   still_must_match). Without it the next `/sync-check` reads the gap as drift and reconciles the
-   deliberate decision away. `/sync-check` is what reads the registry today (the daily static suite
-   does not yet — follow-up). Maya is Hindi-only, so a KKB→Maya port needs no entry on that ground
-   alone.
-8. **Report.** Show what was ported, the variable/tool remapping table used, any flagged gaps,
-   and the files touched per target.
-
-## Test before done (MANDATORY — the port is not DONE until tested)
-
-A change is NOT done when the files are edited/deployed — only when it has been TESTED and confirmed working, with overall sanity intact. Never report a prompt/agent change as "done", "fixed", or "confirmed" until you have actually tested it. Where a bot cannot be harness-tested (inbound bots — the tester can only receive, not dial in; or telephony is down), do the best available verification (post-deploy transcript review + static sanity) and explicitly mark the residual VERIFY-PENDING — never claim done/confirmed on an untested change. Revert on any regression (see `/prompt-version`).
-
-After porting + deploying: **voice-test the TARGET bot** (`/voice-test`) on a scenario that exercises the ported feature, confirm it behaves correctly in the target's own domain/persona, and sanity-check the target's existing flow still works (and its sibling language). Untestable → best-available verification + VERIFY-PENDING.
+1. **Identify** the source bot, the feature (a section, rule, spoken behaviour or flow step) and the
+   target bot. Read the feature in the source's master file in full, and check the source's
+   `CHANGELOG.md` for whether it was ever proven by a call. Porting an unproven feature ports an
+   unproven feature: say so.
+2. **Map the schema gap** using `reference/agent-schemas.md` (re-check the target's real prompt;
+   the file says how). For each variable, tool and payload field the feature uses:
+   - a direct equivalent → remap the name (KKB `recommendations[].job_id` → DKB `${job_id}`);
+   - no equivalent → **flag it and pause**. Never invent a variable, tool or payload field. Legacy
+     and Signals variants of one bot have different tools; check which you target.
+3. **Prepare the target** with `/update-prompt` section 1 (open issues, reconcile every target of the
+   family with live, `bash scripts/prompt-version.sh save <target-folder> pre-port-<slug> "<why>"`,
+   `/sync-check`, baseline `language_checks.py` and `prompt_size.py check`). A port adds text, so
+   the size check matters (D116).
+4. **Re-domain** the content for the target's callers and persona (a seeker-facing line becomes an
+   employer-facing one for DKB; feminine forms for Maya). Keep the logic; change only what the domain
+   requires. Rules in English; only spoken lines in the call's language. Never carry the source's
+   spoken lines over unchanged.
+5. **Place it** in the matching section of the target's **master** file
+   (`../update-prompt/reference/prompt-anatomy.md`). If the target lacks that section, add it where
+   the taxonomy puts it.
+6. **Mirror** to every other language of the target's family with `/update-prompt` section 3
+   (classify, mirror, re-run the checks, read the diff). If the target has other families (inbound,
+   Signals, Slim) that need the feature, port to each as its own step.
+7. **Record:**
+   - `CHANGELOG.md` of the **target**, with a `**Ported from:** <source bot>` line and
+     **DEPLOYED, NOT VERIFIED** until called.
+   - `raya/divergences.json` entry if the port deliberately skips some languages of the family
+     (schema: `../sync-check/reference/n-language-parity.md` → "5. Registry").
+   - An entry in `../prompt-analyser/reference/bug-patterns.md` only if the port fixes a bug the
+     analyser does not already describe (root `CLAUDE.md` → "Bug-fix feedback loop").
+8. **Deploy and prove** with `/update-prompt` section 5: deploy each target with
+   `scripts/raya_deploy.py` after approval, then `/voice-test` a scenario that exercises the ported
+   feature on **each** target variant, and check the target's normal flow still completes. Inbound
+   variants are testable (`/voice-test` → Inbound bots). One call id per variant; until then, DEPLOYED, NOT
+   VERIFIED.
+9. **Report** in plain words: what the target bot now does, the remapping used (a small table), any
+   gaps flagged, the changed lines (before → after) and the call ids. End with what is still open.
 
 ## Notes
 
-- **English instructions rule:** the ported feature's instructions/rules are written in English; only the target agent's spoken lines are localized. Do not carry over Hindi/Kannada rule prose — re-express the rules in English and quote the (re-domained) spoken lines in the target language.
-
-- **Surgical edits only.** Insert the re-domained feature with the smallest possible footprint; preserve every other line in the target file exactly. Prefer additive changes; never reformat or delete unrelated content. See `CLAUDE.md` → "Surgical edits only".
-- Port to one target at a time; repeat for multiple targets so each re-domaining is deliberate.
-- Porting INTO Maya is a deliberate, user-requested act — it is not the same as the KKB→Maya
-  "flag-and-ask" sync in `/update-prompt`. Here the user is explicitly extending a feature to Maya.
-- If the feature depends on a tool the target doesn't have (e.g. KKB has no
-  `get_talent_insights`), that is a hard gap — flag it; do not fabricate the tool.
+- **Maya:** porting INTO Maya is an explicit request, unlike the KKB→Maya flag-and-ask in
+  `/update-prompt`. Still never overwrite Maya's divergences (root `CLAUDE.md` → "Maya rule").
+- **TRRAIN** has only `get_profile`: any feature that writes data cannot be ported to it as is.
+- Surgical edits only: the smallest footprint in the target, every other line preserved.

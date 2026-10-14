@@ -7,12 +7,23 @@ to **re-derive** the spoken-form machinery that makes TTS come out right. One se
 
 1. Read the target language's section **before** writing a single spoken line.
 2. Copy the numerals / money / phone conventions into the new file's `TTS Normalization Rules`
-   section, keeping the master's **English** scaffolding and headings identical — only the
+   section, keeping the master's **English** scaffolding and headings identical: only the
    target-language example strings change.
 3. Copy the script rule + loanword level into `Language and Script Rules`.
 4. Use the honorifics, greeting and place names when re-authoring spoken lines and examples.
 5. Treat the pitfalls row as a **test plan**: each pitfall is something to listen for in the first
-   live call (`/translate-prompt` step 15).
+   live call (`/translate-prompt` step 13).
+
+**Three per-language sources, one job each.** This file holds the conventions (register, numbers,
+greetings, places, pitfalls). `raya/translations/lexicon.json` holds the machine-read word lists
+(everyday words for the minimum terms, bookish words, Hindi marker words, insulting words, the gender
+and question rules, the script range). `raya/translations/style/<iso>.md` holds lessons from earlier
+runs in that language. `scripts/speech_split.py extract` compiles all three into the `STYLE.md` card
+the translating agents read, so put a fact in the one place it belongs rather than in all three.
+
+**Keep the heading format.** `speech_split.py` finds a language's section by a heading that starts
+with `## ` and ends with the ISO code in backticks inside brackets, and reads up to the next `---`. A
+section whose heading loses that ending is silently left out of every STYLE.md.
 
 ## Honesty rule — read this before trusting a cell
 
@@ -162,7 +173,7 @@ precision.
 | **Greeting / farewell** | नमस्कार. Close: धन्यवाद + नमस्कार. |
 | **"or" for "/"** | किंवा. |
 | **Place names for examples** | पुणे, नागपूर, नाशिक, ठाणे, कोल्हापूर, सोलापूर, अमरावती. **छत्रपती संभाजीनगर** (formerly औरंगाबाद) — a renamed city: pick ONE form with the owner and pin it (D26). |
-| **TTS / ASR pitfalls** | **A Hindi voice reading Marathi text is an audible, common failure** — ळ, the ॅ/ॉ vowels, and Marathi's affricate च/ज (dental vs palatal) are all wrong in a Hindi voice. Verify the agent's `language_id`/`voice_id` are genuinely Marathi (`/translate-prompt` step 13) before testing. Shared Devanagari also means Hindi text can be pasted in unnoticed — the sync check must compare meaning, not just script. |
+| **TTS / ASR pitfalls** | **A Hindi voice reading Marathi text is an audible, common failure**: ळ, the ॅ/ॉ vowels, and Marathi's affricate च/ज (dental vs palatal) are all wrong in a Hindi voice. Verify the agent's `language_id`/`voice_id` are genuinely Marathi (`/translate-prompt` step 11) before testing. Shared Devanagari also means Hindi text can be left in unnoticed: `speech_split.py apply` and `language_checks.py` fail on unchanged lines and Hindi marker words (D118), but a reader must still check meaning. |
 
 ---
 
@@ -258,7 +269,7 @@ precision.
 | **Greeting / farewell** | নমস্কাৰ. Close: ধন্যবাদ + নমস্কাৰ. |
 | **"or" for "/"** | বা / অথবা. |
 | **Place names for examples** | গুৱাহাটী, ডিব্ৰুগড়, শিলচৰ, জোৰহাট, তেজপুৰ, নগাঁও, তিনিচুকীয়া. |
-| **TTS / ASR pitfalls** | **Assamese `স / শ / ষ` are all pronounced as a velar fricative /x/ — a Bengali voice reading Assamese text pronounces them wrong, audibly, on every occurrence.** Confirm the platform has a genuinely Assamese voice, not a Bengali one, before committing (`/translate-prompt` step 13). Lowest TTS/ASR maturity of this set — expect weak number ASR and add extra read-backs. **Treat this whole section as provisional; a native reviewer is effectively mandatory here.** |
+| **TTS / ASR pitfalls** | **Assamese `স / শ / ষ` are all pronounced as a velar fricative /x/: a Bengali voice reading Assamese text pronounces them wrong, audibly, on every occurrence.** Confirm the platform has a genuinely Assamese voice, not a Bengali one, before committing (`/translate-prompt` step 11). Lowest TTS/ASR maturity of this set: expect weak number ASR and add extra read-backs. **Treat this whole section as provisional; a native reviewer is effectively mandatory here.** |
 
 ---
 
@@ -284,9 +295,12 @@ precision.
 
 ## Adding a language that is not in this file
 
-Do not improvise inline — add a section here first, using this template, then translate. A language
-without a matrix section has no spoken-form conventions to re-derive from, and the result will be a
-literal translation by default.
+Do not improvise inline. Before translating, add **both**: a section here (template below, heading
+format exactly as shown), and an entry for the ISO code in `raya/translations/lexicon.json` (copy an
+existing entry's keys: `name`, `aliases`, `script`, `range`, `question`, `gender`, `formal`,
+`min_terms_everyday`, `denylist`, `hindi_markers`, `review: "needs-native"`). `speech_split.py` and
+`language_checks.py` stop with `KeyError` on a code the lexicon does not have, and without a matrix
+section the translators get no spoken-form conventions and produce a literal translation.
 
 ```markdown
 ## <English name> — <endonym> (`<iso-639-1>`)

@@ -122,6 +122,8 @@ def preflight_did(tester, to, bot=None):
 
 
 def main():
+    if len(sys.argv) < 5 or sys.argv[1].startswith("-"):
+        sys.exit(__doc__ or "usage: raya_testrun.py <bot_uuid> <tester_10digit_DID> <args.json> <tester_uuid> [label]")
     bot, to, args_path, tester = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
     label = sys.argv[5] if len(sys.argv) > 5 else "test"
     preflight_did(tester, to, bot)

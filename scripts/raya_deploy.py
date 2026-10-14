@@ -185,15 +185,17 @@ def resolve_selector(targets, selector):
     if hits:
         return hits
     # agent[:lang][:dir] selector — tokens after the agent are order-free:
-    # hi/kn/en/xx are read as language; in/out/inbound/outbound as direction.
+    # a 2-letter language code (hi, kn, mr, te, ...) or xx is read as language; in/out as direction.
     parts = [p for p in sel.lower().split(":") if p]
     agent = parts[0] if parts else ""
     lang = None
     direction = None
     for tok in parts[1:]:
-        if tok in ("hi", "kn", "en", "xx"):
+        if tok in ("in", "inbound", "out", "outbound"):
+            pass
+        elif re.fullmatch(r"[a-z]{2}", tok):
             lang = tok
-        elif tok in ("in", "inbound"):
+        if tok in ("in", "inbound"):
             direction = "inbound"
         elif tok in ("out", "outbound"):
             direction = "outbound"
@@ -365,7 +367,27 @@ def name_guard_ok(row, live_name):
     if not live_name:
         return False
     low = str(live_name).lower()
-    return any(tok.lower() in low for tok in tokens)
+    if not any(tok.lower() in low for tok in tokens):
+        return False
+    return not other_language_in_name(row, live_name)
+
+
+_LANG_NAMES = {"hi": "hindi", "kn": "kannada", "mr": "marathi", "te": "telugu", "ta": "tamil", "ml": "malayalam",
+               "bn": "bengali", "gu": "gujarati", "pa": "punjabi", "or": "odia", "as": "assamese", "ur": "urdu"}
+
+
+def other_language_in_name(row, live_name):
+    """The live agent's name names a DIFFERENT language than the target's (e.g. a Hindi prompt about to be
+    PATCHed onto "KKB Placeholder- Kannada Signals API"). expected_name_contains matches ANY token, so a
+    shared token like "KKB" or "Signals" alone never protected against a language swap."""
+    lang = row.get("language")
+    if lang not in _LANG_NAMES:
+        return None
+    low = str(live_name).lower()
+    for code, name in _LANG_NAMES.items():
+        if code != lang and re.search(r"\b%s\b" % name, low):
+            return name
+    return None
 
 
 # ----------------------------------------------------------------------------- commands
@@ -466,6 +488,12 @@ def cmd_diff(args, endpoints, env):
         if normalize(remote_prompt) == normalize(local):
             print("== %s: in sync" % row["id"])
             continue
+        if len((remote_prompt or "").strip()) < max(200, len(local) // 5):
+            # An empty or stub GET is an unreadable live prompt, not proof of drift (pull already refuses it).
+            any_drift = True
+            print("== %s: UNREADABLE — the GET returned %d chars vs %d local; not a diff. Re-run, or use "
+                  "/raya-reconcile's browser path." % (row["id"], len((remote_prompt or "").strip()), len(local)))
+            continue
         any_drift = True
         print("== %s: DRIFTED (remote %s vs local %s)" % (row["id"], row["file"], row["file"]))
         diff = difflib.unified_diff(
@@ -509,7 +537,9 @@ def snapshot_local(row):
     label = "pre-deploy-%s-%s" % (row["id"], stamp)
     note = "auto snapshot before Raya deploy of %s" % row["file"]
     result = subprocess.run(
-        [VERSION_SH, "save", row["agent"], label, note],
+        # Snapshot the folder the file actually lives in: KKB Slim targets carry agent "KKB" but their
+        # files are in KKB-Slim/, so snapshotting by row["agent"] saved the wrong folder.
+        [VERSION_SH, "save", os.path.dirname(row["file"]) or row["agent"], label, note],
         capture_output=True, text=True,
     )
     if result.returncode != 0:
@@ -604,6 +634,10 @@ def deploy_one(row, endpoints, env, base, headers, token, args):
 
     # 2. name guard — refuse a wrong target BEFORE any write or snapshot.
     if not name_guard_ok(row, live_name):
+        other = other_language_in_name(row, live_name)
+        if other:
+            die("REFUSING: live agent name %r names %s, but target %s is language '%s' — wrong agent? "
+                "(fix the raya_agent_id in raya/agents.json)." % (live_name, other.title(), row["id"], row.get("language")))
         die("REFUSING: live agent name %r does not contain any of %s — wrong target? "
             "(fix raya/agents.json or expected_name_contains)."
             % (live_name, row.get("expected_name_contains")))

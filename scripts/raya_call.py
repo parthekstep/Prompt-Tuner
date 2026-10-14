@@ -29,6 +29,8 @@ def get(path):
 
 
 def main():
+    if len(sys.argv) < 2 or sys.argv[1].startswith("-"):
+        sys.exit(__doc__)
     uuid = sys.argv[1]
     limit = int(sys.argv[2]) if len(sys.argv) > 2 else 6
     offset = int(sys.argv[3]) if len(sys.argv) > 3 else 0

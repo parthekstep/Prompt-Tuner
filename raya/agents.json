@@ -114,13 +114,14 @@
   {
    "id": "kkb-hi-signals-slim",
    "file": "KKB-Slim/KKB Slim Hindi Signals.md",
-   "agent": "KKB",
+   "agent": "KKB-Slim",
    "language": "hi",
    "direction": "outbound",
    "kind": "conversation",
    "profile": "conversation",
    "signals": true,
    "expected_name_contains": [
+    "KKB",
     "Slim"
    ],
    "raya_name": "KKB Slim- Hindi Signals API (A/B)",

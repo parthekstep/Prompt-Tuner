@@ -15,7 +15,7 @@ Optional config (per bot) for the checks that need bot knowledge:
   {"disclosure": {"anchor": "<English words on the master's consent/disclosure rule line>",
                   "elements": {"app": {"hi": "पर्पल डॉट्स", "mr": "पर्पल डॉट्स"}, "one year": {"hi": "एक साल", ...}}},
    "denylist_required": true,
-   "substitution_required": true}
+   "substitution_required": true}     # makes a missing everyday-word table a FAIL (default: WARN)
 """
 import argparse, json, os, re, subprocess, sys
 
@@ -177,10 +177,10 @@ def main():
         else "no digits, currency symbols, %, '/' or AM/PM in any spoken string")
 
     # 6. Substitution table
-    head, body = section(T, r"substitut|everyday|plain|simple (word|speech)|word (list|table)|vocabulary|words? to use")
-    _, mbody = section(M, r"substitut|everyday|plain|simple (word|speech)|word (list|table)|vocabulary|words? to use")
+    head, body = section(T, r"substitut|everyday|\bplain (word|speech|language)|simple (word|speech)|word (list|table)|vocabulary|words? to use")
+    _, mbody = section(M, r"substitut|everyday|\bplain (word|speech|language)|simple (word|speech)|word (list|table)|vocabulary|words? to use")
     if not head:
-        add("Substitution table", "Prompt", "FAIL" if cfg.get("substitution_required", True) else "WARN",
+        add("Substitution table", "Prompt", "FAIL" if cfg.get("substitution_required") else "WARN",
             "no everyday-words section found (heading with substitution / everyday / plain / vocabulary)")
     else:
         miss = [t for t in MIN_TERMS if not re.search(t.replace("centre", "cent(re|er)"), body, re.I)]

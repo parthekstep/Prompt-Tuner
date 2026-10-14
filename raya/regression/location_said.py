@@ -137,7 +137,7 @@ def classify(arg_location, agent_turns, caller_turns, has_sentence=True):
     return "OK", spoken, "converted from the argument"
 
 
-TESTER_DID = "7946350285"
+TESTER_DID = "1204404272"   # tester agent f60e0899 since 2026-09-23 (7946350285 was rebound to a Purple Dots bot)
 
 
 def check(bot, uuid, has_sentence=True):

@@ -10,6 +10,207 @@ The recurring meta-lesson across almost all of these: **a rule being present in 
 does not mean it holds at runtime.** A competing action, an example, or skip logic can quietly
 override it. Always check *why the rule would fail*, not just whether it exists.
 
+## Index (read this first)
+
+Every entry below, grouped by the kind of failure. Sections A-G further down are the original
+families; from about D42 on, entries were numbered in the order they were found and sit wherever
+they were added, so use this index, not the section headings, to sweep by family. Jump to an entry
+with `grep -n "^#\+ D95\b" bug-patterns.md`. D89, D90 and D91 are each used for two different
+entries (marked "2nd" here): cite them with their short name, e.g. "D91 (required parameter)".
+New entries take the next free number (D124 onward) and get a row here.
+
+**Flow, branches and guards (steps skipped, wrong branch, a guard that tests the wrong thing)** (50)
+
+- A1: Mandatory step skipped because the competing action isn't forbidden
+- A2: Skip-forward pressure with no backpressure
+- A3: Overlapping/adjacent phases conflated
+- A4: Latent contradiction inside one branch
+- A5: Re-collecting data already available
+- A6: Confirmation/interest asked before the content it refers to
+- A7: Multiple questions/steps chained into one turn (no wait-for-answer)
+- A8: Forceful one-branch mandate bleeds onto the other fork value (no decisive router)
+- D5: Modality leak (outbound bot invites callbacks)
+- D7: Inbound get_profile fork not hard-gated (fetch skipped / deferred / replaced with a permission-ask)
+- D9: Skip-if-known field re-asked at the apply gate despite being on the fetched profile
+- D10: Mandatory end-of-call step skipped because the closing script is jumped to directly
+- D14: Yes/No gate advanced without capturing the owner's clear response (DKB)
+- D15: Apply failure dead-ends the seeker (no recovery, or burden shifted to them)
+- D18: Branch router overridden by a lopsided concrete-vs-abstract next step (new_seeker="yes" still fetches profile)
+- D19: Required spoken action referenced instead of inlined ("say the X line - see Y section") -> not executed
+- D21: New-caller pre-apply fields skipped when the caller rushes to apply
+- D22: Variable-gated branch ignored - model follows structural dominance, not the ${var} value
+- D23: Always-ask question folded into a combined multi-field prompt -> never fires
+- D24: Outbound-lineage residue in an inbound prompt contradicts the silent-fetch router (permission-ask / outbound ...
+- D35: `draft` profile handled inconsistently: known fields re-asked AND/OR consent skipped
+- A9: A new conditional branch is silently defeated by a surviving "ALWAYS the same X" rule elsewhere
+- A10: A new behaviour that DUPLICATES an existing one, a turn apart, is silently dropped
+- D43: No-Match Fallback fires while unshown jobs remain (call ends early with stock in hand)
+- D48: A preference is promised back to the caller with no field to store it in
+- D49: "None of these suit me" collapses into No-Match while most of the list is still unspoken
+- D51: A rule points at a branch label that no longer exists in the section it names (and often means something else ...
+- D55: The model fills a gap the prompt left open (four bugs, one cause)
+- D56: A completeness claim gated on a count the model cannot verify at the moment it speaks
+- D58: A rule that cannot be satisfied honestly gets satisfied dishonestly
+- D62: An evidence whitelist added to stop a branch being GUESSED also blocks the one case where it is KNOWN
+- D64: A "CLOSED SET" of allowed sentences that enumerates only some branches deletes the others
+- D70: A rule triggered "after X is captured" never fires when X is only-if-missing
+- D75: A branch test that never names WHICH field it reads, satisfied by a different field that happens to carry the ...
+- D76: A rule that requires the model to maintain a RUNNING COUNT across turns. It will lose it
+- D78: A guard stops the line it names, and a DIFFERENT line carries the same claim
+- D79: a guard stated only at the top of the prompt loses at the point of use
+- D80: a decision table's catch-all row asserts a cause the specific case contradicts
+- D82: the point-of-use rule (the pattern behind nine of ten bugs found on 2026-09-08/09)
+- D88: a step gated on "first call" is dead for every caller who has a profile
+- D89: a spoken line that promises finality kills every turn after it
+- D94: a shortening rule for one object gets applied to a different object whose value matches the example
+- D95: a skip test that accepts a WEAKER fact than the one it is guarding
+- D96: a pre-close checklist that names ONE owed item silently excuses every other owed item
+- D97: a prohibition scoped to one KIND of thing silently permits every other kind
+- D98: an unfilled promise with no MANDATORY escape gets filled with invention
+- D101: a validation rule whose remedy assumes the input is well-formed, or ends in "accept whatever comes"
+- D105: a hardcoded list was replaced, but the prose around it still describes the old list
+- D110: a guard that tests an injected variable is re-run after the caller answers, so the question loops
+- D114: a routing keyword appears inside the WRONG row's exception text
+
+**Repetition and loops** (4)
+
+- B1: One-time utterance/consent fired repeatedly
+- B2: Forbidden waiting/narration line leaks
+- B3: Unbounded re-ask on a hard-gated field dead-ends the call (and the caller's own question is never answered)
+- D27: Apply-failure turn re-speaks the apply bridge / re-fires apply_job on the same already-failed job
+
+**Tool calls, payloads and results (missed or wrong calls, payload values, backend replies, failure lines)** (40)
+
+- C1: Silent terminal tool calls dropped (no anchor, no gate)
+- C2: Tool referenced but not declared
+- C3: Payload field/data bug
+- C4: Fixed-param / enum integrity
+- C5: Spoken line stands in for a tool call that never fires (fabricated result / hallucinated success / ...
+- C6: Fetched response never consumed (no field map, no "use what's present" rule)
+- C7: Fetched identifier not bound -> downstream re-creates it (duplicate write)
+- C8: Result set presented in given order; known ranking signals not applied
+- C9: Placeholder / sentinel field value spoken or acted on as if real
+- C10: Tool 4xx with a well-formed id = backend/endpoint issue, NOT prose (and endpoint differences across twins may ...
+- D11: Repeat apply by a NEW caller in one call re-mints the profile (duplicate) + re-gathers details
+- D12: Role-name variant / job-family not matched -> false "no jobs" + inconsistent categorisation
+- D13: Out-of-city jobs surfaced in the first batch to a caller who stated their own city
+- D16: Empty get_profile misread as profile-exists -> apply_job without create_profile
+- D17: create_profile / get_profile phone double-prefix (+91+91…)
+- D20: Bundled create_profile+apply_job -> tool call narrated as text + hallucinated apply success
+- D25: Anti-narration / "say only X" edit near a mandatory tool call suppresses the tool itself
+- D28: apply_job sent create_profile's numeric top-level `id` instead of the `profileId` UUID -> 404 "Invalid or ...
+- D29: Greeting bundled with a silent fetch in ONE turn -> the model narrates the fetch OR skips it (un-bundle into ...
+- D30: apply_job stripped the job_id UUID hyphens -> 404 "Job not found"
+- D31: New-caller `create_profile`->`apply_job` batched in one turn -> `apply_job` sent an EMPTY `profile_id`
+- D33: Raya prunes a literal empty-object `{}` from `payload_template` -> a required object field arrives `undefined`
+- D36: Ranking pads the batch to N with irrelevant-role jobs instead of filtering to relevant
+- D37: Multi-profile fetch: bot applied to `items[0]` (a stale draft) while a live profile sat later in the array -> ...
+- D38: Signals dropdown field sent an off-enum value -> 400 INVALID_ITEM_STATE
+- D39: Signals write fails / duplicates the profile: double-prefixed phone, or non-Latin payload values
+- D40: `create_profile` omits `location` -> new profile is created `draft` (not live) -> `apply_job` PROFILE_NOT_LIVE ...
+- C11: DKB create_job not emitted on the post-consent turn (D25 runtime tool-adherence; language-variant-specific)
+- C12: Tool unmapped on a migrated backend kept as a "backend dependency" stub -> dead step / fabrication risk
+- D47: Every tool failure is spoken as "a technical problem on our side", including the ones that aren't
+- D52: A rule branches on a tool-error string the conversation model may never receive
+- D59: "items[0]" works until the caller's first item isn't the one you meant
+- D65: A licensed spoken line that is indistinguishable from the action becomes a substitute for the action
+- D91: `create_profile` on a caller who already has a record mints a duplicate instead of fixing it
+- D93: an empty tool result gets answered with the nearest "we have nothing" line
+- D91 (2nd): a REQUIRED tool parameter can be asserted falsely; it constrains what the model SAYS, not what it DID
+- D99: a tool description that states an OPERATION instead of a TARGET FORMAT, on an input whose shape varies
+- D107: a default search value for undecided callers gives every undecided caller the same wrong jobs
+- D111: an enum list in the prompt disagrees with the tool schema, and the prompt wins
+- D115: "after the tool completes, say done" with no failure branch
+
+**Inputs, variables and templates (`${...}`, `[slot]`, memory, campaign args)** (17)
+
+- D32: Memory block used as a substitute for `get_profile` -> premature name/role + fetch never fires
+- E3: Memory-injection block missing (repo standing rule)
+- G1: Variable placeholder precedes its label in a binding phrase (garbles after interpolation)
+- G2: A literal `${...}` written as an EXAMPLE becomes a phantom declared agent argument
+- G3: A `[bracketed]` placeholder in a spoken line makes the MODEL do the substitution (spoken aloud, wrong value, or ...
+- G4: `memory_enabled` silently overrides the `${contact_memory}` passed in `agent_args`
+- D42: A truncated `${recommendations}` payload makes the bot go silent, invent a role, or drop the call
+- G6: A guard rolled across bot families references a variable that family does not have
+- D53: An input variable the prompt promises to speak back is silently suppressed by a guard about something else
+- D54: A rule gated on stored memory, on a platform where memory is neither settable nor readable
+- D66: An ALIAS for an input variable makes every test of that variable silently false
+- D67: A spoken template with the slot INSIDE it makes the raw variable token the default utterance
+- D68: An input the campaign SENDS that the prompt never names is an input the bot cannot use
+- D73: An emptiness test that enumerates the placeholder STRING and NULL, but not the ABSENT argument
+- D77: The `[slot]` markers a spoken template is BUILT FROM get read out as words
+- D89 (2nd): an upstream field RENAME silently inverts a flag-driven gate
+- D100: a slot defined by the TURN that filled it goes stale when the caller updates the value later
+
+**Examples in the prompt (sample calls and example values that teach the wrong thing)** (12)
+
+- E1: Few-shot examples contradict the rules (incl. cross-branch opening bleed)
+- D50: The prompt's own worked examples demonstrate the violation the rules forbid
+- D57: The samples depict a tool call as narration, so the model narrates it instead of calling it
+- D63: A sample conversation whose CONTEXT omits the field a branch keys on demonstrates the wrong branch
+- D74: A sample conversation whose Context line defines a variable in terms of itself, and whose speech line then ...
+- D81: a prohibition that prints the forbidden output supplies it
+- D81b: an EVIDENCE NOTE that quotes the bad output is the same trap as the prohibition
+- D83: a concrete value printed beside a template becomes the output
+- D87: a reduction rule demonstrated only on single-token inputs teaches "keep the first one"
+- D102: a branch that is never demonstrated is never taken, and the demonstrated branch's VALUES get reused as fabrications
+- D109: a worked example's input value is supplied as the real value when the call's input is empty
+- D112: example VALUES in the prompt are copied into calls where the real value is absent
+
+**What the caller hears (vocabulary, numbers in words, script, gender, internal words spoken)** (18)
+
+- D1: Hard/Sanskritised vocabulary despite a "simple language" rule
+- D2: TTS number/date/time/money not spelled as words
+- D3: Script separation: conversation vs payload
+- D4: Voice-gender inconsistency
+- D6: Symbol/punctuation voiced literally (e.g. "/" read as "slash")
+- D8: Internal technical term ("profile") spoken to the caller
+- D26: Place/city names spoken inconsistently or mispronounced (no canonical-spelling pin)
+- D34: Platform `hold_message` (spoken filler on a tool call) narrates a step the prompt says is SILENT
+- D44: Caller-directed verbs hardcoded to the BOT's gender (a feminine-voiced bot misgenders every male caller)
+- D45: An internal structure name spoken aloud to the caller ("this inventory", "the database")
+- D61: A suppression rule with no replacement line falls back to the thing it suppressed
+- D69: An identifier with no rule of its own falls to the "numbers in words" default and is spoken as a quantity
+- D71: A script/spelling rule backed by a CLOSED LIST converts what is on the list and passes the rest through verbatim
+- D72: An English field LABEL inside a spoken template is read out to the caller
+- D84: "say it in words" gets satisfied by re-rendering the digits in the target script
+- D92: a digit-by-digit spoken number loses a repeated digit unless the count is asserted
+- D104: "reassure them, in your own words" turns a forbidden threat into an unkeepable promise
+- D113: a stage direction or "stay silent" instruction is spoken aloud
+
+**Consent, disclosure and safety** (10)
+
+- D41: doubts question and apply-consent bundled in ONE turn -> a "no" (= no doubts) is read as a refusal to apply -> ...
+- D46: Consent captured and the line dropped in the same breath: the caller cannot learn what they just agreed to
+- E2: Consent handling: multiple gates, single-ask, hard-stop on decline
+- E4: Guard sections thin or absent
+- D60: A mandated line that bundles a disclosure with a question loses the disclosure
+- D86: a flag the prompt tells the model to IGNORE is a consent nobody checks
+- D103: a mandated disclosure that lives in ONE turn is lost on every exit reachable before that turn
+- D106: consent heard at one step but only written at a later one is lost whenever the call ends in between
+- D108: an offer that ends on a statement, plus a "clear yes" list containing a backchannel, records acknowledgements ...
+- D121: a safety statement inside an ordinary answer is acknowledged only for the surface need
+
+**Size and languages (translation, mirrors; run the scripts)** (7)
+
+- D116: the prompt is past the size this bot can handle, so it stops calling tools without any error
+- D117: a mirror's English rules still tell the bot to speak the master's language
+- D118: a same-script mirror keeps master-language text that no script check can see
+- D119: a defect in the master is copied into every language
+- D120: a line with no equivalent in the target language becomes two identical lines
+- D122: a proper noun changes in translation
+- D123: the translation is correct but too formal for the caller
+
+**Diagnosis and test method (not prompt defects; read before concluding)** (5)
+
+- G5: A diagnostic prompt that lets the model JUDGE its input produces false negatives
+- D50 addendum (2026-09-03): "it's model adherence, don't add prose" is a triage claim that must be GREPPED before ...
+- D85: identical output across a CHANGED prompt means the source is not the prompt
+- D90: "the caller's identity is fixed by the dialled number" is worth re-testing before you call a state unfixturable
+- D90 (2nd): a redirected log that looks empty is buffering, not a dead process
+
+Cross-language parity between a master and its mirrors: section F (pointer to `/sync-check`).
+
 ---
 
 ## A. Flow & sequencing
@@ -2029,7 +2230,7 @@ nothing about whether the datum is on record.
 **Caveat that must be checked before calling it a bug (bit us here):** when the platform injects its
 own stored memory, a caller whose memory already holds the datum SHOULD be skipped — so a consistent
 skip on a heavily-reused tester DID may be the rule working correctly. `${contact_memory}` in
-`agent_args` does not reach the model (`/voice-test` §6c), so the "nothing on record" state cannot be
+`agent_args` does not reach the model (`/voice-test` → Fixtures), so the "nothing on record" state cannot be
 fixtured; the discriminator is one call with `memory_enabled: false`, which is what proved the turn
 reachable here. Do not report the branch fixed on the strength of that call — it proves reachability,
 not that the re-gate changed anything in production.
@@ -2073,7 +2274,7 @@ order.)
 consent-flag states — on the strength of a documented platform limit. The limit was real for one
 variable and got generalised to another.
 
-**What actually happened.** `/voice-test` §6c had settled that `contact_memory` in `agent_args` never
+**What actually happened.** `/voice-test` (Fixtures) had settled that `contact_memory` in `agent_args` never
 reaches the model (true), and said `contact_phone` behaved "the same way" (false). On 2026-09-10 a
 one-call probe showed `${contact_phone}` rendering exactly the fixture value and `get_profile` firing
 against it, while the telephony leg still went to the tester DID. Every "cannot be fixtured" note that

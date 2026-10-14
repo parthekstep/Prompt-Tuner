@@ -90,11 +90,10 @@ def main():
         # a field: dkb-kn-signals showed `contact_name` as an "unused arg" on three calls whose value
         # was literally 'ಪರೀಕ್ಷೆ' ("test"), while the Hindi twin's real campaign traffic never carries
         # the key at all.
-        TESTER = "7946350285"
+        TESTERS = ("1204404272", "7946350285")   # current tester DID, and the pre-2026-09-23 one in older history
         listed = [c for c in (d.get("calls") or d.get("data") or [])
                   if (c.get("call_duration") or 0) >= 10
-                  and TESTER not in str(c.get("to_number") or "")
-                  and TESTER not in str(c.get("caller_no") or "")]
+                  and not any(t in str(c.get("to_number") or "") or t in str(c.get("caller_no") or "") for t in TESTERS)]
         fetched = 0
         for c in listed:
             try:
