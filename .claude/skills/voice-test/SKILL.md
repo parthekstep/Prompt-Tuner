@@ -118,6 +118,57 @@ so a failure reason code can be cut off) and never prints `agent_args`. **Grade 
 JSON, never from the printed dump:** `python3 scripts/raya_call.py <bot_uuid> 3` or
 `GET /api/call/{uuid}`, and persist it (§Provenance).
 
+## Run a test sheet ("run these test cases, N calls each, and update the sheet")
+
+This is how most people will ask for testing: they point at a Google Sheet in the house layout
+(`/generate-test-cases` §9b) and want it run and filled in. Do it without being told the mechanics:
+
+1. **Read the sheet through the service account, not a browser:**
+   `python3 scripts/testcase_sheet.py pull --sheet-id <ID> --tab "<tab>" --out <scratch>.json`. A 403
+   means the sheet is not shared with `kkb-sheets-writer@operation-rozgar.iam.gserviceaccount.com`:
+   ask the owner to add it as an editor (one line), do not try to open the sheet in a browser.
+2. **Lint it** (`testcase_sheet.py lint`). Rows with lint errors (no quoted expected line, vague pass
+   criteria) cannot be graded mechanically: tell the user which ones, and grade them as
+   `INCONCLUSIVE` rather than guessing.
+3. **Plan the run before placing a call**: rows × N calls × variants, at ~10-14 calls per hour per
+   tester. Say the number and the time it will take. Order: Smoke rows first; stop and report if a
+   Smoke row fails (the rest would be noise).
+4. **Run every row N times** (default 3 for any row whose behaviour branches; 1 is not a result for a
+   branching row, §Report contract 4). Each call is one `raya_testrun.py` run with the row id in the
+   label.
+5. **Write each result back to its own row**, found by its `#` id, never by row number:
+   `testcase_sheet.py result --sheet-id <ID> --tab "<tab>" --id DK-07 --verdict FAIL --actual "<what
+   happened, quoting the bot's line>" --calls "3 calls: 2 pass, 1 fail (<id>, <id>, <id>)"`. Actual
+   Response is written in the same plain style as the Purple Dots sheet: verdict, call count, the call
+   ids, and the one line that decided it ("FAIL (8c546b11). The bot ran the whole interview after an
+   empty profile, then …"). A call that never connected is not a result (re-dial).
+6. **A bug the sheet did not have becomes a new row**, marked as a bug:
+   `testcase_sheet.py add-bug --sheet-id <ID> --tab "<tab>" --after-phase "<phase>" ...` with the
+   tester's words and the expected line written as a proper test case, so it is re-run next time.
+7. **Report** with the house format (root `CLAUDE.md` → How to report back): what passed, what
+   failed with call ids, new bugs added as rows, next step. Link the sheet.
+
+Never overwrite another person's Actual/Verdict text without saying so; if a row already has a
+verdict from a human tester, add yours to the notes column with the date instead.
+
+## Harness traps that look like bot bugs (check these before reporting a defect)
+
+Each of these was nearly reported as a bot bug by a team using the tuner (Purple Dots, Oct 2026):
+
+| What you see | What it usually is | What to do |
+|---|---|---|
+| Call "failed" at 0 seconds, no transcript | the line never connected (number still switching, bridge flake) | re-dial; never score it |
+| Inbound bot greets the wrong name and hangs up | the inbound bot looks up the **caller's own number**; the test profile was prepared on a different number | prepare inbound test data on the tester's out number |
+| Setup step "succeeded" but the case exits for the wrong reason | the backend refused the setup (e.g. an under-18 profile) and the setup script hid it | setup scripts must stop on any backend refusal; read the response |
+| Empty call report / `call_output` nulls | it arrives some time after the call ends | poll until the field exists (platform reality 4, 14) |
+| A near-miss because the grader looked for one native word | the bot used the English loanword (wheelchair vs its native word) | match through `variants()` (script-aware matching) |
+| Standing checks report only one language | the checker listed files by name | fixed: `static_regression.py` reads languages from `raya/agents.json` |
+| Fluent call, caller told "saved", no tool calls at all | not a harness trap: the prompt is past this bot's size limit (D116) | `scripts/prompt_size.py check`; record the size evidence |
+
+Never run a test setup script against a real person's number: a setup that marks consent as given or
+fills default values (age 34) would write false data about a real participant. Test numbers only
+(memory: never test on user numbers).
+
 ---
 
 ## Grader contract — MANDATORY

@@ -9,7 +9,7 @@ the bot from the transcript.
 Subcommands:
   whoami  <uuid>                          print name / lang / voice / dids / instructions-len
   persona <tester_uuid> <persona_file>    PATCH tester.instructions from a file (backs up prior)
-  lang    <tester_uuid> <hi|kn>           PATCH tester.language_id + voice_id
+  lang    <tester_uuid> <hi|kn|mr>           PATCH tester.language_id + voice_id
   call    <bot_uuid> --to <did> --args <json_file> [--out-did D] [--cc 91] [--tz Asia/Kolkata]
                                           POST /api/call to initiate the test call
 
@@ -34,7 +34,19 @@ LANG = {
            "voice_id": "413cbfba-8270-4291-96cd-1a38a9d68fa7"},
     "kn": {"language_id": "ac4d6be6-3da2-4936-a841-0b23c7323446",
            "voice_id": "c343cabe-629e-48f6-998d-7fa4d6d3c20a"},
+    # mr -> the Marathi pair of "Kaam Ki Baat (Persona Based - Marathi) (Group 2)" (cb470bc3), read-only GET 2026-09-28
+    "mr": {"language_id": "9046a14a-e2f6-46df-95e8-3a9883ca40f7",
+           "voice_id": "daf1d34b-e65c-4553-88fe-54d66c10b912"},
 }
+
+# raya/voices.json is the register of record (per account); the dict above is the built-in fallback.
+try:
+    _vp = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "raya", "voices.json")
+    _acct = os.environ.get("RAYA_ACCOUNT", "ekstep")
+    for _iso, _pair in json.load(open(_vp, encoding="utf-8"))["accounts"].get(_acct, {}).items():
+        LANG[_iso] = {"language_id": _pair["language_id"], "voice_id": _pair["voice_id"]}
+except (OSError, ValueError, KeyError):
+    pass
 
 
 def _req(method, path, body=None):

@@ -34,6 +34,15 @@ not buying adherence, and removing it did not fix anything either. The dominant 
 the time had nothing to do with size: `hold_message` was never played, so 348/348 tool calls sat in
 silence for the whole round-trip.
 
+**One goal where slimming is not optional: the bot has stopped calling tools.** Past a size that
+differs per bot, a prompt does not error: the bot keeps talking fluently and makes no tool calls
+(Purple Dots Kannada: 0 of 3 calls used tools at ~125 KB, 3 of 3 at 105.6 KB; analyser D116). If
+`scripts/prompt_size.py` says BLOCK, or a translation is projected past the bot's limit, slim the
+**master** (never one language on its own, or the languages stop matching), then re-translate. Record
+the new working size on the target as `proven_prompt_bytes` + `size_evidence`. What worked there:
+removing examples that repeated a rule already stated elsewhere, and tightening wording without
+touching any rule.
+
 So, before starting, check and write down:
 
 - [ ] **What is the goal?** Latency, cost, reviewability, or "the team set a char target". If it is

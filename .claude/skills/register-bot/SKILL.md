@@ -189,6 +189,12 @@ touch nothing else.
 
 - **`expected_name_contains` carries the bot token AND the language/variant token** — never a
   single generic token, which is not a guard at all (see step 5 for the live hazard).
+- **Optional evidence fields** (add as soon as you have them, never guess): `account` when the agent
+  is on a Raya account other than the default (its key goes in `raya/.env` as
+  `RAYA_API_TOKEN__<ACCOUNT>`); `proven_prompt_bytes` / `max_prompt_bytes` + `size_evidence` (call ids)
+  for the size this bot has been seen to work at / fail at (`scripts/prompt_size.py`, analyser D116).
+  `raya_deploy.py` refuses at or past `max_prompt_bytes`. A new language's `language_id` / `voice_id`
+  go in `raya/voices.json` under its account.
 - **`project` is the new field** this skill introduces (gap G1). Add it to new entries; backfill
   existing entries with `"project": "blue-dots"` **only if the user approves** touching them —
   otherwise leave them alone and treat a missing `project` as `blue-dots` by default.
@@ -346,10 +352,14 @@ intake summary's scenarios and success criteria so `/generate-test-cases` can em
   repetition on request, never making disability the identity of the call) live in the **generic**
   checklist, not a per-bot one (gap G8).
 
-Also recommended, in this order, before any live call: **`/prompt-analyser`** on the newly filed
-master prompt (read-only pre-flight against the learned bug patterns in
-`.claude/skills/prompt-analyser/reference/bug-patterns.md`), then
-**`/generate-test-cases`**, then **`/voice-test`**.
+**Then run these automatically, in this order, without waiting to be asked** — every new bot gets
+its own suite the moment it is registered: **`/prompt-analyser`** on the newly filed master prompt
+(read-only pre-flight against the learned bug patterns in
+`.claude/skills/prompt-analyser/reference/bug-patterns.md`), then **`/generate-test-cases`** (writes
+`raya/testcases/<bot-id>.md` + `.json`, the personas and the bot checklist), then offer
+**`/voice-test`** on the P0 smoke set (live calls — confirm before dialling). The full catalog of
+quality parameters those suites draw on is `docs/QUALITY-PARAMETERS.md` (regenerate with
+`python3 demo/scripts/count_checks.py --catalog`).
 
 ### 8. Verify the registration — it is not done until the target resolves
 

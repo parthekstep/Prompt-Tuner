@@ -41,3 +41,7 @@ control-center/**/__pycache__/
 # regression email build artifact
 digest.html
 raya/location-writeback-state.json
+
+# /demo — live-run outputs and presenter state (regenerated every run)
+demo/out/
+demo/.state.json

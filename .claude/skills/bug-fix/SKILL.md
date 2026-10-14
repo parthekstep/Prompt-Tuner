@@ -21,6 +21,32 @@ Ties together `scripts/gsheets.py` (sheet R/W), the Raya call + agent APIs, `/ra
 9. **Repeat** for every issue.
 10. **Summarize LAST** — only after all issues are worked, write the MD summary (what fixed / how / why prior attempts failed / what's pending). Never write the summary before the work is done.
 
+## Four habits that make the loop converge (feedback from teams using the tuner, Oct 2026)
+
+People using the tuner saw it (a) forget issues it had reported earlier and focus only on the newest,
+(b) write a long report of possible causes ("maybe the schema, maybe the data") instead of making the
+one call that would decide, (c) fix issues one at a time when one change would have fixed several, and
+(d) find new issues on every run, which made the first report look incomplete. Each has a fix:
+
+1. **Keep one open-issues list per bot and re-read it every time.** The list of record is the tracker
+   sheet when the bot has one, otherwise the issue table in `raya/intake/<bot-id>.md` (ids
+   `<bot-key>-i<NN>`). At the **start** of any fixing or testing session, read it and say how many are
+   open. At the **end**, update every issue you touched: status, the call id that proves it, the date.
+   A report never ends without a "still open from before" line, even if the user only asked about the
+   newest issue.
+2. **Reproduce before you report.** When the cause is unclear, do not write up the candidate causes.
+   Design and place the one call that tells them apart (the input that differs between "schema" and
+   "data"), then report the cause it shows. A report whose findings are all "may be" is not finished.
+3. **Get the whole list first, then group by cause before fixing.** Run the bot's full Smoke + Core set
+   once (a baseline sweep) before the first fix, so the issue list is as complete as it can be up front.
+   Then group the issues by root cause: several symptoms often share one rule, one example or one tool
+   description. Make **one** fix per cause, and say which issues it is expected to close. Each of those
+   issues still needs its own proving call (root `CLAUDE.md`: one call id per fix).
+4. **Expect some new issues after each fix, and say why.** A change can break something nearby (Tier 2
+   exists for this), and some defects only show on paths the earlier calls never reached. Say which new
+   issues are regressions caused by the last change and which are first sightings of an old defect, so
+   the person can tell progress from churn.
+
 ## The two non-negotiable rules (the ones the user keeps repeating)
 
 - **NO FIX WITHOUT A TRANSCRIPT.** Never edit a prompt off a sheet report, a hunch, or a static/analyser finding alone. Pull the actual call, read the offending turns, confirm the bug is real and understand its root cause FIRST. A "plausible" static gap that no transcript reproduces is **not** a fix — it's an ungrounded change (see r70 2026-07-27: a static "gap" that 40 calls never reproduced). If you can't reproduce it in a recent call, do NOT fix — ask the reporter for the specific call uuid + timestamp.

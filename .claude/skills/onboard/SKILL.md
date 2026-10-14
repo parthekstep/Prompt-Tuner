@@ -26,7 +26,8 @@ reads as the language is actually spoken, not a dictionary translation.
 
 - **One question at a time.** Ask, wait, acknowledge the answer, then ask the next. Never dump
   the whole list at once.
-- **Plain, friendly, non-technical.** No jargon walls. If they don't know an answer, that's fine —
+- **Plain, friendly, non-technical.** No jargon walls (root `CLAUDE.md` → "Write for someone who is
+  not a prompt engineer": no "agnostic", "payload", "adherence", "D-numbers" unless they use them first). If they don't know an answer, that's fine —
   note it as "TBD" and move on; we can start with less (see *Minimum to start*).
 - **Say what happens with each answer** as you collect it (see *What each answer unlocks*), so they
   see the value of sharing it — but keep it to a sentence, don't lecture.
@@ -475,8 +476,9 @@ point a newcomer there rather than explaining the whole pipeline in chat.
 - **Existing bot (Branch A)** → the in-repo grounded briefing (`raya/intake/<bot-id>.md` + its
   `raya/agents.json` entry + the bot's `CHANGELOG.md`, then **`/prompt-analyser`**), then
   **`/voice-test`** — or **`/bug-fix`** if their issues are already rows in the tracker sheet.
-- **They want a language the bot doesn't speak yet** → **`/translate-prompt`** (spoken-idiom version
-  with that language's own TTS/script conventions re-derived, plus its new Raya agent), then
+- **They want a language the bot doesn't speak yet** → **`/translate-prompt`** (it cleans the master
+  first, checks the translated prompt will not be too large for the bot, translates only the spoken
+  lines, runs the language checks, then stands up the new Raya agent), then
   `/register-bot` for the new variant, `/generate-test-cases` for its personas, and `/voice-test`
   to grade it. Mirroring an *existing* change across languages is `/sync-check` + `/update-prompt`,
   not this.
@@ -488,6 +490,13 @@ point a newcomer there rather than explaining the whole pipeline in chat.
   reproducing call uuid), `not-a-prompt-bug: data-input` (the inputs were wrong),
   `not-a-prompt-bug: backend` or `: runtime-adherence` (escalate for a platform fix).
 
-Tell the customer, in one line, exactly what happens next and who does it — then stop. Onboarding's
-job is done when the tuner has a filled, confirmed intake summary, a status on every issue-id, and a
-clear first action.
+Tell the customer, in one line, exactly what happens next and who does it. Then give them
+**`docs/WHAT-YOU-CAN-ASK.md`** in two or three lines: the handful of plain sentences they can type next
+("make the test cases for this bot", "run the test cases in this sheet, three calls each", "show me
+exactly what you changed"). People new to the tuner said they could not tell what it can do; this is
+where they find out. Then stop. Onboarding's job is done when the tuner has a filled, confirmed intake
+summary, a status on every issue-id, and a clear first action.
+
+The issue table in `raya/intake/<bot-id>.md` is the bot's **open-issues list** from now on: every
+later fixing or testing session reads it first and updates it last (`/bug-fix` → four habits), so an
+issue reported today is never silently dropped because a newer one came up.

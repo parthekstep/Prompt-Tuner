@@ -27,6 +27,16 @@ Critical:
 - **Graceful exit / closing** — a fixed closing script consistent with the modality.
 - **Memory-injection block** — `### Contact context / {${contact_memory}}` **iff** memory is enabled.
 - **Few-shot examples** — present, and they model the **mandatory** flow (don't skip gated steps).
+- **Safety interrupt** (any bot that talks to the public; critical for vulnerable callers) — a rule that
+  applies in EVERY phase and turn, **including when the statement arrives inside an answer to another
+  question**, overrides the current phase, has its own mandatory spoken line in each language (with the
+  helpline or hand-off), and is never followed by the next form question in the same turn (D121).
+- **Per-language speech rules** (every non-master language file) — the instructions name THIS language
+  and script, never the master's (D117); an everyday-word table built for this language covering at
+  least training, pension, certificate, documents, eligibility, scholarship, support centre, assessment,
+  device (D123); a gender rule written for this language, not copied (D120); a list of words never to
+  say where the domain has insulting terms (e.g. disability words), mirrored in the agent's recognition
+  vocabulary. `scripts/language_checks.py` checks all four.
 
 ### Archetype: Outbound data-collection / profiling bot
 *(the Purple Dots disability-needs bot; any bot that calls a user, fetches a profile, collects/verifies fields, and connects them onward)*

@@ -205,7 +205,7 @@ additions or ports of already-working behaviour.
 | Create or edit an agent's memory prompt | `/update-memory` |
 | Create or edit an agent's output prompt | `/update-output` |
 | Audit whether the language variants have drifted | `/sync-check` |
-| Take a bot into a NEW Indic language — re-author the spoken content the way that language is actually spoken, re-derive its TTS/script machinery, stand up + test the new agent ("add Telugu/Tamil/Marathi", "make it multi-language") | `/translate-prompt` |
+| Take a bot into a NEW Indic language — re-author the spoken content the way that language is actually spoken, re-derive its TTS/script machinery, stand up + test the new agent ("add Telugu/Tamil/Marathi", "make it multi-language"). Rules and tool calls are never handed to a translator (`scripts/speech_split.py`), the size is projected first (`scripts/prompt_size.py`), and the prompt-level language checks gate the deploy (`scripts/language_checks.py`) | `/translate-prompt` |
 | Carry a feature from one agent to another (e.g. KKB → DKB / Maya) | `/port-feature` |
 | Audit a prompt for latent gaps / bug-prone patterns before running it | `/prompt-analyser` |
 | Reconcile a repo prompt against the LIVE prompt on Raya (who's ahead) | `/raya-reconcile` |
@@ -215,6 +215,9 @@ additions or ports of already-working behaviour.
 | Onboard a new user/customer bringing a voice bot (or point at an existing repo bot) | `/onboard` |
 | Register a new bot — or a new language/direction variant — so every skill and script resolves it: folder + prompt files + `CHANGELOG.md`, path-map rows, `raya/agents.json` target(s) with hand-copied uuids, regression fleet entry ("wire up Purple Dots", "add a Tamil variant") | `/register-bot` |
 | Shrink a long conversation prompt into a "slim" variant without losing behaviour, on its own A/B agent, proven by a coverage table + live calls before any traffic moves ("slim this prompt", "compress the prompt") | `/slim-prompt` |
+
+**For a new or non-technical user, start with `docs/WHAT-YOU-CAN-ASK.md`**: what the tuner does, in
+plain sentences they can type, no skill names needed.
 
 **The end-to-end map is `docs/WORKFLOW.md`** — how these skills chain together from intake to the
 standing daily regression, plus a decision table for every real situation, three worked scenarios,
@@ -380,6 +383,24 @@ Rules:
   time. State them once when they first block something; after that just say "blocked, see above".
 - Keep "verified" vs "not verified" — that rule stands (see the call-id section above). Just say it
   in fewer words.
+
+**Write for someone who is not a prompt engineer** (feedback from teams using the tuner, Oct 2026:
+"whatever it says flies over my head"; the people who will run it are programme staff, not
+specialists). This applies to every skill's report, to every user, every time:
+
+- Use the words of the call, not of the tuner: "the bot told the caller their details were saved, but
+  nothing was saved" — not "D115 false-success on create_job with empty tool_calls".
+- Do not use these words to a user unless they used them first, and if one is unavoidable, explain it
+  in five words: agnostic / specific, payload, enum, adherence, obligation, axis, tier, D-number,
+  guard, fixture, sync family, divergence registry, read-back.
+- Say what the person can do next, in one line, as a sentence they could type ("say 'run the Smoke
+  cases on the Marathi bot'"), not as a slash command alone.
+- Show the evidence they can open: the sheet row, the call id with its console link, the two or three
+  prompt lines that changed (before → after). A little visibility of the prompt helps people trust and
+  question a fix; the whole prompt does not.
+- Never leave a report that only lists possibilities ("may be the schema, may be the data"). Make the
+  call that decides, then report what it showed (`/bug-fix` → four habits).
+- End with what is still open from before, so nothing reported earlier silently disappears.
 
 ## Feedback-loop operating sequence (from the sheet — don't ask to be re-told)
 

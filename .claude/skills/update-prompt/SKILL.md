@@ -5,7 +5,8 @@ description: Create or update a voice agent's conversation prompt and keep the l
 
 # Update Prompt
 
-Apply a change to an agent's **conversation prompt** and keep Hindi ↔ Kannada in sync.
+Apply a change to an agent's **conversation prompt** and keep every language in sync (master first,
+then each mirror listed in `raya/agents.json`).
 
 Resolve files via the path map in the repo root `CLAUDE.md`. Read
 `reference/prompt-anatomy.md` (in this skill's folder) for the section taxonomy and the
@@ -26,6 +27,10 @@ editing — never edit a repo file that is behind live (you would clobber live-o
 a real job inventory with placeholders). `deploy` also refuses any prompt still carrying placeholder
 `job_id`s / a `[PLACEHOLDER]` flag. See `raya/README.md → Reconcile-before-fix`.
 
+**Read the bot's open-issues list first** (the tracker sheet, or the issue table in
+`raya/intake/<bot-id>.md`): know what is already open before you change anything, and update it at the
+end (`/bug-fix` → four habits).
+
 0. **Snapshot first (rollback safety).** Before editing, checkpoint the target agent:
    `scripts/prompt-version.sh save <agent> pre-<short-change-slug> "<one-line why>"`. This
    captures the current stable files so any edit is instantly reversible via
@@ -45,10 +50,19 @@ a real job inventory with placeholders). `deploy` also refuses any prompt still 
    - **SPECIFIC** (spoken lines, examples, number-words, tone markers) → will be translated
      and adapted to Kannada idiom/script.
    - **MIXED** → split: copy the rule verbatim, adapt the quoted speech.
-5. **Mirror to Kannada.** Apply the classified change to the Kannada file: verbatim for
-   AGNOSTIC; translated/adapted for SPECIFIC, following the localization conventions
-   (Kannada script, Kanglish, Kannada number-words, local place names) and matching the
-   existing Kannada section's phrasing.
+5. **Mirror to every other language.** The languages are the master plus every mirror listed for
+   this bot in `raya/agents.json` (Kannada for KKB/DKB today; Marathi, Telugu, Odia and more for other
+   projects). Apply the classified change to each mirror: verbatim for AGNOSTIC; re-authored for
+   SPECIFIC, to the `/translate-prompt` standard (the language's everyday words from
+   `raya/translations/lexicon.json`, never the bookish word; its own gender rule; numbers as words;
+   pinned place names), matching the existing section's phrasing. Then, for each mirror:
+
+   ```bash
+   python3 scripts/language_checks.py "<master>" "<mirror>" --lang <iso> --target <mirror-target-id>
+   ```
+
+   A new FAIL that your edit introduced blocks the deploy (a rule that now says "speak Hindi" in the
+   Marathi file, a digit in a new spoken line, a payload value that changed).
 6. **Maya gate (KKB changes only).** If the agent is **KKB** and the change touches shared
    core logic (anything Maya inherits), **stop and ask** the user whether to also apply it to
    Maya Hindi. If yes, apply it while preserving Maya's divergences (college identity,
@@ -72,9 +86,13 @@ a real job inventory with placeholders). `deploy` also refuses any prompt still 
    fix direction → source agent + date), and update
    `../prompt-analyser/reference/section-checklists.md` if the bug implies a section that must
    always exist. See `CLAUDE.md` → "Bug-fix feedback loop". Skip for pure feature additions.
-10. **Report.** Summarize what changed in each file, the classification used, and a
-   structural-parity note (confirm Hindi/Kannada section skeletons still align). For MIXED
-   changes, show the Hindi line and its Kannada adaptation side by side.
+10. **Report, in plain words, with the lines that changed.** The reader may not be a prompt
+   engineer. For each fix: one sentence on what the bot did wrong, one on what it will do now, and the
+   changed prompt lines themselves (before → after, a few lines, not the whole section), so the person
+   can see and question the change without opening the file. Name the open issues this change is
+   expected to close (from the bot's open-issues list), and which are still open. Then the
+   structural-parity note (section skeletons still align across every language) and, for MIXED
+   changes, the master line and each mirror's line side by side.
 11. **Verify by CALL, then report — per fix, with a call id.** A change is not fixed until a live
    call proves it. Before writing "fixed"/"done"/"working" anywhere — changelog, commit message, or
    message to the user — name the call uuid AND the exact transcript line or tool argument that
@@ -82,7 +100,15 @@ a real job inventory with placeholders). `deploy` also refuses any prompt still 
    behaves. If you shipped N behaviour changes you owe N call ids: one passing call does not verify
    the others. Untested changes are labelled **DEPLOYED, NOT VERIFIED** in all three places.
    See root `CLAUDE.md` → "The word 'fixed' requires a call id".
-12. **If the tested behaviour is inconsistent, the fix is NOT finished.** Never close out a change
+12. **Classify before you add words: a wording gap, or a following-instructions problem?** A wording
+   gap is a rule that is missing, ambiguous or contradicted (fix the text). A following-instructions
+   problem is a rule already stated clearly that the model does not keep (ages read as digits after the
+   digits were named as forbidden; consent asked before the search; a safety statement missed). **If a
+   fix does not hold across three calls, stop adding text**: change the mechanism (the ladder below) or
+   escalate with the call ids. Every added paragraph also uses up size budget, and past a bot's size
+   limit the bot stops calling tools without any error (D116): check `scripts/prompt_size.py check`
+   when the prompt grows. Prefer deleting or replacing a line over adding one.
+13. **If the tested behaviour is inconsistent, the fix is NOT finished.** Never close out a change
    as "works sometimes", "flaky", or "runtime adherence". Go to root `CLAUDE.md` → "'Intermittent' is
    not a result" and run **D1-D3 (count → segment by input → read the guard) BEFORE any remedy** — a
    near-clean split by an input variable means it is a condition bug and the remedy rungs will make it
@@ -95,9 +121,9 @@ a real job inventory with placeholders). `deploy` also refuses any prompt still 
 
 ## Procedure (create — new prompt or new language variant)
 
-- **New language variant of an existing agent:** copy the structure of the existing language
-  file; keep all AGNOSTIC content verbatim; translate/adapt all SPECIFIC content to the new
-  language. Verify section parity against the source.
+- **New language variant of an existing agent:** use **`/translate-prompt`**, not this skill. It
+  splits the master mechanically so no rule or tool call is ever translated, checks the size first,
+  and runs the language checks before deploy.
 - **New conversation prompt from scratch:** scaffold from the section taxonomy in
   `reference/prompt-anatomy.md`, filling each section for the new agent's domain. Pull the
   agent's variables/tools/persona from `../port-feature/reference/agent-schemas.md` (add a new

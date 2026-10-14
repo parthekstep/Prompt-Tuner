@@ -240,11 +240,17 @@ def base_url_or_die(env):
     return base
 
 
-def auth_header(endpoints, env):
+def auth_header(endpoints, env, row=None):
     auth = endpoints.get("auth", {})
-    token = (env.get(auth.get("token_env", "RAYA_API_TOKEN")) or "").strip()
+    token_env = auth.get("token_env", "RAYA_API_TOKEN")
+    # A bot on another Raya account carries "account" in agents.json; its key lives in raya/.env as
+    # RAYA_API_TOKEN__<ACCOUNT>. Switching keys by hand made a moved bot fail as "agent not found".
+    if row and row.get("account"):
+        token_env = "RAYA_API_TOKEN__" + re.sub(r"\W", "_", row["account"]).upper()
+    token = (env.get(token_env) or "").strip()
     if not token:
-        die("no API token — set %s in raya/.env." % auth.get("token_env", "RAYA_API_TOKEN"))
+        die("no API token — set %s in raya/.env%s." % (token_env, " (target %s is on account '%s')"
+                                                       % (row["id"], row["account"]) if row and row.get("account") else ""))
     scheme = auth.get("scheme", "")
     value = ("%s %s" % (scheme, token)).strip() if scheme else token
     return {auth.get("header", "Authorization"): value}, token
@@ -323,7 +329,13 @@ def fetch_remote(base, endpoints, env, headers, token, row):
     url = build_url(base, prof["get"], agent_id)
     timeout = endpoints.get("request", {}).get("timeout_s", 30)
     retries = endpoints.get("request", {}).get("read_retries", 2)
+    if row.get("account"):
+        headers, token = auth_header(endpoints, env, row)
     status, parsed, raw = api(prof["get"]["method"], url, headers, token, None, timeout, retries)
+    if status == 404:
+        die("GET %s returned 404: agent %s not found on account '%s'. If this bot moved to another Raya account, set "
+            "\"account\" on target '%s' in raya/agents.json and RAYA_API_TOKEN__<ACCOUNT> in raya/.env."
+            % (redact(url, token), agent_id, row.get("account", "default"), row["id"]))
     if status >= 300 or parsed is None:
         die("GET %s returned HTTP %s\n%s" % (redact(url, token), status, redact(raw, token)[:800]))
     agent_obj = dotted_get(parsed, prof.get("get_item_path", ""))
@@ -542,6 +554,8 @@ def warn_if_stale_agent(base, headers, token, agent_id, timeout):
 
 def deploy_one(row, endpoints, env, base, headers, token, args):
     import difflib
+    if row.get("account"):
+        headers, token = auth_header(endpoints, env, row)
     env_name = env.get("RAYA_ENV", "staging")
     prof = resolve_profile(endpoints, row.get("profile", "conversation"))
     require_endpoint_configured(prof, ("get", "update", "prompt_field"))
@@ -564,10 +578,18 @@ def deploy_one(row, endpoints, env, base, headers, token, args):
             "See raya/README.md -> 'Reconcile-before-fix'."
             % (row["id"], len(_ph_ids), " + a [PLACEHOLDER SAMPLE DATA] flag" if _ph_flag else "", row["file"]))
 
-    max_bytes = endpoints.get("request", {}).get("max_prompt_bytes")
+    # Size gate. A prompt past the size a bot can handle does not error: the bot keeps talking fluently and
+    # stops calling tools (Purple Dots Kannada, Oct 2026). The limit differs per bot, so it is recorded per
+    # target from evidence (scripts/prompt_size.py): max_prompt_bytes = seen failing, proven_prompt_bytes =
+    # seen working.
+    max_bytes = row.get("max_prompt_bytes") or endpoints.get("request", {}).get("max_prompt_bytes")
     llen, lsha = fingerprint(local)
-    if max_bytes and llen > max_bytes:
-        die("local prompt for %s is %d bytes > max_prompt_bytes %d." % (row["id"], llen, max_bytes))
+    if max_bytes and llen >= max_bytes:
+        die("REFUSING: %s is %d bytes, at or past %d bytes where this bot stopped calling tools (%s). Slim the "
+            "MASTER first (/slim-prompt), then re-translate." % (row["id"], llen, max_bytes, row.get("size_evidence", "")))
+    if row.get("proven_prompt_bytes") and llen > row["proven_prompt_bytes"]:
+        print("   SIZE WARNING: %d bytes is bigger than any size proven to call tools on this bot (%d). The first "
+              "post-deploy test call must confirm every tool fires." % (llen, row["proven_prompt_bytes"]))
 
     print("\n=== deploy %s  [env: %s]" % (row["id"], env_name))
 

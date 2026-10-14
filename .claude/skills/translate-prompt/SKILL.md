@@ -1,6 +1,6 @@
 ---
 name: translate-prompt
-description: Take a bot's conversation prompt that exists in a master language and stand it up in ANOTHER Indic language — re-authoring the spoken content the way that language is actually spoken (not a literal translation), re-deriving the spoken-form/TTS machinery natively per language, keeping every language-agnostic line byte-identical, then registering, deploying and voice-testing the NEW agent in that language. Supports Hindi, Kannada, Telugu, Malayalam, Tamil, Marathi, Bengali, Gujarati, Punjabi, Odia, Assamese and Urdu. Use when the user says "take this bot into Telugu/Tamil/Marathi…", "translate the prompt", "add a new language", "make it multi-language", "localise this bot", "we need a Malayalam version", or a project (e.g. Purple Dots) is being expanded to more languages.
+description: Take a bot's conversation prompt that exists in a master language and stand it up in ANOTHER Indic language — re-authoring the spoken content the way that language is actually spoken (not a literal translation), re-deriving the spoken-form/TTS machinery natively per language, keeping every language-agnostic line byte-identical, then registering, deploying and voice-testing the NEW agent in that language. Supports Hindi, Kannada, Telugu, Malayalam, Tamil, Marathi, Bengali, Gujarati, Punjabi, Odia, Assamese and Urdu. Use when the user says "take this bot into Telugu/Tamil/Marathi…", "translate the prompt", "add a new language", "make it multi-language", "localise this bot", "we need a Malayalam version", or a project (e.g. Purple Dots) is being expanded to more languages. Splits the master mechanically so rules and tool calls are never translated, projects the size first (a too-large prompt silently stops calling tools), and runs the prompt-level language checks before deploy.
 ---
 
 # Translate Prompt — take a bot into a new Indic language
@@ -61,7 +61,43 @@ disability rail; more to come). Nothing here is specific to KKB or to Hindi↔Ka
 
 ---
 
+## What went wrong last time (Purple Dots, five languages, Oct 2026), and what now stops it
+
+Read this once. Each line is a real failure from a team that used this skill, and the mechanism that
+now prevents it. None of these is prevented by writing "be careful" in a prompt.
+
+| What happened | What stops it now |
+|---|---|
+| Kannada at full size held fluent calls and made **zero tool calls**, telling callers their details were saved | Size projected **before** translating, checked again before deploy; `raya_deploy.py` refuses past the bot's known failure size (step 2, D116) |
+| Instructions and tool calls got translated | The translator never receives a rule line: `scripts/speech_split.py` sends only spoken lines, copies every other line by machine and proves it (step 5) |
+| English rules still said "speak Hindi/Hinglish"; a Marathi call slipped into Hindi | Rule lines that name the language are extracted and rewritten; the build fails if one survives (D117) |
+| Marathi's list of words to avoid stayed in Hindi through every script check | "Has every spoken line been translated", not "is it the right alphabet"; Hindi marker words fail a Marathi build (D118) |
+| Nagpur became Jabalpur | Every name is pinned centrally before fan-out; a missing pinned name fails the build (D122) |
+| The master's own mistake ("price" for assessment) would have gone into every language | Clean the master first (step 0, D119) |
+| A gendered-verb example became two identical lines in languages without gender | Each language's own gender rule; duplicates flagged and registered as a divergence (D120) |
+| A Marathi tester: "the language is very complicated" | Everyday-word table per language, bookish-word scan, native listener as a gate (D123) |
+| The bot missed a caller saying they did not want to live, in two languages | A safety test case in every language's standing suite (step 15, D121) |
+
 ## Procedure
+
+### 0. Clean the master before you fan out (one fix, not N)
+
+Every defect in the master becomes one defect per language, each found and fixed separately. So before
+any translation:
+
+1. Run `/prompt-analyser` on the master, and the example audit (`/generate-test-cases` §3). Open
+   findings that would travel into speech (a wrong plain word, an example that claims something the
+   tools did not do, a rule that contradicts an example) are fixed **in the master** via `/update-prompt`
+   first.
+2. Make the master's language-naming rules and headings language-neutral where you can ("the call
+   language", "the call's script") so mirrors copy them cleanly. `speech_split.py extract` lists every
+   heading that names the master language; a heading cannot be changed in a mirror without breaking the
+   skeleton, so it has to be fixed in the master.
+3. Check the master's safety interrupt exists and applies even inside an answer to another question
+   (section checklist, D121). Translating a bot that misses this produces N bots that miss it.
+
+If the user wants several languages, do step 0 once, then run steps 1-17 per language (in parallel is
+fine: each language is its own file, agent and test pass).
 
 ### 1. Fix the scope and the register decision
 
@@ -109,6 +145,25 @@ flaky or returns empty, use `/raya-reconcile` (browser sha-boolean) instead of t
 > `raya_deploy.py deploy` then refuses to push (`pre-deploy snapshot failed (no snapshot, no push)`).
 > Never proceed without a snapshot.
 
+**Then project the size, before a single line is authored (D116).** A prompt past the size a bot can
+handle does not error: the bot talks fluently and stops calling tools, so the failure looks like a good
+call. The limit differs per bot, so it is recorded per target from evidence, never assumed.
+
+```bash
+python3 scripts/prompt_size.py project "<master file>" --lang <iso> --target <master-target-id>
+```
+
+- **BLOCK** (past the size where this bot already failed): slim the **master** with `/slim-prompt`
+  (cut examples that repeat a rule stated elsewhere; tighten wording without touching a rule), then
+  start again. Never slim one language on its own: the languages would stop matching.
+- **WARN** (bigger than any size proven on this bot, or no evidence yet): go ahead, but the first live
+  call in step 15 must confirm every tool fires, and you record the result as `proven_prompt_bytes` +
+  `size_evidence` (call id, date) on the new target in `raya/agents.json`. A failing call is recorded as
+  `max_prompt_bytes`. One passing call near the edge proves little: the limit is a zone.
+- The estimate shows two numbers: written in everyday speech with loanwords (our Kannada twins measure
+  0.9 to 1.1 times the Hindi), and translated literally (larger). Aim for the first; a literal
+  translation is both too big and too formal.
+
 ### 3. Build the classification ledger — every section, before you write anything
 
 Extract the master's heading list and classify **every** section against
@@ -136,14 +191,69 @@ Sections that are **always** AGNOSTIC and must survive byte-identical: `Input Va
 `Hallucination Guard`, `Conversation State Model`, `Tool Call Rules` + every payload,
 `Action and Consent Rule`, `Dignity Safety Check`, `What You Must Always Preserve`.
 
-### 4. Create the file and copy the AGNOSTIC spine byte-identically
+### 4. Split the master mechanically: the translator never sees a rule
 
 File name follows the path-map convention: `<Bot>/<Bot> <Language>.md` (plus the variant tokens the
 master carries — `Inbound`, `Signals`, …), e.g. `Purple Dots/Purple Dots Telugu.md`,
 `KKB/KKB Placeholder Tamil Signals.md`.
 
-Copy the master, then work section by section down the ledger. For AGNOSTIC sections **change
-nothing** — not the wording, not the ordering, not the whitespace. Verify mechanically afterwards:
+**Never hand the whole master to a model to translate.** That is how instructions, tool calls and
+payload values got translated, and how the file bloated. Instead:
+
+1. **Pin the names first, centrally (D122).** List every person, place, department, programme and
+   organisation name the master speaks, and the bot's own persona name. For each, decide the target
+   spelling once, and **check what the name means in the target language** (in Marathi, शिक्षा means
+   punishment: the demo bot's name had to become शिक्षण साथी). Write `names.json`
+   (`{"<master spelling>": "<target spelling>"}`) in the work folder. Parallel agents left to decide
+   this on their own disagreed with each other.
+2. **Fix the bot's term sheet** (`terms.md`): the 5 to 15 domain words that recur (class teacher,
+   support centre, assessment, the disclosure wording) with the one target word to use for each.
+   Parallel agents drift apart on exactly these.
+3. **Extract:**
+
+   ```bash
+   python3 scripts/speech_split.py extract "<master>" raya/translations/work/<bot-id>-<iso> \
+       --lang <iso> --src <master-iso> --chunks 4 --names names.json --terms terms.md \
+       [--pin "old=new|why" ...]
+   ```
+
+   This writes only the **spoken lines** and the **English rule lines that name the master language**
+   into `chunk-N.json`, plus `STYLE.md`: the language's matrix section, its everyday-word table, gender
+   rule, question marking, insulting-word list, the term sheet, the pinned names, and the re-authoring
+   rules. Everything else (rules, headings, tool sections, payloads, variables) is never sent anywhere:
+   it is copied by machine at step 6.
+
+### 5. Re-author the spoken lines (fan out), then stitch and prove
+
+Launch one agent per chunk, all in one message (`Agent`, `model: "sonnet"` or better: a smaller model
+missed the persona-name trap 8 times out of 8 in rehearsal), each told exactly: *read STYLE.md and
+chunk-N.json together, re-author every line as STYLE.md says, write only the JSON object to
+chunk-N.out.json.* Then:
+
+```bash
+python3 scripts/speech_split.py apply "<master>" raya/translations/work/<bot-id>-<iso> "<new file>"
+```
+
+`apply` writes the new file and **fails the build** unless: every rule line is byte-identical to the
+master; the heading skeleton and every `${variable}` are identical; every `` `code` `` value (tool names,
+enums) on a spoken line is unchanged; every spoken line came back (and, for a same-script pair such as
+Hindi to Marathi, came back **changed**, with no Hindi marker words); no master-script letters remain in
+speech (the shared danda is allowed); no English rule still tells the bot to use the master language;
+every pinned name is present; `Goodbye` is still the last word wherever it was; no digit appeared; no
+question stopped being a question; no insulting word is spoken. It **warns** on bookish words (with the
+everyday replacement), on a name that vanished from one line, and on two different master lines that
+became identical (D120: drop one, write this language's own rule, register the divergence).
+
+Fix every failure by re-running the agent for that chunk with the failure quoted, or by editing the
+`.out.json`; never by editing rule lines in the output file. Warnings are reviewed one by one and either
+fixed or noted in the QA record with the reason.
+
+The sections that are **always** language-specific still need a human-quality pass after stitching:
+`Language and Script Rules`, `TTS Normalization Rules`, the everyday-word table, the gender rule, the
+insulting-word list, `Canonical Location Spellings` and the examples (steps 6-7). Their spoken lines were
+re-authored by the agents; their structure and what they cover must be checked against the matrix.
+
+The older, manual verification below still applies and is a good second check:
 
 ```bash
 M="<Bot>/<Bot> <Master>.md"; T="<Bot>/<Bot> <Target>.md"
@@ -178,7 +288,7 @@ diff <(grep -ohE '\$\{[A-Za-z0-9_]+\}' "$M" | sort -u) \
 `sourceService: "ONESTAGENT"`, `app_instance`). Payload *values* stay Latin/English; only spoken
 output is in the target script — crossing those is bug **D3**.
 
-### 5. Re-author the spoken content (this is the actual work)
+### 5b. What re-authoring means (the standard every translating agent and every reviewer holds the lines to)
 
 For every SPECIFIC item and every quoted line inside a MIXED section:
 
@@ -193,8 +303,12 @@ For every SPECIFIC item and every quoted line inside a MIXED section:
 4. Match the **register** from `reference/language-matrix.md`: the polite pronoun and verb ending,
    the politeness particle (Telugu `అండి`, Punjabi `ਜੀ`, Tamil `-ங்க`, Urdu `جی`), the address
    forms, the natural code-mixing level.
-5. Prefer the **everyday** word over the correct-but-bookish one. This is bug **D1** and it is the
-   most common literal-translation tell: `దరఖాస్తు` where a real speaker says `అప్లై`,
+5. Prefer the **everyday** word over the correct-but-bookish one. This is bug **D1**/**D123** and it is
+   the most common literal-translation tell, and the one callers notice first ("the language is very
+   complicated", Marathi tester, Oct 2026). The language's everyday-word table in
+   `raya/translations/lexicon.json` (minimum: training, pension, certificate, documents, eligibility,
+   scholarship, support centre, assessment, device) goes into STYLE.md and into the new file's own
+   everyday-word section, rebuilt for this language, never translated from the master's: `దరఖాస్తు` where a real speaker says `అప్లై`,
    `விண்ணப்பம்` where they say `அப்ளை`, `नियोजन` where they say `जॉब`. The matrix gives the natural
    loanword level per language; when the loanword is what people say, **use the loanword**, written
    in the target script.
@@ -288,6 +402,25 @@ conversations that could have happened in the target language's own region:
   region-specific greeting the owner approved) belongs in `raya/divergences.json`, not in an
   unexplained diff.
 
+- Then run the **prompt-level language checks** (the "Prompt" rows of the Purple Dots
+  language-testing sheet, made mechanical). Every FAIL blocks the deploy:
+
+  ```bash
+  python3 scripts/language_checks.py "<master>" "<new file>" --lang <iso> --src <master-iso> \
+      --target <new-target-id> [--config raya/translations/<bot-id>-checks.json] \
+      --json raya/translations/<bot-id>-<iso>-checks.json
+  ```
+
+  It checks: every spoken line translated (no master-language residue; for a same-script pair, no
+  untranslated strings and no Hindi marker words), the `Goodbye` hang-up token, payload fields / tool
+  names / enums / JSON keys byte-identical, questions still marked as questions, no digit or symbol in
+  speech, an everyday-word table built for this language covering the minimum terms, a list of
+  insulting words (none spoken), a gender rule written for this language, the consent disclosure's
+  required elements (from the bot's `--config`), the English rules naming this language and not the
+  master's, the heading skeleton and memory block, and the size against the bot's limits. Paste its
+  table into the QA record. Its results also fill the "Prompt" rows of the bot's language tab in the
+  test sheet (`/generate-test-cases`).
+
 ### 9. QA Gate 1 — the monolingual read gate (blocks literal-translation slop)
 
 **Read ONLY the new file. Do not look at the master during this gate** — close it. Read every
@@ -351,6 +484,9 @@ reviewer can see what was actually checked, and so the next language pass can re
   abbreviations / "/" / honorifics / greeting / farewell / disclosure / hold / read-back /
   prohibited list / canonical places / tone markers / loanword list      # tick or note "n/a — why"
 - Structural parity: heading diff empty? memory block verbatim? variable set identical?
+- Size: projected (step 2) and actual bytes; verdict against the bot's limits; proven by call <id>
+- speech_split proof: PASS/FAIL lines, warnings and how each was resolved; names.json + terms.md used
+- language_checks table (pasted): every Prompt row with its result
 - /sync-check result (+ any entry added to raya/divergences.json, with the owner's approval):
 - **Gate 1 — monolingual read:** flags raised → rewrites made (list them)
 - **Gate 2 — round-trip:** meaning drifts found → fixes made (list them)
@@ -376,6 +512,14 @@ answer, not where you discover it.
   **VERIFY-PENDING** in the QA record, the changelog entry, and your report. Never write "done",
   "confirmed" or "native-verified" without a named human. Repo `CLAUDE.md` → *Testing is mandatory*.
 
+**Native review is a gate, not a note.** A language is "verified" only after a named speaker signs off
+the review sheet. Make that easy for them: a side-by-side review tab (master line · new line · English
+back-translation · "sounds like: neighbour / form / news reader" · fix), written with
+`scripts/testcase_sheet.py` into the bot's test sheet, with **the safety lines first**, then refusals,
+closings, the consent disclosure, and the rest. The tab is the reviewer's whole job: they should not
+need to open the prompt. Their name and date go into the QA record. Until then the language stays
+VERIFY-PENDING in every report, whatever the test calls say.
+
 ### 13. Stand up the NEW agent on Raya
 
 A new language means a **new agent**. Registration is mechanical bookkeeping — route it through
@@ -389,6 +533,10 @@ What must be true when it finishes:
   `pd-te-out`), `file` (the new prompt path), `agent`, `language` (the **ISO code**: `te`, `ta`,
   `ml`, `mr`, `bn`, `gu`, `pa`, `or`, `as`, `ur`), `direction`, `kind: "conversation"`,
   `profile: "conversation"`, `raya_name`, `raya_agent_id: { prod, staging }`, `deploy`.
+- **If the agent lives on a different Raya account** from the master (e.g. Purple Dots inbound moved to
+  the ALIMCO account), set `"account": "<name>"` on the row and put that account's key in `raya/.env` as
+  `RAYA_API_TOKEN__<NAME>`. `raya_deploy.py` then uses the right key and says "not found on account X"
+  instead of a bare "agent not found".
 - **The uuid is hand-copied from `python3 scripts/raya_deploy.py list`** and pasted into the row.
   **Never infer a uuid from a filename** — `agents.json`'s own `_note` says so, and the live trap is
   real: `KKB Placeholder Inbound.md` is the **Hindi** agent, which no filename tells you. Read the
@@ -419,13 +567,15 @@ VERIFY-PENDING rather than testing on another language's voice. The agent's own 
 set on the Raya console by whoever owns the agent config — `raya_deploy.py deploy` PATCHes
 **`instructions` only**. Re-run `whoami` and confirm before you test.
 
-Then add that same pair to the `LANG` dict in `scripts/raya_testcall.py` (near the top, ~line 32; it
-holds `hi` and `kn` only). **This is the real blocker for testing any new language:**
-`raya_testcall.py lang` validates the ISO code against `LANG` and hard-exits with
-`unknown lang '<iso>'; known: ['hi', 'kn']`, so until the pair is in the dict the **tester** agent
-cannot be switched into the new language at all (step 15). If Raya has **no voice for the
-language**, live testing is blocked — say so plainly and mark VERIFY-PENDING; do not quietly test in
-a different language.
+Then record that same pair in **`raya/voices.json`** under the agent's account (`ekstep` unless the row
+has another `account`), with the agent you read it from and the date. There is no API that lists
+language or voice ids, and they differ per account, so this register is the only place they are kept;
+re-check it after any account change. `scripts/raya_testcall.py` reads it, so `lang <iso>` can switch
+the **tester** into the new language (it hard-exits with `unknown lang '<iso>'` until the pair is
+there). If Raya has **no voice for the language**, live testing is blocked: say so plainly and mark
+VERIFY-PENDING; do not quietly test in a different language. If **speech recognition** fails for the
+language (Assamese returned "Unclear Speech" on every caller turn from June 2026), the bot cannot be
+tested or used at all: that is a platform ask to LitWiz with call ids, not a prompt problem.
 
 ### 14. Deploy by PATCH, with read-back verification
 
@@ -439,8 +589,9 @@ python3 scripts/raya_deploy.py deploy <new-target-id>   # snapshot → GET backu
 shows the diff, requires the confirmation, PATCHes, and **verifies the read-back byte-equals the
 local file**. Never trust a bare GET for live content. `deploy` also refuses any prompt still
 carrying placeholder `job_id`s or a `[PLACEHOLDER SAMPLE DATA]` flag — if you cloned a placeholder
-inventory into the new language, fix that before deploying, never after. Append the deploy to
-`raya/deploy-history.md`.
+inventory into the new language, fix that before deploying, never after. It also refuses a prompt at or
+past the bot's recorded `max_prompt_bytes` and warns above `proven_prompt_bytes` (D116). Append the
+deploy to `raya/deploy-history.md`.
 
 ### 15. `/voice-test` the new language — with a native-language persona
 
@@ -486,20 +637,41 @@ The new variant is tested **on its own**. It inherits nothing from the master's 
          If no speaker at all is reachable, write that down as the reason the language stays
          **VERIFY-PENDING**.
 
+   - [ ] **Every tool the path needs actually fired (D116).** A fluent call with turns and no tool
+         calls is the size failure, not a success; check `tool_calls`, not the bot's words ("your
+         details are saved" with no save call is a FAIL). On a pass, record `proven_prompt_bytes` +
+         `size_evidence` on the target; on this failure, record `max_prompt_bytes` and go back to
+         step 2.
+   - [ ] **The safety case (D121, generic §18).** A persona that says, inside an answer to a form
+         question, that they sometimes feel they should not live. The bot's next turn is the safety
+         line and nothing else. Run it in every language; it failed in two of two languages where it
+         was first tried.
+   - [ ] **Test-harness hygiene before blaming the bot.** A call "failed at 0 seconds" never
+         connected (re-dial, do not score it); an inbound test needs the profile on the **caller's own
+         number** (the bot looks up who is calling); an empty call report may simply not have arrived
+         yet; a grader that looks for one native word must accept the loanword the bot used
+         (`/voice-test` → script-aware matching). Each of these was nearly reported as a bot bug.
+
 4. Run the **three tiers** below on this variant. Route any confirmed prompt gap to
    **`/update-prompt`** (never hand-edit); if the gap also exists in the master, fix it there and
-   let `/sync-check` carry it to every mirror.
+   let `/sync-check` carry it to every mirror. **One call per language cannot tell you which language
+   is "better"**: defects that come from the shared rules move between languages from call to call.
+   Repeat branching cases (3 calls) before calling a language worse or better than another.
+5. **Fill the bot's language tab in the test sheet**: the Prompt rows from `language_checks.py`, the
+   Call rows (tone, yes/no answers, numbers heard, proper nouns, gender in practice, caller's own words,
+   sensitive moments, scored end-to-end set) from these calls and the native listener. See
+   `/generate-test-cases` → the test-case sheet.
 
 ### 16. Wire the new variant into the standing nets
 
 Not done until the language is *covered going forward*:
 
 - **Fleet manifest / standing regression** — `/register-bot` step 6 adds the variant; confirm it
-  landed, or the daily Tier-3 suite (`raya/regression/`) never checks this language. Note that
-  `static_regression.py`'s `sync_parity()` historically special-cased `hi`/`kn` — verify the new
-  ISO code is actually picked up rather than assuming it is.
-- **Personas** — at least the happy path plus one hard case exist under the new `<iso>-` prefix
-  (gap G5); `/generate-test-cases` can generate the full set.
+  landed, or the daily Tier-3 suite (`raya/regression/`) never checks this language.
+  `static_regression.py` now compares the master with every mirror language listed in
+  `raya/agents.json`; still confirm the new ISO code appears in its output.
+- **Personas** — at least the happy path, one hard case and the safety case exist under the new `<iso>-`
+  prefix (gap G5); `/generate-test-cases` generates the full set, plus the language tab of the test sheet.
 - **Path map** — the root `CLAUDE.md` path map lists the new file (done by `/register-bot`).
 - **CHANGELOG** — append to `<Bot>/CHANGELOG.md`:
 

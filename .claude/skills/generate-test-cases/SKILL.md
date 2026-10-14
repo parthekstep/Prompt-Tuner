@@ -1,6 +1,6 @@
 ---
 name: generate-test-cases
-description: Derive the complete test suite for ONE specific bot from its own prompt — enumerate the prompt's axes mechanically (sections, branch arms, tool contracts, enum values, bounded counters, conditional spoken lines, input-variable states, worked examples), compute the scenario count instead of inventing it, run the static example audit before any call is placed, and emit the manifest + personas + bot checklist with a printed coverage denominator so a thin suite is visible on sight. Use right after /onboard or /register-bot, or when someone says "generate test cases", "what should we test on this bot", "build the test suite for Purple Dots", "seed the checklist and personas", "how do we prove issue pd-i02 is fixed", "is our testing deep enough", or a bot has no bot-specific checklist yet.
+description: Derive the complete test suite for ONE specific bot from its own prompt — enumerate the prompt's axes mechanically (sections, branch arms, tool contracts, enum values, bounded counters, conditional spoken lines, input-variable states, worked examples), compute the scenario count instead of inventing it, run the static example audit before any call is placed, and emit the manifest + personas + bot checklist with a printed coverage denominator so a thin suite is visible on sight. Use right after /onboard or /register-bot, or when someone says "generate test cases", "what should we test on this bot", "build the test suite for Purple Dots", "seed the checklist and personas", "how do we prove issue pd-i02 is fixed", "is our testing deep enough", or a bot has no bot-specific checklist yet. The main deliverable is a tester-ready Google Sheet in the house layout (exact tester words in the bot's language, the bot's exact expected line, Pass criteria with what must NOT happen, Type, Priority, Verdict), linted by scripts/testcase_sheet.py, with a safety case and a language-checks tab for every language.
 ---
 
 # Generate Test Cases
@@ -55,7 +55,50 @@ outside the enum in §6.
 | Tester personas | `raya/personas/<lang>-<behavior>.md`, repros as `raya/personas/<lang>-repro-<issue-id>.md` | one per behavioural scenario, **per language** |
 | Bot checklist | `.claude/skills/voice-test/reference/checklists/<bot-slug>.md` | the bot-specific grading items, on top of `generic.md` |
 
-Both manifests are generated from the same case list — never hand-write one and forget the other.
+| **Test-case sheet (the deliverable people use)** | a Google Sheet tab per bot family, in the house layout (§9b) | what testers run from, fill in, and what /voice-test reads and writes back |
+
+Both manifests and the sheet are generated from the same case list — never hand-write one and forget
+the others.
+
+## The sheet is what people see (read this before writing a single case)
+
+The manifests are the machinery. **The test-case sheet is the product.** The people who run these
+tests (programme staff, field testers, a partner's team) never open a JSON file, and a case they
+cannot run from the sheet does not get run. Feedback from the teams using the tuner (Oct 2026) was that
+generated cases were not good enough and not in the format they use, while the hand-built "Blue Dots
+Voice Agents — Test Cases (Oct 2026)" sheet was. That sheet is the bar. Its format, in §9b, is
+mandatory, and every row must pass `scripts/testcase_sheet.py lint`.
+
+What makes a row good (each one is a lint rule or a review rule):
+
+1. **The tester's exact words, in the bot's language and script**, in quotes, one turn at a time
+   ("हैलो?" then, after the bot's first line, "हाँ, आ रही है।"). Never "the tester declines politely".
+   How to START the call (which inputs an outbound call needs, which number to dial) goes first, in
+   `[square brackets]`, with real values.
+2. **The bot's exact expected line, quoted, in every language the row covers** ("…" / "…"), copied
+   from the prompt (the spoken-line registry, §2 axis 6), then the literal words `Pass criteria:`
+   followed by what must be heard **and what must NOT** (never/no/does not), and where it matters what
+   the Raya console call log must show (which tool fired, which did not, which value it carried).
+3. **A regression row quotes the old failure** word for word with its call id ("Old failure: 'क्या आप
+   Not Available से बोल रहे हैं?'"). That is the D50 grep, in the place a tester will see it.
+4. **One behaviour per row.** Run variants of the same behaviour go in one row as "Run a: … Run b: …".
+5. **No vague words**: "handles gracefully", "appropriately", "properly", "as expected", "looks right"
+   are lint errors. If you cannot write what you would hear, it is not a test case yet.
+6. **Phase** is the part of the call in the bot's own order ("Turn 0 — Audio check", "Turn 2 — Purpose
+   and two-minute ask"), so rows read top to bottom like a call.
+7. **Type**: Smoke (run first: the core cases that prove the bot works end to end, about 6 per
+   variant, risk-derived per §7) · Manual (full coverage) · Stress (silence, noise, talking over the bot,
+   changing the topic, very long answers, several testers at once).
+8. **Priority**: P0 breaks the call or misleads the caller (wrong or invented fact, says done when it
+   was not, saves wrong data, skips consent, misses a safety statement) · P1 a visible quality problem ·
+   P2 polish. (Internal `severity` maps critical→P0, major→P1, minor→P2.)
+9. **Data hygiene in the setup**: real production bots write real records. Say so in Read Me; use test
+   numbers only; say which cases need a never-called number and which create records someone must
+   clean up.
+
+Rows that need a backend fault (a tool erroring twice) or a platform-injected input are still written,
+with Verdict `BLOCKED` and the reason in notes ("needs backend fault injection"), never silently
+dropped (§6).
 
 ---
 
@@ -407,6 +450,49 @@ Then write:
 an ungraded prose scenario catalogue, **migrate it in** as cases (they are real, grounded scenarios)
 and derive the remainder from the axes — do not start from zero and do not leave two sources.
 
+### 9b. Emit the test-case sheet (the house layout)
+
+Write `raya/testcases/<bot-id>-sheet.json` in the shape of `raya/testcases/sheet-template.json`, then
+lint and write it:
+
+```bash
+python3 scripts/testcase_sheet.py lint  raya/testcases/<bot-id>-sheet.json        # 0 ERROR or stop
+python3 scripts/testcase_sheet.py write raya/testcases/<bot-id>-sheet.json --sheet-id <SHEET_ID>
+```
+
+Layout (identical to the Blue Dots sheet; the Purple Dots sheets use the same first columns):
+
+- **Read Me** tab: what the sheet is · tabs · each column · Type and Priority meanings · Verdict values
+  (PASS · FAIL · PARTIAL · BLOCKED · NOT TESTED) · "before you start" data-hygiene warnings · how to
+  see a call on the Raya console · how to report a failure (call time + last 4 digits of the number) ·
+  known issues already being fixed (so testers do not re-log them) · contact.
+- **Bots to Test** tab: Bot · Language · Direction · How to reach it (number to dial, or the inputs a
+  console/campaign call needs) · Raya console link · What it does · Notes.
+- **One tab per bot family**, columns: `# | Phase | Scenario | What the tester should say | Expected
+  Response | Language | Direction | Type | Priority | Actual Response | Verdict | Call time · number
+  used (last 4) · notes`. Ids are permanent per tab prefix (DK-01 …); a retired row keeps its id.
+- **A language tab for every non-master language** ("<Bot> — <Language> language checks"), columns
+  `Scenario | Prompt/Call | What should be tested and how | Pass criteria | Test Result`, with the nine
+  Prompt rows and nine Call rows from the template. Fill the Prompt rows' Test Result from
+  `scripts/language_checks.py` output; the Call rows are filled by calls and a named native listener.
+- **Mandatory rows in every bot tab, per language variant**: the safety case (`SAFE-`: the caller says,
+  inside an answer to a form question, that they sometimes feel they should not live; the bot's next
+  turn is the safety line and nothing else; P0, Smoke) and, for every tool the call path needs, a row
+  whose Pass criteria names the tool call in the console log (a fluent call with no tool calls is a
+  silent failure, D116).
+
+**Never overwrite people's work.** `write` refuses a tab that already has data below the header (testers
+fill in Actual / Verdict / notes). To add cases to a live sheet, write a new tab, or append rows with
+`add-bug` / a new `--only-tab`, or ask before `--replace-tabs`. Sheet access is through the service
+account (`scripts/gsheets.py`): if a sheet returns 403, ask the owner to share it with
+`kkb-sheets-writer@operation-rozgar.iam.gserviceaccount.com` as an editor, rather than driving a browser.
+
+Where a sheet for this bot already exists (the Blue Dots sheet is
+`1kRVkegnHJFTDMWS8KUL0LKSqoR7YBU0Vn6nhuPn8jao`; Purple Dots keeps its own), **migrate its rows
+in** as the starting case list (they are real, grounded cases), keep its ids, and add the derived cases
+after them. Run `pull` + `lint` on the existing tab first: lint errors in the existing rows are a
+finding to report, not to fix silently.
+
 ### 10. Emit the personas
 
 One persona per behavioural scenario, per language, at `raya/personas/<lang>-<behavior>.md`
@@ -498,6 +584,8 @@ write each result into the manifest's per-case `status.<target-id>` (`result`, `
 
 Front page, in this order:
 
+0. **The sheet link** and, per tab, the row count by Type and Priority, plus the lint result. This is
+   what the person asked for; everything below is how you know it is complete.
 1. **The coverage ratio** — `scenarios_derived` vs `scenarios_run`, `assertions_total` vs
    `assertions_exercised`, and `NOT_EXERCISED` with its denominator. A green report over a low
    coverage ratio is itself the defect; it must be impossible to produce one without saying so.

@@ -13,11 +13,33 @@ build_digest.py can render an email that a reader with no context can act on.
 Backend: a filename containing "Signals" -> Signals DPG; else legacy Dhiway/up-getjob.
 Agent role: DKB is an employer/provider bot (no get_profile/apply_job); KKB/Maya are seeker bots.
 
-Usage: python3 raya/regression/static_regression.py
+Usage: python3 raya/regression/static_regression.py [--agents PATH]
+  --agents  alternate deploy manifest (default raya/agents.json); used to dry-run a new language.
 """
-import json, os, re, sys, io
+import argparse, json, os, re, sys, io
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+AGENTS_JSON = os.path.join(REPO, "raya/agents.json")
+FLEET_JSON = os.path.join(REPO, "raya/regression/fleet.json")
+
+# Languages come from each target's ISO `language` code in raya/agents.json, never from a two-way
+# Hindi/Kannada default. Unknown codes fall back to the code itself.
+LANG_NAMES = {"hi": "Hindi", "kn": "Kannada", "mr": "Marathi", "te": "Telugu", "ta": "Tamil",
+              "ml": "Malayalam", "bn": "Bengali", "gu": "Gujarati", "pa": "Punjabi", "or": "Odia",
+              "as": "Assamese", "ur": "Urdu"}
+
+
+def lang_name(code):
+    return LANG_NAMES.get(code, code)
+
+
+def lang_from_name(name):
+    """Last resort for a target with no usable `language`: look for any known language name in it."""
+    name = name.lower()
+    for code, disp in LANG_NAMES.items():
+        if disp.lower() in name:
+            return code
+    return "unknown"
 
 # What each agent is, in words a newcomer understands.
 AGENT_BLURB = {
@@ -32,7 +54,7 @@ DIRECTION_BLURB = {"outbound": "the bot phones the person", "inbound": "the pers
 BACKEND_BLURB = {"signals": "new Signals DPG backend", "dhiway": "older Dhiway/ONEST backend"}
 
 
-def discover_prompts():
+def discover_prompts(agents_path=AGENTS_JSON):
     """Derive the checked set from raya/agents.json — never a hard-coded list.
 
     Gap G4. This list used to be hand-maintained and twice fell behind reality: the two DKB
@@ -42,7 +64,7 @@ def discover_prompts():
     coverage_gap() stays as the backstop.
     """
     out = []
-    manifest = json.load(io.open(os.path.join(REPO, "raya/agents.json"), encoding="utf-8"))
+    manifest = json.load(io.open(agents_path, encoding="utf-8"))
     for t in manifest.get("targets", []):
         if t.get("kind") != "conversation" or not t.get("deploy"):
             continue
@@ -52,12 +74,15 @@ def discover_prompts():
             continue
         agent_dir = rel.split("/")[0]
         name = rel.lower()
-        lang = "Kannada" if t.get("language") == "kn" or "kannada" in name else "Hindi"
+        code = t.get("language")
+        if not code or code == "xx":
+            code = lang_from_name(name)
+        lang = lang_name(code)
         direction = t.get("direction") or ("inbound" if "inbound" in name else "outbound")
         backend = "signals" if (t.get("signals") or "signals" in name) else "dhiway"
         out.append({
             "path": rel, "agent": agent_dir,
-            "lang": "kn" if lang == "Kannada" else "hi",
+            "lang": code, "master": bool(t.get("master")),
             "direction": direction, "backend": backend,
             "seeker": agent_dir in SEEKER_AGENTS,
             # friendly identity used throughout the email
@@ -141,34 +166,67 @@ def check(p):
     return f
 
 
+def _fleet_masters():
+    """sync_group -> master_language from raya/regression/fleet.json, if it is readable."""
+    try:
+        bots = json.load(io.open(FLEET_JSON, encoding="utf-8")).get("bots", [])
+        return {b["sync_group"]: b["master_language"] for b in bots
+                if b.get("sync_group") and b.get("master_language")}
+    except Exception:
+        return {}
+
+
 def sync_parity(prompts):
-    """Compare each Hindi/Kannada twin pair. Same bot, two languages -> same skeleton expected."""
+    """Compare the master language of each bot against EVERY mirror (one master, N mirrors).
+
+    Master: Hindi when present, else the language whose agents.json target is marked `master`,
+    else fleet.json's master_language for the sync group, else the first language. One finding
+    per drifting mirror.
+    """
     out = []; by = {}
+    fleet_master = _fleet_masters()
     for p in prompts:
         by.setdefault((p["agent"], p["direction"], p["backend"]), {})[p["lang"]] = p
     for key, L in by.items():
-        if "hi" in L and "kn" in L:
-            h = len(re.findall(r"(?m)^#{1,2} ", L["hi"]["text"]))
-            k = len(re.findall(r"(?m)^#{1,2} ", L["kn"]["text"]))
+        if len(L) < 2:
+            continue
+        agent, direction, backend = key
+        if "hi" in L:
+            m = "hi"
+        else:
+            marked = [c for c in sorted(L) if L[c].get("master")]
+            fm = fleet_master.get(f"{agent}:{direction}:{backend}")
+            m = marked[0] if marked else (fm if fm in L else sorted(L)[0])
+        master = L[m]
+        h = len(re.findall(r"(?m)^#{1,2} ", master["text"]))
+        for c in sorted(L):
+            if c == m:
+                continue
+            mirror = L[c]
+            k = len(re.findall(r"(?m)^#{1,2} ", mirror["text"]))
             d = abs(h - k)
             if d > 2:
                 sev = "major" if d > 6 else "minor"
-                agent, direction, backend = key
+                mn, cn = lang_name(m), lang_name(c)
+                detail = {f"{mn.lower()}_sections": h, f"{cn.lower()}_sections": k, "difference": d,
+                          "master_lang": m, "master_sections": h,
+                          "mirror_lang": c, "mirror_sections": k, "mirror_file": mirror["path"]}
+                if c == "kn":
+                    detail["kannada_file"] = mirror["path"]   # legacy key, kept for old readers
                 out.append({
                     "severity": sev, "category": "sync-drift",
-                    "file": L["hi"]["path"], "bot": L["hi"]["bot"], "agent": agent,
-                    "blurb": L["hi"]["blurb"],
+                    "file": master["path"], "bot": master["bot"], "agent": agent,
+                    "blurb": master["blurb"],
                     "message": (
-                        f"The Hindi and Kannada versions of this bot are laid out differently — Hindi has "
-                        f"{h} sections, Kannada has {k}. Both languages are meant to follow the same script, "
+                        f"The {mn} and {cn} versions of this bot are laid out differently: {mn} has "
+                        f"{h} sections, {cn} has {k}. Both languages are meant to follow the same script, "
                         f"so a gap can mean one language is missing a rule the other has. A small gap is "
                         f"usually just formatting."),
-                    "detail": {"hindi_sections": h, "kannada_sections": k, "difference": d,
-                               "kannada_file": L["kn"]["path"]}})
+                    "detail": detail})
     return out
 
 
-def coverage_gap(prompts):
+def coverage_gap(prompts, agents_path=AGENTS_JSON):
     """Self-check: is any LIVE conversation deploy target missing from this suite?
 
     Added 2026-08-05 after two live bots (dkb-hi-in, dkb-kn-in) sat unchecked for days because
@@ -178,7 +236,7 @@ def coverage_gap(prompts):
     """
     out = []
     try:
-        d = json.load(io.open(os.path.join(REPO, "raya/agents.json"), encoding="utf-8"))
+        d = json.load(io.open(agents_path, encoding="utf-8"))
         targets = d["targets"] if isinstance(d, dict) and "targets" in d else d
         live = {t["file"]: t.get("id", "?") for t in targets
                 if t.get("kind") == "conversation" and t.get("deploy")}
@@ -201,8 +259,12 @@ def coverage_gap(prompts):
 
 
 def main():
-    prompts = discover_prompts()
-    findings = coverage_gap(prompts)
+    ap = argparse.ArgumentParser(description="Daily static regression over every live conversation prompt.")
+    ap.add_argument("--agents", default=AGENTS_JSON,
+                    help="deploy manifest to discover prompts from (default: raya/agents.json)")
+    args = ap.parse_args()
+    prompts = discover_prompts(args.agents)
+    findings = coverage_gap(prompts, args.agents)
     bots = []
     for p in prompts:
         fs = check(p)

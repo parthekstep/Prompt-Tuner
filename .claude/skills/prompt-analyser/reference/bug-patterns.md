@@ -2918,3 +2918,151 @@ exists; if not, there must be a truthful "noted" line and an explicit "never say
 
 **Fix direction.** Result-gated success line plus a cause-free failure line; a "noted" line for
 actions with no tool. Source: DKB Signals Hindi/Kannada, 2026-10-13.
+
+## D116: the prompt is past the size this bot can handle, so it stops calling tools without any error
+
+**Symptom.** Purple Dots Kannada outbound, full translation (~125 KB): fluent 30-turn calls, ZERO tool
+calls in 3 of 3, and the bot told callers eleven times their details were saved. Empty call report, no
+audio problem, no error. Partly reduced (~112 KB): tools in 1 of 2. Reduced master (105.6 KB): 3 of 3.
+Two prompts ten characters apart near the edge behaved differently. (Aryan's Purple Dots language
+rollout report, Oct 2026.)
+
+**Root cause.** Every Indic script costs three bytes per character, and a literal translation is
+longer than one written in everyday speech, so a mirror can be well past its master's size. The size at
+which tools stop firing differs per bot (our KKB prompts run at 270 KB and still call tools), so no
+single account-wide number protects anyone. The failure looks like a successful call.
+
+**Detection heuristic.** `python3 scripts/prompt_size.py project <master> --lang <iso> --target <id>`
+before translating, and `check` before deploying: compare with the target's recorded
+`max_prompt_bytes` (seen failing) and `proven_prompt_bytes` (seen working) in `raya/agents.json`. Any
+call with turns and zero tool calls on a path that requires one is this bug until proven otherwise.
+`raya_deploy.py` refuses at or past `max_prompt_bytes`.
+
+**Fix direction.** Slim the MASTER (/slim-prompt), never one language alone: delete examples that
+repeat a rule stated elsewhere, tighten wording without touching a rule. Then re-translate. Record the
+new proven size with its call id. One passing call near the edge proves nothing: the limit is a zone.
+Source: Purple Dots (Kannada outbound), 2026-10.
+
+## D117: a mirror's English rules still tell the bot to speak the master's language
+
+**Symptom.** All four early Purple Dots translations still said "speak Hindi/Hinglish" in their English
+rules, the Kannada ones "write in Devanagari"; a live Marathi call slipped into Hindi. Our own demo
+Marathi bot still says "simple, everyday spoken Hindi" and "speak it as a Hindi number word" (found
+2026-10-14 by the new check).
+
+**Root cause.** The rule lines are English, so "copy the agnostic content byte-identically" copies the
+language name with them. The line is agnostic in form and language-specific in meaning.
+
+**Detection heuristic.** `scripts/language_checks.py` row "Instructions name this language": an
+English line that instructs the bot to speak / write / use the master language or script (not one that
+cites a past call). `scripts/speech_split.py` extracts these lines as `lang-rule` items so they are
+rewritten, and fails the build if one survives.
+
+**Fix direction.** In the master, word such rules language-neutrally where possible ("the call
+language"). In each mirror, name the mirror's own language and script. Source: Purple Dots mirrors
+(mr, kn, te, or), demo Shiksha Saathi Marathi, 2026-10.
+
+## D118: a same-script mirror keeps master-language text that no script check can see
+
+**Symptom.** Marathi shares Devanagari with Hindi, so the list of formal words the Marathi bot must
+avoid stayed entirely in Hindi through every check. Script checks also flag the sentence mark (।)
+that Odia and Assamese share with Hindi as a "leak", a false alarm.
+
+**Root cause.** "Is the text in the right alphabet" cannot tell Marathi from Hindi. The question that
+matters is "has every spoken line been translated".
+
+**Detection heuristic.** Every master speech line must come back changed (`speech_split.py apply`
+fails on an unchanged speech line for a same-script pair) and no Hindi marker word (है, नहीं, क्या,
+रहा/रही, चाहिए, ...) may appear in Marathi speech (`raya/translations/lexicon.json`
+`hindi_markers`). Never count the danda as residue.
+
+**Fix direction.** Re-author the line, including vocabulary lists: a list of words to avoid is
+re-derived for the target language, not copied. Source: Purple Dots Marathi, 2026-10.
+
+## D119: a defect in the master is copied into every language
+
+**Symptom.** The Hindi master offered "price" as the plain word for "assessment"; an example in the
+master taught the bot to say details were saved when nothing had been. Translating would have copied
+both into five languages.
+
+**Root cause.** Translation fans the master out N times. Every master defect becomes N defects, each
+found and fixed separately, each costing a test call per language.
+
+**Detection heuristic.** Before any translation, run /prompt-analyser on the master and the
+example audit (/generate-test-cases §3); a master with open findings is not a translation source.
+
+**Fix direction.** Fix the master once through /update-prompt, then translate. Source: Purple Dots
+Hindi masters, 2026-10.
+
+## D120: a line with no equivalent in the target language becomes two identical lines
+
+**Symptom.** A Hindi example contrasting masculine and feminine verb forms became two identical lines
+in Kannada, Telugu, Odia and Assamese, whose first- and second-person verbs carry no gender.
+
+**Root cause.** Line-by-line translation preserves the count of lines even when the distinction they
+teach does not exist in the target language.
+
+**Detection heuristic.** Two adjacent master lines that differ but come back identical
+(`speech_split.py` warns). A gender rule copied byte-identical from the master (`language_checks.py`
+"Gender rules" fails).
+
+**Fix direction.** Write the target language's own gender rule (`lexicon.json` → `gender`), drop the
+duplicate, and register the difference in `raya/divergences.json`. Source: Purple Dots kn/te/or/as,
+2026-10.
+
+## D121: a safety statement inside an ordinary answer is acknowledged only for the surface need
+
+**Symptom.** In Marathi and in Kannada, a caller said mid-answer that they sometimes feel they should
+not live. The bot acknowledged only the mobility problem and offered a wheelchair. The Hindi production
+bots carry the same rule and had never been tested against it.
+
+**Root cause.** The safety rule was written for a caller who raises distress as the topic. When the
+statement arrives inside an answer to a form question, the phase's "acknowledge and move to the next
+field" behaviour wins. And nothing tested it: it was found only because someone wrote the scenario.
+
+**Detection heuristic.** A bot that talks to the public must have a safety interrupt that (a) applies
+in EVERY phase and turn, including inside an answer to another question, (b) overrides the current
+phase, (c) has its own mandatory spoken line in each language with a helpline or hand-off, and (d) is
+never followed by the next form question in the same turn. Then a standing test case per language:
+the caller embeds the statement inside an answer (generic checklist §18).
+
+**Fix direction.** Add or scope the interrupt rule so it names "even inside an answer to another
+question"; add the example to the master's examples; add the safety scenario to every language's
+standing suite. Escalate the Hindi production decision to the programme owner. Source: Purple Dots
+mr/kn outbound, 2026-10.
+
+## D122: a proper noun changes in translation
+
+**Symptom.** A city in the Marathi translation turned Nagpur into Jabalpur. An earlier rehearsal
+"localised" a child's name in examples whose English context lines still used the original name.
+
+**Root cause.** A translator treats names as content to adapt. Parallel agents each decide on their
+own.
+
+**Detection heuristic.** Before fan-out, list every person, place, department and programme name in
+the master's speech and pin the target spelling (`speech_split.py extract --names names.json`); `apply`
+fails if a pinned name is missing from its line. For same-script pairs `apply` also warns when a name
+that survives everywhere else vanished from one line.
+
+**Fix direction.** Pin names centrally, once, before fan-out. Source: Purple Dots Marathi, demo
+rehearsal, 2026-10.
+
+## D123: the translation is correct but too formal for the caller
+
+**Symptom.** A Marathi tester said the bot's language was "very complicated"; the Kannada bot had the
+same complaint earlier (textbook Kannada, not spoken). The language skill already said "re-author, don't
+translate", and it still happened.
+
+**Root cause.** A model asked to translate reaches for the formal register, and a model reviewing its
+own lines does not hear them as a caller would. There was no per-language list of everyday words and
+no mechanical scan for bookish ones, so "use everyday words" stayed an intention.
+
+**Detection heuristic.** The target file must have an everyday-word table built for that language
+(minimum terms: training, pension, certificate, documents, eligibility, scholarship, support centre,
+assessment, device). `speech_split.py apply` warns on every bookish word in `lexicon.json` → `formal`
+with the everyday replacement. A native listener's "news reader / form / neighbour" verdict on the
+first live call is the real gate.
+
+**Fix direction.** Give every translating agent the language's style card with the everyday-word table
+(`raya/translations/style/<iso>.md` + lexicon). Rewrite flagged lines; never ship with an unreviewed
+formal-word warning. Source: Purple Dots Marathi feedback, KKB Kannada history, 2026-10.

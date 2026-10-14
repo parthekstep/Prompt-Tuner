@@ -67,12 +67,22 @@ GLOSSARY = [
      "post a job.",
      "A missing section means the bot has no instructions for that moment and will improvise — "
      "or skip the step entirely."),
-    ("Hindi and Kannada versions have drifted apart", "sync-drift",
-     "Most bots exist in both Hindi and Kannada and are meant to follow the same script, differing "
-     "only in the words spoken.",
+    ("Language versions of a bot have drifted apart", "sync-drift",
+     "Most bots exist in more than one language (a master, usually Hindi, plus mirrors such as "
+     "Kannada or Marathi) and every version is meant to follow the same script, differing only in "
+     "the words spoken.",
      "If one language has extra or missing sections, a rule may have been added in one language and "
-     "forgotten in the other. Small differences are usually harmless formatting."),
+     "forgotten in another. Small differences are usually harmless formatting."),
 ]
+
+
+# Curated items carry `priority` (high/medium/low); some newer ones carry only `severity`
+# (critical/major/minor). Map rather than crash — a KeyError here silently kills the daily email.
+_SEV_TO_PRIO = {"critical": "high", "major": "medium", "minor": "low"}
+
+
+def prio(it):
+    return it.get("priority") or _SEV_TO_PRIO.get(it.get("severity", ""), "low")
 
 
 def esc(s):
@@ -109,20 +119,20 @@ def priority_rows():
     for f in CRIT:
         rows.append(("critical", f["bot"], f["message"],
                      "Fix before the next production run — this breaks calls.", f.get("file", "")))
-    for it in [i for i in ITEMS if i.get("priority") == "high"]:
+    for it in [i for i in ITEMS if prio(i) == "high"]:
         rows.append(("high", bots_label(it["bots"]), it["title"] + " — " + it["what"], it["next"], ""))
     for f in MAJ:
         rows.append(("major", f["bot"], f["message"],
                      "Worth fixing soon — the bot works, but a step is missing or unclear.",
                      f.get("file", "")))
-    for it in [i for i in ITEMS if i.get("priority") == "medium"]:
+    for it in [i for i in ITEMS if prio(i) == "medium"]:
         rows.append(("medium", bots_label(it["bots"]), it["title"] + " — " + it["what"], it["next"], ""))
     return rows
 
 
 def render_priority():
     rows = priority_rows()
-    later = len(MINO) + len([i for i in ITEMS if i.get("priority") == "low"])
+    later = len(MINO) + len([i for i in ITEMS if prio(i) == "low"])
     if not rows:
         body = (f'<p style="margin:0;color:{INK}">Nothing needs action today. '
                 f'{later} low-priority item(s) are listed further down for information.</p>')
@@ -237,7 +247,7 @@ def render_bots():
                          f'{esc(f["message"])}</div></div>')
             for it in its:
                 body += (f'<div style="margin-top:9px;padding-top:9px;border-top:1px dashed {LINE}">'
-                         f'{chip(SEV[it["priority"]][2], it["priority"])}'
+                         f'{chip(SEV[prio(it)][2], prio(it))}'
                          f'<div style="font-size:12.5px;font-weight:700;color:{INK};margin-top:5px">'
                          f'{esc(it["title"])}</div>'
                          f'<div style="font-size:12.5px;color:{INK};line-height:1.55;margin-top:3px">'
@@ -260,7 +270,7 @@ def render_global_items():
     for it in glob:
         body += (f'<table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px">'
                  f'<tr><td style="padding:11px 13px;background:#fff;border:1px solid {LINE}">'
-                 f'{chip(SEV[it["priority"]][2], it["priority"])}'
+                 f'{chip(SEV[prio(it)][2], prio(it))}'
                  f'<div style="font-size:13px;font-weight:700;color:{INK};margin-top:5px">'
                  f'{esc(it["title"])}</div>'
                  f'<div style="font-size:12.5px;color:{INK};line-height:1.55;margin-top:3px">'
@@ -299,7 +309,7 @@ def section(title, body, sub=""):
 
 
 def main():
-    highs = [i for i in ITEMS if i.get("priority") == "high"]
+    highs = [i for i in ITEMS if prio(i) == "high"]
     clean = not CRIT and not MAJ
     if CRIT or MAJ:
         verdict = (f"{len(CRIT)} critical and {len(MAJ)} major issue(s) need attention before the next "
