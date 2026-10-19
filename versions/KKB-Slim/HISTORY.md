@@ -56,3 +56,5 @@
 - **2026-10-19_150819** — `pre-deploy-kkb-kn-signals-slim-2026-10-19_150819` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(3 files)_
 - **2026-10-19_153109** — `pre-deploy-kkb-hi-signals-slim-2026-10-19_153109` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Hindi Signals.md _(3 files)_
 - **2026-10-19_153110** — `pre-deploy-kkb-kn-signals-slim-2026-10-19_153110` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(3 files)_
+- **2026-10-19_155020** — `pre-deploy-kkb-hi-signals-slim-2026-10-19_155020` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Hindi Signals.md _(3 files)_
+- **2026-10-19_155021** — `pre-deploy-kkb-kn-signals-slim-2026-10-19_155021` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(3 files)_

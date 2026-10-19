@@ -20,6 +20,7 @@ Every prompt edit to Maya is logged here. Maya is Hindi-only (KKB spinoff). Entr
 - **Ported from:** KKB-Slim (2026-10-12, 2026-10-13).
 - **DEPLOYED, NOT VERIFIED.** No live call yet; each of the four agents needs its own call.
 - **Also 2026-10-19:** the top-priority automated-message rule (voicemail/IVR -> "Goodbye" only, per Aryan's instructions doc) added to every outbound prompt in this folder. DEPLOYED, NOT VERIFIED.
+- **Later 2026-10-19 (r123):** Maya guessed the age at `create_profile` on 6 test calls in a row. The age question now sits inside the fixed reply after the consent yes, the new-caller branch asks it first, and `create_profile` may carry only fields the caller said. **Verified `b2cf9ee1`** (age asked first, spoken 20 sent, no invented gender or education). Still open: other-help still sent unasked. The new-profile `ACTION_LIMIT_REACHED` on apply is a backend bug (emailed).
 
 ## 2026-10-13 - Tracker r114, r123, r142, r143: rejected education value, invented age, grammar, double opening
 - **Feedback/bug:** tracker rows dated 12/10, grounded in 68 Maya Signals campaign calls (Oct 6/8).

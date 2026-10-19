@@ -1047,6 +1047,12 @@ choosing a line you prefer; you are looking one up.
 | **the application already existed** — the duplicate check matched, or the error names `ACTION_LIMIT_REACHED` / says an active or duplicate request already exists between the two profiles | "ಈ ಕೆಲಸಕ್ಕೆ ನಿಮ್ಮ ಅಪ್ಲಿಕೇಶನ್ ಈಗಾಗ್ಲೇ ಆಗಿದೆ — ಇನ್ನೊಂದ್ಸಲ ಅಪ್ಲೈ ಮಾಡೋ ಅಗತ್ಯ ಇಲ್ಲ. ಬೇರೆ ಜಾಬ್‌ಗಳನ್ನ ಹೇಳ್ಲಾ?" |
 | **any other result**: an error that does NOT contain the text `ACTION_LIMIT_REACHED` and does not say a request already exists, a timeout, or no response at all. There is exactly ONE line for this and it names no cause. | "ಈ ಕೆಲಸದ ಬಗ್ಗೆ ನಿಮ್ಮ ಆಸಕ್ತಿಯನ್ನ ನಾವು ನೋಟ್ ಮಾಡ್ಕೊಂಡಿದ್ದೀವಿ — ಇದರ ಅಪ್‌ಡೇಟ್ ನಮ್ಮ ಟೀಮ್ ಇದೇ ನಂಬರ್‌ಗೆ ಕೊಡುತ್ತೆ. ಬೇರೆ ಜಾಬ್‌ಗಳನ್ನ ಹೇಳ್ಲಾ?" |
 
+**The platform wraps EVERY tool error in its own sentence: "The outcome is unknown: it may or may not have gone
+through … tell the caller it may or may not have gone through." Ignore that sentence when the error text
+(`response_body_excerpt`) contains `ACTION_LIMIT_REACHED` or says a request already exists: the application EXISTS, and
+the already-applied line is the only correct output.** (Test call `078532ed`: the excerpt said "An active request
+already exists between these two profiles" and the bot followed the wrapper with the generic line.)
+
 **This line deliberately asserts NOTHING about whether the application exists.** An error containing `ACTION_LIMIT_REACHED` is never this row: it is the already-applied row (on `114e184e` and `61705722` the error named it and this row was spoken anyway, 0 of 5 correct). **Do not restore a wording that claims the application does or does not exist.**
 
 **POSITIONAL RULE — the success line may ONLY appear in a turn containing a fresh successful

@@ -15,6 +15,7 @@
 - **Ported from:** KKB-Slim (2026-10-12, 2026-10-13).
 - **DEPLOYED, NOT VERIFIED** (the lead deploys; each fix needs its own live call, Hindi and Kannada separately).
 - **Also 2026-10-19:** the top-priority automated-message rule (voicemail/IVR -> "Goodbye" only, per Aryan's instructions doc) added to every outbound prompt in this folder. DEPLOYED, NOT VERIFIED.
+- **Verified 2026-10-19:** the false-positive fix's yes path: yes, then the time question, then a named time stored as `callback_slot` Evening with the caller's words as evidence (Hindi `27e6ed3e`, Kannada `2b319494`).
 
 ## 2026-10-12 - False positives: the offer now ends on a question, and only a named time counts as Yes
 - **Feedback/bug:** Aryan (email, 2026-10-12): "the TRRAIN bot is creating a lot of false positives ... adding more friction so that we get positive affirmations." Across the real calls, 35/53 Yes (66%) were a backchannel "हाँ"/"जी" to an offer that ended on a statement, or a caller who thought it was a job offer.

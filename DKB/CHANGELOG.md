@@ -16,6 +16,7 @@ Every prompt edit to DKB is logged here. Entry format:
 - **Files:** `DKB/DKB Hindi Signals.md`, `DKB/DKB Kannada Signals.md`, `DKB/DKB Hindi.md`, `DKB/DKB Kannada.md`, `raya/toolspecs/dkb_{create_job,update_job,close_job}{,_kn}.json`. Snapshot `pre-oct19-schema`.
 - **Verified (live test calls on test numbers and our own test postings, all retired after):** post goes LIVE with every field, owner name and phone asked (Hindi `ee20caba`); filled posting paused by `close_job` and only then "हटा दी है" (Hindi `8c440eb8`); failed post gets the truthful failure line, r130 (Hindi `0407c2f6`); hold request gets "जी, ज़रूर।" r133 (`642038cc`, 13 Oct); Kannada bad-line close without a callback promise (`9890a31c`).
 - **VERIFY-PENDING:** consent-ends-the-turn fix (posted early on `0407c2f6`, fix deployed after); Kannada new post and Kannada close_job; automated-message rule.
+- **Verified later 2026-10-19:** Kannada post live after name, same-number and consent questions, each its own turn (`b724636c`); consent question ends the turn and nothing is posted without a yes (Hindi `5e3eb3a9`); voicemail answered with "Goodbye" only (`61edee70`). Test postings retired after the runs.
 
 ## 2026-10-13 - Tracker r130, r131, r133: false "done", false "removed", spoken stage direction
 - **Feedback/bug:** tracker rows dated 12/10, grounded in 713 DKB Signals campaign calls (Oct 8).
