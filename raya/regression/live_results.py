@@ -25,6 +25,8 @@ sys.path.insert(0, os.path.join(REPO, "raya", "regression"))
 import grade_call  # noqa: E402  (env-aware: RAYA_* from the environment, else raya/.env)
 
 REC_FMT = "https://api.getraya.app/call_recording/?audiofile=/%s"
+MIN_BOT_TURNS = 4      # below this the call is THIN (too short to judge), never PASS
+MIN_SECONDS = 60
 
 # Plain-English names for the mechanical checks, for a reader who has never seen the code.
 CHECK_NAMES = {
@@ -187,7 +189,22 @@ def main():
         fails = [x for x in c["checks"] if x["result"] in ("FAIL", "ERROR")]
         dfails = [x for x in c["detector_findings"] if not x["info"]]
         passes = [x for x in c["checks"] if x["result"] == "PASS"]
-        c["verdict"] = "FAIL" if (fails or dfails) else ("PASS" if len(passes) >= 3 else "THIN")
+        # A call that ends after a couple of turns checks nothing about the flow, however many
+        # surface checks it "passes" (the first CI proof call, 09d3a1a5, was 37s and 2 bot turns
+        # because the tester was busy with another run, and graded PASS on 6 trivial checks).
+        bot_turns = sum(1 for t in (full.get("call_transcript") or [])
+                        if t.get("role") == "assistant" and str(t.get("content") or "").strip())
+        c["bot_turns"] = bot_turns
+        short = bot_turns < MIN_BOT_TURNS or (c["duration"] or 0) < MIN_SECONDS
+        if short:
+            c["short_reason"] = ("The call ended after %d bot turn(s) and %ss, too short to check the flow."
+                                 % (bot_turns, c["duration"]))
+        if fails or dfails:
+            c["verdict"] = "FAIL"
+        elif short or len(passes) < 3:
+            c["verdict"] = "THIN"
+        else:
+            c["verdict"] = "PASS"
         calls.append(c)
 
     bots = sorted(dict.fromkeys(c["bot_id"] for c in calls))

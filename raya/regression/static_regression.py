@@ -140,12 +140,21 @@ def check(p):
 
     # 4. Signals seeker enum-exactness (only prompts that carry the new Phase-2 fields)
     if be == "signals" and p["seeker"] and "educationCategory" in t:
-        for enum in ["ITI / Other Vocational Trainings", "Polytechnic / Diploma", "3-5 Years", "B.Tech/B.E."]:
+        # 2026-10-13 (tracker r113): the backend REJECTS "ITI / Other Vocational Trainings" (5/5) and
+        # "Polytechnic / Diploma" (3/3) with INVALID_ITEM_STATE; the live tool schema says `ITI` / `Diploma`.
+        # The old list required the rejected wordings, so it flagged every corrected prompt as critical.
+        for enum in ["`ITI`", "`Diploma`", "3-5 Years", "B.Tech/B.E."]:
             if enum not in t:
                 add("critical", "enum-drift",
-                    f"The answer option \"{enum}\" is missing or reworded. The backend accepts only this "
-                    f"exact wording, so anything else makes saving the caller's profile fail.",
-                    {"expected_option": enum})
+                    f"The answer option \"{enum.strip('`')}\" is missing or reworded. The backend accepts only "
+                    f"this exact wording, so anything else makes saving the caller's profile fail.",
+                    {"expected_option": enum.strip("`")})
+        for bad in ["ITI / Other Vocational Trainings", "Polytechnic / Diploma"]:
+            if bad in t:
+                add("critical", "enum-drift",
+                    f"The answer option \"{bad}\" is back in the script. The backend rejects this wording "
+                    f"(tracker r113), so saving the caller's profile fails.",
+                    {"rejected_option": bad})
 
     # 5. required sections by role
     if "Graceful Exit" not in t and "graceful exit" not in t.lower():

@@ -181,6 +181,9 @@ def render_live():
                 for x in dets:
                     detail += f'&#10007; <b>{esc(x["title"])}</b>: {esc(x["finding"])}<br>'
                 detail += '</div>'
+            if c.get("short_reason"):
+                detail += (f'<div style="margin-top:6px;font-size:12.5px;color:#8a5300;line-height:1.5">'
+                           f'{esc(c["short_reason"])}</div>')
             if passes:
                 detail += (f'<div style="margin-top:4px;font-size:12px;color:{MUTED};line-height:1.5">'
                            f'&#10003; Passed: {esc(", ".join(x["title"] for x in passes))}</div>')
@@ -219,6 +222,8 @@ def headline():
     if LIVE is not None and not LIVE.get("missing"):
         bits.append(f'{LIVE.get("connected", 0)}/{LIVE.get("attempts", 0)} calls connected')
         bits.append(f'{LIVE.get("failed", 0)} with a problem')
+        if LIVE.get("thin"):
+            bits.append(f'{LIVE["thin"]} too short to judge')
     elif LIVE is not None:
         bits.append("live calls did not run")
     if CRIT:
