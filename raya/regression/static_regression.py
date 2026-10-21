@@ -172,6 +172,20 @@ def check(p):
         add("major", "missing-section",
             "This is an employer bot, but its script never posts the job (no create_job) — the whole "
             "point of the call would go unsaved.", {"section": "create_job"})
+    # 9. step references land where they say (D125): a stale "go to Step N" sends the bot to the wrong step
+    sp = os.path.join(REPO, "scripts", "prompt_structure.py")
+    if os.path.exists(sp):
+        import subprocess, tempfile
+        with tempfile.NamedTemporaryFile(suffix=".json") as tf:
+            subprocess.run([sys.executable, sp, os.path.join(REPO, p["path"]), "--json", tf.name], capture_output=True)
+            try:
+                res = json.load(open(tf.name, encoding="utf-8"))
+            except ValueError:
+                res = {}
+        for msg in (res.get("fails") or [])[:5]:
+            add("major", "step-reference",
+                "A rule in this script points the bot at a step that is wrong or missing, so the bot can end "
+                "up at the wrong question: " + msg, {"check": "scripts/prompt_structure.py"})
     return f
 
 

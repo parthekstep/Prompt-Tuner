@@ -43,6 +43,29 @@ one call that would decide, (c) fix issues one at a time when one change would h
    exists for this), and some defects only show on paths the earlier calls never reached. Say which new
    issues are regressions caused by the last change and which are first sightings of an old defect, so
    the person can tell progress from churn.
+5. **When the same issue survives two fixes, read the whole prompt cold before the third.** A fresh
+   subagent with no history (`/prompt-analyser` step 0) plus `scripts/prompt_structure.py`. A session that
+   has been fixing for hours reads the prompt through its own theory of the bug; on Orange Dots that
+   meant hours of added rules, while a fresh read found the step numbering was sending the bot to the
+   wrong question (D125).
+
+## Fix until the sheet passes (`/goal`)
+
+When the user wants the loop to keep going on its own ("keep fixing until every case passes"), use
+Claude Code's built-in **`/goal`**. After each turn a small model checks the condition against what
+Claude has printed, and Claude keeps taking turns until it is met, judged impossible, or stalled. It
+cannot read files or run commands itself, and it does not start subagents, so:
+
+- Write the condition so it can be proven from printed output, and make each turn end by printing the
+  results table (row id, verdict, call ids). Example:
+  `/goal every Smoke and P0 row in the "<tab>" tab of <sheet link> shows PASS on 3 of 3 calls in the
+  results table you print, and the sheet is updated; or stop after 25 turns`.
+- Always include a stop ("or stop after N turns"), and run it in auto mode or with the needed tools
+  allowed, or it waits on permission prompts.
+- The loop still obeys everything here: a transcript before every fix, one fix per cause, a cold read
+  after two failed fixes on one issue, never a third wording, escalation after the ladder, every variant
+  tested, and "fixed" only with a call id. A goal that can only be met by breaking a rule is reported as
+  blocked, not met.
 
 ## The two non-negotiable rules
 

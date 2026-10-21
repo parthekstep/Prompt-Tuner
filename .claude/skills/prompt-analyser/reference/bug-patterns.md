@@ -19,7 +19,7 @@ with `grep -n "^#\+ D95\b" bug-patterns.md`. D89, D90 and D91 are each used for 
 entries (marked "2nd" here): cite them with their short name, e.g. "D91 (required parameter)".
 New entries take the next free number (D125 onward) and get a row here.
 
-**Flow, branches and guards (steps skipped, wrong branch, a guard that tests the wrong thing)** (50)
+**Flow, branches and guards (steps skipped, wrong branch, a guard that tests the wrong thing)** (51)
 
 - A1: Mandatory step skipped because the competing action isn't forbidden
 - A2: Skip-forward pressure with no backpressure
@@ -71,6 +71,7 @@ New entries take the next free number (D125 onward) and get a row here.
 - D105: a hardcoded list was replaced, but the prose around it still describes the old list
 - D110: a guard that tests an injected variable is re-run after the caller answers, so the question loops
 - D114: a routing keyword appears inside the WRONG row's exception text
+- D125: step numbers or cross-references that no longer match the prompt's structure send the bot to the wrong step
 
 **Repetition and loops** (4)
 
@@ -3374,3 +3375,32 @@ it will speak. Check the Style section forbids quotation marks and markdown in r
 
 **Fix direction.** Make the internal format identical to speech (commas), and add "never wrap your reply in
 quotation marks". Source: KKB Slim, 2026-10-19.
+
+## D125: step numbers or cross-references that no longer match the prompt's structure
+
+**Symptom.** Orange Dots (Oct 2026): a rule meant for one step sent the bot to the name question first,
+because the prompt's step numbering no longer matched its actual sections. Rules added on top did not
+help, for hours. A fresh Claude chat, reading the whole prompt as a new prompt, found the cause in
+minutes and the fix was to renumber. Earlier cases of the same class: a restructured Apply Failure
+section left rules citing labels that no longer existed (kkb-hi-signals, 2026-09-01), and rules citing
+"Need Capture" / "Path A" after those sections were removed (KKB Slim, 2026-10).
+
+**Root cause.** A step reference ("go to Step 4", "see the Consent section", "Turn B") is a pointer. When
+sections are inserted, removed, renumbered or renamed, every pointer to them goes stale at once, and the
+model follows the pointer to whatever now carries that number, or improvises when nothing does. The
+session doing the fixing rarely notices, because it reads the rule it is fixing, not the whole flow, and
+it already believes it knows where Step 4 is.
+
+**Detection heuristic.** `python3 scripts/prompt_structure.py <prompt>` on every audit and after every
+edit that adds, removes or renames a section: FAIL on a reference to a step that does not exist, on a
+reference whose own label names a different step ("Step 2 (consent)" where consent is Step 3), and on
+two headings with the same number; WARN on labels (Turn B, Path A) used but never defined and on "see
+<Name>" with no heading of that name. Read the `--map` output once: it shows where every reference lands.
+When fixes for one issue have failed twice, do a cold read (a fresh subagent with no history, /prompt-
+analyser step 0) before the next edit.
+
+**Fix direction.** Fix the pointers, not the rule: renumber or relabel so every reference lands where it
+says, and prefer references by name AND number ("Step 9, Consent") so a mismatch is visible. Remove
+references to deleted sections. Never add a new rule to compensate for a pointer that is wrong. Source:
+Orange Dots, KKB Signals, KKB Slim, 2026-10.
+
