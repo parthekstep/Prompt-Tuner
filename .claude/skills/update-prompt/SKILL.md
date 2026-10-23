@@ -75,6 +75,10 @@ to report back". The section taxonomy is `reference/prompt-anatomy.md`.
   mechanism (the ladder in root `CLAUDE.md`: remove the wrong option rather than forbid it; move a
   constraint into the tool schema only when the model cannot fake the value, D91/D95) or escalate
   with the call ids. Never write a third wording of a guard that already failed twice.
+- **Before editing a section, list what it touches:** `python3 scripts/prompt_map.py impact <file>
+  --section "<title>"` (rules that point at it, values it writes and their readers, the same part in
+  every language, and with `--sheet` the test rows to re-run), and `prompt_map.py rules-about <file>
+  <term>` for the rules already about the thing you are changing: scope or replace one before adding one.
 - **Second failed fix on the same issue: stop and read the prompt cold** before touching it again.
   Run `/prompt-analyser` in a fresh subagent with no history (its step 0) and
   `python3 scripts/prompt_structure.py <file>`. A rule the bot "will not follow" is often a rule it

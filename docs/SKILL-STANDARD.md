@@ -45,6 +45,8 @@ tuner that every skill must already know. Use it when writing a new skill, and w
   split by input, read the guard), then remedy. Two failed wordings means change mechanism, not volume.
   If a fix does not hold across three calls, stop adding text.
 - A required tool parameter constrains what the model says, not what it did (D91, D95).
+- Locate before you fix: trace the failing call to the section that produced its first wrong turn
+  (`scripts/prompt_map.py locate`), and list what that section touches before editing it (`impact`).
 - After two failed fixes on one issue, read the whole prompt cold (a fresh subagent, no history) and run
   `scripts/prompt_structure.py`: a rule the bot "ignores" is often a rule a stale step reference never
   lets it reach (D125).

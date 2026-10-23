@@ -37,6 +37,11 @@ Claude in this folder and say what you want in a normal sentence. A few examples
 
 ## When something will not get fixed
 
+- "Which part of the prompt made the bot say this?" (give the call id). It walks the call turn by turn
+  and names the section each line came from, so you can see where it went wrong first.
+- "If I change the location step, what else could break?" It lists the other rules that point at it,
+  the steps that use what it collects, the same step in the other languages, and the test rows to re-run.
+
 - "Look at this prompt fresh, as if you had never seen it." If a fix has failed twice, the tuner reads
   the whole prompt cold (no memory of the earlier attempts) and checks that every "go to step N" lands
   where it says. A wrong step number once sent a bot to the wrong question for hours of fixing.
