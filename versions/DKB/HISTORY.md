@@ -119,3 +119,9 @@
 - **2026-10-23_122516** — `pre-enum-fields` — remove 19 Oct leftovers that stop create_job sending education/experience/benefits _(8 files)_
 - **2026-10-23_122616** — `pre-deploy-dkb-hi-signals-2026-10-23_122616` — auto snapshot before Raya deploy of DKB/DKB Hindi Signals.md _(8 files)_
 - **2026-10-23_122617** — `pre-deploy-dkb-kn-signals-2026-10-23_122617` — auto snapshot before Raya deploy of DKB/DKB Kannada Signals.md _(8 files)_
+- **2026-10-23_144256** — `pre-candidate-count` — Tushar 23 Oct: tell employers how many candidates are nearby _(8 files)_
+- **2026-10-23_151033** — `pre-deploy-dkb-hi-signals-2026-10-23_151033` — auto snapshot before Raya deploy of DKB/DKB Hindi Signals.md _(8 files)_
+- **2026-10-23_151034** — `pre-deploy-dkb-kn-signals-2026-10-23_151034` — auto snapshot before Raya deploy of DKB/DKB Kannada Signals.md _(8 files)_
+- **2026-10-23_154230** — `pre-name-guard` — role word taken as the manager name (3c44d30d); count digits (8081ff14) _(8 files)_
+- **2026-10-23_154240** — `pre-deploy-dkb-hi-signals-2026-10-23_154240` — auto snapshot before Raya deploy of DKB/DKB Hindi Signals.md _(8 files)_
+- **2026-10-23_154241** — `pre-deploy-dkb-kn-signals-2026-10-23_154241` — auto snapshot before Raya deploy of DKB/DKB Kannada Signals.md _(8 files)_

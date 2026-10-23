@@ -73,6 +73,7 @@ New entries take the next free number (D125 onward) and get a row here.
 - D114: a routing keyword appears inside the WRONG row's exception text
 - D125: step numbers or cross-references that no longer match the prompt's structure send the bot to the wrong step
 - D126: a sentence with a missing place, and a closing line that is a question
+- D127: a backend error with a fixed meaning that the prompt never names
 
 **Repetition and loops** (4)
 
@@ -3441,3 +3442,20 @@ one; describe past failures in English, never in the spoken language; scope the 
 and never after a place rejection or "anything is fine". Keep any new reusable line to ONE place in the prompt: the
 first version of this fix printed the new place line in four spots and the bot said it four times in one call
 (`ae0b3eb6`). Source: KKB Signals / legacy / Slim, Hindi and Kannada, Maya, 2026-10-23.
+
+## D127: a backend error with a fixed meaning that the prompt never names
+
+**Symptom.** `get_profile` returned 400 `U18_NOT_ALLOWED` (the job board holds the caller as a minor) and the bot carried
+on: offered jobs, explained the account it would create (`547f8b8a`), and once created a profile and applied
+(`0754f5d2`, 2026-09-21).
+
+**Root cause.** The prompts handled "no profile" and "a profile" but had no branch for this error, so the model
+treated it like any failed lookup and continued. The backend owner's rule (Sanketika, 2026-10-23): the lookup IS the
+age check and the bot must decide from it.
+
+**Detection heuristic.** List every error code each tool can return that carries a business meaning (not a fault):
+`U18_NOT_ALLOWED`, `ACTION_LIMIT_REACHED`, `PROFILE_LIMIT_REACHED`, `ANCHOR_NOT_FOUND`, `ANCHOR_HAS_NO_LOCATION`.
+Grep the prompt for each. A code with no branch is this bug.
+
+**Fix direction.** One short section per code, at the point where the tool result is read: what it means and the
+one thing to do. Source: KKB Signals, Slim, Maya, inbound, 2026-10-23.

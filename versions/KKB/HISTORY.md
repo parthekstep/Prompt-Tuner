@@ -830,3 +830,8 @@
 - **2026-10-23_135026** — `pre-company-script` — company read in Latin letters _(10 files)_
 - **2026-10-23_135027** — `pre-deploy-kkb-hi-signals-2026-10-23_135027` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
 - **2026-10-23_135028** — `pre-deploy-kkb-hi-in-signals-2026-10-23_135028` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Signals.md _(10 files)_
+- **2026-10-23_144917** — `pre-u18` — U18_NOT_ALLOWED ends the call (Aniket 23 Oct) _(10 files)_
+- **2026-10-23_151029** — `pre-deploy-kkb-hi-signals-2026-10-23_151029` — auto snapshot before Raya deploy of KKB/KKB Placeholder Hindi Signals.md _(10 files)_
+- **2026-10-23_151030** — `pre-deploy-kkb-kn-signals-2026-10-23_151030` — auto snapshot before Raya deploy of KKB/KKB Placeholder Kannada Signals.md _(10 files)_
+- **2026-10-23_151031** — `pre-deploy-kkb-hi-in-signals-2026-10-23_151030` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Signals.md _(10 files)_
+- **2026-10-23_151031** — `pre-deploy-kkb-kn-in-signals-2026-10-23_151031` — auto snapshot before Raya deploy of KKB/KKB Placeholder Inbound Kannada Signals.md _(10 files)_

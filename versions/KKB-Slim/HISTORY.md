@@ -67,3 +67,8 @@
 - **2026-10-23_131659** — `pre-deploy-kkb-kn-signals-slim-2026-10-23_131659` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(3 files)_
 - **2026-10-23_131751** — `pre-deploy-kkb-hi-signals-slim-2026-10-23_131751` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Hindi Signals.md _(3 files)_
 - **2026-10-23_131754** — `pre-deploy-kkb-kn-signals-slim-2026-10-23_131754` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(3 files)_
+- **2026-10-23_144120** — `pre-jobs-near` — location-aware job search (Aniket 23 Oct) _(3 files)_
+- **2026-10-23_151028** — `pre-deploy-kkb-hi-signals-slim-2026-10-23_151028` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Hindi Signals.md _(3 files)_
+- **2026-10-23_151028** — `pre-deploy-kkb-kn-signals-slim-2026-10-23_151028` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(3 files)_
+- **2026-10-23_152813** — `pre-deploy-kkb-hi-signals-slim-2026-10-23_152813` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Hindi Signals.md _(3 files)_
+- **2026-10-23_152848** — `pre-deploy-kkb-kn-signals-slim-2026-10-23_152848` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(3 files)_

@@ -10,6 +10,12 @@ Every prompt edit to Maya is logged here. Maya is Hindi-only (KKB spinoff). Entr
 - **Ported from:** <source agent> (only for cross-agent ports)
 ```
 
+## 2026-10-23 - A known minor ends the call
+- **Feedback/bug:** Aniket (Sanketika, 23 Oct): GET participant returning 400 `U18_NOT_ALLOWED` means the job board holds the caller as a minor, and the bot must decide from it. Our prompts never named that error: on calls where it came back the bots carried on, offered jobs and an account (`547f8b8a`), and on 2026-09-21 one created a profile and applied (`0754f5d2`).
+- **Change:** New section before the get_profile handling: on that error, say the existing under-18 line once and end the call; no job, account, consent or other tool.
+- **Files:** Maya Hindi Signals, Maya Inbound Signals
+- **Status:** DEPLOYED, NOT VERIFIED: no test number can return U18_NOT_ALLOWED (the job board refuses to store an under-18 profile), so this waits for a real call.
+
 ## 2026-10-23 - Offer line names where the jobs are; no English "Exact"/"Phone"
 - **Feedback/bug:** Ported from KKB (nightly `a0a3052a`): the offer line had no place, so a caller elsewhere could hear the jobs as being in their city. Maya nightly `038b877b`, `b4d12594`: the apply-success line said "Exact timing".
 - **Change:** `[job place]` slot in both offer lines with its definition; "Exact timing अलग हो सकती है।" became "इसमें कितना समय लगेगा, यह अलग-अलग होता है।"; "Phone interview" became "फ़ोन पर interview". Maya's own closing line (lists back what was named) is unchanged. Applied under Parth's standing instruction to port fixes to all bots (2026-10-19).

@@ -429,3 +429,6 @@
 - **2026-10-23_135026** — `pre-company-script` — company read in Latin letters _(6 files)_
 - **2026-10-23_135029** — `pre-deploy-maya-hi-signals-2026-10-23_135029` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
 - **2026-10-23_135030** — `pre-deploy-maya-hi-in-signals-2026-10-23_135030` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-10-23_144917** — `pre-u18` — U18_NOT_ALLOWED ends the call (Aniket 23 Oct) _(6 files)_
+- **2026-10-23_151032** — `pre-deploy-maya-hi-signals-2026-10-23_151032` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-10-23_151033** — `pre-deploy-maya-hi-in-signals-2026-10-23_151033` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
