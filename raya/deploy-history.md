@@ -1420,3 +1420,5 @@ to the same number — the first writing the memory, the second consuming it.
 2026-10-19 16:04:06 · prod · maya-hi-in-signals · 1c24feda-a584-4012-a865-fa8f950089df · Maya/Maya Inbound Signals.md · sha256:35616025 · snapshot:pre-deploy-maya-hi-in-signals-2026-10-19_160405 · deployed
 2026-10-19 16:27:56 · prod · maya-hi-signals · 904f333f-1919-4523-a51d-b22ba382dd22 · Maya/Maya Hindi Signals.md · sha256:4657c319 · snapshot:pre-deploy-maya-hi-signals-2026-10-19_162756 · deployed
 2026-10-19 16:27:57 · prod · maya-hi-in-signals · 1c24feda-a584-4012-a865-fa8f950089df · Maya/Maya Inbound Signals.md · sha256:82114cb1 · snapshot:pre-deploy-maya-hi-in-signals-2026-10-19_162756 · deployed
+2026-10-23 12:26:17 · prod · dkb-hi-signals · fabda71d-af75-4ddd-8cf1-fa35c827f753 · DKB/DKB Hindi Signals.md · sha256:bbded999 · snapshot:pre-deploy-dkb-hi-signals-2026-10-23_122616 · deployed
+2026-10-23 12:26:17 · prod · dkb-kn-signals · 847a85e2-c5c8-4727-9918-f1db9efad05d · DKB/DKB Kannada Signals.md · sha256:694d38da · snapshot:pre-deploy-dkb-kn-signals-2026-10-23_122617 · deployed

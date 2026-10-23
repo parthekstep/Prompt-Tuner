@@ -115,3 +115,7 @@
 - **2026-10-19_144344** — `pre-deploy-dkb-kn-out-2026-10-19_144344` — auto snapshot before Raya deploy of DKB/DKB Kannada.md _(8 files)_
 - **2026-10-19_151633** — `pre-deploy-dkb-hi-signals-2026-10-19_151633` — auto snapshot before Raya deploy of DKB/DKB Hindi Signals.md _(8 files)_
 - **2026-10-19_151634** — `pre-deploy-dkb-kn-signals-2026-10-19_151634` — auto snapshot before Raya deploy of DKB/DKB Kannada Signals.md _(8 files)_
+- **2026-10-23_121151** — `pre-output-tool-truth` — Moksh 2026-10-20: new_job_posted from tool result, source-of-truth block, posting_consent field _(8 files)_
+- **2026-10-23_122516** — `pre-enum-fields` — remove 19 Oct leftovers that stop create_job sending education/experience/benefits _(8 files)_
+- **2026-10-23_122616** — `pre-deploy-dkb-hi-signals-2026-10-23_122616` — auto snapshot before Raya deploy of DKB/DKB Hindi Signals.md _(8 files)_
+- **2026-10-23_122617** — `pre-deploy-dkb-kn-signals-2026-10-23_122617` — auto snapshot before Raya deploy of DKB/DKB Kannada Signals.md _(8 files)_

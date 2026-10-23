@@ -290,11 +290,11 @@ The following variables are passed into every call. They describe the jobs alrea
 - `${num_vacancies}` — number of vacancies
 - `${job_id}` — unique job identifier, **never spoken aloud**. **On Signals this is the posting's `job_posting_1.0` `item_id`** (a full hyphenated UUID) — it is passed as `item_id` to `update_job`.
 - `${city}` — city name (e.g. Ghaziabad or Dharwad)
-\1used for the spoken freshness line, and sent as `salaryMin` / `salaryMax` when the owner gives or confirms it.
+- `${salary}`: salary/compensation (may be not available). **Signals note:** used for the spoken freshness line, and sent as `salaryMin` / `salaryMax` when the owner gives or confirms it.
 - `${location}` — work location/address (may be not available). **Signals note:** maps to `item_state.jobProviderLocation` when persisted.
-\1sent as `minEducationalInstitute` when given.
-\1sent as `candidateExperienceType` when given.
-\1sent as `workExperienceYears` when given.
+- `${qualification}`: required qualification or experience (may be not available). **Signals note:** sent as `minEducationalInstitute` when given.
+- `${work_experience}`: whether the owner accepts freshers or wants experienced candidates: "Worked before" or "Fresher" (may be not available). **Signals note:** sent as `candidateExperienceType` when given.
+- `${work_experience_years}`: years of experience required, sent as a string: a single number or a range (may be not available; only relevant when work_experience is "Worked before"). **Signals note:** sent as `workExperienceYears` when given.
 - `${phoneNumber}` — the employer's phone number passed into the call. Used as `phone_number` in `create_job` / `update_job` (formatted `+91` + the 10-digit number). **Never spoken aloud as a payload value.**
 
 **Variable presence rules:**
@@ -495,7 +495,7 @@ Ask these at the **end** of the completion step for that job, after the variable
 (जवाब के बाद:)
 "और सैलरी के अलावा कोई और सुविधा?"
 
-If the owner gives a new value for a **persisted** field (role, vacancies, or location), call `update_job` with only that field. Salary, qualification, experience, working hours, and benefits are NOT part of any tool call.
+If the owner gives a new value for any field of an existing posting (role, vacancies, location, salary, qualification, experience, working hours or benefits), call `update_job` with those values, each through its own parameter.
 
 ---
 
@@ -842,7 +842,7 @@ Examples:
 - "आपका मतलब पच्चीस से तीस हज़ार रुपये महीना है, सही है?"
 - "आपने 'इलेक्ट्रीशियन' role कहा, सही है?"
 
-After the owner confirms, save the value and continue. (Work timings, benefits, salary, qualification, and experience are conversational and not saved to any field on Signals, so brief confirmation is enough — no tool call follows them.)
+After the owner confirms, save the value and continue. (Brief confirmation is enough. Every value the owner gave, including work timings, benefits, salary, qualification and experience, is sent in the next `create_job` or `update_job` call through its own parameter.)
 
 ## Do Not Confirm Unnecessarily
 Do not repeat or reconfirm a value when:

@@ -3321,6 +3321,16 @@ a field "has no slot" when the schema has one. A write that returns `draft` wher
 source (confirm the dialled number rather than dictating ten digits), and cite the schema file and date in the
 prompt. Source: DKB Signals Hindi/Kannada, 2026-10-19 (verified live post on `ee20caba`).
 
+**Half-done alignment (2026-10-23).** After the fix above, education, experience and benefits still reached only
+6, 3 and 2 of 13 posts. The new "send every value" rule was there, but three older lines survived it: "Salary,
+qualification, experience, working hours, and benefits are NOT part of any tool call", "conversational and not
+saved to any field on Signals", and four variable lines whose start had been replaced by a literal `\1` (a broken
+regex substitution), so `${qualification}` and friends were no longer described at all. Salary and hours, which
+the tool also asked for in plain words, kept arriving; the fixed-choice fields lost. **Extra check:** after any
+schema alignment, grep the whole prompt for the old claim in every wording ("NOT part of any tool call", "not
+saved", "no slot", "never persisted", "conversational only") and for `\1`, `\2` or `$1` at the start of a line.
+Every hit is a competing rule, and the model will sometimes obey it.
+
 ## D117: the consent question and the tool call go out in the same turn
 
 **Symptom.** DKB said "क्या मैं यह post कर दूँ?" and called `create_job` in the same breath (`0407c2f6`), or posted

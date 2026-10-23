@@ -132,6 +132,14 @@ def main():
     }
 
     existing = next((i for i, t in enumerate(llm) if (t.get("function") or {}).get("name") == name), None)
+    # Raya's per-tool "Say a hold message while this runs" switch (2026-10-20). A spec may set it;
+    # otherwise a re-sync keeps whatever the live tool already has, so it is never silently reset.
+    if "speak_hold_message" in spec:
+        api["speak_hold_message"] = spec["speak_hold_message"]
+    elif existing is not None and "speak_hold_message" in (llm[existing].get("api_details") or {}):
+        api["speak_hold_message"] = llm[existing]["api_details"]["speak_hold_message"]
+    else:
+        api.pop("speak_hold_message", None)
     if existing is None:
         llm.append(new_tool)
         print(f"=== {target}: ADD tool {name!r} (api cloned from {spec['clone_api_from']!r})")

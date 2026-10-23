@@ -1,0 +1,219 @@
+[
+ {
+  "item": "65fc7307-7f85-41c5-949b-b78a4c7c4600",
+  "status": "live",
+  "role": "Helper",
+  "company": "PRAKASH ENGINEERING CORPORATION",
+  "manager_name_source": "Not Available"
+ },
+ {
+  "item": "c9d07e18-3f2e-4836-b633-5d1e3059b474",
+  "status": "live",
+  "role": "Machine Operator",
+  "company": "PRAKASH ENGINEERING CORPORATION",
+  "manager_name_source": "Not Available"
+ },
+ {
+  "item": "8f09495d-5d6f-4c8b-a5ce-32b92117a105",
+  "status": "live",
+  "role": "Supply",
+  "company": "VISHAL MARKTING",
+  "manager_name_source": "February post"
+ },
+ {
+  "item": "110ecb6c-3503-4d0a-8f92-02f934b5e93e",
+  "status": "live",
+  "role": "Operations",
+  "company": "M/S M.U.V HOSPITALITY INCS PRIVATE LIMITED",
+  "manager_name_source": "February post"
+ },
+ {
+  "item": "bb33f294-e07d-46f8-89ba-d6deeb21ef2d",
+  "status": "live",
+  "role": "Helper",
+  "company": "SURESH CHAND RAJ KUMAR",
+  "manager_name_source": "February post"
+ },
+ {
+  "item": "e8c90034-fadb-4228-ad5a-e89f2f47a555",
+  "status": "live",
+  "role": "Quality Inspector",
+  "company": "FK ENGINEERS",
+  "manager_name_source": "February post"
+ },
+ {
+  "item": "94f681d8-bdff-4f3b-9bac-cd63faf72b80",
+  "status": "live",
+  "role": "Die Maker",
+  "company": "FK ENGINEERS",
+  "manager_name_source": "February post"
+ },
+ {
+  "item": "efc3dd77-068e-4ece-95bf-b6fb5329045e",
+  "status": "retired",
+  "role": "Die Designer",
+  "company": null,
+  "manager_name_source": "February post"
+ },
+ {
+  "item": "55839d29-8a6c-46c9-8ea9-dab50f6b5fc9",
+  "status": "live",
+  "role": "Die Designer",
+  "company": "FK ENGINEERS",
+  "manager_name_source": "February post"
+ },
+ {
+  "item": "58824189-6d11-4cc9-8db4-94be367e9b99",
+  "status": "live",
+  "role": "Accountant",
+  "company": "M/S AMBEY TRADERS",
+  "manager_name_source": "Not Available"
+ },
+ {
+  "item": "1f42406f-28ea-4c43-a6f8-709f373f4324",
+  "status": "live",
+  "role": "Field Job",
+  "company": "M/S AMBEY TRADERS",
+  "manager_name_source": "Not Available"
+ },
+ {
+  "item": "f50738b6-9d42-4523-baea-b9e81d70441d",
+  "status": "live",
+  "role": "Sales",
+  "company": "UROKART ENTERPRISES",
+  "manager_name_source": "Not Available"
+ },
+ {
+  "item": "62096da9-d38f-4430-aec3-4b86fab8953e",
+  "status": "live",
+  "role": "Driver",
+  "company": "AJAY TRADERS",
+  "manager_name_source": "February post"
+ },
+ {
+  "item": "b082c70d-e4fe-4934-86e7-a1a220c2bb2c",
+  "status": "live",
+  "role": "Helper",
+  "company": "EXCEL INDIA UNIFORM",
+  "manager_name_source": "Not Available"
+ },
+ {
+  "item": "7bc2d067-90d1-4a75-a040-f62f510fd535",
+  "status": "live",
+  "role": "Electrician",
+  "company": "STEEL UDYOG",
+  "manager_name_source": "February post"
+ },
+ {
+  "item": "3c0010e7-1cd8-4b1d-b75f-939ef9159144",
+  "status": "live",
+  "role": "Technical Supervisor",
+  "company": "STEEL UDYOG",
+  "manager_name_source": "February post"
+ },
+ {
+  "item": "9a131cba-d08f-4865-924b-a4a1b22c719f",
+  "status": "live",
+  "role": "Data Entry Accountant",
+  "company": "BAL KISHAN WATER SUPPLY CO",
+  "manager_name_source": "Not Available"
+ },
+ {
+  "item": "3c71662a-8192-48a0-91c8-8cebc76d2d79",
+  "status": "live",
+  "role": "Computer Operator",
+  "company": "ASHU PLASTICS",
+  "manager_name_source": "February post"
+ },
+ {
+  "item": "e2a6602f-8835-47c6-9b5d-799a03d313ad",
+  "status": "live",
+  "role": "Helper",
+  "company": "ASHU PLASTICS",
+  "manager_name_source": "February post"
+ },
+ {
+  "item": "6eea03fe-0ac1-4391-ba76-d2907771b0e9",
+  "status": "live",
+  "role": "Vendor",
+  "company": "UNIQUE REFRIGERATION",
+  "manager_name_source": "February post"
+ },
+ {
+  "item": "460fce62-1bee-4abc-a3d3-b2f59727c255",
+  "status": "live",
+  "role": "Helper",
+  "company": "SHIVAM TRADING AGENCY",
+  "manager_name_source": "February post"
+ },
+ {
+  "item": "930d0a15-44b3-46fd-9c86-63b81688208c",
+  "status": "live",
+  "role": "Cable Mistri",
+  "company": "THUKRAL INDUSTRIES",
+  "manager_name_source": "February post"
+ },
+ {
+  "item": "cb856651-9912-4d40-b8e3-bd74acb2da4f",
+  "status": "live",
+  "role": "Helper",
+  "company": "THUKRAL INDUSTRIES",
+  "manager_name_source": "February post"
+ },
+ {
+  "item": "bea1b987-af13-4837-b158-8d3e99a85cb5",
+  "status": "live",
+  "role": "Helper Sales",
+  "company": "ARHAN ENTERPRISES",
+  "manager_name_source": "February post"
+ },
+ {
+  "item": "be11a675-f233-4790-a1ba-e7e88ab814bf",
+  "status": "live",
+  "role": "Ice cream seller",
+  "company": "RUCHI TRADERS",
+  "manager_name_source": "Not Available"
+ },
+ {
+  "item": "ff9ea670-e738-4f13-8fd6-0ccb7eba95f0",
+  "status": "live",
+  "role": "Salesman",
+  "company": "RUCHI TRADERS",
+  "manager_name_source": "Not Available"
+ },
+ {
+  "item": "39c80491-6999-4c19-a6a6-e940df27240b",
+  "status": "live",
+  "role": "E-rickshaw driver",
+  "company": "RUCHI TRADERS",
+  "manager_name_source": "Not Available"
+ },
+ {
+  "item": "2a69979e-a57b-4b16-94b2-ddd4bb251440",
+  "status": "live",
+  "role": "Fitter",
+  "company": "Pasondia Cables Pvt Ltd",
+  "manager_name_source": "February post"
+ },
+ {
+  "item": "b9b7705a-1589-41c9-a7f3-d70b8533f8c3",
+  "status": "live",
+  "role": "Accountant and Computer Operator",
+  "company": "SHRI GANESH AGENCY",
+  "manager_name_source": "February post"
+ },
+ {
+  "item": "ca662933-a3db-4a80-99e8-7973ec95346b",
+  "status": "live",
+  "role": "Counter",
+  "company": "SHRI GANESH AGENCY",
+  "manager_name_source": "February post"
+ },
+ {
+  "item": "caf3b3e9-66d6-438e-989f-c2303587226a",
+  "status": "live",
+  "role": "Computer Operator (Billing)",
+  "company": "SHRI AMBA MEDICOS",
+  "manager_name_source": "Not Available"
+ }
+]
