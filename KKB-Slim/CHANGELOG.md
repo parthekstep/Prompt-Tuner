@@ -5,6 +5,13 @@ output prompts; the ONLY difference is the conversation prompt — a ground-up r
 against the master's ~224k. It exists to test whether prompt size is what the latency complaints
 are about. Not a language variant, so `/sync-check` must not treat it as a mirror.
 
+## 2026-10-23 - Offer line names where the jobs are; "what kind of work" asked once; no English "Employer"/"Phone"/"Exact"
+- **Feedback/bug:** Ported from KKB (nightly `a0a3052a`, `0f8be040`): a missing place in the offer line let the caller's city fill it, and the kind-of-work question looped on a wrong-city caller. Slim Kannada nightly `19cc5a40` said "Employer" and "Phone" in English letters.
+- **Change:** Same as KKB 2026-10-23: `[job place]` slot in both offer lines, the ban now on the caller's city only, the kind-of-work question at most once and never after a place rejection, Path L ends with one place line and does not re-ask a place already given; "Employer"/"Phone" written in script; "Exact timing" removed.
+- **Files:** `KKB Slim Hindi Signals.md`, `KKB Slim Kannada Signals.md`.
+- **Ported from:** KKB
+- **Verified:** Slim Hindi `8ef14d9b` (Bengaluru caller): no loop, said where our jobs are when asked, closed politely. Slim Kannada `500f6f7d`: flow unchanged (its only flag is the already-applied wording, blocked on Raya).
+
 ## 2026-10-19 - Automated-message rule; false "already applied"; invented gender; PIN read with bars; under-18 line
 - **Feedback/bug:** Aryan (2026-10-19): end calls on IVR/voicemail per the shared instructions. Today's live tests and the first nightly run found: "already applied" said with no `apply_job` when the caller said "फिर से अप्लाई"; the read-back said "ಮಹಿಳೆ" for a man who never answered; the PIN read back as "दो | शून्य | …"; a city from the job rows confirmed as the caller's location; lines wrapped in quote marks; an under-18 close composed with "18" in digits (nightly call `6b7454a9`).
 - **Change (Hindi + Kannada):** top-priority automated-message rule; "What the caller says is never evidence" in the duplicate check; empty read-back slots left out; the silent PIN split uses commas; "a city in job results is never the caller's location"; no quotation marks in replies; a fixed under-18 line with the number in words.

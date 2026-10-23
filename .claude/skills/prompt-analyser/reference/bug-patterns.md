@@ -72,6 +72,7 @@ New entries take the next free number (D125 onward) and get a row here.
 - D110: a guard that tests an injected variable is re-run after the caller answers, so the question loops
 - D114: a routing keyword appears inside the WRONG row's exception text
 - D125: step numbers or cross-references that no longer match the prompt's structure send the bot to the wrong step
+- D126: a sentence with a missing place, and a closing line that is a question
 
 **Repetition and loops** (4)
 
@@ -3414,3 +3415,29 @@ says, and prefer references by name AND number ("Step 9, Consent") so a mismatch
 references to deleted sections. Never add a new rule to compensate for a pointer that is wrong. Source:
 Orange Dots, KKB Signals, KKB Slim, 2026-10.
 
+
+## D126: a sentence with a missing place, and a closing line that is a question
+
+**Symptom.** A caller in Bengaluru was offered Ghaziabad-area jobs. The bot said "अभी बेंगलुरु के लिए टेली सेल्स की
+जॉब्स उपलब्ध नहीं हैं — लेकिन पी.सी.बी. असेंबली टेक्नीशियन जैसी जॉब्स हैं", which sounds as if the PCB job is in
+Bengaluru (it was in Muradnagar). Later, after the caller said "कुछ भी चलेगा, बस बेंगलुरु में हो", it asked
+"किस तरह का काम देख रहे हैं?" again, word for word (`a0a3052a`, `0f8be040`, nightly 2026-10-22).
+
+**Root cause.** Three things together. (1) The offer sentence had slots for the role and the kinds of work but none
+for WHERE the jobs are, so the model filled the gap with the caller's city. (2) The prompt warned against that by
+QUOTING it: `Do not say "[शहर] के लिए … जॉब्स उपलब्ध नहीं हैं"` and a past call's exact words, "अभी बेंगलुरु के लिए
+डेटा एंट्री या कंप्यूटर ऑपरेटर की जॉब्स उपलब्ध नहीं हैं". The legacy bot said that example word for word, with
+jobs it did not have (D81). (3) The only line for "every job named and turned down" was a question about the kind
+of work, so a caller whose objection was the PLACE answered it and got the same question back.
+
+**Detection heuristic.** (a) For every templated offer that names jobs, ask: does it say where they are? If the
+caller may be somewhere else, a missing place slot will be filled with the wrong place. (b) Grep every
+`Do not say "..."` and every quoted past failure in the caller's language: a quoted wrong line is a template. (c) For
+every terminal line (the one said when the list is exhausted), check it is not a question that the previous answer
+already answered, and that each kind of rejection (place, kind of work) has its own ending.
+
+**Fix direction.** Give the right value a slot (`[job place]`, the jobs' own place) instead of banning the wrong
+one; describe past failures in English, never in the spoken language; scope the closing question to once per call
+and never after a place rejection or "anything is fine". Keep any new reusable line to ONE place in the prompt: the
+first version of this fix printed the new place line in four spots and the bot said it four times in one call
+(`ae0b3eb6`). Source: KKB Signals / legacy / Slim, Hindi and Kannada, Maya, 2026-10-23.
