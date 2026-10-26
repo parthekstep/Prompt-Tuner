@@ -17,11 +17,11 @@
   "properties": {
    "role": {
     "type": "string",
-    "description": "job role"
+    "description": "job role. English / Latin letters only."
    },
    "title": {
     "type": "string",
-    "description": "job title"
+    "description": "job title. English / Latin letters only."
    },
    "positions": {
     "type": "integer",
@@ -29,7 +29,7 @@
    },
    "companyName": {
     "type": "string",
-    "description": "employer/company name (goes to top-level name)"
+    "description": "employer/company name (goes to top-level name). In English / Latin letters only, never Devanagari or Kannada script: \"ट्यूनर मोबाइल शॉप\" is \"Tuner Mobile Shop\" (8178a26e posted it in Devanagari)."
    },
    "natureOfJob": {
     "type": "string",
@@ -56,7 +56,7 @@
    },
    "jobProviderLocation": {
     "type": "string",
-    "description": "work city or location, in English"
+    "description": "work city or location, in English. English / Latin letters only."
    },
    "salaryMin": {
     "type": "number",
@@ -127,7 +127,7 @@
    },
    "hiringManagerPhone": {
     "type": "string",
-    "description": "The 10-digit number candidates should call, digits only, no +91. REQUIRED by the job board for the post to go live. Use ${phoneNumber} unchanged when the owner said yes to \"ಕ್ಯಾಂಡಿಡೇಟ್‌ಗಳು ಇದೇ ನಂಬರ್‌ಗೆ ನಿಮ್ಮನ್ನ ಸಂಪರ್ಕಿಸಬಹುದಾ?\"; only when they gave a different number, send that number (exactly the ten digits they said, confirmed back once)."
+    "description": "The 10-digit number candidates should call, digits only, no +91. REQUIRED by the job board for the post to go live. Use the caller's ten digits unchanged when the owner said yes to \"ಕ್ಯಾಂಡಿಡೇಟ್‌ಗಳು ಇದೇ ನಂಬರ್‌ಗೆ ನಿಮ್ಮನ್ನ ಸಂಪರ್ಕಿಸಬಹುದಾ?\"; only when they gave a different number, send that number (exactly the ten digits they said, confirmed back once)."
    }
   }
  },

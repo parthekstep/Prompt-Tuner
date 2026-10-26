@@ -114,7 +114,10 @@ def main():
         sys.exit(f"{target}: clone_api_from tool {spec['clone_api_from']!r} not found — cannot clone url/headers")
     api = copy.deepcopy(donor["api_details"])
     api["method"] = spec.get("method", api.get("method", "POST"))
-    api["payload_template"] = copy.deepcopy(spec["payload_template"])
+    if spec.get("payload_template") is None:      # a GET lookup sends its parameters as the query string
+        api.pop("payload_template", None)
+    else:
+        api["payload_template"] = copy.deepcopy(spec["payload_template"])
     # `path_override` keeps the donor's scheme+host+auth headers but swaps the path -- needed for a
     # tool on a DIFFERENT service of the same instance (e.g. /signals-search/v1/search vs
     # /api/v1/...). The key still never touches the repo: it is cloned from the live donor tool.

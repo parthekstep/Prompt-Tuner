@@ -126,8 +126,13 @@ def copy_agent():
     if into:
         s2, r2 = raya("/api/agent/" + into, "PATCH", body, account=da); new_uuid = into
     else:
+        # Create rejects the memory fields (400 unrecognized_keys, Oct 2026): create without them, PATCH them after.
+        later = {k: body.pop(k) for k in ("memory_instructions", "memory_enabled") if k in body}
         s2, r2 = raya("/api/agent", "POST", body, account=da)
         new_uuid = (r2 or {}).get("uuid") if isinstance(r2, dict) else None
+        if later and new_uuid and s2 in (200, 201):
+            s4, r4 = raya("/api/agent/" + new_uuid, "PATCH", later, account=da)
+            print(f"  memory settings PATCH={s4}")
     if s2 not in (200, 201) or not new_uuid:
         sys.exit(f"write failed {s2}: {r2}")
     s3, D = raya("/api/agent/" + new_uuid, account=da); D = D.get("data", D)

@@ -74,6 +74,7 @@ New entries take the next free number (D125 onward) and get a row here.
 - D125: step numbers or cross-references that no longer match the prompt's structure send the bot to the wrong step
 - D126: a sentence with a missing place, and a closing line that is a question
 - D127: a backend error with a fixed meaning that the prompt never names
+- D128: a value built by a conditional rule, a checklist read out, an optional templated parameter, a typed id
 
 **Repetition and loops** (4)
 
@@ -3459,3 +3460,25 @@ Grep the prompt for each. A code with no branch is this bug.
 
 **Fix direction.** One short section per code, at the point where the tool result is read: what it means and the
 one thing to do. Source: KKB Signals, Slim, Maya, inbound, 2026-10-23.
+
+## D128: a value the model must build by a conditional rule, and a checklist the model reads out
+
+**Symptoms (DKB both-directions rewrite, 2026-10-26).** (1) `get_employer` was sent `9191888888985`: the rule was
+"the number unchanged when it has 12 digits, 91 in front when it has 10", and the model took the wrong branch, so the
+job board found nobody, the owner's postings were skipped and one was posted twice (`f84a3c17`). (2) An English
+checklist of missing fields ("salary, area, qualification, experience, hours, benefits") was read to the owner as one
+question; the owner answered one item and the posting was never completed (`18c2024f`, `1429e575`). (3) An optional
+tool parameter that the payload template always uses (`phoneNumber` → `"+91{{phoneNumber}}"`) was left out, so every
+update went out with `"+91"` and was refused (`a3f61db8`). (4) An id typed with a trailing comma (`…d1,`) was refused
+as an invalid UUID (`1190be24`, `ee2c3603`).
+
+**Detection heuristic.** (1) Any instruction that builds a value differently depending on its input's shape ("if 12
+digits … if 10 digits …"): replace it with one recipe that is correct for every shape ("91 + the last ten digits").
+(2) Any list of things to collect written as a list in prose: the model will speak it as a list. Give each item its
+own spoken question line, numbered, one per turn. (3) For every payload template, every `{{param}}` that is not in the
+tool's `required` list: if the template wraps it in fixed text (`"+91{{x}}"`), an omitted value produces an invalid
+field, so make it required. (4) Ids typed by the model: give the parameter a strict `pattern` and say "exactly as
+returned, nothing added".
+
+**Fix direction.** As above: one recipe, one line per question, required parameters for templated fields, a pattern
+on ids. Source: DKB Signals Hindi/Kannada, 2026-10-26.

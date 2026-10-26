@@ -103,6 +103,8 @@ QUEUE = [
     ("dkb-hi-signals",    "hi", "hi-employer-cooperative",      "dkb-new-provider",           "DKB new provider: no expiry claim, nothing invented"),
     ("dkb-hi-signals",    "hi", "hi-employer-probe",            "dkb-new-provider",           "DKB: identity probing, never government"),
     ("dkb-kn-signals",    "kn", "kn-employer-cooperative",      "dkb-kn-new-provider",        "DKB Kannada new provider"),
+    ("dkb-hi-signals",    "hi", "hi-oct26-dkb-inbound-new",     "oct26/dkb-inbound-new",      "DKB both directions: a new employer calls in, no campaign arguments"),
+    ("dkb-kn-signals",    "kn", "kn-oct26-dkb-inbound-new",     "oct26/dkb-kn-inbound-new",   "DKB Kannada both directions: a new employer calls in"),
     ("trrain-hi-out",     "hi", "hi-trrain-accepts",            "trrain-hi",                  "TRRAIN Hindi on Signals get_profile"),
     ("trrain-hi-out",     "hi", "hi-trrain-wrong-person",       "trrain-hi",                  "TRRAIN Hindi: no offer to the wrong person"),
     ("kkb-hi-out",        "hi", "hi-force-apply",               "gzb-validated-12",           "legacy Hindi outbound still healthy"),
