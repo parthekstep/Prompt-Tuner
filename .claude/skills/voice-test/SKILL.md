@@ -114,7 +114,9 @@ python3 scripts/raya_memory_test.py platform                         # is Raya c
   of the probe also says "Nothing stored", Raya is not keeping memory on this account: that is a
   platform report with the probe's call ids, not a prompt fix. On 2026-10-28 it failed on the EkStep
   account (probe calls `bd332b65`, `63ce32c9`, `51359f4b`, `8d872d33`; with and without a call report
-  prompt, so that is not the cause).
+  prompt, so that is not the cause). On 29 Oct a `contact_memory` value sent with the call reached the
+  bot unchanged (`ad458bb1`): with memory on, Raya used to replace it with the stored memory, so the
+  memory switch was behaving as if it were off.
 - **The stored memory cannot be read through the API** (no endpoint; the console's memories page is
   the only direct view). The probe and the "do you remember?" answer are the evidence.
 - **Use the tester's number only, never a real caller's.**
