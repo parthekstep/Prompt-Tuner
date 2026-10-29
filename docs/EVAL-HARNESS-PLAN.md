@@ -7,11 +7,11 @@ Shared copy: https://docs.google.com/document/d/1QSIRuR1GJMvpv05_KgWwJ-VRJjxpzvW
 
 Not all of it is easy. The spec splits into three kinds of work:
 
-| Kind | Share of the spec | Effort (estimate, one engineer with Claude) | Needs from others |
-|---|---|---|---|
-| **A. Measure what we already record.** Golden set, domain grounding, rubric judge, safety, task outcome, connection and first-response timing, end reasons, words per second, the agent's speech-recognition error rate, spend caps | about half | 1 to 1.5 weeks | the agri knowledge base and a signed-off golden set |
-| **B. Read the agent's own telemetry.** Tool calls, retrieved passages, per-stage timings | about a sixth | 1 week for our side | VoicERA's per-call metrics API access; Kenpath installs a small package |
-| **C. An eval agent that speaks over audio streams.** `wss://` calls, the AI4Bharat caller voice, noise and packet loss, timed barge-ins, two-channel recording, barge-in and overlap metrics, and the whole calibration table | about a third | 4 to 6 weeks | `wss://` URLs and tokens, a sandbox agent, speech endpoints and their quotas |
+| Kind | Share of the spec | Needs from others |
+|---|---|---|
+| **A. Measure what we already record.** Golden set, domain grounding, rubric judge, safety, task outcome, connection and first-response timing, end reasons, words per second, the agent's speech-recognition error rate, spend caps | about half | the agri knowledge base and a signed-off golden set |
+| **B. Read the agent's own telemetry.** Tool calls, retrieved passages, per-stage timings | about a sixth | VoicERA's per-call metrics API access; Kenpath installs a small package |
+| **C. An eval agent that speaks over audio streams.** `wss://` calls, the AI4Bharat caller voice, noise and packet loss, timed barge-ins, two-channel recording, barge-in and overlap metrics, and the whole calibration table | about a third | `wss://` URLs and tokens, a sandbox agent, speech endpoints and their quotas |
 
 A is configuration and scripting on top of what the tuner already has. B is a small integration. C is real
 engineering: a new caller with its own audio pipeline, and it cannot be bolted onto the current caller,
@@ -45,7 +45,7 @@ Everything after the call stays shared. Only the way a call is placed changes.
 
 ## Phases
 
-### Phase 1: the conversation layer and the cheap call metrics (A). Week 1 to 2
+### Phase 1: the conversation layer and the cheap call metrics (A)
 
 | Deliverable | How |
 |---|---|
@@ -62,7 +62,7 @@ Everything after the call stays shared. Only the way a call is placed changes.
 Done when: a golden-set run on one Blue Dots bot produces a report with every Phase 1 metric and a call
 id behind every number. **Can start today on the Raya bots, before any agri input arrives.**
 
-### Phase 2: agent telemetry (B). Week 2 to 3
+### Phase 2: agent telemetry (B)
 
 | Deliverable | How |
 |---|---|
@@ -73,7 +73,7 @@ id behind every number. **Can start today on the Raya bots, before any agri inpu
 
 Done when: one VoicERA call shows its tool calls and stage timings in the call record, joined by call id.
 
-### Phase 3: the audio eval agent (C). Week 3 to 8
+### Phase 3: the audio eval agent (C)
 
 | Deliverable | How |
 |---|---|
@@ -88,7 +88,7 @@ Done when: one VoicERA call shows its tool calls and stage timings in the call r
 Done when: the same golden set runs over `wss://` against a VoicERA sandbox agent with two noise profiles
 and a barge-in schedule, and the report shows every speech metric.
 
-### Phase 4: calibration (C). Week 7 to 9
+### Phase 4: calibration (C)
 
 A reference "offline agent" we control (a Pipecat bot that replies with known delays, overlaps at set
 moments and records exactly what it received). Running the eval agent against it measures the eval agent
