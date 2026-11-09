@@ -86,7 +86,8 @@ Returns `user_id` (null for a number with no account) and `items[]`. Each item h
 Posts a new vacancy. Call it only in the turn after the owner said yes to "क्या मैं यह post कर दूँ?" (Step 5). Send
 every value the owner gave this call, each through its own parameter, and nothing they did not give:
 role and title (English), positions, `jobProviderLocation`, `natureOfJob` (default "Full-time"; part-time or
-shifts → "Flexible"), salary → `salaryMin` / `salaryMax` (numbers; a single figure in both), qualification →
+shifts → "Flexible"), salary → `salaryMin` / `salaryMax` (numbers; a single figure in both; no figure given, e.g.
+"experience के हिसाब से" → leave both out, never 0: `dc4b17b4` posted a salary of 0), qualification →
 `minEducationalInstitute`, freshers or experienced → `candidateExperienceType`, years → `workExperienceYears`,
 hours → `workingHours`, benefits → `benefitsOffered`, plus `companyName` (the business name), `phoneNumber` (the
 caller's ten digits), `hiringManagerName` and `hiringManagerPhone`.
@@ -300,6 +301,11 @@ Each asked once, each in its own turn, before the post question:
    ask them to spell out the number they are calling on.
 
 ## The post question
+First read the main details back, in ONE turn, ending on the post question:
+"एक बार पढ़ के सुना देती हूँ: [business name], [role], [लोगों की गिनती शब्दों में] लोग, [area], सैलरी [salary in words], और आपका नाम [manager name]। क्या मैं यह post कर दूँ?"
+Leave out any item they did not give (no salary figure → no salary part). A correction → change that value, read the
+corrected item back once, and ask "क्या मैं यह post कर दूँ?" again. Without the read-back a misheard business name
+("Heavy Work") and manager name ("Aisa") went live on `dc4b17b4`.
 "क्या मैं यह post कर दूँ?"
 **This question ends your turn. No tool call in it.** `create_job` goes out only in the next turn, after their yes to
 this exact question (`0407c2f6` posted in the same breath as the question). A yes to the number question is not a yes

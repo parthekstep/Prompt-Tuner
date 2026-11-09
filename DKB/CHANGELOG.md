@@ -10,6 +10,12 @@ Every prompt edit to DKB is logged here. Entry format:
 - **Ported from:** <source agent> (only for cross-agent ports)
 ```
 
+## 2026-11-09 - Details read back before a job is posted; no salary of 0
+- **Feedback/bug:** Tracker r168 (Gaurav, 8 Nov, campaign 4 Nov): jobs were posted without reading the details back, so a misheard business name ("Heavy Work") and manager name ("Aisa") went live, and one post carried a salary of 0 when the owner said the pay depends on experience (`dc4b17b4`).
+- **Change:** The post question now comes after a one-turn read-back of business name, role, count, area, salary and the manager's name; a correction is read back again before asking once more. `create_job` (and `update_job`, which uses the same fields) leaves the salary out when no figure was given, never 0.
+- **Files:** `DKB/DKB Hindi Signals.md`, `DKB/DKB Kannada Signals.md`.
+- **Status:** VERIFY-PENDING (see test calls below).
+
 ## 2026-10-26 - Rewritten: one bot for both directions, built on the job board's own data
 - **Feedback/bug:** Parth (26 Oct): DKB Signals had no inbound capability like KKB, and the prompt described the Signals tools as changes from the old ONEST backend ("What Changed", "the old fixed params are GONE", a "Signals note" on every input) with leftovers that contradicted what the bot now does ("Experience answers are conversation-only", "Do NOT send these in any tool call", `update_job` only for role, count or place). It also told owners a posting "expires today" (postings do not expire) and quoted a fixed "सोलह हज़ार से ज़्यादा एक्टिव जॉब सीकर्स".
 - **Change:** New prompt in both languages (Hindi master, Kannada mirror), about 27 KB each instead of 70 KB:

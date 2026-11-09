@@ -156,3 +156,8 @@
 - **2026-10-26_184030** — `pre-deploy-dkb-hi-signals-ab-2026-10-26_184030` — auto snapshot before Raya deploy of DKB/DKB Hindi Signals.md _(8 files)_
 - **2026-10-26_184031** — `pre-deploy-dkb-kn-signals-2026-10-26_184031` — auto snapshot before Raya deploy of DKB/DKB Kannada Signals.md _(8 files)_
 - **2026-10-26_184031** — `pre-deploy-dkb-kn-signals-ab-2026-10-26_184031` — auto snapshot before Raya deploy of DKB/DKB Kannada Signals.md _(8 files)_
+- **2026-11-09_123901** — `pre-readback-2026-11-09` — before r168 read-back + no zero salary _(8 files)_
+- **2026-11-09_123939** — `pre-deploy-dkb-hi-signals-ab-2026-11-09_123939` — auto snapshot before Raya deploy of DKB/DKB Hindi Signals.md _(8 files)_
+- **2026-11-09_123939** — `pre-deploy-dkb-kn-signals-ab-2026-11-09_123939` — auto snapshot before Raya deploy of DKB/DKB Kannada Signals.md _(8 files)_
+- **2026-11-09_125452** — `pre-deploy-dkb-hi-signals-2026-11-09_125452` — auto snapshot before Raya deploy of DKB/DKB Hindi Signals.md _(8 files)_
+- **2026-11-09_125453** — `pre-deploy-dkb-kn-signals-2026-11-09_125453` — auto snapshot before Raya deploy of DKB/DKB Kannada Signals.md _(8 files)_

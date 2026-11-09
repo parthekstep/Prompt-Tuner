@@ -72,3 +72,6 @@
 - **2026-10-23_151028** — `pre-deploy-kkb-kn-signals-slim-2026-10-23_151028` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(3 files)_
 - **2026-10-23_152813** — `pre-deploy-kkb-hi-signals-slim-2026-10-23_152813` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Hindi Signals.md _(3 files)_
 - **2026-10-23_152848** — `pre-deploy-kkb-kn-signals-slim-2026-10-23_152848` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(3 files)_
+- **2026-11-09_124815** — `pre-nov09-fixes` — before Gaurav 8 Nov rows _(3 files)_
+- **2026-11-09_125454** — `pre-deploy-kkb-hi-signals-slim-2026-11-09_125454` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Hindi Signals.md _(3 files)_
+- **2026-11-09_125455** — `pre-deploy-kkb-kn-signals-slim-2026-11-09_125455` — auto snapshot before Raya deploy of KKB-Slim/KKB Slim Kannada Signals.md _(3 files)_

@@ -10,6 +10,16 @@ Every prompt edit to Maya is logged here. Maya is Hindi-only (KKB spinoff). Entr
 - **Ported from:** <source agent> (only for cross-agent ports)
 ```
 
+## 2026-11-09 - Tracker r160, r161, r162, r169, r172 (HE Maya, 4-5 Nov) and the lookup error
+- **Tracker r156/r157/r158/r159/r170 (Gaurav, 8 Nov; campaigns 26 Oct and 4-5 Nov):** the profile lookup failed on almost every campaign call (285 of 285 Hindi, 61 of 67 Kannada). The bot sees only "request failed (HTTP 400)", never the `U18_NOT_ALLOWED` name, so the under-18 rule could not fire; with no branch for a failed lookup the bot re-greeted (39 of 72 slim calls) and saved an age nobody said, mostly 25 (11 of 15 Hindi saves, 3 of 13 Kannada). A read-only lookup on 9 Nov showed the flag means "no usable age on file": callers who said 21 to 26 were flagged, and once their spoken age was saved the lookup returned them normally.
+  - **Change:** a failed lookup is now a new caller: ask the age first as its own turn, never replay the greeting, end only when the caller says an age under 18, and save only the age they said. The under-18 section says what the error looks like and that it is not proof of a minor.
+- **r160 made-up jobs:** the campaign sent no `${recommendations}` on 519 of 520 calls; the bot read jobs from this prompt's examples and applied to the example `job_id` (a real CY Future job; 7 applications in a partial sample). An unfilled token now counts as empty (no-jobs path); the example id is gone. **The campaign must send jobs.** Giving Maya its own job search (Gaurav's suggestion) is not done: open.
+- **r161/r172:** apply-failure line "…दिलचस्पी हमने नोट कर ली है — इसकी अपडेट हमारी टीम…" → "इस जॉब के लिए अप्लाई अभी पक्का नहीं हो पाया।"; service yes no longer promises a team call.
+- **r162 the bot answered its own questions as the student:** only when the caller's line echoed the bot's voice (4 of 13 echo calls, 0 of 371 others). New echo rule: an echoed turn is never an answer; ask once to turn the speaker off, then end.
+- **r169 consent said yes but not saved:** a new student's consent was saved only at apply. Now saved at once with the new tool `record_consent_new` (added to the live agent) after the age they say; Step 4 then completes that draft with `update_profile` instead of `create_profile` (the KKB Slim pattern, verified on the API 2026-10-12).
+- **Files:** `Maya/Maya Hindi Signals.md`, `Maya/Maya Inbound Signals.md` (inbound: lookup-error branch and the two lines only); live tool `record_consent_new` on `maya-hi-signals`.
+- **Status:** DEPLOYED 2026-11-09, VERIFY-PENDING.
+
 ## 2026-10-23 - A known minor ends the call
 - **Feedback/bug:** Aniket (Sanketika, 23 Oct): GET participant returning 400 `U18_NOT_ALLOWED` means the job board holds the caller as a minor, and the bot must decide from it. Our prompts never named that error: on calls where it came back the bots carried on, offered jobs and an account (`547f8b8a`), and on 2026-09-21 one created a profile and applied (`0754f5d2`).
 - **Change:** New section before the get_profile handling: on that error, say the existing under-18 line once and end the call; no job, account, consent or other tool.

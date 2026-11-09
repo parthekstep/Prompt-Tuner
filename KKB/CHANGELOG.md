@@ -10,6 +10,14 @@ Every prompt edit to KKB is logged here. Entry format:
 - **Ported from:** <source agent> (only for cross-agent ports)
 ```
 
+## 2026-11-09 - Tracker rows from the 4-5 Nov campaign (Signals prompts)
+- **Tracker r156/r157/r158/r159/r170 (Gaurav, 8 Nov; campaigns 26 Oct and 4-5 Nov):** the profile lookup failed on almost every campaign call (285 of 285 Hindi, 61 of 67 Kannada). The bot sees only "request failed (HTTP 400)", never the `U18_NOT_ALLOWED` name, so the under-18 rule could not fire; with no branch for a failed lookup the bot re-greeted (39 of 72 slim calls) and saved an age nobody said, mostly 25 (11 of 15 Hindi saves, 3 of 13 Kannada). A read-only lookup on 9 Nov showed the flag means "no usable age on file": callers who said 21 to 26 were flagged, and once their spoken age was saved the lookup returned them normally.
+  - **Change:** a failed lookup is now a new caller: ask the age first as its own turn, never replay the greeting, end only when the caller says an age under 18, and save only the age they said. The under-18 section says what the error looks like and that it is not proof of a minor.
+- **r158/r160 made-up jobs and applications to a job nobody chose:** the 4 Nov campaign sent no `${recommendations}` on 770 of 776 calls; the unfilled token was not recognised as empty, so the bot read out jobs from this prompt's examples and applied to its example `job_id` (`eab4805a…`, a real CY Future job; 6 applications). An unfilled token now counts as empty, and the example id is gone. **The campaign must send jobs to this agent, or run on the slim agent, which searches.**
+- **r161/r171 promises:** apply-failure line and service-yes line reworded as in KKB-Slim (no team update, no team call).
+- **Files:** `KKB/KKB Placeholder Hindi Signals.md`, `KKB/KKB Placeholder Kannada Signals.md`, `KKB/KKB Placeholder Inbound Signals.md`, `KKB/KKB Placeholder Inbound Kannada Signals.md` (inbound: lookup-error branch and the two lines only).
+- **Status:** DEPLOYED 2026-11-09, VERIFY-PENDING.
+
 ## 2026-10-23 - A known minor ends the call
 - **Feedback/bug:** Aniket (Sanketika, 23 Oct): GET participant returning 400 `U18_NOT_ALLOWED` means the job board holds the caller as a minor, and the bot must decide from it. Our prompts never named that error: on calls where it came back the bots carried on, offered jobs and an account (`547f8b8a`), and on 2026-09-21 one created a profile and applied (`0754f5d2`).
 - **Change:** New section before the get_profile handling: on that error, say the existing under-18 line once and end the call; no job, account, consent or other tool.

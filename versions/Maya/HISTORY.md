@@ -432,3 +432,7 @@
 - **2026-10-23_144917** — `pre-u18` — U18_NOT_ALLOWED ends the call (Aniket 23 Oct) _(6 files)_
 - **2026-10-23_151032** — `pre-deploy-maya-hi-signals-2026-10-23_151032` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
 - **2026-10-23_151033** — `pre-deploy-maya-hi-in-signals-2026-10-23_151033` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-11-09_124815** — `pre-nov09-fixes` — before Gaurav 8 Nov rows _(6 files)_
+- **2026-11-09_125459** — `pre-deploy-maya-hi-signals-2026-11-09_125459` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
+- **2026-11-09_125500** — `pre-deploy-maya-hi-in-signals-2026-11-09_125500` — auto snapshot before Raya deploy of Maya/Maya Inbound Signals.md _(6 files)_
+- **2026-11-09_140702** — `pre-deploy-maya-hi-signals-2026-11-09_140702` — auto snapshot before Raya deploy of Maya/Maya Hindi Signals.md _(6 files)_
