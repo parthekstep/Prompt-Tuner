@@ -1,0 +1,2 @@
+{"name": "profile_id", "required": true, "schema": {"type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+ "description": "The seeker item_id that get_profile RETURNED this call (the live one, else the draft). A caller for whom get_profile returned no seeker item, or an error, has no profile_id: do not call this tool for them. Never send a made-up id such as 00000000-0000-0000-0000-000000000000 (test call 3995ceee did, with age 0)."}}
