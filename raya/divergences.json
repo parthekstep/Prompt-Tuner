@@ -272,6 +272,37 @@
     "maya-hi-signals",
     "maya-hi-in-signals"
    ]
+  },
+  {
+   "id": "kkb-in-signals-up-fast-capture",
+   "bot": "KKB",
+   "sync_family": "KKB · inbound · signals (Hindi/Kannada inbound pair)",
+   "targets": [
+    "kkb-hi-in-signals",
+    "kkb-kn-in-signals"
+   ],
+   "master_language": "hi",
+   "languages_affected": [
+    "kn"
+   ],
+   "direction": "master-only",
+   "scope": [
+    {
+     "section": "whole prompt",
+     "kind": "structure",
+     "what": "On 2026-11-18 the Hindi (Uttar Pradesh) inbound prompt was rebuilt around a fast capture (name, age and place, education or skill, work and salary, then save, then at most one Ghaziabad job, then a positive close naming the Blue Dots and Rojgar Sangam apps), with an Uttar Pradesh government identity line. The Kannada (Karnataka) inbound prompt keeps the earlier full job-browsing flow and its own identity.",
+     "contains": [
+      "उत्तर प्रदेश सरकार की रोज़गार पहल",
+      "Step 3: Capture",
+      "रोज़गार संगम"
+     ]
+    }
+   ],
+   "why": "Programme ask (18 Nov 2026): the Uttar Pradesh inbound line must capture key details in about a minute and stay positive where jobs are not live yet; the change was requested for the UP bots only.",
+   "approved_by": "Parth (18 Nov 2026, programme feedback from the UP team)",
+   "approved_on": "2026-11-18",
+   "changelog_ref": "KKB/CHANGELOG.md, 2026-11-18 UP inbound fast capture",
+   "still_must_match": "Tool names and payload rules (get_profile phone format, seeker-item selection, record_consent / create_profile / apply_job ids), the memory injection block, the data-sharing line before every apply_job, and the under-18 stop."
   }
  ]
 }

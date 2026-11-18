@@ -161,3 +161,16 @@
 - **2026-11-09_123939** — `pre-deploy-dkb-kn-signals-ab-2026-11-09_123939` — auto snapshot before Raya deploy of DKB/DKB Kannada Signals.md _(8 files)_
 - **2026-11-09_125452** — `pre-deploy-dkb-hi-signals-2026-11-09_125452` — auto snapshot before Raya deploy of DKB/DKB Hindi Signals.md _(8 files)_
 - **2026-11-09_125453** — `pre-deploy-dkb-kn-signals-2026-11-09_125453` — auto snapshot before Raya deploy of DKB/DKB Kannada Signals.md _(8 files)_
+- **2026-11-18_234857** — `pre-up-inbound-fast-capture` — new DKB Hindi inbound variant for UP (programme feedback 18 Nov) _(8 files)_
+- **2026-11-18_235507** — `pre-deploy-dkb-hi-in-signals-2026-11-18_235507` — auto snapshot before Raya deploy of DKB/DKB Hindi Inbound Signals.md _(9 files)_
+- **2026-11-19_000910** — `pre-deploy-dkb-hi-in-signals-2026-11-19_000910` — auto snapshot before Raya deploy of DKB/DKB Hindi Inbound Signals.md _(9 files)_
+- **2026-11-19_001813** — `pre-dkb-nov17-fixes` — DKB outbound fixes from 17 Nov campaign review _(9 files)_
+- **2026-11-19_001831** — `pre-deploy-dkb-hi-signals-2026-11-19_001831` — auto snapshot before Raya deploy of DKB/DKB Hindi Signals.md _(9 files)_
+- **2026-11-19_001832** — `pre-deploy-dkb-kn-signals-2026-11-19_001832` — auto snapshot before Raya deploy of DKB/DKB Kannada Signals.md _(9 files)_
+- **2026-11-19_001832** — `pre-deploy-dkb-hi-signals-ab-2026-11-19_001832` — auto snapshot before Raya deploy of DKB/DKB Hindi Signals.md _(9 files)_
+- **2026-11-19_001832** — `pre-deploy-dkb-kn-signals-ab-2026-11-19_001832` — auto snapshot before Raya deploy of DKB/DKB Kannada Signals.md _(9 files)_
+- **2026-11-19_003440** — `pre-deploy-dkb-hi-in-signals-2026-11-19_003440` — auto snapshot before Raya deploy of DKB/DKB Hindi Inbound Signals.md _(9 files)_
+- **2026-11-19_004550** — `pre-deploy-dkb-hi-signals-2026-11-19_004550` — auto snapshot before Raya deploy of DKB/DKB Hindi Signals.md _(9 files)_
+- **2026-11-19_004550** — `pre-deploy-dkb-kn-signals-2026-11-19_004550` — auto snapshot before Raya deploy of DKB/DKB Kannada Signals.md _(9 files)_
+- **2026-11-19_004551** — `pre-deploy-dkb-hi-signals-ab-2026-11-19_004551` — auto snapshot before Raya deploy of DKB/DKB Hindi Signals.md _(9 files)_
+- **2026-11-19_004551** — `pre-deploy-dkb-kn-signals-ab-2026-11-19_004551` — auto snapshot before Raya deploy of DKB/DKB Kannada Signals.md _(9 files)_

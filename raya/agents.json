@@ -474,6 +474,28 @@
    "signals": true
   },
   {
+   "id": "dkb-hi-in-signals",
+   "file": "DKB/DKB Hindi Inbound Signals.md",
+   "agent": "DKB",
+   "language": "hi",
+   "direction": "inbound",
+   "kind": "conversation",
+   "profile": "conversation",
+   "raya_name": "DKB Hindi Inbound Signals",
+   "raya_agent_id": {
+    "prod": "92e7d07d-cfe5-4999-b920-5513edd05d3b",
+    "staging": ""
+   },
+   "deploy": true,
+   "expected_name_contains": [
+    "DKB",
+    "Inbound",
+    "Signals"
+   ],
+   "_note": "2026-11-18: UP inbound employer line, copied from dkb-hi-signals (same tools, settings, memory) with an inbound-only fast-capture prompt (programme ask, Tushar/Gaurav). No in_did yet: the live inbound number still points at dkb-hi-signals until the routing is switched.",
+   "signals": true
+  },
+  {
    "id": "dkb-hi-signals-ab",
    "file": "DKB/DKB Hindi Signals.md",
    "agent": "DKB",

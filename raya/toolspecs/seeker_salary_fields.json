@@ -1,0 +1,8 @@
+{"_note": "2026-11-18: expected monthly salary on a seeker profile (programme ask: capture desired salary on the UP inbound line). Added to create_profile and update_profile on kkb-hi-in-signals: two optional number parameters, and item_state.salaryMin / salaryMax in the payload template (the seeker profile_1.0 schema has both as numbers).",
+ "tools": ["create_profile", "update_profile"],
+ "params": {
+  "salaryMin": {"type": "number", "description": "Lowest monthly salary the caller expects, in rupees, as a number (\"बारह हज़ार\" -> 12000). One figure -> the same number in salaryMin and salaryMax. No figure given -> leave out; never 0."},
+  "salaryMax": {"type": "number", "description": "Highest monthly salary the caller expects, in rupees, as a number. One figure -> same as salaryMin. No figure given -> leave out; never 0."}
+ },
+ "item_state": {"salaryMin": "{{salaryMin}}", "salaryMax": "{{salaryMax}}"}
+}

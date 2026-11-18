@@ -3536,3 +3536,56 @@ consent and age can be "given" by the echo. A "repeat the question" fix alone lo
 
 **Fix direction.** An echoed turn is never an answer: ask once to turn the speaker off, then close. Source: Maya,
 2026-11-09 (tracker r162).
+
+## D133: a known value is re-asked because the ask line sits in the default branch
+
+**Symptoms (DKB Hindi Signals, 17-18 Nov 2026).** The lookup already held the business name, yet the new-vacancy step
+asked "आपके बिज़नेस का नाम क्या है?" and posted under the misheard answer ("Quick Call" for "Ques corp company",
+`b3704c54`; asked again on `54db83b7`; the new inbound bot did the same on `10bf7739`). The rule said "if you do not
+know the business name, ask it first", with the spoken line inline, and the model took the line.
+
+**Detection heuristic.** For every "ask X if not known" line: is "known" defined by a named field (`jobProviderName`
+of any posting in the lookup), and is the spoken ask gated behind the negative case only? A sentence that opens with
+the ask and leaves "known" to judgement is this bug.
+
+**Fix direction.** Define KNOWN by the field, make the ask line reachable only when that field is absent, and say
+where the known value goes (`companyName`, the read-back). Verified on `6d3924ac` (Hindi, not asked, posted under the
+lookup's name). Source: DKB Hindi/Kannada Signals, 2026-11-19.
+
+## D134: one filled field read as "this record is complete"
+
+**Symptoms (DKB, 17 Nov 2026).** A still-needed posting with a salary but no hours or benefits went straight to the
+candidate count (`153eeae6`; 2 of 2 postings that already had a salary, 0 of 5 without). The first fix, "check all six
+one by one", over-corrected: the bot re-asked filled fields (`54db83b7`).
+
+**Detection heuristic.** A list of questions each with "skip if filled": does the prompt say the decision is made per
+field, from that record's own field? Without it, models skip the whole list when the first item is filled.
+
+**Fix direction.** "Decide each separately from that record's own field: empty is asked, filled is skipped; one filled
+field says nothing about the others." Verified on `6d3924ac` (asked only the empty hours and benefits). Source: DKB
+Hindi/Kannada Signals, 2026-11-19.
+
+## D135: a removal taken from an unclear or "later" answer
+
+**Symptoms (DKB, 17 Nov 2026).** A posting was closed on "हम्म, हम्म" after the bot itself offered removal "so you get
+no more calls" (`7932fc51`); another was closed on "needed in January" (`fc8793b3`); a "noted, not needed" line was
+said with no `close_job` call at all (`b03754e8`).
+
+**Detection heuristic.** Does every irreversible action name the exact answers that trigger it, and say that unclear,
+"later" and off-topic replies do not? Is any "noted" fallback line reachable without the tool having been called?
+
+**Fix direction.** Close only on a clear "filled / not needed"; "later" and unclear keep it live; never offer removal;
+the "noted" line only after a `close_job` that did not return `paused`. Source: DKB Hindi/Kannada Signals, 2026-11-19.
+VERIFY-PENDING (the unclear-answer test calls had a silent tester).
+
+## D136: a "your details are saved / known" line that can be said before any save
+
+**Symptoms (KKB Hindi Inbound Signals, 18-19 Nov 2026).** A returning-caller line "आपकी जानकारी अपडेट हो गई है" was
+said as a greeting before anything was asked or saved (`9df67fa4`, `4d09c3cf`); a "we already have all your details"
+variant was then chosen instead of asking the missing education and salary (`3398d2d4`).
+
+**Detection heuristic.** Any line that claims a save, an update or completeness: is it positioned after the tool
+result that proves it, and is there a cheaper "we already have it" option that lets the model skip the questions?
+
+**Fix direction.** Remove the "already have everything" option; state the missing-field check by field name; the save
+line only in the closing step after the save result. Source: KKB Hindi Inbound Signals, 2026-11-19.
