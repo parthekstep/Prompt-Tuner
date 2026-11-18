@@ -49,3 +49,5 @@ demo/.state.json
 # VoicERA call records carry caller transcripts and audio; live configs are pulled copies
 raya/voicera/records/
 raya/voicera/live/
+# AI DPG config export, guide and sample traces: their config, kept out of this public repo
+raya/voicera/dpg/

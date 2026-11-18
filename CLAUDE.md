@@ -72,6 +72,7 @@ Filenames are kept as-is (note KKB's "Placeholder" naming). Always resolve files
 | Maya | `Maya/Maya Hindi.md` | — (none) | `Maya/Maya Memory.md` | `Maya/Maya Output.md` |
 | KKB-Slim | `KKB-Slim/KKB Slim Hindi Signals.md` | `KKB-Slim/KKB Slim Kannada Signals.md` | (shares KKB's, per-agent on Raya) | `KKB-Slim/KKB Slim Output.md` (Hindi agent only — diverged from KKB's on 2026-09-23) |
 | TRRAIN | `TRRAIN/TRRAIN Hindi.md` | `TRRAIN/TRRAIN Kannada.md` | `TRRAIN/TRRAIN Memory.md` | `TRRAIN/TRRAIN Output.md` |
+| KKB on VoicERA (Hubli) | on AI DPG, not in this repo: `python3 scripts/dpg_prompts.py` reads the export | not configured yet (AI DPG converts it) | none (AI DPG fetches the profile) | `KKB-VoicERA/KKB VoicERA Output.md` (computed by VoicERA's post-call step) |
 
 ## Core principle: agnostic vs language-specific
 
@@ -219,6 +220,8 @@ additions or ports of already-working behaviour.
 | Find which part of a prompt produced a bot's line, what else a change to a part affects, every rule about one thing, and which parts go with failing calls (`/bug-fix` → "The prompt map") | `python3 scripts/prompt_map.py locate / impact / rules-about / spectrum` |
 | Check a bot really remembers a caller between calls: memory wiring check, then two calls from the same number (outbound or real inbound), graded per detail (`/voice-test` → Memory test) | `python3 scripts/raya_memory_test.py check / run / grade / platform` |
 | Check that every "go to Step N" / "see <section>" in a prompt lands where it says (run after any edit that adds, removes or renumbers a section) | `python3 scripts/prompt_structure.py <file>` |
+| Read or propose a change to the KKB bot on VoicERA + AI DPG (its prompts are AI DPG config, changed only by their PR): find the phase or line, list spoken lines, compare two exports, write a proposal keyed by `source` | `python3 scripts/dpg_prompts.py phases / show / locate / speech / diff / propose` |
+| Build a VoicERA call's report (call_output) from its transcript and AI DPG telemetry, or the Raya-shaped transcript for the dashboards | `python3 scripts/voicera_call_output.py` |
 | Shrink a long conversation prompt into a "slim" variant without losing behaviour, on its own A/B agent, proven by a coverage table + live calls before any traffic moves ("slim this prompt", "compress the prompt") | `/slim-prompt` |
 
 **For a new or non-technical user, start with `docs/WHAT-YOU-CAN-ASK.md`**: what the tuner does, in
